@@ -1,9 +1,11 @@
 package app
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/spf13/viper"
 
@@ -110,7 +112,8 @@ type BandApp struct {
 	// Module manager.
 	mm *module.Manager
 	// List of hooks
-	hooks []Hook
+	hooks      []Hook
+	syncingLog *os.File
 }
 
 // MakeCodec returns BandChain codec.
@@ -138,7 +141,7 @@ func SetBech32AddressPrefixesAndBip44CoinType(config *sdk.Config) {
 func NewBandApp(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
 	invCheckPeriod uint, skipUpgradeHeights map[int64]bool, home string,
-	disableFeelessReports bool, baseAppOptions ...func(*bam.BaseApp),
+	disableFeelessReports bool, logLocaltion string, baseAppOptions ...func(*bam.BaseApp),
 ) *BandApp {
 	cdc := MakeCodec()
 	bApp := bam.NewBaseApp(AppName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
@@ -252,6 +255,15 @@ func NewBandApp(
 			tmos.Exit(err.Error())
 		}
 	}
+
+	if logLocaltion != "" {
+		f, err := os.OpenFile(logLocaltion, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+		if err != nil {
+			tmos.Exit(err.Error())
+		}
+		app.syncingLog = f
+	}
+
 	return app
 }
 
@@ -273,6 +285,9 @@ func (app *BandApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.R
 	res := app.mm.EndBlock(ctx, req)
 	for _, hook := range app.hooks {
 		hook.AfterEndBlock(ctx, req, res)
+	}
+	if ctx.BlockHeader().Height%10 == 0 {
+		fmt.Fprintf(app.syncingLog, "%d, %d\n", ctx.BlockHeader().Height%10, time.Now().Unix())
 	}
 	return res
 }
