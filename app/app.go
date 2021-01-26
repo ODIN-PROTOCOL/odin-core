@@ -287,7 +287,7 @@ func (app *BandApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.R
 		hook.AfterEndBlock(ctx, req, res)
 	}
 	if ctx.BlockHeader().Height%10 == 0 {
-		fmt.Fprintf(app.syncingLog, "%d, %d\n", ctx.BlockHeader().Height%10, time.Now().Unix())
+		fmt.Fprintf(app.syncingLog, "%d, %d\n", ctx.BlockHeader().Height, time.Now().Unix())
 	}
 	return res
 }
