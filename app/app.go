@@ -162,7 +162,7 @@ func NewBandApp(
 		keys:           keys,
 		tKeys:          tKeys,
 	}
-	owasmVm, err := api.NewVm(owasmCacheSize)
+	owasmVm, err := api.NewVm(owasmCacheSize * 1024)
 	if err != nil {
 		panic(err)
 	}
