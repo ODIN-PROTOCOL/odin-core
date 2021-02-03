@@ -2,6 +2,7 @@ package oracle
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/bandprotocol/chain/pkg/gzip"
 	"github.com/bandprotocol/chain/x/oracle/types"
@@ -132,14 +133,17 @@ func handleMsgEditOracleScript(ctx sdk.Context, k Keeper, m MsgEditOracleScript)
 }
 
 func handleMsgRequestData(ctx sdk.Context, k Keeper, m MsgRequestData) (*sdk.Result, error) {
+	t := time.Now()
 	err := k.PrepareRequest(ctx, &m)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("os[%d]::handleMsgRequestData %d\n", m.OracleScriptID, time.Since(t).Microseconds())
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
 
 func handleMsgReportData(ctx sdk.Context, k Keeper, m MsgReportData) (*sdk.Result, error) {
+	t := time.Now()
 	if !k.IsReporter(ctx, m.Validator, m.Reporter) {
 		return nil, types.ErrReporterNotAuthorized
 	}
@@ -161,6 +165,7 @@ func handleMsgReportData(ctx sdk.Context, k Keeper, m MsgReportData) (*sdk.Resul
 		sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", m.RequestID)),
 		sdk.NewAttribute(types.AttributeKeyValidator, m.Validator.String()),
 	))
+	fmt.Printf("os::handleMsgReportData %d\n", time.Since(t).Microseconds())
 	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
 
