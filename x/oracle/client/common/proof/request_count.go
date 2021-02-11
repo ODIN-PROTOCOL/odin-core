@@ -4,7 +4,7 @@ package proof
 // 	"encoding/json"
 // 	"net/http"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // 	"github.com/cosmos/cosmos-sdk/client/context"
 // 	"github.com/cosmos/cosmos-sdk/types/rest"
 // 	"github.com/ethereum/go-ethereum/accounts/abi"

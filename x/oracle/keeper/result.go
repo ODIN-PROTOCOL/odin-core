@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/bandprotocol/chain/pkg/obi"
-	"github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/pkg/obi"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 // HasResult checks if the result of this request ID exists in the storage.

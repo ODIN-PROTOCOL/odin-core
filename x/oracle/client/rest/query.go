@@ -11,9 +11,9 @@ package rest
 // 	"github.com/cosmos/cosmos-sdk/types/rest"
 // 	"github.com/gorilla/mux"
 
-// 	"github.com/bandprotocol/chain/hooks/price"
-// 	clientcmn "github.com/bandprotocol/chain/x/oracle/client/common"
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/hooks/price"
+// 	clientcmn "github.com/GeoDB-Limited/odin-core/x/oracle/client/common"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // type RequestPrices struct {

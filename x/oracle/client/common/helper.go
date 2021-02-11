@@ -7,7 +7,7 @@ package common
 // 	"github.com/cosmos/cosmos-sdk/client/context"
 // 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // func PostProcessQueryResponse(w http.ResponseWriter, cliCtx context.CLIContext, bz []byte) {

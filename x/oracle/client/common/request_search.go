@@ -8,7 +8,7 @@ package common
 
 // 	"github.com/cosmos/cosmos-sdk/client/context"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // func queryLatestRequest(cliCtx context.CLIContext, oid, calldata, askCount, minCount string) (types.RequestID, error) {

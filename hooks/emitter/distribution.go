@@ -5,7 +5,7 @@ package emitter
 // 	dist "github.com/cosmos/cosmos-sdk/x/distribution"
 // 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-// 	"github.com/bandprotocol/chain/hooks/common"
+// 	"github.com/GeoDB-Limited/odin-core/hooks/common"
 // )
 
 // func (h *Hook) getCurrentRewardAndCurrentRatio(ctx sdk.Context, addr sdk.ValAddress) (string, string) {

@@ -17,9 +17,9 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/bandprotocol/chain/x/oracle/client/cli"
-	"github.com/bandprotocol/chain/x/oracle/keeper"
-	"github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/client/cli"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 var (

@@ -21,10 +21,10 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	bandapp "github.com/bandprotocol/chain/app"
-	"github.com/bandprotocol/chain/pkg/filecache"
-	me "github.com/bandprotocol/chain/x/oracle/keeper"
-	"github.com/bandprotocol/chain/x/oracle/types"
+	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
+	me "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 // Account is a data structure to store key of test account.

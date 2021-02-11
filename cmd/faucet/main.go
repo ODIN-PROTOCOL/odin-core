@@ -11,7 +11,7 @@ package main
 // 	"github.com/spf13/cobra"
 // 	"github.com/spf13/viper"
 
-// 	"github.com/bandprotocol/chain/app"
+// 	"github.com/GeoDB-Limited/odin-core/app"
 // )
 
 // const (

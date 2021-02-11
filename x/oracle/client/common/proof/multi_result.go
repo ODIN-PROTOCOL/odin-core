@@ -6,9 +6,9 @@ package proof
 // 	"net/http"
 // 	"strconv"
 
-// 	"github.com/bandprotocol/chain/pkg/obi"
-// 	clientcmn "github.com/bandprotocol/chain/x/oracle/client/common"
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/pkg/obi"
+// 	clientcmn "github.com/GeoDB-Limited/odin-core/x/oracle/client/common"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // 	"github.com/cosmos/cosmos-sdk/client/context"
 // 	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 // 	"github.com/cosmos/cosmos-sdk/types/rest"

@@ -1,4 +1,4 @@
-module github.com/bandprotocol/chain
+module github.com/GeoDB-Limited/odin-core
 
 go 1.15
 

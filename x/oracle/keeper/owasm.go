@@ -8,8 +8,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/bandprotocol/chain/pkg/bandrng"
-	"github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/pkg/bandrng"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	owasm "github.com/bandprotocol/go-owasm/api"
 )
 

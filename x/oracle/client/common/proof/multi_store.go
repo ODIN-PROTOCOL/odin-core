@@ -17,7 +17,7 @@ package proof
 // 	"github.com/tendermint/tendermint/crypto/merkle"
 // 	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // // MultiStoreProof stores a compact of other Cosmos-SDK modules' storage hash in multistore to

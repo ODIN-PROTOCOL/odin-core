@@ -9,8 +9,8 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/bandprotocol/chain/pkg/filecache"
-	"github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 const (

@@ -80,12 +80,12 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	bandappparams "github.com/bandprotocol/chain/app/params"
+	bandappparams "github.com/GeoDB-Limited/odin-core/app/params"
 
-	"github.com/bandprotocol/chain/x/oracle"
-	bandante "github.com/bandprotocol/chain/x/oracle/ante"
-	oraclekeeper "github.com/bandprotocol/chain/x/oracle/keeper"
-	oracletypes "github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/x/oracle"
+	bandante "github.com/GeoDB-Limited/odin-core/x/oracle/ante"
+	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 const (

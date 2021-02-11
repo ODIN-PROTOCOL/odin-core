@@ -4,7 +4,7 @@ package main
 // 	"fmt"
 // 	"net/http"
 
-// 	"github.com/bandprotocol/chain/app"
+// 	"github.com/GeoDB-Limited/odin-core/app"
 // 	sdkctx "github.com/cosmos/cosmos-sdk/client/context"
 // 	ckeys "github.com/cosmos/cosmos-sdk/client/keys"
 // 	sdk "github.com/cosmos/cosmos-sdk/types"

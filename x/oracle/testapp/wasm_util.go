@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/bandprotocol/chain/x/oracle/types"
+	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	"github.com/bandprotocol/go-owasm/api"
 )
 

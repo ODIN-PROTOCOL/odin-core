@@ -11,7 +11,7 @@ package proof
 // 	"github.com/tendermint/iavl"
 // 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // var (

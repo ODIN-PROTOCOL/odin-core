@@ -7,7 +7,7 @@ package proof
 // 	"github.com/stretchr/testify/require"
 // 	"github.com/tendermint/tendermint/crypto/tmhash"
 
-// 	"github.com/bandprotocol/chain/x/oracle/types"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 // )
 
 // func hexToBytes(hexstr string) []byte {

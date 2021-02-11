@@ -4,7 +4,7 @@ package emitter
 // 	sdk "github.com/cosmos/cosmos-sdk/types"
 // 	"github.com/cosmos/cosmos-sdk/x/bank"
 
-// 	"github.com/bandprotocol/chain/hooks/common"
+// 	"github.com/GeoDB-Limited/odin-core/hooks/common"
 // )
 
 // // handleMsgSend implements emitter handler for MsgSend.

@@ -6,7 +6,7 @@ package rest
 // 	"github.com/cosmos/cosmos-sdk/client/context"
 // 	"github.com/gorilla/mux"
 
-// 	"github.com/bandprotocol/chain/x/oracle/client/common/proof"
+// 	"github.com/GeoDB-Limited/odin-core/x/oracle/client/common/proof"
 // )
 
 // const (
