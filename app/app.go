@@ -89,8 +89,8 @@ import (
 )
 
 const (
-	appName          = "BandApp"
-	Bech32MainPrefix = "band"
+	appName          = "Odin"
+	Bech32MainPrefix = "odin"
 	Bip44CoinType    = 494
 )
 

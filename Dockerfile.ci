@@ -1,0 +1,24 @@
+FROM golang:1.13.5-buster as builder
+
+WORKDIR /chain
+COPY ./ /chain
+
+RUN wget https://github.com/WebAssembly/wabt/releases/download/1.0.17/wabt-1.0.17-ubuntu.tar.gz
+RUN tar -zxf wabt-1.0.17-ubuntu.tar.gz
+RUN cp wabt-1.0.17/bin/wat2wasm /usr/local/bin
+
+RUN make install && make faucet
+
+FROM debian:latest
+
+COPY --from=builder /go/bin/bandd /usr/local/bin/bandd
+COPY --from=builder /go/bin/bandcli /usr/local/bin/bandcli
+
+COPY chain/docker-config/validator1/ validator1/
+COPY chain/docker-config/validator2/ validator2/
+COPY chain/docker-config/validator3/ validator3/
+COPY chain/docker-config/validator4/ validator4/
+
+COPY chain/docker-config/query-node/ query-node/
+
+CMD ["bandd", "--help"]
