@@ -14,11 +14,11 @@ FROM debian:latest
 COPY --from=builder /go/bin/bandd /usr/local/bin/bandd
 COPY --from=builder /go/bin/bandcli /usr/local/bin/bandcli
 
-COPY chain/docker-config/validator1/ validator1/
-COPY chain/docker-config/validator2/ validator2/
-COPY chain/docker-config/validator3/ validator3/
-COPY chain/docker-config/validator4/ validator4/
+COPY ./docker-config/validator1/ validator1/
+COPY ./docker-config/validator2/ validator2/
+COPY ./docker-config/validator3/ validator3/
+COPY ./docker-config/validator4/ validator4/
 
-COPY chain/docker-config/query-node/ query-node/
+COPY ./docker-config/query-node/ query-node/
 
 CMD ["bandd", "--help"]
