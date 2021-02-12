@@ -7,7 +7,7 @@ RUN wget https://github.com/WebAssembly/wabt/releases/download/1.0.17/wabt-1.0.1
 RUN tar -zxf wabt-1.0.17-ubuntu.tar.gz
 RUN cp wabt-1.0.17/bin/wat2wasm /usr/local/bin
 
-RUN make install && make faucet
+RUN make install ##&& make faucet
 
 FROM debian:latest
 
