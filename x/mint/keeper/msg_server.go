@@ -29,7 +29,9 @@ func (k msgServer) WithdrawCoinsToAccFromTreasury(
 		return nil, sdkerrors.Wrapf(minttypes.ErrAccountIsNotEligible, "account: %s", msg.Sender)
 	}
 
-	if k.LimitExceeded(ctx, msg.Amount) {
+	moduleParams := k.GetParams(ctx)
+
+	if msg.Amount.IsAnyGT(moduleParams.MaxWithdrawalPerTime) {
 		return nil, sdkerrors.Wrapf(minttypes.ErrExceedsWithdrawalLimitPerTime, "amount: %s", msg.Amount.String())
 	}
 
@@ -38,8 +40,14 @@ func (k msgServer) WithdrawCoinsToAccFromTreasury(
 		return nil, sdkerrors.Wrapf(err, "failed to parse receiver address %s", msg.Receiver)
 	}
 
-	if err := k.WithdrawCoinsFromTreasury(ctx, receiver, msg.Amount); err != nil {
-		return nil, sdkerrors.Wrapf(err, "failed to mint %s coins to account %s", msg.Amount, msg.Receiver)
+	if moduleParams.MintAir {
+		if err := k.MintCoinsFromAir(ctx, receiver, msg.Amount); err != nil {
+			return nil, sdkerrors.Wrapf(err, "failed to mint %s coins to account %s", msg.Amount, msg.Receiver)
+		}
+	} else {
+		if err := k.WithdrawCoinsFromTreasury(ctx, receiver, msg.Amount); err != nil {
+			return nil, sdkerrors.Wrapf(err, "failed to withdraw %s coins to account %s", msg.Amount, msg.Receiver)
+		}
 	}
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(

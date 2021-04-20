@@ -141,12 +141,6 @@ func (k Keeper) AddCollectedFees(ctx sdk.Context, fees sdk.Coins) error {
 	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, k.feeCollectorName, fees)
 }
 
-// LimitExceeded checks if withdrawal amount exceeds the limit
-func (k Keeper) LimitExceeded(ctx sdk.Context, amt sdk.Coins) bool {
-	moduleParams := k.GetParams(ctx)
-	return amt.IsAnyGT(moduleParams.MaxWithdrawalPerTime)
-}
-
 // IsEligibleAccount checks if addr exists in the eligible to withdraw account pool
 func (k Keeper) IsEligibleAccount(ctx sdk.Context, addr string) bool {
 	params := k.GetParams(ctx)
@@ -184,6 +178,20 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 
 	mintPool.TreasuryPool = mintPool.TreasuryPool.Sub(amount)
 	k.SetMintPool(ctx, mintPool)
+
+	return nil
+}
+
+// MintCoinsFromAir mints coins from air to the receiver balance
+func (k Keeper) MintCoinsFromAir(ctx sdk.Context, receiver sdk.AccAddress, amount sdk.Coins) error {
+	err := k.bankKeeper.AddCoins(ctx, receiver, amount)
+	if err != nil {
+		return sdkerrors.Wrapf(err, "failed to add %s to %s account", amount.String(), receiver.String())
+	}
+
+	supply := k.bankKeeper.GetSupply(ctx)
+	supply.Inflate(amount)
+	k.bankKeeper.SetSupply(ctx, supply)
 
 	return nil
 }
