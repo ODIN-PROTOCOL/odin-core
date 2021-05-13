@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	govkeeper "github.com/GeoDB-Limited/odin-core/x/gov/keeper"
+	govtypes "github.com/GeoDB-Limited/odin-core/x/gov/types"
 	mintkeeper "github.com/GeoDB-Limited/odin-core/x/mint/keeper"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,8 +17,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/segmentio/kafka-go"

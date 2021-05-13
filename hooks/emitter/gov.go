@@ -1,8 +1,8 @@
 package emitter
 
 import (
+	"github.com/GeoDB-Limited/odin-core/x/gov/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/GeoDB-Limited/odin-core/hooks/common"
 )

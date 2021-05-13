@@ -40,6 +40,8 @@ type Account struct {
 
 // nolint
 var (
+	TestUser1          Account
+	TestUser2          Account
 	Owner              Account
 	Treasury           Account
 	FeePayer           Account
@@ -55,8 +57,13 @@ var (
 	OwasmVM            *owasm.Vm
 )
 
+const (
+	BondDenom = "odin"
+)
+
 // nolint
 var (
+	bigInt, _                = sdk.NewIntFromString("100000000000")
 	EmptyCoins               = sdk.Coins(nil)
 	Coin1geo                 = sdk.NewInt64Coin("geo", 1)
 	Coin10odin               = sdk.NewInt64Coin("odin", 10)
@@ -65,6 +72,7 @@ var (
 	Coins99999999odin        = sdk.NewCoins(sdk.NewInt64Coin("odin", 99999999))
 	Coin100000000odin        = sdk.NewInt64Coin("odin", 100000000)
 	Coin10000000000odin      = sdk.NewInt64Coin("odin", 10000000000)
+	Coins100000000000odin    = sdk.NewCoins(sdk.NewCoin("odin", bigInt))
 	Coins100000000odin       = sdk.NewCoins(Coin100000000odin)
 	Coins10000000000odin     = sdk.NewCoins(Coin10000000000odin)
 	DefaultDataProvidersPool = sdk.NewCoins(Coin100000000odin)
@@ -83,6 +91,8 @@ func init() {
 	Carol = createArbitraryAccount(r)
 	OraclePoolProvider = createArbitraryAccount(r)
 	FeePoolProvider = createArbitraryAccount(r)
+	TestUser1 = createArbitraryAccount(r)
+	TestUser2 = createArbitraryAccount(r)
 	for i := 0; i < 3; i++ {
 		Validators = append(Validators, createArbitraryAccount(r))
 	}
@@ -226,9 +236,11 @@ func NewSimApp(chainID string, logger log.Logger) *bandapp.BandApp {
 		{Address: Alice.Address.String(), Coins: Coins1000000odin.Add(Coin100000000geo)},
 		{Address: Bob.Address.String(), Coins: Coins1000000odin},
 		{Address: Carol.Address.String(), Coins: Coins1000000odin},
-		{Address: Validators[0].Address.String(), Coins: Coins100000000odin},
-		{Address: Validators[1].Address.String(), Coins: Coins100000000odin},
-		{Address: Validators[2].Address.String(), Coins: Coins100000000odin},
+		{Address: TestUser1.Address.String(), Coins: Coins100000000odin},
+		{Address: TestUser2.Address.String(), Coins: Coins100000000odin},
+		{Address: Validators[0].Address.String(), Coins: Coins100000000000odin},
+		{Address: Validators[1].Address.String(), Coins: Coins10000000000odin},
+		{Address: Validators[2].Address.String(), Coins: Coins10000000000odin},
 		{Address: OraclePoolProvider.Address.String(), Coins: DefaultDataProvidersPool},
 		{Address: FeePoolProvider.Address.String(), Coins: DefaultCommunityPool},
 	}

@@ -6,6 +6,7 @@ import (
 	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
 	"time"
 
+	govtypes "github.com/GeoDB-Limited/odin-core/x/gov/types"
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -19,7 +20,6 @@ import (
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	ibc "github.com/cosmos/cosmos-sdk/x/ibc/core"
 	ibchost "github.com/cosmos/cosmos-sdk/x/ibc/core/24-host"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -54,7 +54,7 @@ func NewDefaultGenesisState() GenesisState {
 	distrGenesis.Params.BonusProposerReward = sdk.NewDecWithPrec(12, 2) // 12%
 	mintGenesis.Params.BlocksPerYear = 10519200                         // target 3-second block time
 	mintGenesis.Params.MintDenom = denom
-	govGenesis.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000)))
+	govGenesis.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(10)))
 	crisisGenesis.ConstantFee = sdk.NewCoin(denom, sdk.TokensFromConsensusPower(10000))
 	slashingGenesis.Params.SignedBlocksWindow = 30000                         // approximately 1 day
 	slashingGenesis.Params.MinSignedPerWindow = sdk.NewDecWithPrec(5, 2)      // 5%
