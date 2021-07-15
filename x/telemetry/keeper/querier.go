@@ -29,8 +29,14 @@ func queryTopBalances(ctx sdk.Context, path []string, k Keeper, cdc *codec.Legac
 	if err := cdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
 	}
-	return commontypes.QueryOK(cdc, k.GetPaginatedBalances(ctx, path[0], params.Desc, &query.PageRequest{
+	balances, total := k.GetPaginatedBalances(ctx, path[0], params.Desc, &query.PageRequest{
 		Offset: params.Offset,
 		Limit:  params.Limit,
-	}))
+	})
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryTopBalancesResponse{
+		Balances: balances,
+		Pagination: &query.PageResponse{
+			Total: total,
+		},
+	})
 }

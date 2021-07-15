@@ -21,7 +21,7 @@ func NewKeeper(cdc codec.BinaryMarshaler, bk bankkeeper.ViewKeeper) Keeper {
 	}
 }
 
-func (k Keeper) GetPaginatedBalances(ctx sdk.Context, denom string, desc bool, pagination *query.PageRequest) []banktypes.Balance {
+func (k Keeper) GetPaginatedBalances(ctx sdk.Context, denom string, desc bool, pagination *query.PageRequest) ([]banktypes.Balance, uint64) {
 	balances := k.bankKeeper.GetAccountsBalances(ctx)
 
 	sort.Slice(balances, func(i, j int) bool {
@@ -32,7 +32,7 @@ func (k Keeper) GetPaginatedBalances(ctx sdk.Context, denom string, desc bool, p
 	})
 
 	if pagination.GetOffset() >= uint64(len(balances)) {
-		return []banktypes.Balance{}
+		return []banktypes.Balance{}, 0
 	}
 
 	maxLimit := pagination.GetLimit()
@@ -40,5 +40,5 @@ func (k Keeper) GetPaginatedBalances(ctx sdk.Context, denom string, desc bool, p
 		maxLimit = uint64(len(balances)) - pagination.GetOffset()
 	}
 
-	return balances[pagination.GetOffset() : pagination.GetOffset()+maxLimit]
+	return balances[pagination.GetOffset() : pagination.GetOffset()+maxLimit], uint64(len(balances))
 }

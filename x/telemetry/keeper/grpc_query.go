@@ -11,10 +11,11 @@ var _ telemetrytypes.QueryServer = Keeper{}
 
 func (k Keeper) TopBalances(c context.Context, request *telemetrytypes.QueryTopBalancesRequest) (*telemetrytypes.QueryTopBalancesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
+	balances, total := k.GetPaginatedBalances(ctx, request.GetDenom(), request.GetDesc(), request.Pagination)
 	return &telemetrytypes.QueryTopBalancesResponse{
-		Balances: k.GetPaginatedBalances(ctx, request.GetDenom(), request.GetDesc(), request.Pagination),
+		Balances: balances,
 		Pagination: &query.PageResponse{
-			Total: 0,
+			Total: total,
 		},
 	}, nil
 }
