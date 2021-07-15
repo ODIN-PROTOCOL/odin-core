@@ -9,4 +9,5 @@ const (
 	QuerierRoute = ModuleName
 
 	QueryTopBalances = "top_balances"
+	DenomTag         = "denomTag "
 )

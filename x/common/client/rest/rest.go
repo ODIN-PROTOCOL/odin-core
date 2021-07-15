@@ -18,6 +18,10 @@ func СheckPaginationParams(w http.ResponseWriter, r *http.Request) (commontypes
 	if rest.CheckBadRequestError(w, err) {
 		return commontypes.QueryPaginationParams{}, false
 	}
+	desc, err := strconv.ParseBool(vars[DescTag])
+	if rest.CheckBadRequestError(w, err) {
+		return commontypes.QueryPaginationParams{}, false
+	}
 
-	return commontypes.QueryPaginationParams{Offset: offset, Limit: limit}, true
+	return commontypes.QueryPaginationParams{Offset: offset, Limit: limit, Desc: desc}, true
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -28,5 +29,8 @@ func queryTopBalances(ctx sdk.Context, path []string, k Keeper, cdc *codec.Legac
 	if err := cdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
 	}
-	return commontypes.QueryOK(cdc, k.GetPaginatedBalances(ctx, path[1], params.Limit, params.Offset))
+	return commontypes.QueryOK(cdc, k.GetPaginatedBalances(ctx, path[0], params.Desc, &query.PageRequest{
+		Offset: params.Offset,
+		Limit:  params.Limit,
+	}))
 }

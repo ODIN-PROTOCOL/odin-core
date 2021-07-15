@@ -22,6 +22,7 @@ service Query {
 message QueryTopBalancesRequest {
   string denom = 1;
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
+  bool desc = 3;
 }
 // QueryParamsResponse is response type for the Query/QueryParams RPC
 // method.
@@ -30,4 +31,6 @@ message QueryTopBalancesResponse {
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false
   ];
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

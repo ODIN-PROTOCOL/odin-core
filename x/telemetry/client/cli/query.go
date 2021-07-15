@@ -39,12 +39,19 @@ func GetQueryCmdTopBalances() *cobra.Command {
 
 			var limit uint64 = query.DefaultLimit
 			var offset uint64 = 0
-			if len(args) == 3 {
+			if len(args) >= 3 {
 				limit, err = strconv.ParseUint(args[1], 10, 64)
 				if err != nil {
 					return err
 				}
 				offset, err = strconv.ParseUint(args[2], 10, 64)
+				if err != nil {
+					return err
+				}
+			}
+			desc := false
+			if len(args) == 4 {
+				desc, err = strconv.ParseBool(args[3])
 				if err != nil {
 					return err
 				}
@@ -57,6 +64,7 @@ func GetQueryCmdTopBalances() *cobra.Command {
 					Offset: offset,
 					Limit:  limit,
 				},
+				Desc: desc,
 			})
 			if err != nil {
 				return err

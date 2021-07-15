@@ -11,7 +11,7 @@ import (
 )
 
 func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
-	rtr.HandleFunc(fmt.Sprintf("%s/top_balances", telemetrytypes.ModuleName), getTopBalancesHandler(clientCtx)).Methods("GET")
+	rtr.HandleFunc(fmt.Sprintf("/%s/%s/{%s}/{%s}/{%s}/{%s}", telemetrytypes.ModuleName, telemetrytypes.QueryTopBalances, telemetrytypes.DenomTag, commonrest.LimitTag, commonrest.OffsetTag, commonrest.DescTag), getTopBalancesHandler(clientCtx)).Methods("GET")
 }
 
 func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
@@ -26,10 +26,14 @@ func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 		bin := clientCtx.LegacyAmino.MustMarshalJSON(paginationParams)
+
+		vars := mux.Vars(r)
+
 		res, height, err := clientCtx.QueryWithData(fmt.Sprintf(
-			"custom/%s/%s",
+			"custom/%s/%s/%s",
 			telemetrytypes.QuerierRoute,
 			telemetrytypes.QueryTopBalances,
+			vars[telemetrytypes.DenomTag],
 		), bin)
 		if rest.CheckInternalServerError(w, err) {
 			return
