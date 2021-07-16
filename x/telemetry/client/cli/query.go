@@ -25,9 +25,10 @@ func GetQueryCmd() *cobra.Command {
 }
 
 // GetQueryCmdTopBalances implements the query parameters command.
+// TODO: refactor limit, offset and desc params to unnecessary flags (everywhere)
 func GetQueryCmdTopBalances() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "top-balances []",
+		Use:  "top-balances [denom] [limit] [offset] [desc]",
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)

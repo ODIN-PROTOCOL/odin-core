@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// RegisterRoutes TODO: refactor rest limit and offset params to get params
 func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	rtr.HandleFunc(fmt.Sprintf("/%s/%s/{%s}/{%s}/{%s}/{%s}", telemetrytypes.ModuleName, telemetrytypes.QueryTopBalances, telemetrytypes.DenomTag, commonrest.LimitTag, commonrest.OffsetTag, commonrest.DescTag), getTopBalancesHandler(clientCtx)).Methods("GET")
 }
