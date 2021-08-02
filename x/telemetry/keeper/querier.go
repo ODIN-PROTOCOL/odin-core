@@ -17,13 +17,29 @@ func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
 			return queryTopBalances(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryExtendedValidators:
 			return queryExtendedValidators(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryAvgBlockSize:
+			return queryAvgBlockSize(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryAvgBlockTime:
+			return queryAvgBlockTime(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryAvgTxFee:
+			return queryAvgTxFee(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryTxVolume:
+			return queryTxVolume(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryValidatorsBlocks:
+			return queryValidatorsBlocks(ctx, path[1:], keeper, cdc, req)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown telemetry query endpoint")
 		}
 	}
 }
 
-func queryTopBalances(ctx sdk.Context, path []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery) ([]byte, error) {
+func queryTopBalances(
+	ctx sdk.Context,
+	path []string,
+	k Keeper,
+	cdc *codec.LegacyAmino,
+	req abci.RequestQuery,
+) ([]byte, error) {
 	if len(path) > 1 {
 		return nil, sdkerrors.ErrInvalidRequest
 	}
@@ -43,7 +59,13 @@ func queryTopBalances(ctx sdk.Context, path []string, k Keeper, cdc *codec.Legac
 	})
 }
 
-func queryExtendedValidators(ctx sdk.Context, path []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery) ([]byte, error) {
+func queryExtendedValidators(
+	ctx sdk.Context,
+	path []string,
+	k Keeper,
+	cdc *codec.LegacyAmino,
+	req abci.RequestQuery,
+) ([]byte, error) {
 	if len(path) > 1 {
 		return nil, sdkerrors.ErrInvalidRequest
 	}
@@ -54,7 +76,7 @@ func queryExtendedValidators(ctx sdk.Context, path []string, k Keeper, cdc *code
 
 	var total = 0
 	if params.GetCountTotal() {
-		total = len(k.stakingKeeper.GetValidators(ctx, k.stakingKeeper.MaxValidators(ctx)))
+		total = len(k.stakingQuerier.GetValidators(ctx, k.stakingQuerier.MaxValidators(ctx)))
 	}
 	validators, err := k.ExtendedValidators(sdk.WrapSDKContext(ctx), &telemetrytypes.QueryExtendedValidatorsRequest{
 		Status: path[0],
@@ -69,4 +91,101 @@ func queryExtendedValidators(ctx sdk.Context, path []string, k Keeper, cdc *code
 
 	validators.Pagination.Total = uint64(total)
 	return commontypes.QueryOK(cdc, validators)
+}
+
+func queryAvgBlockSize(
+	_ sdk.Context,
+	_ []string,
+	k Keeper,
+	cdc *codec.LegacyAmino,
+	req abci.RequestQuery,
+) ([]byte, error) {
+	var request telemetrytypes.QueryAvgBlockSizeRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+	blockSizePerDay, err := k.GetAvgBlockSizePerDay(request.GetStartDate(), request.GetEndDate())
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get average block size per day")
+	}
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryAvgBlockSizeResponse{
+		AvgBlockSizePerDay: blockSizePerDay,
+	})
+}
+
+func queryAvgBlockTime(
+	_ sdk.Context,
+	_ []string,
+	k Keeper,
+	cdc *codec.LegacyAmino,
+	req abci.RequestQuery,
+) ([]byte, error) {
+	var request telemetrytypes.QueryAvgBlockTimeRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+	blockTimePerDay, err := k.GetAvgBlockTimePerDay(request.GetStartDate(), request.GetEndDate())
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get average block time per day")
+	}
+
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryAvgBlockTimeResponse{
+		AvgBlockTimePerDay: blockTimePerDay,
+	})
+}
+
+func queryAvgTxFee(_ sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery) ([]byte, error) {
+	var request telemetrytypes.QueryAvgTxFeeRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+	avgTxFee, err := k.GetAvgTxFeePerDay(request.GetStartDate(), request.GetEndDate())
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get average tx fee per day")
+	}
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryAvgTxFeeResponse{
+		AvgTxFeePerDay: avgTxFee,
+	})
+}
+
+func queryTxVolume(_ sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery) ([]byte, error) {
+	var request telemetrytypes.QueryTxVolumeRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+	txVolume, err := k.GetTxVolumePerDay(request.GetStartDate(), request.GetEndDate())
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get tx volume")
+	}
+
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryTxVolumeResponse{
+		TxVolumePerDay: txVolume,
+	})
+}
+
+func queryValidatorsBlocks(
+	ctx sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery,
+) ([]byte, error) {
+	var request telemetrytypes.QueryValidatorsBlocksRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+
+	validatorsBlocks, total, err := k.GetValidatorsBlocks(
+		ctx,
+		request.GetStartDate(),
+		request.GetEndDate(),
+		request.GetDesc(),
+		request.GetPagination(),
+	)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get validators blocks")
+	}
+
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryValidatorsBlocksResponse{
+		ValidatorsBlocks: validatorsBlocks,
+		Pagination: &query.PageResponse{
+			Total: total,
+		},
+	})
 }

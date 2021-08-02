@@ -10,6 +10,12 @@ const (
 
 	QueryTopBalances        = "top_balances"
 	QueryExtendedValidators = "extended_validators"
-	DenomTag                = "denom"
-	StatusTag               = "status"
+	QueryAvgBlockSize       = "avg_block_size"
+	QueryAvgBlockTime       = "avg_block_time"
+	QueryAvgTxFee           = "avg_tx_fee"
+	QueryTxVolume           = "tx_volume"
+	QueryValidatorsBlocks   = "validators_blocks"
+
+	DenomTag  = "denom"
+	StatusTag = "status"
 )
