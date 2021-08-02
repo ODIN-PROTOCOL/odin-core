@@ -6,6 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var _ telemetrytypes.QueryServer = Keeper{}
@@ -85,31 +87,6 @@ func (k Keeper) TxVolume(
 	}, nil
 }
 
-func (k Keeper) ValidatorsBlocks(
-	c context.Context,
-	request *telemetrytypes.QueryValidatorsBlocksRequest,
-) (*telemetrytypes.QueryValidatorsBlocksResponse, error) {
-
-	ctx := sdk.UnwrapSDKContext(c)
-	validatorsBlocks, total, err := k.GetValidatorsBlocks(
-		ctx,
-		request.GetStartDate(),
-		request.GetEndDate(),
-		request.GetDesc(),
-		request.GetPagination(),
-	)
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to get validators blocks")
-	}
-
-	return &telemetrytypes.QueryValidatorsBlocksResponse{
-		ValidatorsBlocks: validatorsBlocks,
-		Pagination: &query.PageResponse{
-			Total: total,
-		},
-	}, nil
-}
-
 func (k Keeper) ExtendedValidators(
 	c context.Context,
 	request *telemetrytypes.QueryExtendedValidatorsRequest,
@@ -127,4 +104,62 @@ func (k Keeper) ExtendedValidators(
 	extendedValidatorsResp := ValidatorsResponseToExtendedValidatorsResponse(validatorsResp)
 	extendedValidatorsResp.Balances = k.GetBalances(ctx, accounts...)
 	return extendedValidatorsResp, nil
+}
+
+func (k Keeper) ValidatorBlocks(
+	c context.Context,
+	request *telemetrytypes.QueryValidatorBlocksRequest,
+) (*telemetrytypes.QueryValidatorBlocksResponse, error) {
+
+	if request.ValidatorAddress == "" {
+		return nil, status.Error(codes.InvalidArgument, "address cannot be empty")
+	}
+
+	address, err := sdk.ValAddressFromBech32(request.ValidatorAddress)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid address: %s", err.Error())
+	}
+
+	ctx := sdk.UnwrapSDKContext(c)
+	blocks, total, err := k.GetValidatorBlocks(
+		ctx,
+		address,
+		request.GetDesc(),
+		request.GetPagination(),
+	)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get validator blocks")
+	}
+
+	return &telemetrytypes.QueryValidatorBlocksResponse{
+		Blocks: blocks,
+		Pagination: &query.PageResponse{
+			Total: total,
+		},
+	}, nil
+}
+
+func (k Keeper) TopValidators(
+	c context.Context,
+	request *telemetrytypes.QueryTopValidatorsRequest,
+) (*telemetrytypes.QueryTopValidatorsResponse, error) {
+
+	ctx := sdk.UnwrapSDKContext(c)
+	topValidators, total, err := k.GetTopValidatorsByBlocks(
+		ctx,
+		request.GetStartDate(),
+		request.GetEndDate(),
+		request.GetDesc(),
+		request.GetPagination(),
+	)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get top validators by blocks")
+	}
+
+	return &telemetrytypes.QueryTopValidatorsResponse{
+		TopValidators: topValidators,
+		Pagination: &query.PageResponse{
+			Total: total,
+		},
+	}, nil
 }

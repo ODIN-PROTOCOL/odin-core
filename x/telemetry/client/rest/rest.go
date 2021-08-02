@@ -42,8 +42,13 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	).Methods("GET")
 
 	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorsBlocks),
-		getValidatorsBlocksHandler(clientCtx),
+		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopValidators),
+		getTopValidatorsHandler(clientCtx),
+	).Methods("GET")
+
+	rtr.HandleFunc(
+		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorBlocks),
+		getValidatorBlocksHandler(clientCtx),
 	).Methods("GET")
 }
 
@@ -211,21 +216,47 @@ func getTxVolumeHandler(clientCtx client.Context) http.HandlerFunc {
 	}
 }
 
-func getValidatorsBlocksHandler(clientCtx client.Context) http.HandlerFunc {
+func getTopValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
 		if !ok {
 			return
 		}
 
-		var request telemetrytypes.QueryValidatorsBlocksRequest
+		var request telemetrytypes.QueryTopValidatorsRequest
 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
 			return
 		}
 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
 		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorsBlocks),
+			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryTopValidators),
+			bin,
+		)
+		if rest.CheckInternalServerError(w, err) {
+			return
+		}
+
+		clientCtx = clientCtx.WithHeight(height)
+		rest.PostProcessResponse(w, clientCtx, res)
+	}
+}
+
+func getValidatorBlocksHandler(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		var request telemetrytypes.QueryValidatorBlocksRequest
+		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+			return
+		}
+		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+
+		res, height, err := clientCtx.QueryWithData(
+			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorBlocks),
 			bin,
 		)
 		if rest.CheckInternalServerError(w, err) {

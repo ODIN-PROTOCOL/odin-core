@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/query"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"sort"
@@ -17,6 +18,7 @@ import (
 type Keeper struct {
 	cdc            codec.BinaryMarshaler
 	bankKeeper     bankkeeper.ViewKeeper
+	distrKeeper    telemetrytypes.DistrKeeper
 	stakingQuerier stakingkeeper.Querier
 	txDecoder      sdk.TxDecoder
 }
@@ -26,10 +28,12 @@ func NewKeeper(
 	txDecoder sdk.TxDecoder,
 	bk bankkeeper.ViewKeeper,
 	sk stakingkeeper.Keeper,
+	dk distrkeeper.Keeper,
 ) Keeper {
 	return Keeper{
-		cdc:        cdc,
-		bankKeeper: bk,
+		cdc:         cdc,
+		bankKeeper:  bk,
+		distrKeeper: dk,
 		stakingQuerier: stakingkeeper.Querier{
 			Keeper: sk,
 		},
@@ -185,12 +189,12 @@ func (k Keeper) GetTxVolumePerDay(startDate, endDate time.Time) ([]telemetrytype
 	return dailyTxsVolumes, nil
 }
 
-func (k Keeper) GetValidatorsBlocks(
+func (k Keeper) GetTopValidatorsByBlocks(
 	ctx sdk.Context,
 	startDate, endDate time.Time,
 	desc bool,
 	pagination *query.PageRequest,
-) ([]telemetrytypes.ValidatorsBlocks, uint64, error) {
+) ([]telemetrytypes.ValidatorBlockStats, uint64, error) {
 
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
@@ -211,7 +215,7 @@ func (k Keeper) GetValidatorsBlocks(
 		}
 	}
 
-	validatorsBlocks := make([]telemetrytypes.ValidatorsBlocks, 0, len(blocksCount))
+	validatorsBlocks := make([]telemetrytypes.ValidatorBlockStats, 0, len(blocksCount))
 	totalBondedTokens := k.stakingQuerier.TotalBondedTokens(ctx)
 
 	for addr, blocks := range blocksCount {
@@ -245,8 +249,8 @@ func (k Keeper) GetValidatorsBlocks(
 
 		validatorsBlocks = append(
 			validatorsBlocks,
-			telemetrytypes.ValidatorsBlocks{
-				ValidatorAddress: addr,
+			telemetrytypes.ValidatorBlockStats{
+				ValidatorAddress: valAddr.String(),
 				BlocksCount:      blocks,
 				StakePercentage:  stakePercentage,
 			},
@@ -263,7 +267,7 @@ func (k Keeper) GetValidatorsBlocks(
 	validatorsBlocksLength := uint64(len(validatorsBlocks))
 
 	if pagination.GetOffset() >= validatorsBlocksLength {
-		return []telemetrytypes.ValidatorsBlocks{}, 0, nil
+		return []telemetrytypes.ValidatorBlockStats{}, 0, nil
 	}
 
 	maxLimit := pagination.GetLimit()
@@ -272,4 +276,37 @@ func (k Keeper) GetValidatorsBlocks(
 	}
 
 	return validatorsBlocks[pagination.GetOffset() : pagination.GetOffset()+maxLimit], validatorsBlocksLength, nil
+}
+
+func (k Keeper) GetValidatorBlocks(
+	ctx sdk.Context,
+	valAddr sdk.ValAddress,
+	desc bool,
+	pagination *query.PageRequest,
+) ([]telemetrytypes.ValidatorBlock, uint64, error) {
+
+	validatorBlocks, err := k.GetBlocksByValidator(ctx, valAddr)
+	if err != nil {
+		return nil, 0, sdkerrors.Wrap(err, "failed to get the blocks by validator")
+	}
+
+	sort.Slice(validatorBlocks, func(i, j int) bool {
+		if desc {
+			return validatorBlocks[j].Height < validatorBlocks[j].Height
+		}
+		return validatorBlocks[i].Height < validatorBlocks[j].Height
+	})
+
+	blocksCount := uint64(len(validatorBlocks))
+
+	if pagination.GetOffset() >= blocksCount {
+		return []telemetrytypes.ValidatorBlock{}, 0, nil
+	}
+
+	maxLimit := pagination.GetLimit()
+	if pagination.GetOffset()+pagination.GetLimit() >= blocksCount {
+		maxLimit = blocksCount - pagination.GetOffset()
+	}
+
+	return validatorBlocks[pagination.GetOffset() : pagination.GetOffset()+maxLimit], blocksCount, nil
 }

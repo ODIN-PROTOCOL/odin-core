@@ -655,26 +655,26 @@ func (m *QueryTxVolumeResponse) GetTxVolumePerDay() []TxVolumePerDay {
 	return nil
 }
 
-// QueryValidatorsBlocksRequest is request type for the Query/ValidatorsBlocks RPC method.
-type QueryValidatorsBlocksRequest struct {
+// QueryTopValidatorsRequest is request type for the Query/TopValidators RPC method.
+type QueryTopValidatorsRequest struct {
 	StartDate  time.Time          `protobuf:"bytes,1,opt,name=start_date,json=startDate,proto3,stdtime" json:"start_date"`
 	EndDate    time.Time          `protobuf:"bytes,2,opt,name=end_date,json=endDate,proto3,stdtime" json:"end_date"`
 	Pagination *query.PageRequest `protobuf:"bytes,3,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	Desc       bool               `protobuf:"varint,4,opt,name=desc,proto3" json:"desc,omitempty"`
 }
 
-func (m *QueryValidatorsBlocksRequest) Reset()         { *m = QueryValidatorsBlocksRequest{} }
-func (m *QueryValidatorsBlocksRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryValidatorsBlocksRequest) ProtoMessage()    {}
-func (*QueryValidatorsBlocksRequest) Descriptor() ([]byte, []int) {
+func (m *QueryTopValidatorsRequest) Reset()         { *m = QueryTopValidatorsRequest{} }
+func (m *QueryTopValidatorsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryTopValidatorsRequest) ProtoMessage()    {}
+func (*QueryTopValidatorsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4346fb254048dbbd, []int{12}
 }
-func (m *QueryValidatorsBlocksRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryTopValidatorsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryValidatorsBlocksRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryTopValidatorsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryValidatorsBlocksRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryTopValidatorsRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -684,64 +684,64 @@ func (m *QueryValidatorsBlocksRequest) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (m *QueryValidatorsBlocksRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryValidatorsBlocksRequest.Merge(m, src)
+func (m *QueryTopValidatorsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryTopValidatorsRequest.Merge(m, src)
 }
-func (m *QueryValidatorsBlocksRequest) XXX_Size() int {
+func (m *QueryTopValidatorsRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryValidatorsBlocksRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryValidatorsBlocksRequest.DiscardUnknown(m)
+func (m *QueryTopValidatorsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryTopValidatorsRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryValidatorsBlocksRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryTopValidatorsRequest proto.InternalMessageInfo
 
-func (m *QueryValidatorsBlocksRequest) GetStartDate() time.Time {
+func (m *QueryTopValidatorsRequest) GetStartDate() time.Time {
 	if m != nil {
 		return m.StartDate
 	}
 	return time.Time{}
 }
 
-func (m *QueryValidatorsBlocksRequest) GetEndDate() time.Time {
+func (m *QueryTopValidatorsRequest) GetEndDate() time.Time {
 	if m != nil {
 		return m.EndDate
 	}
 	return time.Time{}
 }
 
-func (m *QueryValidatorsBlocksRequest) GetPagination() *query.PageRequest {
+func (m *QueryTopValidatorsRequest) GetPagination() *query.PageRequest {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-func (m *QueryValidatorsBlocksRequest) GetDesc() bool {
+func (m *QueryTopValidatorsRequest) GetDesc() bool {
 	if m != nil {
 		return m.Desc
 	}
 	return false
 }
 
-// QueryValidatorsBlocksResponse is response type for the Query/ValidatorsBlocks RPC method.
-type QueryValidatorsBlocksResponse struct {
-	ValidatorsBlocks []ValidatorsBlocks  `protobuf:"bytes,1,rep,name=validators_blocks,json=validatorsBlocks,proto3" json:"validators_blocks"`
-	Pagination       *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+// QueryTopValidatorsResponse is response type for the Query/TopValidators RPC method.
+type QueryTopValidatorsResponse struct {
+	TopValidators []ValidatorBlockStats `protobuf:"bytes,1,rep,name=top_validators,json=topValidators,proto3" json:"top_validators"`
+	Pagination    *query.PageResponse   `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
 
-func (m *QueryValidatorsBlocksResponse) Reset()         { *m = QueryValidatorsBlocksResponse{} }
-func (m *QueryValidatorsBlocksResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryValidatorsBlocksResponse) ProtoMessage()    {}
-func (*QueryValidatorsBlocksResponse) Descriptor() ([]byte, []int) {
+func (m *QueryTopValidatorsResponse) Reset()         { *m = QueryTopValidatorsResponse{} }
+func (m *QueryTopValidatorsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryTopValidatorsResponse) ProtoMessage()    {}
+func (*QueryTopValidatorsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4346fb254048dbbd, []int{13}
 }
-func (m *QueryValidatorsBlocksResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryTopValidatorsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryValidatorsBlocksResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryTopValidatorsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryValidatorsBlocksResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryTopValidatorsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -751,26 +751,140 @@ func (m *QueryValidatorsBlocksResponse) XXX_Marshal(b []byte, deterministic bool
 		return b[:n], nil
 	}
 }
-func (m *QueryValidatorsBlocksResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryValidatorsBlocksResponse.Merge(m, src)
+func (m *QueryTopValidatorsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryTopValidatorsResponse.Merge(m, src)
 }
-func (m *QueryValidatorsBlocksResponse) XXX_Size() int {
+func (m *QueryTopValidatorsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryValidatorsBlocksResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryValidatorsBlocksResponse.DiscardUnknown(m)
+func (m *QueryTopValidatorsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryTopValidatorsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryValidatorsBlocksResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryTopValidatorsResponse proto.InternalMessageInfo
 
-func (m *QueryValidatorsBlocksResponse) GetValidatorsBlocks() []ValidatorsBlocks {
+func (m *QueryTopValidatorsResponse) GetTopValidators() []ValidatorBlockStats {
 	if m != nil {
-		return m.ValidatorsBlocks
+		return m.TopValidators
 	}
 	return nil
 }
 
-func (m *QueryValidatorsBlocksResponse) GetPagination() *query.PageResponse {
+func (m *QueryTopValidatorsResponse) GetPagination() *query.PageResponse {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+// QueryValidatorBlocksRequest is request type for the Query/ValidatorBlocks RPC method.
+type QueryValidatorBlocksRequest struct {
+	ValidatorAddress string             `protobuf:"bytes,1,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
+	Pagination       *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Desc             bool               `protobuf:"varint,3,opt,name=desc,proto3" json:"desc,omitempty"`
+}
+
+func (m *QueryValidatorBlocksRequest) Reset()         { *m = QueryValidatorBlocksRequest{} }
+func (m *QueryValidatorBlocksRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryValidatorBlocksRequest) ProtoMessage()    {}
+func (*QueryValidatorBlocksRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4346fb254048dbbd, []int{14}
+}
+func (m *QueryValidatorBlocksRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryValidatorBlocksRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryValidatorBlocksRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryValidatorBlocksRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryValidatorBlocksRequest.Merge(m, src)
+}
+func (m *QueryValidatorBlocksRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryValidatorBlocksRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryValidatorBlocksRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryValidatorBlocksRequest proto.InternalMessageInfo
+
+func (m *QueryValidatorBlocksRequest) GetValidatorAddress() string {
+	if m != nil {
+		return m.ValidatorAddress
+	}
+	return ""
+}
+
+func (m *QueryValidatorBlocksRequest) GetPagination() *query.PageRequest {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *QueryValidatorBlocksRequest) GetDesc() bool {
+	if m != nil {
+		return m.Desc
+	}
+	return false
+}
+
+// QueryValidatorBlocksResponse is response type for the Query/ValidatorBlocks RPC method.
+type QueryValidatorBlocksResponse struct {
+	Blocks     []ValidatorBlock    `protobuf:"bytes,1,rep,name=blocks,proto3" json:"blocks"`
+	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+}
+
+func (m *QueryValidatorBlocksResponse) Reset()         { *m = QueryValidatorBlocksResponse{} }
+func (m *QueryValidatorBlocksResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryValidatorBlocksResponse) ProtoMessage()    {}
+func (*QueryValidatorBlocksResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4346fb254048dbbd, []int{15}
+}
+func (m *QueryValidatorBlocksResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryValidatorBlocksResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryValidatorBlocksResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryValidatorBlocksResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryValidatorBlocksResponse.Merge(m, src)
+}
+func (m *QueryValidatorBlocksResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryValidatorBlocksResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryValidatorBlocksResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryValidatorBlocksResponse proto.InternalMessageInfo
+
+func (m *QueryValidatorBlocksResponse) GetBlocks() []ValidatorBlock {
+	if m != nil {
+		return m.Blocks
+	}
+	return nil
+}
+
+func (m *QueryValidatorBlocksResponse) GetPagination() *query.PageResponse {
 	if m != nil {
 		return m.Pagination
 	}
@@ -790,78 +904,85 @@ func init() {
 	proto.RegisterType((*QueryAvgTxFeeResponse)(nil), "telemetry.QueryAvgTxFeeResponse")
 	proto.RegisterType((*QueryTxVolumeRequest)(nil), "telemetry.QueryTxVolumeRequest")
 	proto.RegisterType((*QueryTxVolumeResponse)(nil), "telemetry.QueryTxVolumeResponse")
-	proto.RegisterType((*QueryValidatorsBlocksRequest)(nil), "telemetry.QueryValidatorsBlocksRequest")
-	proto.RegisterType((*QueryValidatorsBlocksResponse)(nil), "telemetry.QueryValidatorsBlocksResponse")
+	proto.RegisterType((*QueryTopValidatorsRequest)(nil), "telemetry.QueryTopValidatorsRequest")
+	proto.RegisterType((*QueryTopValidatorsResponse)(nil), "telemetry.QueryTopValidatorsResponse")
+	proto.RegisterType((*QueryValidatorBlocksRequest)(nil), "telemetry.QueryValidatorBlocksRequest")
+	proto.RegisterType((*QueryValidatorBlocksResponse)(nil), "telemetry.QueryValidatorBlocksResponse")
 }
 
 func init() { proto.RegisterFile("telemetry/query.proto", fileDescriptor_4346fb254048dbbd) }
 
 var fileDescriptor_4346fb254048dbbd = []byte{
-	// 1016 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x96, 0x4f, 0x6f, 0xdb, 0x36,
-	0x18, 0xc6, 0x23, 0x27, 0xcd, 0x1c, 0x66, 0x18, 0x5a, 0x22, 0x7f, 0x6c, 0xd7, 0x91, 0x1d, 0xb5,
-	0x68, 0xbd, 0x02, 0x91, 0x90, 0x6c, 0x18, 0xb0, 0xcb, 0x86, 0x7a, 0x59, 0x0b, 0x0c, 0x43, 0xd7,
-	0x79, 0x41, 0x0f, 0xdb, 0x41, 0xa0, 0xad, 0xb7, 0xaa, 0x60, 0x5b, 0x54, 0x45, 0xda, 0xb3, 0x8b,
-	0x61, 0x28, 0x76, 0xed, 0xa5, 0x40, 0xaf, 0x3b, 0xec, 0x63, 0xec, 0x23, 0xf4, 0x58, 0x60, 0x97,
-	0x9e, 0xda, 0x21, 0xd9, 0xa7, 0xd8, 0x2e, 0x83, 0x28, 0x4a, 0xa6, 0x65, 0xa9, 0xe9, 0xb6, 0x00,
-	0xcb, 0xc9, 0x16, 0xf9, 0xf2, 0x7d, 0x1e, 0xfe, 0x48, 0xbe, 0x24, 0xda, 0xe4, 0x30, 0x80, 0x21,
-	0xf0, 0x70, 0x6a, 0x3d, 0x1c, 0x41, 0x38, 0x35, 0x83, 0x90, 0x72, 0x8a, 0xd7, 0xd2, 0xe6, 0xda,
-	0x86, 0x4b, 0x5d, 0x2a, 0x5a, 0xad, 0xe8, 0x5f, 0x1c, 0x50, 0xab, 0xbb, 0x94, 0xba, 0x03, 0xb0,
-	0x48, 0xe0, 0x59, 0xc4, 0xf7, 0x29, 0x27, 0xdc, 0xa3, 0x3e, 0x93, 0xbd, 0x7a, 0x8f, 0xb2, 0x21,
-	0x65, 0x56, 0x97, 0x30, 0xb0, 0xc6, 0xfb, 0x5d, 0xe0, 0x64, 0xdf, 0xea, 0x51, 0xcf, 0x97, 0xfd,
-	0xbb, 0x79, 0xfd, 0x5d, 0x32, 0x20, 0x7e, 0x0f, 0x64, 0xc8, 0x0d, 0x35, 0x44, 0x58, 0x4b, 0x03,
-	0x03, 0xe2, 0x7a, 0xbe, 0xd0, 0x93, 0xb1, 0x0d, 0x69, 0x46, 0x7c, 0x75, 0x47, 0xf7, 0x2d, 0xee,
-	0x0d, 0x81, 0x71, 0x32, 0x0c, 0x64, 0x40, 0x75, 0x36, 0xcb, 0xf4, 0x9f, 0xec, 0xba, 0x92, 0x67,
-	0x65, 0x4c, 0x06, 0x9e, 0x43, 0x38, 0x0d, 0xe3, 0x20, 0xe3, 0x89, 0x86, 0xb6, 0xbf, 0x8e, 0x3c,
-	0x1c, 0xd1, 0xa0, 0x1d, 0xdb, 0x64, 0x1d, 0x78, 0x38, 0x02, 0xc6, 0xf1, 0x06, 0xba, 0xe0, 0x80,
-	0x4f, 0x87, 0x15, 0xad, 0xa9, 0xb5, 0xd6, 0x3a, 0xf1, 0x07, 0xbe, 0x85, 0xd0, 0xcc, 0x66, 0xa5,
-	0xd4, 0xd4, 0x5a, 0xeb, 0x07, 0xd7, 0xcc, 0x58, 0xcb, 0x8c, 0xb4, 0xcc, 0x18, 0xb7, 0x54, 0x34,
-	0xef, 0x12, 0x17, 0x64, 0xc6, 0x8e, 0x32, 0x12, 0x63, 0xb4, 0xe2, 0x00, 0xeb, 0x55, 0x96, 0x9b,
-	0x5a, 0xab, 0xdc, 0x11, 0xff, 0x8d, 0x97, 0x1a, 0xaa, 0x2c, 0xba, 0x61, 0x01, 0xf5, 0x19, 0x60,
-	0x86, 0xca, 0x12, 0x24, 0xab, 0x68, 0xcd, 0xe5, 0xd6, 0xfa, 0x41, 0x7d, 0x4e, 0x36, 0x11, 0x94,
-	0x03, 0xdb, 0x1f, 0x3f, 0x7f, 0xd5, 0x58, 0xfa, 0xf3, 0x55, 0x63, 0xdf, 0xf5, 0xf8, 0x83, 0x51,
-	0xd7, 0xec, 0xd1, 0xa1, 0x25, 0x91, 0xc4, 0x3f, 0x7b, 0xcc, 0xe9, 0x5b, 0x13, 0xab, 0x4b, 0xfc,
-	0xbe, 0xc5, 0xa7, 0x01, 0xb0, 0x64, 0x68, 0x27, 0x15, 0xc2, 0xb7, 0x73, 0x66, 0x7b, 0xfd, 0xd4,
-	0xd9, 0xc6, 0x8e, 0xd5, 0xe9, 0x1a, 0x8f, 0x35, 0xa4, 0x8b, 0xa9, 0x7d, 0x3e, 0xe1, 0xe0, 0x3b,
-	0xe0, 0xdc, 0x4b, 0x56, 0x22, 0xe5, 0xbd, 0x85, 0x56, 0x19, 0x27, 0x7c, 0xc4, 0x24, 0x70, 0xf9,
-	0x75, 0x56, 0xc4, 0x8d, 0xd7, 0x25, 0xd4, 0x28, 0xb4, 0x20, 0x21, 0xff, 0x88, 0x50, 0xba, 0x45,
-	0x12, 0xcc, 0x7a, 0x2e, 0xe6, 0x74, 0x70, 0xfb, 0x13, 0x09, 0xfa, 0xa3, 0x53, 0x40, 0x33, 0x4e,
-	0xfa, 0x9e, 0xef, 0x4a, 0xd6, 0xe9, 0xf8, 0x8e, 0xa2, 0x38, 0xb7, 0xc8, 0xa5, 0xff, 0x67, 0x91,
-	0x97, 0xff, 0xfd, 0x22, 0xff, 0x92, 0xec, 0xdf, 0x9b, 0x63, 0xb7, 0x3d, 0xa0, 0xbd, 0xfe, 0x37,
-	0xde, 0xa3, 0x64, 0x29, 0xf0, 0x67, 0x08, 0x31, 0x4e, 0x42, 0x6e, 0x3b, 0x84, 0x83, 0x58, 0xe2,
-	0xf5, 0x83, 0x9a, 0x19, 0x1f, 0x70, 0x33, 0x39, 0xe0, 0xe6, 0x51, 0x72, 0xc0, 0xdb, 0xe5, 0x68,
-	0x6a, 0x4f, 0x5f, 0x37, 0xb4, 0xce, 0x9a, 0x18, 0x77, 0x48, 0x38, 0xe0, 0x4f, 0x51, 0x19, 0x7c,
-	0x27, 0x4e, 0x51, 0xfa, 0x07, 0x29, 0xde, 0x01, 0xdf, 0x89, 0x12, 0x18, 0x13, 0x54, 0xcd, 0x71,
-	0x28, 0x57, 0xff, 0x3b, 0xb4, 0x45, 0xc6, 0xae, 0xdd, 0x8d, 0x3a, 0x6c, 0xe6, 0x3d, 0x02, 0x3b,
-	0x80, 0xd0, 0x76, 0xc8, 0x54, 0xee, 0x84, 0x5d, 0x73, 0x56, 0x64, 0x6e, 0x8e, 0x21, 0x24, 0x2e,
-	0xa4, 0x49, 0xee, 0x42, 0x78, 0x48, 0xa6, 0xed, 0x95, 0x48, 0xb2, 0x83, 0x89, 0x92, 0x3e, 0xee,
-	0x59, 0x84, 0x13, 0xf9, 0x3c, 0xdf, 0x70, 0x62, 0x87, 0x79, 0x70, 0xa2, 0x3a, 0xfc, 0x96, 0x70,
-	0xa2, 0x24, 0xf9, 0x70, 0x66, 0x3d, 0xc6, 0xcf, 0x1a, 0xda, 0x48, 0xa4, 0x8f, 0x26, 0xb7, 0xe0,
-	0x9c, 0x81, 0x79, 0x80, 0x36, 0x33, 0xee, 0x24, 0x94, 0xaf, 0x50, 0x34, 0x1b, 0x9b, 0x4f, 0xec,
-	0xfb, 0x90, 0x05, 0xb2, 0xb3, 0x08, 0x44, 0x0c, 0x9e, 0x83, 0xf1, 0x1e, 0x91, 0x29, 0xb3, 0x20,
-	0x8e, 0x26, 0xf7, 0xe8, 0x60, 0x74, 0xde, 0x76, 0x48, 0x4f, 0x82, 0x98, 0xb9, 0x93, 0x20, 0xbe,
-	0x40, 0x97, 0xf8, 0xc4, 0x1e, 0x8b, 0xc6, 0x0c, 0x87, 0xaa, 0xc2, 0x21, 0x19, 0x37, 0xcf, 0x80,
-	0xcf, 0xb5, 0x1a, 0x8f, 0x4b, 0xa8, 0x2e, 0x54, 0x66, 0x05, 0x5a, 0xec, 0x17, 0x76, 0xae, 0x58,
-	0x64, 0xee, 0xa5, 0xe5, 0xff, 0xfc, 0x12, 0x58, 0x51, 0x5e, 0x02, 0xbf, 0x6a, 0x68, 0xa7, 0x00,
-	0x81, 0x04, 0x7e, 0x07, 0x5d, 0x9a, 0xdd, 0x1b, 0xf1, 0xa9, 0x4c, 0x2e, 0xac, 0xcb, 0x0a, 0xf0,
-	0xec, 0x78, 0x89, 0xfc, 0xe2, 0x38, 0xd3, 0x7e, 0x66, 0x37, 0xfd, 0xc1, 0x5f, 0xab, 0xe8, 0x82,
-	0xb0, 0x8e, 0xbf, 0x47, 0xeb, 0xca, 0x43, 0x06, 0x1b, 0x8a, 0xad, 0x82, 0x37, 0x57, 0xed, 0xca,
-	0x1b, 0x63, 0x62, 0x35, 0xa3, 0xf1, 0xd3, 0x6f, 0x7f, 0x3c, 0x2b, 0x55, 0xf1, 0xb6, 0xa5, 0xbc,
-	0xfe, 0x68, 0x60, 0xa7, 0x17, 0xda, 0x0f, 0xe8, 0x5d, 0xb5, 0xbe, 0xe3, 0x85, 0xac, 0x39, 0xf7,
-	0x53, 0xed, 0xea, 0x9b, 0x83, 0xa4, 0xf6, 0xae, 0xd0, 0xbe, 0x8c, 0xab, 0x8a, 0xf6, 0xfc, 0x9d,
-	0xa1, 0xaa, 0x47, 0xfb, 0xa7, 0x58, 0x5d, 0xb9, 0x00, 0x8a, 0xd5, 0xd5, 0x1a, 0x7c, 0x8a, 0x7a,
-	0x54, 0x94, 0xf1, 0x00, 0x95, 0x93, 0x2a, 0x85, 0x1b, 0x39, 0x49, 0xd5, 0xea, 0x5a, 0x6b, 0x16,
-	0x07, 0x48, 0xc5, 0x1d, 0xa1, 0xb8, 0x8d, 0x37, 0x33, 0x8a, 0x71, 0xc5, 0xc3, 0x7d, 0x54, 0x4e,
-	0x8e, 0xf4, 0xa2, 0x5a, 0xa6, 0x84, 0x2d, 0xaa, 0x65, 0xab, 0x88, 0x51, 0x17, 0x6a, 0x5b, 0x78,
-	0x43, 0x5d, 0xd9, 0xa4, 0xac, 0xe0, 0x27, 0x1a, 0xba, 0x98, 0xdd, 0xcf, 0xf8, 0x7a, 0x36, 0x69,
-	0x41, 0xd1, 0xa8, 0xb5, 0x4e, 0x0f, 0x94, 0x2e, 0xae, 0x0a, 0x17, 0x3a, 0xae, 0x2b, 0x2e, 0x16,
-	0xce, 0x1a, 0x7e, 0xa6, 0x21, 0xbc, 0xf8, 0x92, 0xc4, 0xef, 0x67, 0x65, 0x0a, 0x1f, 0xbc, 0xb5,
-	0x1b, 0x6f, 0x13, 0x2a, 0x3d, 0x5d, 0x13, 0x9e, 0x9a, 0x58, 0x2f, 0xf0, 0x24, 0xb7, 0x7e, 0xfb,
-	0xce, 0xf3, 0x63, 0x5d, 0x7b, 0x71, 0xac, 0x6b, 0xbf, 0x1f, 0xeb, 0xda, 0xd3, 0x13, 0x7d, 0xe9,
-	0xc5, 0x89, 0xbe, 0xf4, 0xf2, 0x44, 0x5f, 0xfa, 0xf6, 0x43, 0xe5, 0x89, 0x78, 0x1b, 0xe8, 0x61,
-	0x7b, 0xef, 0x4b, 0x6f, 0xe8, 0x71, 0x70, 0x2c, 0xea, 0x78, 0xfe, 0x5e, 0x8f, 0x86, 0x60, 0x4d,
-	0x54, 0xee, 0xd1, 0x6b, 0xb1, 0xbb, 0x2a, 0x6a, 0xe1, 0x07, 0x7f, 0x07, 0x00, 0x00, 0xff, 0xff,
-	0x98, 0x03, 0x34, 0x02, 0x4f, 0x0e, 0x00, 0x00,
+	// 1102 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xcf, 0x6f, 0x1b, 0xc5,
+	0x17, 0xcf, 0x24, 0x69, 0xea, 0x4c, 0xbe, 0xed, 0x97, 0x8e, 0xf2, 0xc3, 0x76, 0x92, 0xb5, 0xb3,
+	0x29, 0x69, 0x28, 0xca, 0xae, 0x12, 0x10, 0x88, 0x0b, 0x28, 0x26, 0xb4, 0x12, 0x20, 0x28, 0xc6,
+	0xea, 0x01, 0x0e, 0xab, 0xb1, 0x77, 0xba, 0x5d, 0xd9, 0xde, 0xd9, 0xee, 0x8c, 0x8d, 0x5d, 0x21,
+	0x40, 0x5c, 0x38, 0x70, 0xa9, 0xd4, 0x2b, 0x87, 0x9e, 0xf8, 0x03, 0xf8, 0x2b, 0x7a, 0xac, 0xc4,
+	0xa5, 0xa7, 0x16, 0x25, 0xfc, 0x11, 0x08, 0x09, 0x09, 0xed, 0xec, 0xec, 0x7a, 0x76, 0xbd, 0x8e,
+	0x0b, 0x04, 0x91, 0x93, 0xbd, 0x3b, 0x6f, 0xde, 0xe7, 0xf3, 0x3e, 0xef, 0xed, 0x7b, 0x0f, 0xae,
+	0x70, 0xd2, 0x21, 0x5d, 0xc2, 0x83, 0xa1, 0x79, 0xaf, 0x47, 0x82, 0xa1, 0xe1, 0x07, 0x94, 0x53,
+	0xb4, 0x98, 0xbc, 0x2e, 0x2f, 0x3b, 0xd4, 0xa1, 0xe2, 0xad, 0x19, 0xfe, 0x8b, 0x0c, 0xca, 0x1b,
+	0x0e, 0xa5, 0x4e, 0x87, 0x98, 0xd8, 0x77, 0x4d, 0xec, 0x79, 0x94, 0x63, 0xee, 0x52, 0x8f, 0xc9,
+	0x53, 0xad, 0x45, 0x59, 0x97, 0x32, 0xb3, 0x89, 0x19, 0x31, 0xfb, 0xfb, 0x4d, 0xc2, 0xf1, 0xbe,
+	0xd9, 0xa2, 0xae, 0x27, 0xcf, 0xb7, 0xf2, 0xce, 0x9b, 0xb8, 0x83, 0xbd, 0x16, 0x91, 0x26, 0xd7,
+	0x55, 0x13, 0x41, 0x2d, 0x31, 0xf4, 0xb1, 0xe3, 0x7a, 0x02, 0x4f, 0xda, 0x56, 0x24, 0x19, 0xf1,
+	0xd4, 0xec, 0xdd, 0x31, 0xb9, 0xdb, 0x25, 0x8c, 0xe3, 0xae, 0x2f, 0x0d, 0x4a, 0xa3, 0x28, 0x93,
+	0x7f, 0xf2, 0x68, 0x3b, 0x8f, 0x4a, 0x1f, 0x77, 0x5c, 0x1b, 0x73, 0x1a, 0x44, 0x46, 0xfa, 0xf7,
+	0x00, 0xae, 0x7d, 0x12, 0x72, 0x68, 0x50, 0xbf, 0x16, 0xd1, 0x64, 0x75, 0x72, 0xaf, 0x47, 0x18,
+	0x47, 0xcb, 0xf0, 0x82, 0x4d, 0x3c, 0xda, 0x2d, 0x82, 0x2a, 0xd8, 0x5d, 0xac, 0x47, 0x0f, 0xe8,
+	0x06, 0x84, 0x23, 0x9a, 0xc5, 0xd9, 0x2a, 0xd8, 0x5d, 0x3a, 0xd8, 0x31, 0x22, 0x2c, 0x23, 0xc4,
+	0x32, 0x22, 0xb9, 0x25, 0xa2, 0x71, 0x0b, 0x3b, 0x44, 0x7a, 0xac, 0x2b, 0x37, 0x11, 0x82, 0xf3,
+	0x36, 0x61, 0xad, 0xe2, 0x5c, 0x15, 0xec, 0x16, 0xea, 0xe2, 0xbf, 0xfe, 0x14, 0xc0, 0xe2, 0x38,
+	0x1b, 0xe6, 0x53, 0x8f, 0x11, 0xc4, 0x60, 0x41, 0x0a, 0xc9, 0x8a, 0xa0, 0x3a, 0xb7, 0xbb, 0x74,
+	0xb0, 0x91, 0x82, 0x8d, 0x01, 0xe5, 0xc5, 0xda, 0x5b, 0x8f, 0x9f, 0x55, 0x66, 0x7e, 0x7f, 0x56,
+	0xd9, 0x77, 0x5c, 0x7e, 0xb7, 0xd7, 0x34, 0x5a, 0xb4, 0x6b, 0x4a, 0x49, 0xa2, 0x9f, 0x3d, 0x66,
+	0xb7, 0xcd, 0x81, 0xd9, 0xc4, 0x5e, 0xdb, 0xe4, 0x43, 0x9f, 0xb0, 0xf8, 0x6a, 0x3d, 0x01, 0x42,
+	0x37, 0x73, 0xa2, 0xbd, 0x36, 0x35, 0xda, 0x88, 0xb1, 0x1a, 0xae, 0xfe, 0x0d, 0x80, 0x9a, 0x08,
+	0xed, 0xbd, 0x01, 0x27, 0x9e, 0x4d, 0xec, 0xdb, 0x71, 0x26, 0x12, 0xbd, 0x57, 0xe1, 0x02, 0xe3,
+	0x98, 0xf7, 0x98, 0x14, 0x5c, 0x3e, 0x9d, 0x95, 0xe2, 0xfa, 0xf3, 0x59, 0x58, 0x99, 0x48, 0x41,
+	0x8a, 0xfc, 0x15, 0x84, 0x49, 0x89, 0xc4, 0x32, 0x6b, 0xb9, 0x32, 0x27, 0x97, 0x6b, 0x6f, 0x4b,
+	0xa1, 0xdf, 0x98, 0x22, 0x34, 0xe3, 0xb8, 0xed, 0x7a, 0x8e, 0xd4, 0x3a, 0xb9, 0x5f, 0x57, 0x10,
+	0x53, 0x49, 0x9e, 0xfd, 0x6f, 0x92, 0x3c, 0xf7, 0xf7, 0x93, 0xfc, 0x28, 0xae, 0xdf, 0xc3, 0xbe,
+	0x53, 0xeb, 0xd0, 0x56, 0xfb, 0x53, 0xf7, 0x7e, 0x9c, 0x0a, 0xf4, 0x2e, 0x84, 0x8c, 0xe3, 0x80,
+	0x5b, 0x36, 0xe6, 0x44, 0xa4, 0x78, 0xe9, 0xa0, 0x6c, 0x44, 0x1f, 0xb8, 0x11, 0x7f, 0xe0, 0x46,
+	0x23, 0xfe, 0xc0, 0x6b, 0x85, 0x30, 0xb4, 0x07, 0xcf, 0x2b, 0xa0, 0xbe, 0x28, 0xee, 0x1d, 0x61,
+	0x4e, 0xd0, 0x3b, 0xb0, 0x40, 0x3c, 0x3b, 0x72, 0x31, 0xfb, 0x17, 0x5c, 0x5c, 0x24, 0x9e, 0x1d,
+	0x3a, 0xd0, 0x07, 0xb0, 0x94, 0xc3, 0x50, 0x66, 0xff, 0x73, 0xb8, 0x8a, 0xfb, 0x8e, 0xd5, 0x0c,
+	0x0f, 0x2c, 0xe6, 0xde, 0x27, 0x96, 0x4f, 0x02, 0xcb, 0xc6, 0x43, 0x59, 0x09, 0x5b, 0xc6, 0xa8,
+	0xc9, 0x1c, 0xf6, 0x49, 0x80, 0x1d, 0x92, 0x38, 0xb9, 0x45, 0x82, 0x23, 0x3c, 0xac, 0xcd, 0x87,
+	0x90, 0x75, 0x84, 0x15, 0xf7, 0xd1, 0xc9, 0xb8, 0x38, 0x21, 0xcf, 0xf3, 0x2d, 0x4e, 0xc4, 0x30,
+	0x4f, 0x9c, 0xb0, 0x0f, 0xbf, 0xa0, 0x38, 0xa1, 0x93, 0x7c, 0x71, 0x46, 0x27, 0xfa, 0x0f, 0x00,
+	0x2e, 0xc7, 0xd0, 0x8d, 0xc1, 0x0d, 0x72, 0xce, 0x84, 0xb9, 0x0b, 0x57, 0x32, 0xec, 0xa4, 0x28,
+	0x1f, 0xc3, 0x30, 0x1a, 0x8b, 0x0f, 0xac, 0x3b, 0x24, 0x2b, 0xc8, 0xe6, 0xb8, 0x20, 0xe2, 0x72,
+	0x4a, 0x8c, 0xcb, 0x58, 0xba, 0xcc, 0x0a, 0xd1, 0x18, 0xdc, 0xa6, 0x9d, 0xde, 0x79, 0xab, 0x90,
+	0x96, 0x14, 0x62, 0xc4, 0x4e, 0x0a, 0xf1, 0x3e, 0xbc, 0xc2, 0x07, 0x56, 0x5f, 0xbc, 0xcc, 0xe8,
+	0x50, 0x52, 0x74, 0x88, 0xef, 0xa5, 0x35, 0xe0, 0xa9, 0xb7, 0xfa, 0x1f, 0x40, 0xd6, 0x61, 0x83,
+	0xfa, 0xe3, 0x63, 0xe2, 0x5c, 0x08, 0x91, 0x19, 0x4a, 0x73, 0xff, 0x78, 0x0d, 0x98, 0x57, 0xd6,
+	0x80, 0x9f, 0x00, 0x2c, 0xe7, 0xc5, 0x2f, 0xa5, 0xfe, 0x00, 0x5e, 0xe6, 0xd4, 0xb7, 0x72, 0xe6,
+	0xd4, 0x48, 0xe7, 0xd1, 0x74, 0x12, 0x5d, 0x88, 0x63, 0xce, 0xa4, 0xd8, 0x97, 0xb8, 0xea, 0xf4,
+	0xec, 0x06, 0xfc, 0x8f, 0x00, 0xae, 0x0b, 0xd2, 0x69, 0xe8, 0x24, 0x6d, 0xaf, 0xc2, 0x2b, 0x09,
+	0x63, 0x0b, 0xdb, 0x76, 0x40, 0x58, 0x3c, 0xe8, 0x5f, 0x4a, 0x0e, 0x0e, 0xa3, 0xf7, 0xff, 0xea,
+	0x92, 0xf5, 0x08, 0xc0, 0x8d, 0x7c, 0xa2, 0x52, 0xdf, 0x37, 0xe1, 0x82, 0x68, 0x72, 0x2c, 0xa7,
+	0x7e, 0xd3, 0x77, 0xa4, 0xa4, 0xd2, 0xfc, 0xcc, 0xb4, 0x3c, 0xf8, 0xed, 0x22, 0xbc, 0x20, 0x28,
+	0xa2, 0x2f, 0xe0, 0x92, 0xb2, 0x0b, 0x22, 0x5d, 0xa1, 0x32, 0x61, 0x6d, 0x2d, 0x6f, 0x9f, 0x6a,
+	0x13, 0xa1, 0xe9, 0x95, 0x6f, 0x7f, 0xfe, 0xf5, 0xe1, 0x6c, 0x09, 0xad, 0x99, 0xca, 0x02, 0x4d,
+	0x7d, 0x2b, 0xd9, 0x09, 0x1e, 0x02, 0x88, 0xc6, 0xf7, 0x24, 0xf4, 0x4a, 0xd6, 0xf9, 0xc4, 0x75,
+	0xae, 0x7c, 0xfd, 0x45, 0x4c, 0x25, 0x9d, 0x1d, 0x41, 0xa7, 0x8a, 0x34, 0x85, 0xce, 0xa8, 0xbe,
+	0x47, 0xac, 0xbe, 0x84, 0xff, 0x53, 0x07, 0x37, 0x1a, 0x8b, 0x35, 0x67, 0xf1, 0x28, 0x5f, 0x3d,
+	0xdd, 0x48, 0x52, 0xd8, 0x12, 0x14, 0xd6, 0x51, 0x49, 0xa1, 0x90, 0x5e, 0x06, 0x54, 0xf4, 0xb0,
+	0x37, 0x4c, 0x46, 0x57, 0x26, 0xfb, 0x64, 0x74, 0x75, 0xb8, 0x4e, 0x41, 0x0f, 0xa7, 0x2d, 0xea,
+	0xc0, 0x42, 0x3c, 0x7e, 0x50, 0x25, 0xc7, 0xa9, 0x3a, 0x36, 0xcb, 0xd5, 0xc9, 0x06, 0x12, 0x71,
+	0x53, 0x20, 0xae, 0xa1, 0x95, 0x0c, 0x62, 0x34, 0xca, 0x50, 0x1b, 0x16, 0xe2, 0x5e, 0x3d, 0x8e,
+	0x96, 0x99, 0x4d, 0xe3, 0x68, 0xd9, 0xf1, 0xa0, 0x6f, 0x08, 0xb4, 0x55, 0xb4, 0xac, 0xd6, 0x5b,
+	0x3c, 0x2f, 0xd0, 0xd7, 0xf0, 0x52, 0xaa, 0xd5, 0xa1, 0xab, 0x39, 0x35, 0x3c, 0x5e, 0x61, 0x2f,
+	0x4f, 0xb1, 0x3a, 0x45, 0xdb, 0x74, 0x03, 0x45, 0xdf, 0x01, 0xf8, 0xff, 0x4c, 0x3b, 0x40, 0x3b,
+	0x59, 0xef, 0xf9, 0x8d, 0xad, 0x7c, 0x6d, 0xaa, 0x9d, 0xe4, 0xb1, 0x2d, 0x78, 0x6c, 0xa2, 0xf5,
+	0xbc, 0x22, 0x8f, 0x32, 0xcd, 0x6a, 0x1f, 0x3d, 0x3e, 0xd6, 0xc0, 0x93, 0x63, 0x0d, 0xfc, 0x72,
+	0xac, 0x81, 0x07, 0x27, 0xda, 0xcc, 0x93, 0x13, 0x6d, 0xe6, 0xe9, 0x89, 0x36, 0xf3, 0xd9, 0xeb,
+	0xca, 0x8a, 0x7f, 0x93, 0xd0, 0xa3, 0xda, 0xde, 0x87, 0x6e, 0xd7, 0xe5, 0xc4, 0x36, 0xa9, 0xed,
+	0x7a, 0x7b, 0x2d, 0x1a, 0x10, 0x73, 0xa0, 0x86, 0x18, 0x6e, 0xfb, 0xcd, 0x05, 0x31, 0xce, 0x5e,
+	0xfb, 0x33, 0x00, 0x00, 0xff, 0xff, 0x27, 0x40, 0xc2, 0x1c, 0x0f, 0x10, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -878,6 +999,8 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// TopBalances returns all the system balances for specific denom.
 	TopBalances(ctx context.Context, in *QueryTopBalancesRequest, opts ...grpc.CallOption) (*QueryTopBalancesResponse, error)
+	// ExtendedValidators returns validators balances.
+	ExtendedValidators(ctx context.Context, in *QueryExtendedValidatorsRequest, opts ...grpc.CallOption) (*QueryExtendedValidatorsResponse, error)
 	// AvgBlockSize returns average block size per day.
 	AvgBlockSize(ctx context.Context, in *QueryAvgBlockSizeRequest, opts ...grpc.CallOption) (*QueryAvgBlockSizeResponse, error)
 	// AvgBlockTime returns average block time per day.
@@ -886,9 +1009,10 @@ type QueryClient interface {
 	AvgTxFee(ctx context.Context, in *QueryAvgTxFeeRequest, opts ...grpc.CallOption) (*QueryAvgTxFeeResponse, error)
 	// TxVolume returns count of transactions per day.
 	TxVolume(ctx context.Context, in *QueryTxVolumeRequest, opts ...grpc.CallOption) (*QueryTxVolumeResponse, error)
-	// ValidatorsBlocks returns validators blocks and stake percentage.
-	ValidatorsBlocks(ctx context.Context, in *QueryValidatorsBlocksRequest, opts ...grpc.CallOption) (*QueryValidatorsBlocksResponse, error)
-	ExtendedValidators(ctx context.Context, in *QueryExtendedValidatorsRequest, opts ...grpc.CallOption) (*QueryExtendedValidatorsResponse, error)
+	// TopValidators returns validators blocks and stake percentage.
+	TopValidators(ctx context.Context, in *QueryTopValidatorsRequest, opts ...grpc.CallOption) (*QueryTopValidatorsResponse, error)
+	// ValidatorBlocks returns validator approved blocks.
+	ValidatorBlocks(ctx context.Context, in *QueryValidatorBlocksRequest, opts ...grpc.CallOption) (*QueryValidatorBlocksResponse, error)
 }
 
 type queryClient struct {
@@ -902,6 +1026,15 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 func (c *queryClient) TopBalances(ctx context.Context, in *QueryTopBalancesRequest, opts ...grpc.CallOption) (*QueryTopBalancesResponse, error) {
 	out := new(QueryTopBalancesResponse)
 	err := c.cc.Invoke(ctx, "/telemetry.Query/TopBalances", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) ExtendedValidators(ctx context.Context, in *QueryExtendedValidatorsRequest, opts ...grpc.CallOption) (*QueryExtendedValidatorsResponse, error) {
+	out := new(QueryExtendedValidatorsResponse)
+	err := c.cc.Invoke(ctx, "/telemetry.Query/ExtendedValidators", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -944,18 +1077,18 @@ func (c *queryClient) TxVolume(ctx context.Context, in *QueryTxVolumeRequest, op
 	return out, nil
 }
 
-func (c *queryClient) ValidatorsBlocks(ctx context.Context, in *QueryValidatorsBlocksRequest, opts ...grpc.CallOption) (*QueryValidatorsBlocksResponse, error) {
-	out := new(QueryValidatorsBlocksResponse)
-	err := c.cc.Invoke(ctx, "/telemetry.Query/ValidatorsBlocks", in, out, opts...)
+func (c *queryClient) TopValidators(ctx context.Context, in *QueryTopValidatorsRequest, opts ...grpc.CallOption) (*QueryTopValidatorsResponse, error) {
+	out := new(QueryTopValidatorsResponse)
+	err := c.cc.Invoke(ctx, "/telemetry.Query/TopValidators", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) ExtendedValidators(ctx context.Context, in *QueryExtendedValidatorsRequest, opts ...grpc.CallOption) (*QueryExtendedValidatorsResponse, error) {
-	out := new(QueryExtendedValidatorsResponse)
-	err := c.cc.Invoke(ctx, "/telemetry.Query/ExtendedValidators", in, out, opts...)
+func (c *queryClient) ValidatorBlocks(ctx context.Context, in *QueryValidatorBlocksRequest, opts ...grpc.CallOption) (*QueryValidatorBlocksResponse, error) {
+	out := new(QueryValidatorBlocksResponse)
+	err := c.cc.Invoke(ctx, "/telemetry.Query/ValidatorBlocks", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -966,6 +1099,8 @@ func (c *queryClient) ExtendedValidators(ctx context.Context, in *QueryExtendedV
 type QueryServer interface {
 	// TopBalances returns all the system balances for specific denom.
 	TopBalances(context.Context, *QueryTopBalancesRequest) (*QueryTopBalancesResponse, error)
+	// ExtendedValidators returns validators balances.
+	ExtendedValidators(context.Context, *QueryExtendedValidatorsRequest) (*QueryExtendedValidatorsResponse, error)
 	// AvgBlockSize returns average block size per day.
 	AvgBlockSize(context.Context, *QueryAvgBlockSizeRequest) (*QueryAvgBlockSizeResponse, error)
 	// AvgBlockTime returns average block time per day.
@@ -974,9 +1109,10 @@ type QueryServer interface {
 	AvgTxFee(context.Context, *QueryAvgTxFeeRequest) (*QueryAvgTxFeeResponse, error)
 	// TxVolume returns count of transactions per day.
 	TxVolume(context.Context, *QueryTxVolumeRequest) (*QueryTxVolumeResponse, error)
-	// ValidatorsBlocks returns validators blocks and stake percentage.
-	ValidatorsBlocks(context.Context, *QueryValidatorsBlocksRequest) (*QueryValidatorsBlocksResponse, error)
-	ExtendedValidators(context.Context, *QueryExtendedValidatorsRequest) (*QueryExtendedValidatorsResponse, error)
+	// TopValidators returns validators blocks and stake percentage.
+	TopValidators(context.Context, *QueryTopValidatorsRequest) (*QueryTopValidatorsResponse, error)
+	// ValidatorBlocks returns validator approved blocks.
+	ValidatorBlocks(context.Context, *QueryValidatorBlocksRequest) (*QueryValidatorBlocksResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -985,6 +1121,9 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) TopBalances(ctx context.Context, req *QueryTopBalancesRequest) (*QueryTopBalancesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TopBalances not implemented")
+}
+func (*UnimplementedQueryServer) ExtendedValidators(ctx context.Context, req *QueryExtendedValidatorsRequest) (*QueryExtendedValidatorsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExtendedValidators not implemented")
 }
 func (*UnimplementedQueryServer) AvgBlockSize(ctx context.Context, req *QueryAvgBlockSizeRequest) (*QueryAvgBlockSizeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AvgBlockSize not implemented")
@@ -998,11 +1137,11 @@ func (*UnimplementedQueryServer) AvgTxFee(ctx context.Context, req *QueryAvgTxFe
 func (*UnimplementedQueryServer) TxVolume(ctx context.Context, req *QueryTxVolumeRequest) (*QueryTxVolumeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TxVolume not implemented")
 }
-func (*UnimplementedQueryServer) ValidatorsBlocks(ctx context.Context, req *QueryValidatorsBlocksRequest) (*QueryValidatorsBlocksResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidatorsBlocks not implemented")
+func (*UnimplementedQueryServer) TopValidators(ctx context.Context, req *QueryTopValidatorsRequest) (*QueryTopValidatorsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TopValidators not implemented")
 }
-func (*UnimplementedQueryServer) ExtendedValidators(ctx context.Context, req *QueryExtendedValidatorsRequest) (*QueryExtendedValidatorsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ExtendedValidators not implemented")
+func (*UnimplementedQueryServer) ValidatorBlocks(ctx context.Context, req *QueryValidatorBlocksRequest) (*QueryValidatorBlocksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidatorBlocks not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -1023,6 +1162,24 @@ func _Query_TopBalances_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TopBalances(ctx, req.(*QueryTopBalancesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_ExtendedValidators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryExtendedValidatorsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).ExtendedValidators(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/telemetry.Query/ExtendedValidators",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).ExtendedValidators(ctx, req.(*QueryExtendedValidatorsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1099,38 +1256,38 @@ func _Query_TxVolume_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_ValidatorsBlocks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryValidatorsBlocksRequest)
+func _Query_TopValidators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryTopValidatorsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).ValidatorsBlocks(ctx, in)
+		return srv.(QueryServer).TopValidators(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/telemetry.Query/ValidatorsBlocks",
+		FullMethod: "/telemetry.Query/TopValidators",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ValidatorsBlocks(ctx, req.(*QueryValidatorsBlocksRequest))
+		return srv.(QueryServer).TopValidators(ctx, req.(*QueryTopValidatorsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_ExtendedValidators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryExtendedValidatorsRequest)
+func _Query_ValidatorBlocks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryValidatorBlocksRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).ExtendedValidators(ctx, in)
+		return srv.(QueryServer).ValidatorBlocks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/telemetry.Query/ExtendedValidators",
+		FullMethod: "/telemetry.Query/ValidatorBlocks",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ExtendedValidators(ctx, req.(*QueryExtendedValidatorsRequest))
+		return srv.(QueryServer).ValidatorBlocks(ctx, req.(*QueryValidatorBlocksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1142,6 +1299,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TopBalances",
 			Handler:    _Query_TopBalances_Handler,
+		},
+		{
+			MethodName: "ExtendedValidators",
+			Handler:    _Query_ExtendedValidators_Handler,
 		},
 		{
 			MethodName: "AvgBlockSize",
@@ -1160,12 +1321,12 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_TxVolume_Handler,
 		},
 		{
-			MethodName: "ValidatorsBlocks",
-			Handler:    _Query_ValidatorsBlocks_Handler,
+			MethodName: "TopValidators",
+			Handler:    _Query_TopValidators_Handler,
 		},
 		{
-			MethodName: "ExtendedValidators",
-			Handler:    _Query_ExtendedValidators_Handler,
+			MethodName: "ValidatorBlocks",
+			Handler:    _Query_ValidatorBlocks_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1682,7 +1843,7 @@ func (m *QueryTxVolumeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryValidatorsBlocksRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryTopValidatorsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1692,12 +1853,12 @@ func (m *QueryValidatorsBlocksRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryValidatorsBlocksRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryTopValidatorsRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryValidatorsBlocksRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryTopValidatorsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1743,7 +1904,7 @@ func (m *QueryValidatorsBlocksRequest) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryValidatorsBlocksResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryTopValidatorsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1753,12 +1914,12 @@ func (m *QueryValidatorsBlocksResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryValidatorsBlocksResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryTopValidatorsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryValidatorsBlocksResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryTopValidatorsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1775,10 +1936,111 @@ func (m *QueryValidatorsBlocksResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.ValidatorsBlocks) > 0 {
-		for iNdEx := len(m.ValidatorsBlocks) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.TopValidators) > 0 {
+		for iNdEx := len(m.TopValidators) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.ValidatorsBlocks[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.TopValidators[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryValidatorBlocksRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryValidatorBlocksRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryValidatorBlocksRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Desc {
+		i--
+		if m.Desc {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ValidatorAddress) > 0 {
+		i -= len(m.ValidatorAddress)
+		copy(dAtA[i:], m.ValidatorAddress)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.ValidatorAddress)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryValidatorBlocksResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryValidatorBlocksResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryValidatorBlocksResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Pagination != nil {
+		{
+			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Blocks) > 0 {
+		for iNdEx := len(m.Blocks) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Blocks[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -1996,7 +2258,7 @@ func (m *QueryTxVolumeResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryValidatorsBlocksRequest) Size() (n int) {
+func (m *QueryTopValidatorsRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2016,14 +2278,53 @@ func (m *QueryValidatorsBlocksRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryValidatorsBlocksResponse) Size() (n int) {
+func (m *QueryTopValidatorsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.ValidatorsBlocks) > 0 {
-		for _, e := range m.ValidatorsBlocks {
+	if len(m.TopValidators) > 0 {
+		for _, e := range m.TopValidators {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryValidatorBlocksRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ValidatorAddress)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Pagination != nil {
+		l = m.Pagination.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	if m.Desc {
+		n += 2
+	}
+	return n
+}
+
+func (m *QueryValidatorBlocksResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Blocks) > 0 {
+		for _, e := range m.Blocks {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -3371,7 +3672,7 @@ func (m *QueryTxVolumeResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryValidatorsBlocksRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryTopValidatorsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -3394,10 +3695,10 @@ func (m *QueryValidatorsBlocksRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryValidatorsBlocksRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryTopValidatorsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryValidatorsBlocksRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryTopValidatorsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -3543,7 +3844,7 @@ func (m *QueryValidatorsBlocksRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryValidatorsBlocksResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryTopValidatorsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -3566,15 +3867,15 @@ func (m *QueryValidatorsBlocksResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryValidatorsBlocksResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryTopValidatorsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryValidatorsBlocksResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryTopValidatorsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ValidatorsBlocks", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field TopValidators", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3601,8 +3902,266 @@ func (m *QueryValidatorsBlocksResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ValidatorsBlocks = append(m.ValidatorsBlocks, ValidatorsBlocks{})
-			if err := m.ValidatorsBlocks[len(m.ValidatorsBlocks)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.TopValidators = append(m.TopValidators, ValidatorBlockStats{})
+			if err := m.TopValidators[len(m.TopValidators)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageResponse{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryValidatorBlocksRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryValidatorBlocksRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryValidatorBlocksRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ValidatorAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ValidatorAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Pagination == nil {
+				m.Pagination = &query.PageRequest{}
+			}
+			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Desc", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Desc = bool(v != 0)
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryValidatorBlocksResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryValidatorBlocksResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryValidatorBlocksResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Blocks", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Blocks = append(m.Blocks, ValidatorBlock{})
+			if err := m.Blocks[len(m.Blocks)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

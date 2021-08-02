@@ -8,6 +8,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
@@ -25,8 +27,10 @@ func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
 			return queryAvgTxFee(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryTxVolume:
 			return queryTxVolume(ctx, path[1:], keeper, cdc, req)
-		case telemetrytypes.QueryValidatorsBlocks:
-			return queryValidatorsBlocks(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryValidatorBlocks:
+			return queryValidatorBlocks(ctx, path[1:], keeper, cdc, req)
+		case telemetrytypes.QueryTopValidators:
+			return queryTopValidators(ctx, path[1:], keeper, cdc, req)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown telemetry query endpoint")
 		}
@@ -163,18 +167,22 @@ func queryTxVolume(_ sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, 
 	})
 }
 
-func queryValidatorsBlocks(
+func queryValidatorBlocks(
 	ctx sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery,
 ) ([]byte, error) {
-	var request telemetrytypes.QueryValidatorsBlocksRequest
+	var request telemetrytypes.QueryValidatorBlocksRequest
 	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
 	}
 
-	validatorsBlocks, total, err := k.GetValidatorsBlocks(
+	address, err := sdk.ValAddressFromBech32(request.ValidatorAddress)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid address: %s", err.Error())
+	}
+
+	blocks, total, err := k.GetValidatorBlocks(
 		ctx,
-		request.GetStartDate(),
-		request.GetEndDate(),
+		address,
 		request.GetDesc(),
 		request.GetPagination(),
 	)
@@ -182,8 +190,35 @@ func queryValidatorsBlocks(
 		return nil, sdkerrors.Wrap(err, "failed to get validators blocks")
 	}
 
-	return commontypes.QueryOK(cdc, telemetrytypes.QueryValidatorsBlocksResponse{
-		ValidatorsBlocks: validatorsBlocks,
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryValidatorBlocksResponse{
+		Blocks: blocks,
+		Pagination: &query.PageResponse{
+			Total: total,
+		},
+	})
+}
+
+func queryTopValidators(
+	ctx sdk.Context, _ []string, k Keeper, cdc *codec.LegacyAmino, req abci.RequestQuery,
+) ([]byte, error) {
+	var request telemetrytypes.QueryTopValidatorsRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+
+	validatorsBlocks, total, err := k.GetTopValidatorsByBlocks(
+		ctx,
+		request.GetStartDate(),
+		request.GetEndDate(),
+		request.GetDesc(),
+		request.GetPagination(),
+	)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get top validators by blocks")
+	}
+
+	return commontypes.QueryOK(cdc, telemetrytypes.QueryTopValidatorsResponse{
+		TopValidators: validatorsBlocks,
 		Pagination: &query.PageResponse{
 			Total: total,
 		},
