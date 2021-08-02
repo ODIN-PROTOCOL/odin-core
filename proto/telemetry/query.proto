@@ -104,7 +104,6 @@ message QueryAvgBlockSizeResponse {
 // QueryAvgBlockTimeRequest is request type for the Query/AvgBlockTime RPC method.
 message QueryAvgBlockTimeRequest {
   google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-
   google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 

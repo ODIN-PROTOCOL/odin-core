@@ -98,7 +98,7 @@ func GetQueryCmdExtendedValidators() *cobra.Command {
 
 Example:
   $ %[1]s query %[2]s extended-validators [status]
-  $ %[1]s query %[2]s extended-validators [status] --page=2 --limit=100
+  $ %[1]s query %[2]s extended-validators [status] --limit=100 --offset=2
 `,
 				version.AppName, telemetrytypes.ModuleName,
 			),
@@ -167,8 +167,7 @@ func GetQueryCmdAvgBlockSize() *cobra.Command {
 }
 
 // GetQueryCmdAvgBlockTime implements the query parameters command.
-func
-GetQueryCmdAvgBlockTime() *cobra.Command {
+func GetQueryCmdAvgBlockTime() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-time [start-date] [end-date]",
 		Args: cobra.MinimumNArgs(2),
@@ -201,8 +200,7 @@ GetQueryCmdAvgBlockTime() *cobra.Command {
 }
 
 // GetQueryCmdAvgTxFee implements the query parameters command.
-func
-GetQueryCmdAvgTxFee() *cobra.Command {
+func GetQueryCmdAvgTxFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-tx-fee [start-date] [end-date]",
 		Args: cobra.MinimumNArgs(2),
