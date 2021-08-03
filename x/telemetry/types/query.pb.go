@@ -100,6 +100,7 @@ func (m *QueryTopBalancesRequest) GetDesc() bool {
 
 // QueryTopBalancesResponse is response type for the Query/TopBalances RPC method.
 type QueryTopBalancesResponse struct {
+	//  map<string, int64> transactionsCount = 1;
 	Balances   []github_com_cosmos_cosmos_sdk_x_bank_types.Balance `protobuf:"bytes,1,rep,name=balances,proto3,casttype=github.com/cosmos/cosmos-sdk/x/bank/types.Balance" json:"balances"`
 	Pagination *query.PageResponse                                 `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }

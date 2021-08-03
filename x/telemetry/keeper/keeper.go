@@ -2,6 +2,7 @@ package keeper
 
 import (
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -16,6 +17,7 @@ import (
 
 type Keeper struct {
 	cdc            codec.BinaryMarshaler
+	txCfg          client.TxConfig
 	bankKeeper     bankkeeper.ViewKeeper
 	stakingQuerier stakingkeeper.Querier
 	txDecoder      sdk.TxDecoder
@@ -23,6 +25,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryMarshaler,
+	txCfg client.TxConfig,
 	txDecoder sdk.TxDecoder,
 	bk bankkeeper.ViewKeeper,
 	sk stakingkeeper.Keeper,
@@ -33,6 +36,7 @@ func NewKeeper(
 		stakingQuerier: stakingkeeper.Querier{
 			Keeper: sk,
 		},
+		txCfg:     txCfg,
 		txDecoder: txDecoder,
 	}
 }
