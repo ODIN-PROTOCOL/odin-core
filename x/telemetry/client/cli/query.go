@@ -52,7 +52,7 @@ Example:
 				version.AppName, telemetrytypes.ModuleName,
 			),
 		),
-		Args: cobra.MaximumNArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -165,8 +165,7 @@ func GetQueryCmdAvgBlockSize() *cobra.Command {
 }
 
 // GetQueryCmdAvgBlockTime implements the query parameters command.
-func
-GetQueryCmdAvgBlockTime() *cobra.Command {
+func GetQueryCmdAvgBlockTime() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-time [start-date] [end-date]",
 		Args: cobra.MinimumNArgs(2),
@@ -199,8 +198,7 @@ GetQueryCmdAvgBlockTime() *cobra.Command {
 }
 
 // GetQueryCmdAvgTxFee implements the query parameters command.
-func
-GetQueryCmdAvgTxFee() *cobra.Command {
+func GetQueryCmdAvgTxFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-tx-fee [start-date] [end-date]",
 		Args: cobra.MinimumNArgs(2),

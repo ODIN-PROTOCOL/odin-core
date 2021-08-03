@@ -58,6 +58,7 @@ message QueryTopBalancesRequest {
 }
 // QueryTopBalancesResponse is response type for the Query/TopBalances RPC method.
 message QueryTopBalancesResponse {
+//  map<string, int64> transactionsCount = 1;
   repeated cosmos.base.v1beta1.Balance balances = 1 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false

@@ -4,6 +4,7 @@ import (
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -35,4 +36,12 @@ func ValidatorsToAccounts(validators []stakingtypes.Validator) ([]sdk.AccAddress
 		}
 	}
 	return accs, nil
+}
+
+func BalancesToAccounts(balances []banktypes.Balance) []sdk.AccAddress {
+	res := make([]sdk.AccAddress, len(balances))
+	for i, b := range balances {
+		res[i] = b.GetAddress()
+	}
+	return res
 }
