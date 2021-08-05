@@ -64,7 +64,7 @@ message QueryTopBalancesRequest {
 }
 // QueryTopBalancesResponse is response type for the Query/TopBalances RPC method.
 message QueryTopBalancesResponse {
-//  map<string, int64> transactionsCount = 1;
+  //  map<string, int64> transactionsCount = 1;
   repeated cosmos.base.v1beta1.Balance balances = 1 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false
@@ -94,8 +94,8 @@ message QueryExtendedValidatorsResponse {
 
 // QueryAvgBlockSizeRequest is request type for the Query/AvgBlockSize RPC method.
 message QueryAvgBlockSizeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 // QueryAvgBlockSizeResponse is response type for the Query/AvgBlockSize RPC method.
 message QueryAvgBlockSizeResponse {
@@ -104,8 +104,8 @@ message QueryAvgBlockSizeResponse {
 
 // QueryAvgBlockTimeRequest is request type for the Query/AvgBlockTime RPC method.
 message QueryAvgBlockTimeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgBlockTimeResponse is response type for the Query/AvgBlockTime RPC method.
@@ -115,8 +115,8 @@ message QueryAvgBlockTimeResponse {
 
 // QueryAvgTxFeeRequest is request type for the Query/AvgTxFee RPC method.
 message QueryAvgTxFeeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgTxFeeResponse is response type for the Query/AvgTxFee RPC method.
@@ -126,8 +126,8 @@ message QueryAvgTxFeeResponse {
 
 // QueryTxVolumeRequest is request type for the Query/TxVolume RPC method.
 message QueryTxVolumeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgTxFeeResponse is response type for the Query/TxVolume RPC method.
@@ -137,8 +137,8 @@ message QueryTxVolumeResponse {
 
 // QueryTopValidatorsRequest is request type for the Query/TopValidators RPC method.
 message QueryTopValidatorsRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
   cosmos.base.query.v1beta1.PageRequest pagination = 3;
   bool desc = 4;
 }

@@ -81,7 +81,7 @@ func (k Keeper) GetBalances(ctx sdk.Context, addrs ...sdk.AccAddress) []banktype
 	return balances
 }
 
-func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageBlockSizePerDay, error) {
+func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageBlockSizePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -104,7 +104,7 @@ func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate time.Time) ([]telemetry
 	return avgBlockSizePerDay, nil
 }
 
-func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageBlockTimePerDay, error) {
+func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageBlockTimePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -126,7 +126,7 @@ func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate time.Time) ([]telemetry
 	return avgBlockTimePerDay, nil
 }
 
-func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageTxFeePerDay, error) {
+func (k Keeper) GetAvgTxFeePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageTxFeePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -168,7 +168,7 @@ func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytype
 	return avgTxFeePerDay, nil
 }
 
-func (k Keeper) GetTxVolumePerDay(startDate, endDate time.Time) ([]telemetrytypes.TxVolumePerDay, error) {
+func (k Keeper) GetTxVolumePerDay(startDate, endDate *time.Time) ([]telemetrytypes.TxVolumePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -192,7 +192,7 @@ func (k Keeper) GetTxVolumePerDay(startDate, endDate time.Time) ([]telemetrytype
 
 func (k Keeper) GetTopValidatorsByBlocks(
 	ctx sdk.Context,
-	startDate, endDate time.Time,
+	startDate, endDate *time.Time,
 	desc bool,
 	pagination *query.PageRequest,
 ) ([]telemetrytypes.ValidatorBlockStats, uint64, error) {

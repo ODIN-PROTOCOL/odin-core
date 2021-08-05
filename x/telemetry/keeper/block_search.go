@@ -17,10 +17,11 @@ const (
 	OrderByAsc     = "asc"
 )
 
-func (k Keeper) GetBlocksByDates(startDate, endDate time.Time) (map[time.Time][]*tendermint.Block, error) {
-	ok := startDate.Before(endDate)
-	if !ok {
-		return nil, sdkerrors.Wrapf(telemetrytypes.ErrInvalidDateInterval, "invalid dates order")
+func (k Keeper) GetBlocksByDates(startDate, endDate *time.Time) (map[time.Time][]*tendermint.Block, error) {
+	if startDate != nil && endDate != nil {
+		if ok := startDate.Before(*endDate); !ok {
+			return nil, sdkerrors.Wrapf(telemetrytypes.ErrInvalidDateInterval, "invalid dates order")
+		}
 	}
 
 	blocksPerDay := make(map[time.Time][]*tendermint.Block, 0)
@@ -44,9 +45,20 @@ func (k Keeper) GetBlocksByDates(startDate, endDate time.Time) (map[time.Time][]
 
 		for _, r := range blocks.Blocks {
 			blockDate := telemetrytypes.TimeToUTCDate(r.Block.Header.Time)
-			if blockDate.Equal(startDate) || blockDate.After(startDate) && blockDate.Equal(endDate) || blockDate.Before(endDate) {
-				blocksPerDay[blockDate] = append(blocksPerDay[blockDate], r.Block)
+
+			if startDate != nil {
+				if !blockDate.Equal(*startDate) && !blockDate.After(*startDate) {
+					continue
+				}
 			}
+
+			if endDate != nil {
+				if !blockDate.Equal(*endDate) && !blockDate.Before(*endDate) {
+					continue
+				}
+			}
+
+			blocksPerDay[blockDate] = append(blocksPerDay[blockDate], r.Block)
 		}
 
 		blocksParsed += blocksCount
@@ -138,12 +150,11 @@ func (k Keeper) GetBlocksByValidator(ctx sdk.Context, valAddr sdk.ValAddress) ([
 		}
 
 		blocksParsed += blocksCount
+		page++
 
 		if blocks.TotalCount == blocksCount {
 			break
 		}
-
-		page++
 	}
 
 	return validatorBlocks, nil

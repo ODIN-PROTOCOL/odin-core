@@ -137,7 +137,7 @@ Example:
 func GetQueryCmdAvgBlockSize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-size [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -170,7 +170,7 @@ func GetQueryCmdAvgBlockSize() *cobra.Command {
 func GetQueryCmdAvgBlockTime() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-time [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -203,7 +203,7 @@ func GetQueryCmdAvgBlockTime() *cobra.Command {
 func GetQueryCmdAvgTxFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-tx-fee [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -236,7 +236,7 @@ func GetQueryCmdAvgTxFee() *cobra.Command {
 func GetQueryCmdTxVolume() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "tx-volume [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -335,7 +335,7 @@ Example:
 				version.AppName, telemetrytypes.ModuleName,
 			),
 		),
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -376,14 +376,23 @@ Example:
 	return cmd
 }
 
-func ParseDateInterval(startDateArg, endDateArg string) (time.Time, time.Time, error) {
-	startDate, err := time.Parse(DateFormat, startDateArg)
-	if err != nil {
-		return time.Time{}, time.Time{}, sdkerrors.Wrap(err, "failed to parse start date")
+func ParseDateInterval(startDateArg, endDateArg string) (*time.Time, *time.Time, error) {
+	var startDate, endDate *time.Time
+
+	if startDateArg != "" {
+		sd, err := time.Parse(DateFormat, startDateArg)
+		if err != nil {
+			return nil, nil, sdkerrors.Wrap(err, "failed to parse start date")
+		}
+		startDate = &sd
 	}
-	endDate, err := time.Parse(DateFormat, endDateArg)
-	if err != nil {
-		return time.Time{}, time.Time{}, sdkerrors.Wrap(err, "failed to parse end date")
+	if endDateArg != "" {
+		ed, err := time.Parse(DateFormat, endDateArg)
+		if err != nil {
+			return nil, nil, sdkerrors.Wrap(err, "failed to parse end date")
+		}
+		endDate = &ed
 	}
-	return startDate, endDate, err
+
+	return startDate, endDate, nil
 }
