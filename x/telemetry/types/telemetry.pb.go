@@ -83,7 +83,7 @@ func (m *AverageBlockSizePerDay) GetBytes() uint64 {
 	return 0
 }
 
-// AverageBlockSizePerDay represents average block time per day.
+// AverageBlockTimePerDay represents average block time per day.
 type AverageBlockTimePerDay struct {
 	Date    time.Time `protobuf:"bytes,1,opt,name=date,proto3,stdtime" json:"date"`
 	Seconds uint64    `protobuf:"varint,2,opt,name=seconds,proto3" json:"seconds,omitempty"`
@@ -136,7 +136,7 @@ func (m *AverageBlockTimePerDay) GetSeconds() uint64 {
 	return 0
 }
 
-// AverageBlockSizePerDay represents average transaction fee per day.
+// AverageTxFeePerDay represents average transaction fee per day.
 type AverageTxFeePerDay struct {
 	Date time.Time                                `protobuf:"bytes,1,opt,name=date,proto3,stdtime" json:"date"`
 	Fee  github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=fee,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee"`
@@ -189,7 +189,7 @@ func (m *AverageTxFeePerDay) GetFee() github_com_cosmos_cosmos_sdk_types.Coins {
 	return nil
 }
 
-// AverageBlockSizePerDay represents count of transactions per day.
+// TxVolumePerDay represents count of transactions per day.
 type TxVolumePerDay struct {
 	Date   time.Time `protobuf:"bytes,1,opt,name=date,proto3,stdtime" json:"date"`
 	Volume uint64    `protobuf:"varint,2,opt,name=volume,proto3" json:"volume,omitempty"`
@@ -242,25 +242,25 @@ func (m *TxVolumePerDay) GetVolume() uint64 {
 	return 0
 }
 
-// AverageBlockSizePerDay represents validators blocks and stake percentage.
-type ValidatorsBlocks struct {
+// ValidatorBlockStats represents validators blocks and stake percentage.
+type ValidatorBlockStats struct {
 	ValidatorAddress string                                 `protobuf:"bytes,1,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
 	BlocksCount      uint64                                 `protobuf:"varint,2,opt,name=blocks_count,json=blocksCount,proto3" json:"blocks_count,omitempty"`
 	StakePercentage  github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=stake_percentage,json=stakePercentage,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"stake_percentage"`
 }
 
-func (m *ValidatorsBlocks) Reset()         { *m = ValidatorsBlocks{} }
-func (m *ValidatorsBlocks) String() string { return proto.CompactTextString(m) }
-func (*ValidatorsBlocks) ProtoMessage()    {}
-func (*ValidatorsBlocks) Descriptor() ([]byte, []int) {
+func (m *ValidatorBlockStats) Reset()         { *m = ValidatorBlockStats{} }
+func (m *ValidatorBlockStats) String() string { return proto.CompactTextString(m) }
+func (*ValidatorBlockStats) ProtoMessage()    {}
+func (*ValidatorBlockStats) Descriptor() ([]byte, []int) {
 	return fileDescriptor_83397851ec684947, []int{4}
 }
-func (m *ValidatorsBlocks) XXX_Unmarshal(b []byte) error {
+func (m *ValidatorBlockStats) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ValidatorsBlocks) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ValidatorBlockStats) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ValidatorsBlocks.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ValidatorBlockStats.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -270,47 +270,52 @@ func (m *ValidatorsBlocks) XXX_Marshal(b []byte, deterministic bool) ([]byte, er
 		return b[:n], nil
 	}
 }
-func (m *ValidatorsBlocks) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ValidatorsBlocks.Merge(m, src)
+func (m *ValidatorBlockStats) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidatorBlockStats.Merge(m, src)
 }
-func (m *ValidatorsBlocks) XXX_Size() int {
+func (m *ValidatorBlockStats) XXX_Size() int {
 	return m.Size()
 }
-func (m *ValidatorsBlocks) XXX_DiscardUnknown() {
-	xxx_messageInfo_ValidatorsBlocks.DiscardUnknown(m)
+func (m *ValidatorBlockStats) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidatorBlockStats.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ValidatorsBlocks proto.InternalMessageInfo
+var xxx_messageInfo_ValidatorBlockStats proto.InternalMessageInfo
 
-func (m *ValidatorsBlocks) GetValidatorAddress() string {
+func (m *ValidatorBlockStats) GetValidatorAddress() string {
 	if m != nil {
 		return m.ValidatorAddress
 	}
 	return ""
 }
 
-func (m *ValidatorsBlocks) GetBlocksCount() uint64 {
+func (m *ValidatorBlockStats) GetBlocksCount() uint64 {
 	if m != nil {
 		return m.BlocksCount
 	}
 	return 0
 }
 
-type Statistic struct {
+// ValidatorBlock represents block approved by validator.
+type ValidatorBlock struct {
+	Height   uint64                                   `protobuf:"varint,1,opt,name=height,proto3" json:"height,omitempty"`
+	Time     time.Time                                `protobuf:"bytes,2,opt,name=time,proto3,stdtime" json:"time"`
+	TxsCount uint64                                   `protobuf:"varint,3,opt,name=txs_count,json=txsCount,proto3" json:"txs_count,omitempty"`
+	Reward   github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=reward,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"reward"`
 }
 
-func (m *Statistic) Reset()         { *m = Statistic{} }
-func (m *Statistic) String() string { return proto.CompactTextString(m) }
-func (*Statistic) ProtoMessage()    {}
-func (*Statistic) Descriptor() ([]byte, []int) {
+func (m *ValidatorBlock) Reset()         { *m = ValidatorBlock{} }
+func (m *ValidatorBlock) String() string { return proto.CompactTextString(m) }
+func (*ValidatorBlock) ProtoMessage()    {}
+func (*ValidatorBlock) Descriptor() ([]byte, []int) {
 	return fileDescriptor_83397851ec684947, []int{5}
 }
-func (m *Statistic) XXX_Unmarshal(b []byte) error {
+func (m *ValidatorBlock) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Statistic) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ValidatorBlock) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Statistic.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ValidatorBlock.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -320,90 +325,42 @@ func (m *Statistic) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Statistic) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Statistic.Merge(m, src)
+func (m *ValidatorBlock) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ValidatorBlock.Merge(m, src)
 }
-func (m *Statistic) XXX_Size() int {
+func (m *ValidatorBlock) XXX_Size() int {
 	return m.Size()
 }
-func (m *Statistic) XXX_DiscardUnknown() {
-	xxx_messageInfo_Statistic.DiscardUnknown(m)
+func (m *ValidatorBlock) XXX_DiscardUnknown() {
+	xxx_messageInfo_ValidatorBlock.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Statistic proto.InternalMessageInfo
+var xxx_messageInfo_ValidatorBlock proto.InternalMessageInfo
 
-type DailyStatistic struct {
-	Date        time.Time                                `protobuf:"bytes,1,opt,name=date,proto3,stdtime" json:"date"`
-	BlocksCount uint64                                   `protobuf:"varint,2,opt,name=blocks_count,json=blocksCount,proto3" json:"blocks_count,omitempty"`
-	BlocksSize  uint64                                   `protobuf:"varint,3,opt,name=blocks_size,json=blocksSize,proto3" json:"blocks_size,omitempty"`
-	TxsCount    uint64                                   `protobuf:"varint,4,opt,name=txs_count,json=txsCount,proto3" json:"txs_count,omitempty"`
-	TotalTxFee  github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=total_tx_fee,json=totalTxFee,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"total_tx_fee"`
-}
-
-func (m *DailyStatistic) Reset()         { *m = DailyStatistic{} }
-func (m *DailyStatistic) String() string { return proto.CompactTextString(m) }
-func (*DailyStatistic) ProtoMessage()    {}
-func (*DailyStatistic) Descriptor() ([]byte, []int) {
-	return fileDescriptor_83397851ec684947, []int{6}
-}
-func (m *DailyStatistic) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *DailyStatistic) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_DailyStatistic.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *DailyStatistic) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DailyStatistic.Merge(m, src)
-}
-func (m *DailyStatistic) XXX_Size() int {
-	return m.Size()
-}
-func (m *DailyStatistic) XXX_DiscardUnknown() {
-	xxx_messageInfo_DailyStatistic.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DailyStatistic proto.InternalMessageInfo
-
-func (m *DailyStatistic) GetDate() time.Time {
+func (m *ValidatorBlock) GetHeight() uint64 {
 	if m != nil {
-		return m.Date
+		return m.Height
+	}
+	return 0
+}
+
+func (m *ValidatorBlock) GetTime() time.Time {
+	if m != nil {
+		return m.Time
 	}
 	return time.Time{}
 }
 
-func (m *DailyStatistic) GetBlocksCount() uint64 {
-	if m != nil {
-		return m.BlocksCount
-	}
-	return 0
-}
-
-func (m *DailyStatistic) GetBlocksSize() uint64 {
-	if m != nil {
-		return m.BlocksSize
-	}
-	return 0
-}
-
-func (m *DailyStatistic) GetTxsCount() uint64 {
+func (m *ValidatorBlock) GetTxsCount() uint64 {
 	if m != nil {
 		return m.TxsCount
 	}
 	return 0
 }
 
-func (m *DailyStatistic) GetTotalTxFee() github_com_cosmos_cosmos_sdk_types.Coins {
+func (m *ValidatorBlock) GetReward() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
-		return m.TotalTxFee
+		return m.Reward
 	}
 	return nil
 }
@@ -413,51 +370,49 @@ func init() {
 	proto.RegisterType((*AverageBlockTimePerDay)(nil), "telemetry.AverageBlockTimePerDay")
 	proto.RegisterType((*AverageTxFeePerDay)(nil), "telemetry.AverageTxFeePerDay")
 	proto.RegisterType((*TxVolumePerDay)(nil), "telemetry.TxVolumePerDay")
-	proto.RegisterType((*ValidatorsBlocks)(nil), "telemetry.ValidatorsBlocks")
-	proto.RegisterType((*Statistic)(nil), "telemetry.Statistic")
-	proto.RegisterType((*DailyStatistic)(nil), "telemetry.DailyStatistic")
+	proto.RegisterType((*ValidatorBlockStats)(nil), "telemetry.ValidatorBlockStats")
+	proto.RegisterType((*ValidatorBlock)(nil), "telemetry.ValidatorBlock")
 }
 
 func init() { proto.RegisterFile("telemetry/telemetry.proto", fileDescriptor_83397851ec684947) }
 
 var fileDescriptor_83397851ec684947 = []byte{
-	// 574 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0x41, 0x6b, 0xdb, 0x3e,
-	0x18, 0xc6, 0xe3, 0x36, 0xed, 0xbf, 0x51, 0x4a, 0xff, 0x99, 0x29, 0x25, 0xc9, 0xc0, 0xce, 0x72,
-	0x18, 0x81, 0x11, 0x6b, 0xed, 0x76, 0x18, 0xbb, 0xd5, 0x0d, 0xdb, 0x65, 0x8c, 0xe2, 0x86, 0xc2,
-	0x06, 0xc3, 0xc8, 0xf6, 0x5b, 0x57, 0xc4, 0xb6, 0x82, 0xa5, 0x04, 0xa7, 0x9f, 0xa2, 0xe7, 0x9d,
-	0x76, 0xde, 0x75, 0x1f, 0x61, 0x97, 0x1e, 0x7b, 0x1c, 0x3b, 0xb4, 0x23, 0xb9, 0xec, 0x63, 0x0c,
-	0xcb, 0x72, 0xe8, 0x76, 0x2a, 0xa4, 0xa7, 0xe8, 0x7d, 0xa4, 0xf7, 0xf9, 0x49, 0x8f, 0x14, 0xa3,
-	0x96, 0x80, 0x08, 0x62, 0x10, 0xe9, 0x0c, 0x2f, 0x47, 0xd6, 0x38, 0x65, 0x82, 0xe9, 0xb5, 0xa5,
-	0xd0, 0xde, 0x0d, 0x59, 0xc8, 0xa4, 0x8a, 0xf3, 0x51, 0xb1, 0xa0, 0x6d, 0x86, 0x8c, 0x85, 0x11,
-	0x60, 0x59, 0x79, 0x93, 0x33, 0x2c, 0x68, 0x0c, 0x5c, 0x90, 0x78, 0xac, 0x16, 0xb4, 0xfe, 0x5d,
-	0x40, 0x12, 0x65, 0xde, 0x36, 0x7c, 0xc6, 0x63, 0xc6, 0xb1, 0x47, 0x38, 0xe0, 0xe9, 0xbe, 0x07,
-	0x82, 0xec, 0x63, 0x9f, 0xd1, 0xa4, 0x98, 0xef, 0x26, 0x68, 0xef, 0x70, 0x0a, 0x29, 0x09, 0xc1,
-	0x8e, 0x98, 0x3f, 0x3a, 0xa1, 0x17, 0x70, 0x0c, 0xe9, 0x80, 0xcc, 0xf4, 0x57, 0xa8, 0x1a, 0x10,
-	0x01, 0x4d, 0xad, 0xa3, 0xf5, 0xea, 0x07, 0x6d, 0xab, 0x60, 0x58, 0x25, 0xc3, 0x1a, 0x96, 0x9b,
-	0xb0, 0xb7, 0xae, 0x6e, 0xcc, 0xca, 0xe5, 0xad, 0xa9, 0x39, 0xb2, 0x43, 0xdf, 0x45, 0x1b, 0xde,
-	0x4c, 0x00, 0x6f, 0xae, 0x75, 0xb4, 0x5e, 0xd5, 0x29, 0x8a, 0xd7, 0xd5, 0xdf, 0x5f, 0x4c, 0xad,
-	0x9b, 0xfe, 0xcd, 0xcb, 0x4d, 0x56, 0xe6, 0x35, 0xd1, 0x7f, 0x1c, 0x7c, 0x96, 0x04, 0x25, 0xb1,
-	0x2c, 0x15, 0xf3, 0x9b, 0x86, 0x74, 0x05, 0x1d, 0x66, 0x6f, 0x60, 0x75, 0xe0, 0x27, 0xb4, 0x7e,
-	0x06, 0xd0, 0x5c, 0xeb, 0xac, 0xf7, 0xea, 0x07, 0x2d, 0xab, 0x88, 0xd8, 0xca, 0x23, 0xb6, 0x54,
-	0xc4, 0xd6, 0x11, 0xa3, 0x89, 0xfd, 0x3c, 0xef, 0xfb, 0x7a, 0x6b, 0xf6, 0x42, 0x2a, 0xce, 0x27,
-	0x9e, 0xe5, 0xb3, 0x18, 0xab, 0xfb, 0x28, 0x7e, 0xfa, 0x3c, 0x18, 0x61, 0x31, 0x1b, 0x03, 0x97,
-	0x0d, 0xdc, 0xc9, 0x7d, 0xd5, 0xae, 0xcf, 0xd1, 0xce, 0x30, 0x3b, 0x65, 0xd1, 0xe4, 0x01, 0x12,
-	0xda, 0x43, 0x9b, 0x53, 0xe9, 0xa4, 0x02, 0x52, 0x95, 0x22, 0x7d, 0xd7, 0x50, 0xe3, 0x94, 0x44,
-	0x34, 0x20, 0x82, 0xa5, 0x5c, 0xde, 0x0b, 0xd7, 0x9f, 0xa1, 0x47, 0xd3, 0x52, 0x73, 0x49, 0x10,
-	0xa4, 0xc0, 0xb9, 0x24, 0xd7, 0x9c, 0xc6, 0x72, 0xe2, 0xb0, 0xd0, 0xf5, 0x27, 0x68, 0xdb, 0x93,
-	0x6d, 0xae, 0xcf, 0x26, 0x89, 0x50, 0x94, 0x7a, 0xa1, 0x1d, 0xe5, 0x92, 0xfe, 0x01, 0x35, 0xb8,
-	0x20, 0x23, 0x70, 0xc7, 0x90, 0xfa, 0x90, 0x08, 0x12, 0x42, 0x73, 0x3d, 0xb7, 0xb3, 0xad, 0x7c,
-	0xb3, 0x3f, 0x6f, 0xcc, 0xa7, 0xf7, 0x48, 0x69, 0x00, 0xbe, 0xf3, 0xbf, 0xf4, 0x39, 0x5e, 0xda,
-	0xa8, 0x53, 0xd4, 0x51, 0xed, 0x44, 0x10, 0x41, 0xb9, 0xa0, 0x7e, 0xf7, 0xf3, 0x1a, 0xda, 0x19,
-	0x10, 0x1a, 0xcd, 0x96, 0xd2, 0x0a, 0xe9, 0xdd, 0xe3, 0x74, 0x26, 0x52, 0xa5, 0xcb, 0xe9, 0x45,
-	0x71, 0xb0, 0xaa, 0x83, 0x0a, 0x29, 0xff, 0x4f, 0xe9, 0x8f, 0x51, 0x4d, 0x64, 0xa5, 0x41, 0x55,
-	0x4e, 0x6f, 0x89, 0x4c, 0x75, 0xc7, 0x68, 0x5b, 0x30, 0x41, 0x22, 0x57, 0x64, 0x6e, 0xfe, 0xb0,
-	0x36, 0x1e, 0xfe, 0x61, 0x21, 0x09, 0x90, 0xcf, 0xdf, 0x7e, 0x7f, 0x35, 0x37, 0xb4, 0xeb, 0xb9,
-	0xa1, 0xfd, 0x9a, 0x1b, 0xda, 0xe5, 0xc2, 0xa8, 0x5c, 0x2f, 0x8c, 0xca, 0x8f, 0x85, 0x51, 0xf9,
-	0xf8, 0xf2, 0x8e, 0xdf, 0x5b, 0x60, 0x03, 0xbb, 0xff, 0x8e, 0xc6, 0x54, 0x40, 0x80, 0x59, 0x40,
-	0x93, 0xbe, 0xcf, 0x52, 0xc0, 0x19, 0xbe, 0xf3, 0x29, 0xcb, 0x09, 0xde, 0xa6, 0xcc, 0xf0, 0xc5,
-	0x9f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x1b, 0xfd, 0xd2, 0xdd, 0xe4, 0x04, 0x00, 0x00,
+	// 559 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x54, 0x41, 0x6f, 0xd3, 0x30,
+	0x18, 0x6d, 0xd6, 0x52, 0x56, 0x17, 0x8d, 0x11, 0xa6, 0x29, 0x2d, 0x52, 0x52, 0x76, 0x40, 0x95,
+	0x50, 0x63, 0x36, 0x38, 0x20, 0x6e, 0xcb, 0x2a, 0xb8, 0x20, 0x34, 0x85, 0x6a, 0x12, 0x48, 0xa8,
+	0x72, 0x92, 0x6f, 0x69, 0xd4, 0x26, 0xae, 0x6c, 0xb7, 0xb4, 0xfc, 0x8a, 0xfd, 0x04, 0xce, 0x5c,
+	0xf9, 0x0f, 0x68, 0xc7, 0x1d, 0x11, 0x87, 0x0d, 0xb5, 0x17, 0xc4, 0xaf, 0x40, 0x76, 0x9c, 0x6a,
+	0xe3, 0x34, 0x69, 0x3b, 0xc5, 0xdf, 0xb3, 0xbf, 0xf7, 0xbe, 0xf7, 0xe2, 0x04, 0x35, 0x04, 0x8c,
+	0x20, 0x05, 0xc1, 0xe6, 0x78, 0xb5, 0x72, 0xc7, 0x8c, 0x0a, 0x6a, 0xd6, 0x56, 0x40, 0x73, 0x2b,
+	0xa6, 0x31, 0x55, 0x28, 0x96, 0xab, 0xfc, 0x40, 0xd3, 0x89, 0x29, 0x8d, 0x47, 0x80, 0x55, 0x15,
+	0x4c, 0x8e, 0xb1, 0x48, 0x52, 0xe0, 0x82, 0xa4, 0x63, 0x7d, 0xa0, 0xf1, 0xff, 0x01, 0x92, 0x69,
+	0xf2, 0xa6, 0x1d, 0x52, 0x9e, 0x52, 0x8e, 0x03, 0xc2, 0x01, 0x4f, 0x77, 0x03, 0x10, 0x64, 0x17,
+	0x87, 0x34, 0xc9, 0xf2, 0xfd, 0x9d, 0x0c, 0x6d, 0xef, 0x4f, 0x81, 0x91, 0x18, 0xbc, 0x11, 0x0d,
+	0x87, 0xef, 0x93, 0x2f, 0x70, 0x08, 0xac, 0x4b, 0xe6, 0xe6, 0x4b, 0x54, 0x89, 0x88, 0x00, 0xcb,
+	0x68, 0x19, 0xed, 0xfa, 0x5e, 0xd3, 0xcd, 0x35, 0xdc, 0x42, 0xc3, 0xed, 0x15, 0x43, 0x78, 0xeb,
+	0xa7, 0xe7, 0x4e, 0xe9, 0xe4, 0xc2, 0x31, 0x7c, 0xd5, 0x61, 0x6e, 0xa1, 0x3b, 0xc1, 0x5c, 0x00,
+	0xb7, 0xd6, 0x5a, 0x46, 0xbb, 0xe2, 0xe7, 0xc5, 0xab, 0xca, 0x9f, 0xaf, 0x8e, 0xb1, 0xc3, 0xae,
+	0xea, 0x49, 0x92, 0x1b, 0xeb, 0x59, 0xe8, 0x2e, 0x87, 0x90, 0x66, 0x51, 0xa1, 0x58, 0x94, 0x5a,
+	0xf3, 0xbb, 0x81, 0x4c, 0x2d, 0xda, 0x9b, 0xbd, 0x86, 0x9b, 0x0b, 0x7e, 0x42, 0xe5, 0x63, 0x00,
+	0x6b, 0xad, 0x55, 0x6e, 0xd7, 0xf7, 0x1a, 0x6e, 0x1e, 0xb1, 0x2b, 0x23, 0x76, 0x75, 0xc4, 0xee,
+	0x01, 0x4d, 0x32, 0xef, 0x99, 0xec, 0xfb, 0x76, 0xe1, 0xb4, 0xe3, 0x44, 0x0c, 0x26, 0x81, 0x1b,
+	0xd2, 0x14, 0xeb, 0xf7, 0x91, 0x3f, 0x3a, 0x3c, 0x1a, 0x62, 0x31, 0x1f, 0x03, 0x57, 0x0d, 0xdc,
+	0x97, 0xbc, 0x7a, 0xea, 0x01, 0xda, 0xe8, 0xcd, 0x8e, 0xe8, 0x68, 0x72, 0x0b, 0x09, 0x6d, 0xa3,
+	0xea, 0x54, 0x31, 0xe9, 0x80, 0x74, 0xa5, 0x95, 0x7e, 0x18, 0xe8, 0xe1, 0x11, 0x19, 0x25, 0x11,
+	0x11, 0x94, 0xe5, 0xd7, 0x40, 0x10, 0xc1, 0xcd, 0xa7, 0xe8, 0xc1, 0xb4, 0x80, 0xfb, 0x24, 0x8a,
+	0x18, 0x70, 0xae, 0xc4, 0x6b, 0xfe, 0xe6, 0x6a, 0x63, 0x3f, 0xc7, 0xcd, 0xc7, 0xe8, 0x5e, 0x20,
+	0x5b, 0x79, 0x3f, 0xa4, 0x93, 0x4c, 0x68, 0xa1, 0x7a, 0x8e, 0x1d, 0x48, 0xc8, 0xfc, 0x80, 0x36,
+	0xb9, 0x20, 0x43, 0xe8, 0x8f, 0x81, 0x85, 0x90, 0x09, 0x12, 0x83, 0x55, 0x96, 0x74, 0x9e, 0x2b,
+	0xe7, 0xfd, 0x75, 0xee, 0x3c, 0xb9, 0x46, 0x50, 0x5d, 0x08, 0xfd, 0xfb, 0x8a, 0xe7, 0x70, 0x45,
+	0xa3, 0x8d, 0xfc, 0x35, 0xd0, 0xc6, 0x55, 0x23, 0xd2, 0xf9, 0x00, 0x92, 0x78, 0x20, 0xd4, 0xe0,
+	0x15, 0x5f, 0x57, 0x32, 0x4b, 0xf9, 0x15, 0xa9, 0x31, 0xaf, 0x9d, 0xa5, 0xec, 0x30, 0x1f, 0xa1,
+	0x9a, 0x98, 0x15, 0x2e, 0xcb, 0x8a, 0x74, 0x5d, 0xcc, 0xb4, 0xc5, 0x10, 0x55, 0x19, 0x7c, 0x26,
+	0x2c, 0xb2, 0x2a, 0xb7, 0x7f, 0x39, 0x34, 0x75, 0x6e, 0xd6, 0x7b, 0x77, 0xba, 0xb0, 0x8d, 0xb3,
+	0x85, 0x6d, 0xfc, 0x5e, 0xd8, 0xc6, 0xc9, 0xd2, 0x2e, 0x9d, 0x2d, 0xed, 0xd2, 0xcf, 0xa5, 0x5d,
+	0xfa, 0xf8, 0xe2, 0x12, 0xe3, 0x1b, 0xa0, 0x5d, 0xaf, 0xf3, 0x36, 0x49, 0x13, 0x01, 0x11, 0xa6,
+	0x51, 0x92, 0x75, 0x42, 0xca, 0x00, 0xcf, 0xf0, 0xa5, 0x1f, 0x92, 0xd4, 0x08, 0xaa, 0xca, 0xfb,
+	0xf3, 0x7f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x7d, 0x6b, 0xbc, 0xec, 0xaa, 0x04, 0x00, 0x00,
 }
 
 func (this *AverageBlockSizePerDay) Equal(that interface{}) bool {
@@ -573,14 +528,14 @@ func (this *TxVolumePerDay) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ValidatorsBlocks) Equal(that interface{}) bool {
+func (this *ValidatorBlockStats) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ValidatorsBlocks)
+	that1, ok := that.(*ValidatorBlockStats)
 	if !ok {
-		that2, ok := that.(ValidatorsBlocks)
+		that2, ok := that.(ValidatorBlockStats)
 		if ok {
 			that1 = &that2
 		} else {
@@ -600,6 +555,44 @@ func (this *ValidatorsBlocks) Equal(that interface{}) bool {
 	}
 	if !this.StakePercentage.Equal(that1.StakePercentage) {
 		return false
+	}
+	return true
+}
+func (this *ValidatorBlock) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ValidatorBlock)
+	if !ok {
+		that2, ok := that.(ValidatorBlock)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Height != that1.Height {
+		return false
+	}
+	if !this.Time.Equal(that1.Time) {
+		return false
+	}
+	if this.TxsCount != that1.TxsCount {
+		return false
+	}
+	if len(this.Reward) != len(that1.Reward) {
+		return false
+	}
+	for i := range this.Reward {
+		if !this.Reward[i].Equal(&that1.Reward[i]) {
+			return false
+		}
 	}
 	return true
 }
@@ -756,7 +749,7 @@ func (m *TxVolumePerDay) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ValidatorsBlocks) Marshal() (dAtA []byte, err error) {
+func (m *ValidatorBlockStats) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -766,12 +759,12 @@ func (m *ValidatorsBlocks) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ValidatorsBlocks) MarshalTo(dAtA []byte) (int, error) {
+func (m *ValidatorBlockStats) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ValidatorsBlocks) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ValidatorBlockStats) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -801,7 +794,7 @@ func (m *ValidatorsBlocks) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *Statistic) Marshal() (dAtA []byte, err error) {
+func (m *ValidatorBlock) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -811,43 +804,20 @@ func (m *Statistic) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Statistic) MarshalTo(dAtA []byte) (int, error) {
+func (m *ValidatorBlock) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Statistic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ValidatorBlock) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *DailyStatistic) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *DailyStatistic) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *DailyStatistic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.TotalTxFee) > 0 {
-		for iNdEx := len(m.TotalTxFee) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Reward) > 0 {
+		for iNdEx := len(m.Reward) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.TotalTxFee[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Reward[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -855,32 +825,27 @@ func (m *DailyStatistic) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintTelemetry(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2a
+			dAtA[i] = 0x22
 		}
 	}
 	if m.TxsCount != 0 {
 		i = encodeVarintTelemetry(dAtA, i, uint64(m.TxsCount))
 		i--
-		dAtA[i] = 0x20
-	}
-	if m.BlocksSize != 0 {
-		i = encodeVarintTelemetry(dAtA, i, uint64(m.BlocksSize))
-		i--
 		dAtA[i] = 0x18
 	}
-	if m.BlocksCount != 0 {
-		i = encodeVarintTelemetry(dAtA, i, uint64(m.BlocksCount))
-		i--
-		dAtA[i] = 0x10
-	}
-	n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Date):])
+	n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Time, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Time):])
 	if err5 != nil {
 		return 0, err5
 	}
 	i -= n5
 	i = encodeVarintTelemetry(dAtA, i, uint64(n5))
 	i--
-	dAtA[i] = 0xa
+	dAtA[i] = 0x12
+	if m.Height != 0 {
+		i = encodeVarintTelemetry(dAtA, i, uint64(m.Height))
+		i--
+		dAtA[i] = 0x8
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -954,7 +919,7 @@ func (m *TxVolumePerDay) Size() (n int) {
 	return n
 }
 
-func (m *ValidatorsBlocks) Size() (n int) {
+func (m *ValidatorBlockStats) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -972,34 +937,22 @@ func (m *ValidatorsBlocks) Size() (n int) {
 	return n
 }
 
-func (m *Statistic) Size() (n int) {
+func (m *ValidatorBlock) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	return n
-}
-
-func (m *DailyStatistic) Size() (n int) {
-	if m == nil {
-		return 0
+	if m.Height != 0 {
+		n += 1 + sovTelemetry(uint64(m.Height))
 	}
-	var l int
-	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Date)
+	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Time)
 	n += 1 + l + sovTelemetry(uint64(l))
-	if m.BlocksCount != 0 {
-		n += 1 + sovTelemetry(uint64(m.BlocksCount))
-	}
-	if m.BlocksSize != 0 {
-		n += 1 + sovTelemetry(uint64(m.BlocksSize))
-	}
 	if m.TxsCount != 0 {
 		n += 1 + sovTelemetry(uint64(m.TxsCount))
 	}
-	if len(m.TotalTxFee) > 0 {
-		for _, e := range m.TotalTxFee {
+	if len(m.Reward) > 0 {
+		for _, e := range m.Reward {
 			l = e.Size()
 			n += 1 + l + sovTelemetry(uint64(l))
 		}
@@ -1436,7 +1389,7 @@ func (m *TxVolumePerDay) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ValidatorsBlocks) Unmarshal(dAtA []byte) error {
+func (m *ValidatorBlockStats) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1459,10 +1412,10 @@ func (m *ValidatorsBlocks) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ValidatorsBlocks: wiretype end group for non-group")
+			return fmt.Errorf("proto: ValidatorBlockStats: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ValidatorsBlocks: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ValidatorBlockStats: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1571,7 +1524,7 @@ func (m *ValidatorsBlocks) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Statistic) Unmarshal(dAtA []byte) error {
+func (m *ValidatorBlock) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1594,65 +1547,34 @@ func (m *Statistic) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Statistic: wiretype end group for non-group")
+			return fmt.Errorf("proto: ValidatorBlock: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Statistic: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTelemetry(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTelemetry
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *DailyStatistic) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTelemetry
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: DailyStatistic: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: DailyStatistic: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ValidatorBlock: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Height", wireType)
+			}
+			m.Height = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTelemetry
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Height |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Date", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Time", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1679,49 +1601,11 @@ func (m *DailyStatistic) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Time, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BlocksCount", wireType)
-			}
-			m.BlocksCount = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTelemetry
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.BlocksCount |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		case 3:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field BlocksSize", wireType)
-			}
-			m.BlocksSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTelemetry
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.BlocksSize |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field TxsCount", wireType)
 			}
@@ -1740,9 +1624,9 @@ func (m *DailyStatistic) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 5:
+		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TotalTxFee", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Reward", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1769,8 +1653,8 @@ func (m *DailyStatistic) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TotalTxFee = append(m.TotalTxFee, types.Coin{})
-			if err := m.TotalTxFee[len(m.TotalTxFee)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Reward = append(m.Reward, types.Coin{})
+			if err := m.Reward[len(m.Reward)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

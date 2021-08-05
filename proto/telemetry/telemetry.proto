@@ -19,7 +19,7 @@ message AverageBlockSizePerDay {
   uint64 bytes = 2;
 }
 
-// AverageBlockSizePerDay represents average block time per day.
+// AverageBlockTimePerDay represents average block time per day.
 message AverageBlockTimePerDay {
   option (gogoproto.equal) = true;
 
@@ -30,7 +30,7 @@ message AverageBlockTimePerDay {
   uint64 seconds = 2;
 }
 
-// AverageBlockSizePerDay represents average transaction fee per day.
+// AverageTxFeePerDay represents average transaction fee per day.
 message AverageTxFeePerDay {
   option (gogoproto.equal) = true;
 
@@ -44,7 +44,7 @@ message AverageTxFeePerDay {
   ];
 }
 
-// AverageBlockSizePerDay represents count of transactions per day.
+// TxVolumePerDay represents count of transactions per day.
 message TxVolumePerDay {
   option (gogoproto.equal) = true;
 
@@ -55,8 +55,8 @@ message TxVolumePerDay {
   uint64 volume = 2;
 }
 
-// AverageBlockSizePerDay represents validators blocks and stake percentage.
-message ValidatorsBlocks {
+// ValidatorBlockStats represents validators blocks and stake percentage.
+message ValidatorBlockStats {
   option (gogoproto.equal) = true;
 
   string validator_address = 1;
@@ -67,21 +67,16 @@ message ValidatorsBlocks {
   ];
 }
 
-
-
-message Statistic {
-
-}
-
-message DailyStatistic {
-  google.protobuf.Timestamp date = 1 [
+// ValidatorBlock represents block approved by validator.
+message ValidatorBlock {
+  option (gogoproto.equal) = true;
+  uint64 height = 1;
+  google.protobuf.Timestamp time = 2 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime) = true
   ];
-  uint64 blocks_count = 2;
-  uint64 blocks_size = 3;
-  uint64 txs_count = 4;
-  repeated cosmos.base.v1beta1.Coin total_tx_fee = 5 [
+  uint64 txs_count = 3;
+  repeated cosmos.base.v1beta1.Coin reward = 4 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];

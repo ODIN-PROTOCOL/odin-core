@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/query"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"sort"
@@ -19,25 +20,25 @@ type Keeper struct {
 	cdc            codec.BinaryMarshaler
 	txCfg          client.TxConfig
 	bankKeeper     bankkeeper.ViewKeeper
+	distrKeeper    telemetrytypes.DistrKeeper
 	stakingQuerier stakingkeeper.Querier
-	txDecoder      sdk.TxDecoder
 }
 
 func NewKeeper(
 	cdc codec.BinaryMarshaler,
 	txCfg client.TxConfig,
-	txDecoder sdk.TxDecoder,
 	bk bankkeeper.ViewKeeper,
 	sk stakingkeeper.Keeper,
+	dk distrkeeper.Keeper,
 ) Keeper {
 	return Keeper{
-		cdc:        cdc,
-		bankKeeper: bk,
+		cdc:         cdc,
+		bankKeeper:  bk,
+		distrKeeper: dk,
 		stakingQuerier: stakingkeeper.Querier{
 			Keeper: sk,
 		},
-		txCfg:     txCfg,
-		txDecoder: txDecoder,
+		txCfg: txCfg,
 	}
 }
 
@@ -80,7 +81,7 @@ func (k Keeper) GetBalances(ctx sdk.Context, addrs ...sdk.AccAddress) []banktype
 	return balances
 }
 
-func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageBlockSizePerDay, error) {
+func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageBlockSizePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -103,7 +104,7 @@ func (k Keeper) GetAvgBlockSizePerDay(startDate, endDate time.Time) ([]telemetry
 	return avgBlockSizePerDay, nil
 }
 
-func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageBlockTimePerDay, error) {
+func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageBlockTimePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -125,7 +126,7 @@ func (k Keeper) GetAvgBlockTimePerDay(startDate, endDate time.Time) ([]telemetry
 	return avgBlockTimePerDay, nil
 }
 
-func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytypes.AverageTxFeePerDay, error) {
+func (k Keeper) GetAvgTxFeePerDay(startDate, endDate *time.Time) ([]telemetrytypes.AverageTxFeePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -138,7 +139,7 @@ func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytype
 		totalTxCount := 0
 		for _, block := range value {
 			for _, tx := range block.Data.Txs {
-				decodedTx, err := k.txDecoder(tx)
+				decodedTx, err := k.txCfg.TxDecoder()(tx)
 				if err != nil {
 					return nil, sdkerrors.Wrap(err, "failed to decode block transaction")
 				}
@@ -167,7 +168,7 @@ func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytype
 	return avgTxFeePerDay, nil
 }
 
-func (k Keeper) GetTxVolumePerDay(startDate, endDate time.Time) ([]telemetrytypes.TxVolumePerDay, error) {
+func (k Keeper) GetTxVolumePerDay(startDate, endDate *time.Time) ([]telemetrytypes.TxVolumePerDay, error) {
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -189,12 +190,12 @@ func (k Keeper) GetTxVolumePerDay(startDate, endDate time.Time) ([]telemetrytype
 	return dailyTxsVolumes, nil
 }
 
-func (k Keeper) GetValidatorsBlocks(
+func (k Keeper) GetTopValidatorsByBlocks(
 	ctx sdk.Context,
-	startDate, endDate time.Time,
+	startDate, endDate *time.Time,
 	desc bool,
 	pagination *query.PageRequest,
-) ([]telemetrytypes.ValidatorsBlocks, uint64, error) {
+) ([]telemetrytypes.ValidatorBlockStats, uint64, error) {
 
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
@@ -215,7 +216,7 @@ func (k Keeper) GetValidatorsBlocks(
 		}
 	}
 
-	validatorsBlocks := make([]telemetrytypes.ValidatorsBlocks, 0, len(blocksCount))
+	validatorsBlocks := make([]telemetrytypes.ValidatorBlockStats, 0, len(blocksCount))
 	totalBondedTokens := k.stakingQuerier.TotalBondedTokens(ctx)
 
 	for addr, blocks := range blocksCount {
@@ -249,8 +250,8 @@ func (k Keeper) GetValidatorsBlocks(
 
 		validatorsBlocks = append(
 			validatorsBlocks,
-			telemetrytypes.ValidatorsBlocks{
-				ValidatorAddress: addr,
+			telemetrytypes.ValidatorBlockStats{
+				ValidatorAddress: valAddr.String(),
 				BlocksCount:      blocks,
 				StakePercentage:  stakePercentage,
 			},
@@ -267,7 +268,7 @@ func (k Keeper) GetValidatorsBlocks(
 	validatorsBlocksLength := uint64(len(validatorsBlocks))
 
 	if pagination.GetOffset() >= validatorsBlocksLength {
-		return []telemetrytypes.ValidatorsBlocks{}, 0, nil
+		return []telemetrytypes.ValidatorBlockStats{}, 0, nil
 	}
 
 	maxLimit := pagination.GetLimit()
@@ -276,4 +277,37 @@ func (k Keeper) GetValidatorsBlocks(
 	}
 
 	return validatorsBlocks[pagination.GetOffset() : pagination.GetOffset()+maxLimit], validatorsBlocksLength, nil
+}
+
+func (k Keeper) GetValidatorBlocks(
+	ctx sdk.Context,
+	valAddr sdk.ValAddress,
+	desc bool,
+	pagination *query.PageRequest,
+) ([]telemetrytypes.ValidatorBlock, uint64, error) {
+
+	validatorBlocks, err := k.GetBlocksByValidator(ctx, valAddr)
+	if err != nil {
+		return nil, 0, sdkerrors.Wrap(err, "failed to get the blocks by validator")
+	}
+
+	sort.Slice(validatorBlocks, func(i, j int) bool {
+		if desc {
+			return validatorBlocks[j].Height < validatorBlocks[j].Height
+		}
+		return validatorBlocks[i].Height < validatorBlocks[j].Height
+	})
+
+	blocksCount := uint64(len(validatorBlocks))
+
+	if pagination.GetOffset() >= blocksCount {
+		return []telemetrytypes.ValidatorBlock{}, 0, nil
+	}
+
+	maxLimit := pagination.GetLimit()
+	if pagination.GetOffset()+pagination.GetLimit() >= blocksCount {
+		maxLimit = blocksCount - pagination.GetOffset()
+	}
+
+	return validatorBlocks[pagination.GetOffset() : pagination.GetOffset()+maxLimit], blocksCount, nil
 }

@@ -14,7 +14,8 @@ const (
 	QueryAvgBlockTime       = "avg_block_time"
 	QueryAvgTxFee           = "avg_tx_fee"
 	QueryTxVolume           = "tx_volume"
-	QueryValidatorsBlocks   = "validators_blocks"
+	QueryValidatorBlocks    = "validator_blocks"
+	QueryTopValidators      = "top_validators"
 
 	DenomTag  = "denom"
 	StatusTag = "status"

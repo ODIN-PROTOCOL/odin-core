@@ -20,6 +20,11 @@ service Query {
     option (google.api.http).get = "/telemetry/top_balances";
   }
 
+  // ExtendedValidators returns validators balances.
+  rpc ExtendedValidators(QueryExtendedValidatorsRequest) returns (QueryExtendedValidatorsResponse) {
+    option (google.api.http).get = "/telemetry/validators_balances";
+  }
+
   // AvgBlockSize returns average block size per day.
   rpc AvgBlockSize(QueryAvgBlockSizeRequest) returns (QueryAvgBlockSizeResponse) {
     option (google.api.http).get = "/telemetry/avg_block_size";
@@ -40,13 +45,14 @@ service Query {
     option (google.api.http).get = "/telemetry/tx_volume";
   }
 
-  // ValidatorsBlocks returns validators blocks and stake percentage.
-  rpc ValidatorsBlocks(QueryValidatorsBlocksRequest) returns (QueryValidatorsBlocksResponse) {
-    option (google.api.http).get = "/telemetry/validators_blocks";
+  // TopValidators returns validators blocks and stake percentage.
+  rpc TopValidators(QueryTopValidatorsRequest) returns (QueryTopValidatorsResponse) {
+    option (google.api.http).get = "/telemetry/top_validators";
   }
 
-  rpc ExtendedValidators(QueryExtendedValidatorsRequest) returns (QueryExtendedValidatorsResponse) {
-    option (google.api.http).get = "/telemetry/validators_balances";
+  // ValidatorBlocks returns validator approved blocks.
+  rpc ValidatorBlocks(QueryValidatorBlocksRequest) returns (QueryValidatorBlocksResponse) {
+    option (google.api.http).get = "/telemetry/validator_blocks";
   }
 }
 
@@ -58,7 +64,7 @@ message QueryTopBalancesRequest {
 }
 // QueryTopBalancesResponse is response type for the Query/TopBalances RPC method.
 message QueryTopBalancesResponse {
-//  map<string, int64> transactionsCount = 1;
+  //  map<string, int64> transactionsCount = 1;
   repeated cosmos.base.v1beta1.Balance balances = 1 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false
@@ -88,8 +94,8 @@ message QueryExtendedValidatorsResponse {
 
 // QueryAvgBlockSizeRequest is request type for the Query/AvgBlockSize RPC method.
 message QueryAvgBlockSizeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 // QueryAvgBlockSizeResponse is response type for the Query/AvgBlockSize RPC method.
 message QueryAvgBlockSizeResponse {
@@ -98,8 +104,8 @@ message QueryAvgBlockSizeResponse {
 
 // QueryAvgBlockTimeRequest is request type for the Query/AvgBlockTime RPC method.
 message QueryAvgBlockTimeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgBlockTimeResponse is response type for the Query/AvgBlockTime RPC method.
@@ -109,8 +115,8 @@ message QueryAvgBlockTimeResponse {
 
 // QueryAvgTxFeeRequest is request type for the Query/AvgTxFee RPC method.
 message QueryAvgTxFeeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgTxFeeResponse is response type for the Query/AvgTxFee RPC method.
@@ -120,8 +126,8 @@ message QueryAvgTxFeeResponse {
 
 // QueryTxVolumeRequest is request type for the Query/TxVolume RPC method.
 message QueryTxVolumeRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }
 
 // QueryAvgTxFeeResponse is response type for the Query/TxVolume RPC method.
@@ -129,16 +135,29 @@ message QueryTxVolumeResponse {
   repeated TxVolumePerDay tx_volume_per_day = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryValidatorsBlocksRequest is request type for the Query/ValidatorsBlocks RPC method.
-message QueryValidatorsBlocksRequest {
-  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
-  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+// QueryTopValidatorsRequest is request type for the Query/TopValidators RPC method.
+message QueryTopValidatorsRequest {
+  google.protobuf.Timestamp start_date = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+  google.protobuf.Timestamp end_date = 2 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
   cosmos.base.query.v1beta1.PageRequest pagination = 3;
   bool desc = 4;
 }
 
-// QueryValidatorsBlocksResponse is response type for the Query/ValidatorsBlocks RPC method.
-message QueryValidatorsBlocksResponse {
-  repeated ValidatorsBlocks validators_blocks = 1 [(gogoproto.nullable) = false];
+// QueryTopValidatorsResponse is response type for the Query/TopValidators RPC method.
+message QueryTopValidatorsResponse {
+  repeated ValidatorBlockStats top_validators = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryValidatorBlocksRequest is request type for the Query/ValidatorBlocks RPC method.
+message QueryValidatorBlocksRequest {
+  string validator_address = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+  bool desc = 3;
+}
+
+// QueryValidatorBlocksResponse is response type for the Query/ValidatorBlocks RPC method.
+message QueryValidatorBlocksResponse {
+  repeated ValidatorBlock blocks = 1 [(gogoproto.nullable) = false];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

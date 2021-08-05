@@ -5,6 +5,7 @@ import (
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
@@ -32,7 +33,8 @@ func GetQueryCmd() *cobra.Command {
 		GetQueryCmdAvgBlockTime(),
 		GetQueryCmdAvgTxFee(),
 		GetQueryCmdTxVolume(),
-		GetQueryCmdValidatorsBlocks(),
+		GetQueryCmdValidatorBlocks(),
+		GetQueryCmdTopValidators(),
 	)
 	return coinswapCmd
 }
@@ -135,7 +137,7 @@ Example:
 func GetQueryCmdAvgBlockSize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-size [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -168,7 +170,7 @@ func GetQueryCmdAvgBlockSize() *cobra.Command {
 func GetQueryCmdAvgBlockTime() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-time [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -201,7 +203,7 @@ func GetQueryCmdAvgBlockTime() *cobra.Command {
 func GetQueryCmdAvgTxFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-tx-fee [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -234,7 +236,7 @@ func GetQueryCmdAvgTxFee() *cobra.Command {
 func GetQueryCmdTxVolume() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "tx-volume [start-date] [end-date]",
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -263,22 +265,77 @@ func GetQueryCmdTxVolume() *cobra.Command {
 	return cmd
 }
 
-// GetQueryCmdValidatorsBlocks implements the query parameters command.
-func GetQueryCmdValidatorsBlocks() *cobra.Command {
+// GetQueryCmdValidatorBlocks implements the query parameters command.
+func GetQueryCmdValidatorBlocks() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "validators-blocks [start-date] [end-date]",
-		Short: "Query for validators blocks",
+		Use:   "validator-blocks [address]",
+		Short: "Query for validator blocks",
 		Long: strings.TrimSpace(
-			fmt.Sprintf(`Query for validators blocks.
+			fmt.Sprintf(`Query for validator blocks.
 
 Example:
-  $ %[1]s query %[2]s validators-blocks [start-date] [end-date]
-  $ %[1]s query %[2]s validators-blocks [start-date] [end-date] --limit=100 --offset=2 --desc=true
+  $ %[1]s query %[2]s validator-blocks [address]
+  $ %[1]s query %[2]s validator-blocks [address] --limit=100 --offset=2 --desc=true
 `,
 				version.AppName, telemetrytypes.ModuleName,
 			),
 		),
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return sdkerrors.Wrap(err, "failed to get client context")
+			}
+
+			valAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			flagSet := cmd.Flags()
+			pageReq, err := client.ReadPageRequest(flagSet)
+			if err != nil {
+				return err
+			}
+			desc, _ := flagSet.GetBool(flagDesc)
+
+			queryClient := telemetrytypes.NewQueryClient(clientCtx)
+			res, err := queryClient.ValidatorBlocks(cmd.Context(), &telemetrytypes.QueryValidatorBlocksRequest{
+				ValidatorAddress: valAddr.String(),
+				Pagination:       pageReq,
+				Desc:             desc,
+			})
+			if err != nil {
+				return sdkerrors.Wrap(err, "failed to query validator blocks")
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, "validator blocks")
+	cmd.Flags().Bool(flagDesc, false, "desc is used in calling the data with sort by desc")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetQueryCmdTopValidators implements the query parameters command.
+func GetQueryCmdTopValidators() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "top-validators [start-date] [end-date]",
+		Short: "Query for top validators by blocks",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Query for top validators by blocks.
+
+Example:
+  $ %[1]s query %[2]s top-validators [start-date] [end-date]
+  $ %[1]s query %[2]s top-validators [start-date] [end-date] --limit=100 --offset=2 --desc=true
+`,
+				version.AppName, telemetrytypes.ModuleName,
+			),
+		),
+		Args: cobra.MaximumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -298,14 +355,14 @@ Example:
 			desc, _ := flagSet.GetBool(flagDesc)
 
 			queryClient := telemetrytypes.NewQueryClient(clientCtx)
-			res, err := queryClient.ValidatorsBlocks(cmd.Context(), &telemetrytypes.QueryValidatorsBlocksRequest{
+			res, err := queryClient.TopValidators(cmd.Context(), &telemetrytypes.QueryTopValidatorsRequest{
 				StartDate:  startDate,
 				EndDate:    endDate,
 				Pagination: pageReq,
 				Desc:       desc,
 			})
 			if err != nil {
-				return sdkerrors.Wrap(err, "failed to query validators blocks")
+				return sdkerrors.Wrap(err, "failed to query top validators by blocks")
 			}
 
 			return clientCtx.PrintProto(res)
@@ -319,14 +376,23 @@ Example:
 	return cmd
 }
 
-func ParseDateInterval(startDateArg, endDateArg string) (time.Time, time.Time, error) {
-	startDate, err := time.Parse(DateFormat, startDateArg)
-	if err != nil {
-		return time.Time{}, time.Time{}, sdkerrors.Wrap(err, "failed to parse start date")
+func ParseDateInterval(startDateArg, endDateArg string) (*time.Time, *time.Time, error) {
+	var startDate, endDate *time.Time
+
+	if startDateArg != "" {
+		sd, err := time.Parse(DateFormat, startDateArg)
+		if err != nil {
+			return nil, nil, sdkerrors.Wrap(err, "failed to parse start date")
+		}
+		startDate = &sd
 	}
-	endDate, err := time.Parse(DateFormat, endDateArg)
-	if err != nil {
-		return time.Time{}, time.Time{}, sdkerrors.Wrap(err, "failed to parse end date")
+	if endDateArg != "" {
+		ed, err := time.Parse(DateFormat, endDateArg)
+		if err != nil {
+			return nil, nil, sdkerrors.Wrap(err, "failed to parse end date")
+		}
+		endDate = &ed
 	}
-	return startDate, endDate, err
+
+	return startDate, endDate, nil
 }
