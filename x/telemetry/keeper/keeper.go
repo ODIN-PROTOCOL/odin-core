@@ -2,6 +2,7 @@ package keeper
 
 import (
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -17,15 +18,15 @@ import (
 
 type Keeper struct {
 	cdc            codec.BinaryMarshaler
+	txCfg          client.TxConfig
 	bankKeeper     bankkeeper.ViewKeeper
 	distrKeeper    telemetrytypes.DistrKeeper
 	stakingQuerier stakingkeeper.Querier
-	txDecoder      sdk.TxDecoder
 }
 
 func NewKeeper(
 	cdc codec.BinaryMarshaler,
-	txDecoder sdk.TxDecoder,
+	txCfg client.TxConfig,
 	bk bankkeeper.ViewKeeper,
 	sk stakingkeeper.Keeper,
 	dk distrkeeper.Keeper,
@@ -37,7 +38,7 @@ func NewKeeper(
 		stakingQuerier: stakingkeeper.Querier{
 			Keeper: sk,
 		},
-		txDecoder: txDecoder,
+		txCfg: txCfg,
 	}
 }
 
@@ -138,7 +139,7 @@ func (k Keeper) GetAvgTxFeePerDay(startDate, endDate time.Time) ([]telemetrytype
 		totalTxCount := 0
 		for _, block := range value {
 			for _, tx := range block.Data.Txs {
-				decodedTx, err := k.txDecoder(tx)
+				decodedTx, err := k.txCfg.TxDecoder()(tx)
 				if err != nil {
 					return nil, sdkerrors.Wrap(err, "failed to decode block transaction")
 				}

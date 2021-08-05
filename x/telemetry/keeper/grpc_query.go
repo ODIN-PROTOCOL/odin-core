@@ -19,7 +19,13 @@ func (k Keeper) TopBalances(
 
 	ctx := sdk.UnwrapSDKContext(c)
 	balances, total := k.GetPaginatedBalances(ctx, request.GetDenom(), request.GetDesc(), request.Pagination)
+	// TODO: optimize or remove
+	//txsCount, err := k.GetAccountTxsCount(BalancesToAccounts(balances)...)
+	//if err != nil {
+	//	return nil, sdkerrors.Wrap(err, "failed to get accounts txs")
+	//}
 	return &telemetrytypes.QueryTopBalancesResponse{
+		//TransactionsCount: txsCount,
 		Balances: balances,
 		Pagination: &query.PageResponse{
 			Total: total,
