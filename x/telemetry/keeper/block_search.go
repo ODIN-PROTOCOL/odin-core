@@ -50,12 +50,11 @@ func (k Keeper) GetBlocksByDates(startDate, endDate time.Time) (map[time.Time][]
 		}
 
 		blocksParsed += blocksCount
+		page++
 
 		if blocks.TotalCount == blocksCount {
 			break
 		}
-
-		page++
 	}
 
 	return blocksPerDay, nil
@@ -76,11 +75,11 @@ func (k Keeper) GetBlockValidators(blockHeight int64) ([]tendermint.Validator, e
 			validators = append(validators, *val)
 		}
 
+		page++
+
 		if resultValidators.Total == len(validators) {
 			break
 		}
-
-		page++
 	}
 
 	return validators, nil
