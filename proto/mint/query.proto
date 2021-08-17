@@ -19,17 +19,17 @@ service Query {
   rpc Inflation(QueryInflationRequest) returns (QueryInflationResponse) {
     option (google.api.http).get = "/mint/parameters";
   }
-  // Inflation returns current annual provisions.
+  // AnnualProvisions returns current annual provisions.
   rpc AnnualProvisions(QueryAnnualProvisionsRequest)
       returns (QueryAnnualProvisionsResponse) {
     option (google.api.http).get = "/mint/annual_provisions";
   }
-  // Inflation returns ethereum integration address.
-  rpc EthIntegrationAddress(QueryEthIntegrationAddressRequest)
-      returns (QueryEthIntegrationAddressResponse) {
-    option (google.api.http).get = "/mint/eth_integration_address";
+  // IntegrationAddress returns ethereum integration address.
+  rpc IntegrationAddress(QueryIntegrationAddressRequest)
+      returns (QueryIntegrationAddressResponse) {
+    option (google.api.http).get = "/mint/integration_address";
   }
-  // Inflation returns current treasury pool.
+  // TreasuryPool returns current treasury pool.
   rpc TreasuryPool(QueryTreasuryPoolRequest)
       returns (QueryTreasuryPoolResponse) {
     option (google.api.http).get = "/mint/treasury_pool";
@@ -42,7 +42,7 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/QueryParams RPC
 // method.
 message QueryParamsResponse {
-  Params params = 1 [ (gogoproto.nullable) = false ];
+  Params params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryInflationRequest is request type for the Query/QueryInflation RPC
@@ -69,13 +69,13 @@ message QueryAnnualProvisionsResponse {
   ];
 }
 
-// QueryEthIntegrationAddressRequest is request type for the
-// Query/QueryEthIntegrationAddress RPC method.
-message QueryEthIntegrationAddressRequest {}
-// QueryEthIntegrationAddressResponse is response type for the
-// Query/QueryEthIntegrationAddress RPC method.
-message QueryEthIntegrationAddressResponse {
-  string eth_integration_address = 1;
+// QueryIntegrationAddressRequest is request type for the Query/QueryIntegrationAddress RPC method.
+message QueryIntegrationAddressRequest {
+  string integration_name = 1;
+}
+// QueryIntegrationAddressResponse is response type for the Query/QueryIntegrationAddress RPC method.
+message QueryIntegrationAddressResponse {
+  string integration_address = 1;
 }
 
 // QueryTreasuryPoolRequest is request type for the Query/QueryTreasuryPool RPC

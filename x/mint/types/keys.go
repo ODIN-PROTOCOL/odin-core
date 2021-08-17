@@ -18,11 +18,11 @@ const (
 	LegacyRoute = "minting"
 
 	// Query endpoints supported by the minting querier
-	QueryParams                = "parameters"
-	QueryInflation             = "inflation"
-	QueryAnnualProvisions      = "annual_provisions"
-	QueryEthIntegrationAddress = "eth_integration_address"
-	QueryTreasuryPool          = "treasury_pool"
+	QueryParams             = "parameters"
+	QueryInflation          = "inflation"
+	QueryAnnualProvisions   = "annual_provisions"
+	QueryIntegrationAddress = "integration_address"
+	QueryTreasuryPool       = "treasury_pool"
 )
 
 var (

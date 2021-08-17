@@ -22,8 +22,8 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 		case minttypes.QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k, legacyQuerierCdc)
 
-		case minttypes.QueryEthIntegrationAddress:
-			return queryEthIntegrationAddress(ctx, k, legacyQuerierCdc)
+		case minttypes.QueryIntegrationAddress:
+			return queryIntegrationAddress(ctx, path, k, legacyQuerierCdc)
 
 		case minttypes.QueryTreasuryPool:
 			return queryTreasuryPool(ctx, k, legacyQuerierCdc)
@@ -67,10 +67,21 @@ func queryAnnualProvisions(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.Le
 	return res, nil
 }
 
-func queryEthIntegrationAddress(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
-	params := k.GetParams(ctx)
+func queryIntegrationAddress(
+	ctx sdk.Context, path []string, k Keeper, legacyQuerierCdc *codec.LegacyAmino,
+) ([]byte, error) {
 
-	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, params.EthIntegrationAddress)
+	if len(path) != 1 {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "integration name is not specified")
+	}
+
+	params := k.GetParams(ctx)
+	integrationName, ok := params.IntegrationAddresses[path[0]]
+	if !ok {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown integration")
+	}
+
+	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, integrationName)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}

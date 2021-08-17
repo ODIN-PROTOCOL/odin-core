@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+const (
+	integrationNameTag = "integrationNameTag"
+)
+
 func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
 	r.HandleFunc(
 		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryParams),
@@ -26,8 +30,13 @@ func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
 	).Methods("GET")
 
 	r.HandleFunc(
-		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryEthIntegrationAddress),
-		queryEthIntegrationAddressHandlerFn(clientCtx),
+		fmt.Sprintf(
+			"%s/%s/{%s}",
+			minttypes.LegacyRoute,
+			minttypes.QueryIntegrationAddress,
+			integrationNameTag,
+		),
+		queryIntegrationAddressHandlerFn(clientCtx),
 	).Methods("GET")
 
 	r.HandleFunc(
@@ -93,16 +102,21 @@ func queryAnnualProvisionsHandlerFn(clientCtx client.Context) http.HandlerFunc {
 	}
 }
 
-func queryEthIntegrationAddressHandlerFn(clientCtx client.Context) http.HandlerFunc {
+func queryIntegrationAddressHandlerFn(clientCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		route := fmt.Sprintf("custom/%s/%s", minttypes.QuerierRoute, minttypes.QueryEthIntegrationAddress)
-
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
 		if !ok {
 			return
 		}
 
-		res, height, err := cliCtx.QueryWithData(route, nil)
+		vars := mux.Vars(r)
+
+		res, height, err := cliCtx.Query(fmt.Sprintf(
+			"custom/%s/%s/%s",
+			minttypes.QuerierRoute,
+			minttypes.QueryIntegrationAddress,
+			vars[integrationNameTag],
+		))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

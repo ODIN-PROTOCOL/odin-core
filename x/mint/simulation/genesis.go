@@ -91,6 +91,9 @@ func RandomizedGenState(simState *module.SimulationState) {
 	}
 	privateKeyBytes := crypto.FromECDSA(privateKey)
 	ethIntegrationAddress := hexutil.Encode(privateKeyBytes)
+	integrationAddresses := map[string]string{
+		"eth": ethIntegrationAddress,
+	}
 	eligibleAccountsPool := []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"}
 
 	params := minttypes.NewParams(
@@ -102,7 +105,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 		MaxWithdrawalPerTime,
 		blocksPerYear,
 		mintAir,
-		ethIntegrationAddress,
+		integrationAddresses,
 		eligibleAccountsPool,
 	)
 	mintGenesis := minttypes.NewGenesisState(minttypes.InitialMinter(inflation), params, minttypes.InitialMintPool())

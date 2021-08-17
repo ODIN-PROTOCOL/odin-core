@@ -23,7 +23,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryInflation(),
 		GetCmdQueryAnnualProvisions(),
-		GetCmdQueryEthIntegrationAddress(),
+		GetCmdQueryIntegrationAddress(),
 		GetCmdQueryTreasuryPool(),
 	)
 
@@ -120,12 +120,12 @@ func GetCmdQueryAnnualProvisions() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryEthIntegrationAddress returns the command for fetching ethereum integration address
-func GetCmdQueryEthIntegrationAddress() *cobra.Command {
+// GetCmdQueryIntegrationAddress returns the command for fetching ethereum integration address
+func GetCmdQueryIntegrationAddress() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "eth-integration-address",
-		Short: "Query current ETH integration address",
-		Args:  cobra.NoArgs,
+		Use:   "integration-address",
+		Short: "Query integration address",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -134,13 +134,15 @@ func GetCmdQueryEthIntegrationAddress() *cobra.Command {
 
 			queryClient := minttypes.NewQueryClient(clientCtx)
 
-			params := &minttypes.QueryEthIntegrationAddressRequest{}
-			res, err := queryClient.EthIntegrationAddress(context.Background(), params)
+			params := &minttypes.QueryIntegrationAddressRequest{
+				IntegrationName: args[0],
+			}
+			res, err := queryClient.IntegrationAddress(context.Background(), params)
 			if err != nil {
 				return err
 			}
 
-			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.EthIntegrationAddress))
+			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.IntegrationAddress))
 		},
 	}
 

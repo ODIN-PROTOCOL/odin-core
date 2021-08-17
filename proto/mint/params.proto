@@ -47,9 +47,9 @@ message Params {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];
-  // the address of the smart contract
-  string eth_integration_address = 8
-      [ (gogoproto.moretags) = "yaml:\"eth_integration_address\"" ];
+  // the addresses of the smart contracts
+  map<string, string> integration_addresses = 8
+      [ (gogoproto.moretags) = "yaml:\"integration_addresses\"" ];
   // flag if minting from air
   bool mint_air = 9 [ (gogoproto.moretags) = "yaml:\"mint_air\"" ];
   // eligible to withdraw accounts
