@@ -1,63 +1,54 @@
 package yoda
 
 import (
-	"github.com/GeoDB-Limited/odin-core/yoda/errors"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 type rawRequest struct {
-	dataSource     types.DataSource
-	dataSourceID   types.DataSourceID
-	externalID     types.ExternalID
+	dataSourceID   oracletypes.DataSourceID
 	dataSourceHash string
+	externalID     oracletypes.ExternalID
 	calldata       string
 }
 
 // GetRawRequests returns the list of all raw data requests in the given log.
-func GetRawRequests(c *Context, l *Logger, log sdk.ABCIMessageLog) ([]rawRequest, error) {
-	dataSourceIDs := GetEventValues(log, types.EventTypeRawRequest, types.AttributeKeyDataSourceID)
-	dataSourceHashList := GetEventValues(log, types.EventTypeRawRequest, types.AttributeKeyDataSourceHash)
-	externalIDs := GetEventValues(log, types.EventTypeRawRequest, types.AttributeKeyExternalID)
-	calldataList := GetEventValues(log, types.EventTypeRawRequest, types.AttributeKeyCalldata)
+func GetRawRequests(log sdk.ABCIMessageLog) ([]rawRequest, error) {
+	dataSourceIDs := GetEventValues(log, oracletypes.EventTypeRawRequest, oracletypes.AttributeKeyDataSourceID)
+	dataSourceHashList := GetEventValues(log, oracletypes.EventTypeRawRequest, oracletypes.AttributeKeyDataSourceHash)
+	externalIDs := GetEventValues(log, oracletypes.EventTypeRawRequest, oracletypes.AttributeKeyExternalID)
+	calldataList := GetEventValues(log, oracletypes.EventTypeRawRequest, oracletypes.AttributeKeyCalldata)
 
 	if len(dataSourceIDs) != len(externalIDs) {
-		return nil, sdkerrors.Wrap(errors.ErrInconsistentCount, "inconsistent data source count and external ID count")
+		return nil, fmt.Errorf("Inconsistent data source count and external ID count")
 	}
 	if len(dataSourceIDs) != len(calldataList) {
-		return nil, sdkerrors.Wrap(errors.ErrInconsistentCount, "inconsistent data source count and calldata count")
+		return nil, fmt.Errorf("Inconsistent data source count and calldata count")
 	}
 
 	var reqs []rawRequest
 	for idx := range dataSourceIDs {
 		dataSourceID, err := strconv.Atoi(dataSourceIDs[idx])
 		if err != nil {
-			return nil, sdkerrors.Wrap(err, "failed to parse data source id")
+			return nil, fmt.Errorf("Failed to parse data source id: %s", err.Error())
 		}
 
 		externalID, err := strconv.Atoi(externalIDs[idx])
 		if err != nil {
-			return nil, sdkerrors.Wrap(err, "failed to parse external id")
-		}
-
-		ds, err := GetDataSource(c, l, types.DataSourceID(dataSourceID))
-		if err != nil {
-			return nil, sdkerrors.Wrap(err, "failed to get data source by id")
+			return nil, fmt.Errorf("Failed to parse external id: %s", err.Error())
 		}
 
 		reqs = append(reqs, rawRequest{
-			dataSourceID:   types.DataSourceID(dataSourceID),
+			dataSourceID:   oracletypes.DataSourceID(dataSourceID),
 			dataSourceHash: dataSourceHashList[idx],
-			externalID:     types.ExternalID(externalID),
+			externalID:     oracletypes.ExternalID(externalID),
 			calldata:       calldataList[idx],
-			dataSource:     ds,
 		})
 	}
-
 	return reqs, nil
 }
 
@@ -81,10 +72,10 @@ func GetEventValues(log sdk.ABCIMessageLog, evType string, evKey string) (res []
 func GetEventValue(log sdk.ABCIMessageLog, evType string, evKey string) (string, error) {
 	values := GetEventValues(log, evType, evKey)
 	if len(values) == 0 {
-		return "", sdkerrors.Wrapf(errors.ErrUnknownEventType, "cannot find event with type: %s, key: %s", evType, evKey)
+		return "", fmt.Errorf("Cannot find event with type: %s, key: %s", evType, evKey)
 	}
 	if len(values) > 1 {
-		return "", sdkerrors.Wrapf(errors.ErrInvalidEventsCount, "found more than one event with type: %s, key: %s", evType, evKey)
+		return "", fmt.Errorf("Found more than one event with type: %s, key: %s", evType, evKey)
 	}
 	return values[0], nil
 }

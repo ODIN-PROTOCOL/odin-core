@@ -12,9 +12,9 @@ import (
 
 func creatDefaultServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		res.WriteHeader(http.StatusOK)
+		res.WriteHeader(200)
 		ret := externalExecutionResponse{
-			ReturnCode: 0,
+			Returncode: 0,
 			Stdout:     "BEEB",
 			Stderr:     "Stderr",
 		}
@@ -24,22 +24,22 @@ func creatDefaultServer() *httptest.Server {
 
 func createResponseNotOkSenarioServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		res.WriteHeader(http.StatusInternalServerError)
+		res.WriteHeader(500)
 	}))
 }
 
 func createCannotDecodeJsonSenarioServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		res.WriteHeader(http.StatusOK)
+		res.WriteHeader(200)
 		res.Write([]byte("invalid bytes"))
 	}))
 }
 
 func creatExecuteFailSenarioServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		res.WriteHeader(http.StatusOK)
+		res.WriteHeader(200)
 		ret := externalExecutionResponse{
-			ReturnCode: 1,
+			Returncode: 1,
 			Stdout:     "BEEB",
 			Stderr:     "Stderr",
 		}
@@ -82,7 +82,7 @@ func TestExecuteResponseNotOk(t *testing.T) {
 
 	executor := NewRestExec(testServer.URL, 1*time.Second)
 	_, err := executor.Exec([]byte("executable"), "calldata", nil)
-	require.Error(t, err)
+	require.ErrorIs(t, err, ErrRestNotOk)
 }
 
 func TestExecuteFail(t *testing.T) {

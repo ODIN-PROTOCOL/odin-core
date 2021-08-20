@@ -2,10 +2,12 @@ package oraclekeeper
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -265,7 +267,6 @@ func (k Querier) DataProviderReward(
 	return &oracletypes.QueryDataProviderRewardResponse{RewardPerByte: accumulatedRewards.CurrentRewardPerByte}, nil
 }
 
-
 func (k Querier) PendingRequests(c context.Context, req *oracletypes.QueryPendingRequestsRequest) (*oracletypes.QueryPendingRequestsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -326,4 +327,152 @@ func (k Querier) PendingRequests(c context.Context, req *oracletypes.QueryPendin
 	}
 
 	return &oracletypes.QueryPendingRequestsResponse{RequestIDs: pendingIDs}, nil
+}
+
+// RequestVerification verifies oracle request for validation before executing data sources
+func (k Querier) RequestVerification(
+	c context.Context,
+	req *oracletypes.QueryRequestVerificationRequest,
+) (*oracletypes.QueryRequestVerificationResponse, error) {
+	// Request should not be empty
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(c)
+
+	// Provided chain ID should match current chain ID
+	if ctx.ChainID() != req.ChainId {
+		return nil, status.Error(
+			codes.FailedPrecondition,
+			fmt.Sprintf(
+				"provided chain ID does not match the validator's chain ID; expected %s, got %s",
+				ctx.ChainID(),
+				req.ChainId,
+			),
+		)
+	}
+
+	// Provided validator's address should be valid
+	validator, err := sdk.ValAddressFromBech32(req.Validator)
+	if err != nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			fmt.Sprintf("unable to parse validator address: %s", err.Error(),
+			),
+		)
+	}
+
+	// Provided signature should be valid, which means this query request should be signed by the provided reporter
+	pk, err := hex.DecodeString(req.Reporter)
+	if err != nil || len(pk) != secp256k1.PubKeySize {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("unable to get reporter's public key"))
+	}
+	reporterPubKey := secp256k1.PubKey(pk[:])
+
+	requestVerificationContent := oracletypes.NewRequestVerification(
+		req.ChainId, validator,
+		oracletypes.RequestID(req.RequestId),
+		oracletypes.ExternalID(req.ExternalId),
+	)
+	signByte := requestVerificationContent.GetSignBytes()
+	if !reporterPubKey.VerifySignature(signByte, req.Signature) {
+		return nil, status.Error(codes.Unauthenticated, "invalid reporter's signature")
+	}
+
+	// Provided reporter should be authorized by the provided validator
+	reporters := k.GetReporters(ctx, validator)
+	reporter := sdk.AccAddress(reporterPubKey.Address().Bytes())
+	isReporterAuthorizedByValidator := false
+	for _, existingReporter := range reporters {
+		if reporter.Equals(existingReporter) {
+			isReporterAuthorizedByValidator = true
+			break
+		}
+	}
+	if !isReporterAuthorizedByValidator {
+		return nil, status.Error(
+			codes.PermissionDenied,
+			fmt.Sprintf("%s is not an authorized reporter of %s", reporter, req.Validator),
+		)
+	}
+
+	// Provided request should exist on chain
+	request, err := k.GetRequest(ctx, oracletypes.RequestID(req.RequestId))
+	if err != nil {
+		return nil, status.Error(
+			codes.NotFound,
+			fmt.Sprintf("unable to get request from chain: %s", err.Error()),
+		)
+	}
+
+	// Provided validator should be assigned to response to the request
+	isValidatorAssigned := false
+	for _, requestedValidator := range request.RequestedValidators {
+		v, _ := sdk.ValAddressFromBech32(requestedValidator)
+		if validator.Equals(v) {
+			isValidatorAssigned = true
+			break
+		}
+	}
+	if !isValidatorAssigned {
+		return nil, status.Error(
+			codes.PermissionDenied,
+			fmt.Sprintf("%s is not assigned for request ID %d", validator, req.RequestId),
+		)
+	}
+
+	// Provided external ID should be required by the request determined by oracle script
+	var dataSourceID *oracletypes.DataSourceID
+	for _, rawRequest := range request.RawRequests {
+		if rawRequest.ExternalID == oracletypes.ExternalID(req.ExternalId) {
+			dataSourceID = &rawRequest.DataSourceID
+			break
+		}
+	}
+	if dataSourceID == nil {
+		return nil, status.Error(
+			codes.InvalidArgument,
+			fmt.Sprintf(
+				"no data source required by the request %d found which relates to the external data source with ID %d.",
+				req.RequestId,
+				req.ExternalId,
+			),
+		)
+	}
+
+	// Provided validator should not have reported data for the request
+	reports := k.GetRequestReports(ctx, oracletypes.RequestID(req.RequestId))
+	isValidatorReported := false
+	for _, report := range reports {
+		reportVal, _ := sdk.ValAddressFromBech32(report.Validator)
+		if reportVal.Equals(validator) {
+			isValidatorReported = true
+			break
+		}
+	}
+	if isValidatorReported {
+		return nil, status.Error(
+			codes.AlreadyExists,
+			fmt.Sprintf("validator %s already submitted data report for this request", validator),
+		)
+	}
+
+	params := k.GetParams(ctx)
+
+	// The request should not be expired
+	if request.RequestHeight+int64(params.ExpirationBlockCount) < ctx.BlockHeader().Height {
+		return nil, status.Error(
+			codes.DeadlineExceeded,
+			fmt.Sprintf("Request with ID %d is already expired", req.RequestId),
+		)
+	}
+
+	return &oracletypes.QueryRequestVerificationResponse{
+		ChainId:      req.ChainId,
+		Validator:    req.Validator,
+		RequestId:    req.RequestId,
+		ExternalId:   req.ExternalId,
+		DataSourceId: uint64(*dataSourceID),
+	}, nil
 }
