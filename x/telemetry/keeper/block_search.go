@@ -41,8 +41,6 @@ func (k Keeper) GetBlocksByDates(startDate, endDate *time.Time) (map[time.Time][
 			return nil, sdkerrors.Wrap(err, "failed to find the blocks")
 		}
 
-		blocksCount := len(blocks.Blocks)
-
 		for _, r := range blocks.Blocks {
 			blockDate := telemetrytypes.TimeToUTCDate(r.Block.Header.Time)
 
@@ -61,10 +59,10 @@ func (k Keeper) GetBlocksByDates(startDate, endDate *time.Time) (map[time.Time][
 			blocksPerDay[blockDate] = append(blocksPerDay[blockDate], r.Block)
 		}
 
-		blocksParsed += blocksCount
+		blocksParsed += len(blocks.Blocks)
 		page++
 
-		if blocks.TotalCount == blocksCount {
+		if blocks.TotalCount == blocksParsed {
 			break
 		}
 	}
@@ -115,8 +113,6 @@ func (k Keeper) GetBlocksByValidator(ctx sdk.Context, valAddr sdk.ValAddress) ([
 			return nil, sdkerrors.Wrap(err, "failed to find the blocks")
 		}
 
-		blocksCount := len(blocks.Blocks)
-
 		for _, r := range blocks.Blocks {
 			blockHeight := uint64(r.Block.Height)
 			blockValidators, err := k.GetBlockValidators(r.Block.Height)
@@ -149,10 +145,10 @@ func (k Keeper) GetBlocksByValidator(ctx sdk.Context, valAddr sdk.ValAddress) ([
 			}
 		}
 
-		blocksParsed += blocksCount
+		blocksParsed += len(blocks.Blocks)
 		page++
 
-		if blocks.TotalCount == blocksCount {
+		if blocks.TotalCount == blocksParsed {
 			break
 		}
 	}
