@@ -3,7 +3,6 @@ package yoda
 import (
 	"context"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"strings"
 	"time"
 
@@ -13,61 +12,68 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/client"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	odin "github.com/GeoDB-Limited/odin-core/app"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	app "github.com/GeoDB-Limited/odin-core/app"
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 var (
-	// Use this as codec to legacy msg
-	cdc = odin.MakeEncodingConfig().Amino
+	// Proto codec for encoding/decoding proto message
+	cdc = app.MakeEncodingConfig().Marshaler
 )
 
 func signAndBroadcast(
-	ctx *Context, key keyring.Info, msgs []sdk.Msg, gasLimit uint64, memo string,
+	c *Context, key keyring.Info, msgs []sdk.Msg, gasLimit uint64, memo string,
 ) (string, error) {
 	clientCtx := client.Context{
-		Client:            ctx.client,
-		TxConfig:          odin.MakeEncodingConfig().TxConfig,
-		BroadcastMode:     flags.BroadcastAsync,
-		InterfaceRegistry: odin.MakeEncodingConfig().InterfaceRegistry,
+		Client:            c.client,
+		TxConfig:          app.MakeEncodingConfig().TxConfig,
+		BroadcastMode:     "async",
+		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 	acc, err := queryAccount(clientCtx, key)
 	if err != nil {
-		return "", sdkerrors.Wrap(err, "unable to get account")
+		return "", fmt.Errorf("unable to get account: %w", err)
 	}
 
 	txf := tx.Factory{}.
 		WithAccountNumber(acc.GetAccountNumber()).
 		WithSequence(acc.GetSequence()).
-		WithTxConfig(odin.MakeEncodingConfig().TxConfig).
+		WithTxConfig(app.MakeEncodingConfig().TxConfig).
 		WithGas(gasLimit).WithGasAdjustment(1).
-		WithChainID(yoda.config.ChainID).
+		WithChainID(cfg.ChainID).
 		WithMemo(memo).
-		WithGasPrices(ctx.gasPrices).
-		WithKeybase(yoda.keybase).
+		WithGasPrices(c.gasPrices).
+		WithKeybase(kb).
 		WithAccountRetriever(clientCtx.AccountRetriever)
 
 	txb, err := tx.BuildUnsignedTx(txf, msgs...)
 	if err != nil {
-		return "", sdkerrors.Wrap(err, "failed to build unsigned tx")
+		return "", err
 	}
+
 	err = tx.Sign(txf, key.GetName(), txb, true)
 	if err != nil {
-		return "", sdkerrors.Wrap(err, "failed to sign transaction")
+		return "", err
 	}
+
 	txBytes, err := clientCtx.TxConfig.TxEncoder()(txb.GetTx())
 	if err != nil {
-		return "", sdkerrors.Wrap(err, "failed to encode transaction")
+		return "", err
 	}
+
 	// broadcast to a Tendermint node
 	res, err := clientCtx.BroadcastTx(txBytes)
 	if err != nil {
-		return "", sdkerrors.Wrap(err, "failed to broadcast transaction")
+		return "", err
 	}
-
+	// out, err := txBldr.WithKeybase(keybase).BuildAndSign(key.GetName(), ckeys.DefaultKeyPass, msgs)
+	// if err != nil {
+	// 	return "", fmt.Errorf("Failed to build tx with error: %s", err.Error())
+	// }
 	return res.TxHash, nil
 }
 
@@ -75,8 +81,9 @@ func queryAccount(clientCtx client.Context, key keyring.Info) (client.Account, e
 	accountRetriever := authtypes.AccountRetriever{}
 	acc, err := accountRetriever.GetAccount(clientCtx, key.GetAddress())
 	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to query account")
+		return nil, err
 	}
+
 	return acc, nil
 }
 
@@ -90,7 +97,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	// Summarize execute version
 	versionMap := make(map[string]bool)
 	msgs := make([]sdk.Msg, len(reports))
-	ids := make([]types.RequestID, len(reports))
+	ids := make([]oracletypes.RequestID, len(reports))
 	feeEstimations := make([]FeeEstimationData, len(reports))
 
 	for i, report := range reports {
@@ -116,16 +123,11 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	// cliCtx := sdkCtx.CLIContext{Client: c.client, TrustNode: true, Codec: cdc}
 	clientCtx := client.Context{
 		Client:            c.client,
-		TxConfig:          odin.MakeEncodingConfig().TxConfig,
-		InterfaceRegistry: odin.MakeEncodingConfig().InterfaceRegistry,
-	}
-	acc, err := queryAccount(clientCtx, key)
-	if err != nil {
-		l.Error(":warning: Failed to query account with error: %s", c, err.Error())
-		return
+		TxConfig:          app.MakeEncodingConfig().TxConfig,
+		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 
-	gasLimit := estimateGas(c, msgs, feeEstimations, acc, l)
+	gasLimit := estimateGas(c, l, msgs, feeEstimations)
 	// We want to resend transaction only if tx returns Out of gas error.
 	for sendAttempt := uint64(1); sendAttempt <= c.maxTry; sendAttempt++ {
 		var txHash string
@@ -151,7 +153,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	FindTx:
 		for start := time.Now(); time.Since(start) < c.broadcastTimeout; {
 			time.Sleep(c.rpcPollInterval)
-			txRes, err := authclient.QueryTx(clientCtx, txHash)
+			txRes, err := authtx.QueryTx(clientCtx, txHash)
 			if err != nil {
 				l.Debug(":warning: Failed to query tx with error: %s", err.Error())
 				continue
@@ -183,61 +185,71 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 }
 
 // GetExecutable fetches data source executable using the provided client.
-func GetExecutable(ctx *Context, log *Logger, hash string) ([]byte, error) {
-	resValue, err := ctx.fileCache.GetFile(hash)
+func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
+	resValue, err := c.fileCache.GetFile(hash)
 	if err != nil {
-		log.Debug(":magnifying_glass_tilted_left: Fetching data source hash: %s from bandchain querier", hash)
-		res, err := ctx.client.ABCIQuery(
-			context.Background(),
-			fmt.Sprintf("custom/%s/%s/%s", types.StoreKey, types.QueryData, hash),
-			nil,
-		)
+		l.Debug(":magnifying_glass_tilted_left: Fetching data source hash: %s from bandchain querier", hash)
+		res, err := abciQuery(c, l, fmt.Sprintf("custom/%s/%s/%s", oracletypes.StoreKey, oracletypes.QueryData, hash), nil)
 		if err != nil {
-			log.Error(":exploding_head: Failed to get data source with error: %s", ctx, err.Error())
-			return nil, sdkerrors.Wrap(err, "failed to get data source")
+			l.Error(":exploding_head: Failed to get data source with error: %s", c, err.Error())
+			return nil, err
 		}
 		resValue = res.Response.GetValue()
-		ctx.fileCache.AddFile(resValue)
+		c.fileCache.AddFile(resValue)
 	} else {
-		log.Debug(":card_file_box: Found data source hash: %s in cache file", hash)
+		l.Debug(":card_file_box: Found data source hash: %s in cache file", hash)
 	}
 
-	log.Debug(":balloon: Received data source hash: %s content: %q", hash, resValue[:32])
+	l.Debug(":balloon: Received data source hash: %s content: %q", hash, resValue[:32])
 	return resValue, nil
 }
 
-func GetDataSource(ctx *Context, log *Logger, id types.DataSourceID) (types.DataSource, error) {
-	res, err := ctx.client.ABCIQuery(
-		context.Background(),
-		fmt.Sprintf("/store/%s/key", types.StoreKey),
-		types.DataSourceStoreKey(id),
-	)
-	if err != nil {
-		log.Debug(":skull: Failed to get data source with error: %s", err.Error())
-		return types.DataSource{}, sdkerrors.Wrap(err, "failed to get data source")
+// GetDataSourceHash fetches data source hash by id
+func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (string, error) {
+	if hash, ok := c.dataSourceCache.Load(id); ok {
+		return hash.(string), nil
 	}
 
-	var dataSource types.DataSource
-	cdc.MustUnmarshalBinaryBare(res.Response.Value, &dataSource)
+	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.DataSourceStoreKey(id))
+	if err != nil {
+		l.Error(":skull: Failed to get data source with error: %s", c, err.Error())
+		return "", err
+	}
 
-	_, _ = ctx.dataSourceCache.LoadOrStore(id, dataSource.Filename) // just put hash
-	return dataSource, nil
+	var d oracletypes.DataSource
+	cdc.MustUnmarshalBinaryBare(res.Response.Value, &d)
+
+	hash, _ := c.dataSourceCache.LoadOrStore(id, d.Filename)
+
+	return hash.(string), nil
 }
 
 // GetRequest fetches request by id
-func GetRequest(ctx *Context, log *Logger, id types.RequestID) (types.Request, error) {
-	res, err := ctx.client.ABCIQuery(
-		context.Background(),
-		fmt.Sprintf("/store/%s/key", types.StoreKey),
-		types.RequestStoreKey(id),
-	)
+func GetRequest(c *Context, l *Logger, id oracletypes.RequestID) (oracletypes.Request, error) {
+	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.RequestStoreKey(id))
 	if err != nil {
-		log.Debug(":skull: Failed to get request with error: %s", err.Error())
-		return types.Request{}, sdkerrors.Wrap(err, "failed to get request")
+		l.Error(":skull: Failed to get request with error: %s", c, err.Error())
+		return oracletypes.Request{}, err
 	}
 
-	var r types.Request
+	var r oracletypes.Request
 	cdc.MustUnmarshalBinaryBare(res.Response.Value, &r)
 
 	return r, nil
+}
+
+// abciQuery will try to query data from BandChain node maxTry time before give up and return error
+func abciQuery(c *Context, l *Logger, path string, data []byte) (*ctypes.ResultABCIQuery, error) {
+	var lastErr error
+	for try := 0; try < int(c.maxTry); try++ {
+		res, err := c.client.ABCIQuery(context.Background(), path, data)
+		if err != nil {
+			l.Debug(":skull: Failed to query on %s request with error: %s", path, err.Error())
+			lastErr = err
+			time.Sleep(c.rpcPollInterval)
+			continue
+		}
+		return res, nil
+	}
+	return nil, lastErr
 }

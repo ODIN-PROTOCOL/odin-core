@@ -3,44 +3,40 @@ package yoda
 import (
 	"bufio"
 	"fmt"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
-	"github.com/cosmos/go-bip39"
+	bip39 "github.com/cosmos/go-bip39"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	odin "github.com/GeoDB-Limited/odin-core/app"
+	app "github.com/GeoDB-Limited/odin-core/app"
 )
 
 const (
-	flagAccount = "account"
-	flagIndex   = "index"
-	flagRecover = "recover"
-	flagAddress = "address"
+	flagAccount  = "account"
+	flagIndex    = "index"
+	flagCoinType = "coin-type"
+	flagRecover  = "recover"
+	flagAddress  = "address"
 )
 
-const (
-	EntropyBitSize = 256
-)
-
-func keysCmd() *cobra.Command {
+func keysCmd(c *Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "keys",
 		Aliases: []string{"k"},
 		Short:   "Manage key held by the oracle process",
 	}
 	cmd.AddCommand(
-		keysAddCmd(),
-		keysDeleteCmd(),
-		keysListCmd(),
-		keysShowCmd(),
+		keysAddCmd(c),
+		keysDeleteCmd(c),
+		keysListCmd(c),
+		keysShowCmd(c),
 	)
 	return cmd
 }
 
-func keysAddCmd() *cobra.Command {
+func keysAddCmd(c *Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "add [name]",
 		Aliases: []string{"a"},
@@ -48,40 +44,44 @@ func keysAddCmd() *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var mnemonic string
-			rec, err := cmd.Flags().GetBool(flagRecover)
+			recover, err := cmd.Flags().GetBool(flagRecover)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to parse rec flag")
+				return err
 			}
-			if rec {
+			if recover {
 				inBuf := bufio.NewReader(cmd.InOrStdin())
+				var err error
 				mnemonic, err = input.GetString("Enter your bip39 mnemonic", inBuf)
 				if err != nil {
-					return sdkerrors.Wrapf(err, "failed to parse input mnemonic")
+					return err
 				}
 			} else {
-				seed, err := bip39.NewEntropy(EntropyBitSize)
+				seed, err := bip39.NewEntropy(256)
 				if err != nil {
-					return sdkerrors.Wrapf(err, "failed to create a new entropy")
+					return err
 				}
 				mnemonic, err = bip39.NewMnemonic(seed)
 				if err != nil {
-					return sdkerrors.Wrapf(err, "failed to create a new mnemonic with the given seed")
+					return err
 				}
 				fmt.Printf("Mnemonic: %s\n", mnemonic)
 			}
 
+			if err != nil {
+				return err
+			}
 			account, err := cmd.Flags().GetUint32(flagAccount)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to parse account flag")
+				return err
 			}
 			index, err := cmd.Flags().GetUint32(flagIndex)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to parse index flag")
+				return err
 			}
-			hdPath := hd.CreateHDPath(odin.Bip44CoinType, account, index)
-			info, err := yoda.keybase.NewAccount(args[0], mnemonic, "", hdPath.String(), hd.Secp256k1)
+			hdPath := hd.CreateHDPath(app.Bip44CoinType, account, index)
+			info, err := kb.NewAccount(args[0], mnemonic, "", hdPath.String(), hd.Secp256k1)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to create a new keyring account")
+				return err
 			}
 			fmt.Printf("Address: %s\n", info.GetAddress().String())
 			return nil
@@ -90,11 +90,10 @@ func keysAddCmd() *cobra.Command {
 	cmd.Flags().Bool(flagRecover, false, "Provide seed phrase to recover existing key instead of creating")
 	cmd.Flags().Uint32(flagAccount, 0, "Account number for HD derivation")
 	cmd.Flags().Uint32(flagIndex, 0, "Address index number for HD derivation")
-
 	return cmd
 }
 
-func keysDeleteCmd() *cobra.Command {
+func keysDeleteCmd(c *Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete [name]",
 		Aliases: []string{"d"},
@@ -102,15 +101,16 @@ func keysDeleteCmd() *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
-			_, err := yoda.keybase.Key(name)
+
+			_, err := kb.Key(name)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to find value by the given key: %s", name)
+				return err
 			}
 
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			confirmInput, err := input.GetString("Key will be deleted. Continue?[y/N]", inBuf)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to parse confirmation input")
+				return err
 			}
 
 			if confirmInput != "y" {
@@ -118,8 +118,8 @@ func keysDeleteCmd() *cobra.Command {
 				return nil
 			}
 
-			if err := yoda.keybase.Delete(name); err != nil {
-				return sdkerrors.Wrapf(err, "failed to delete value by the given key: %s", name)
+			if err := kb.Delete(name); err != nil {
+				return err
 			}
 
 			fmt.Printf("Deleted key: %s\n", name)
@@ -129,16 +129,16 @@ func keysDeleteCmd() *cobra.Command {
 	return cmd
 }
 
-func keysListCmd() *cobra.Command {
+func keysListCmd(c *Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"l"},
 		Short:   "List all the keys in the keychain",
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			keys, err := yoda.keybase.List()
+			keys, err := kb.List()
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to get keys from keyring")
+				return err
 			}
 			isShowAddr := viper.GetBool(flagAddress)
 			for _, key := range keys {
@@ -152,14 +152,11 @@ func keysListCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolP(flagAddress, "a", false, "Output the address only")
-	if err := viper.BindPFlag(flagAddress, cmd.Flags().Lookup(flagAddress)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to parse %s flag", flagAddress))
-	}
-
+	viper.BindPFlag(flagAddress, cmd.Flags().Lookup(flagAddress))
 	return cmd
 }
 
-func keysShowCmd() *cobra.Command {
+func keysShowCmd(c *Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "show [name]",
 		Aliases: []string{"s"},
@@ -167,9 +164,10 @@ func keysShowCmd() *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
-			key, err := yoda.keybase.Key(name)
+
+			key, err := kb.Key(name)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "failed to get value by the given key: %s", name)
+				return err
 			}
 			fmt.Println(key.GetAddress().String())
 			return nil

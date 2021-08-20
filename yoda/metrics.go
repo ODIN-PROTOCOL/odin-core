@@ -1,7 +1,6 @@
 package yoda
 
 import (
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"net/http"
 	"sync/atomic"
 
@@ -61,7 +60,5 @@ func metricsListen(listenAddr string, c *Context) {
 	collector := NewYodaCollector(c)
 	prometheus.MustRegister(collector)
 	http.Handle("/metrics", promhttp.Handler())
-	if err := http.ListenAndServe(listenAddr, nil); err != nil {
-		panic(sdkerrors.Wrap(err, "failed to start http server"))
-	}
+	panic(http.ListenAndServe(listenAddr, nil))
 }

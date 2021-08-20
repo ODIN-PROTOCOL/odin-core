@@ -1,9 +1,9 @@
 package yoda
 
 import (
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
 // Constant used to estimate gas price of reports transaction.
@@ -32,7 +32,7 @@ const (
 	writeAccountGas                = writeFlatGas + accountByteLength*writeGasPerByte
 
 	// Auth's ante handlers procedures
-	baseAuthAnteGas              = readParamGas*4 + readAccountGas*4 + writeAccountGas + signatureVerificationGasCost
+	baseAuthAnteGas              = readParamGas*4 + readAccountGas*4 + writeAccountGas + signatureVerificationGasCost + readAccountWithoutPublicKeyGas + writeAccountGas
 	payingFeeGasCost             = uint64(19834)
 	baseTransactionSize          = uint64(253)
 	txCostPerByte                = uint64(5)    // Using DefaultTxSizeCostPerByte of BandChain
@@ -54,7 +54,7 @@ func getTxByteLength(msgs []sdk.Msg) uint64 {
 	size := baseTransactionSize
 
 	for _, msg := range msgs {
-		msg, ok := msg.(*types.MsgReportData)
+		msg, ok := msg.(*oracletypes.MsgReportData)
 		if !ok {
 			panic("Don't support non-report data message")
 		}
@@ -79,8 +79,8 @@ func getRequestByteLength(f FeeEstimationData) uint64 {
 	return size
 }
 
-func getReportByteLength(msg *types.MsgReportData) uint64 {
-	report := types.NewReport(
+func getReportByteLength(msg *oracletypes.MsgReportData) uint64 {
+	report := oracletypes.NewReport(
 		sdk.ValAddress(msg.Validator),
 		true,
 		msg.RawReports,
@@ -88,7 +88,7 @@ func getReportByteLength(msg *types.MsgReportData) uint64 {
 	return uint64(len(cdc.MustMarshalBinaryBare(&report)))
 }
 
-func estimateReportHandlerGas(msg *types.MsgReportData, f FeeEstimationData) uint64 {
+func estimateReportHandlerGas(msg *oracletypes.MsgReportData, f FeeEstimationData) uint64 {
 	reportByteLength := getReportByteLength(msg)
 	requestByteLength := getRequestByteLength(f)
 
@@ -106,14 +106,8 @@ func estimateReportHandlerGas(msg *types.MsgReportData, f FeeEstimationData) uin
 	return cost
 }
 
-func estimateAuthAnteHandlerGas(c *Context, msgs []sdk.Msg, acc client.Account) uint64 {
+func estimateAuthAnteHandlerGas(c *Context, msgs []sdk.Msg) uint64 {
 	gas := uint64(baseAuthAnteGas)
-
-	if acc.GetPubKey() == nil {
-		gas += readAccountWithoutPublicKeyGas + writeAccountGas
-	} else {
-		gas += readAccountGas
-	}
 
 	txByteLength := getTxByteLength(msgs)
 	gas += txCostPerByte * txByteLength
@@ -125,11 +119,11 @@ func estimateAuthAnteHandlerGas(c *Context, msgs []sdk.Msg, acc client.Account) 
 	return gas
 }
 
-func estimateGas(c *Context, msgs []sdk.Msg, feeEstimations []FeeEstimationData, acc client.Account, l *Logger) uint64 {
-	gas := estimateAuthAnteHandlerGas(c, msgs, acc)
+func estimateGas(c *Context, l *Logger, msgs []sdk.Msg, feeEstimations []FeeEstimationData) uint64 {
+	gas := estimateAuthAnteHandlerGas(c, msgs)
 
 	for i, msg := range msgs {
-		msg, ok := msg.(*types.MsgReportData)
+		msg, ok := msg.(*oracletypes.MsgReportData)
 		if !ok {
 			panic("Don't support non-report data message")
 		}
