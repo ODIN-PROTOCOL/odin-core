@@ -21,7 +21,7 @@ const (
 	QueryParams                = "parameters"
 	QueryInflation             = "inflation"
 	QueryAnnualProvisions      = "annual_provisions"
-	QueryEthIntegrationAddress = "eth_integration_address"
+	QueryIntegrationAddresses  = "integration_addresses"
 	QueryTreasuryPool          = "treasury_pool"
 )
 

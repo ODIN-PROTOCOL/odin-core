@@ -5,7 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	ethcommon "github.com/ethereum/go-ethereum/common"
 	"strings"
 )
 
@@ -18,7 +17,7 @@ var (
 	KeyGoalBonded            = []byte("GoalBonded")
 	KeyBlocksPerYear         = []byte("BlocksPerYear")
 	KeyMintAir               = []byte("MintAir")
-	KeyEthIntegrationAddress = []byte("EthIntegrationAddress")
+	KeyIntegrationAddresses  = []byte("IntegrationAddresses")
 	KeyMaxWithdrawalPerTime  = []byte("MaxWithdrawalPerTime")
 	KeyEligibleAccountsPool  = []byte("EligibleAccountsPool")
 )
@@ -34,7 +33,7 @@ func NewParams(
 	MaxWithdrawalPerTime sdk.Coins,
 	blocksPerYear uint64,
 	mintAir bool,
-	ethIntegrationAddress string,
+	integrationAddresses map[string]string,
 	eligibleAccountsPool []string,
 
 ) Params {
@@ -47,7 +46,7 @@ func NewParams(
 		GoalBonded:            goalBonded,
 		BlocksPerYear:         blocksPerYear,
 		MintAir:               mintAir,
-		EthIntegrationAddress: ethIntegrationAddress,
+		IntegrationAddresses:  integrationAddresses,
 		MaxWithdrawalPerTime:  MaxWithdrawalPerTime,
 		EligibleAccountsPool:  eligibleAccountsPool,
 	}
@@ -63,7 +62,7 @@ func DefaultParams() Params {
 		GoalBonded:            sdk.NewDecWithPrec(67, 2),
 		BlocksPerYear:         uint64(60 * 60 * 8766 / 5), // assuming 5 second block times
 		MintAir:               false,
-		EthIntegrationAddress: "0xa19Df1199CeEfd7831576f1D055E454364337633", // default value (might be invalid for actual use)
+		IntegrationAddresses:  map[string]string{}, // default value (might be invalid for actual use)
 		MaxWithdrawalPerTime:  sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
 		EligibleAccountsPool:  []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
 	}
@@ -92,7 +91,7 @@ func (p Params) Validate() error {
 	if err := validateMintAir(p.MintAir); err != nil {
 		return err
 	}
-	if err := validateEthIntegarionAddress(p.EthIntegrationAddress); err != nil {
+	if err := validateIntegrationAddresses(p.IntegrationAddresses); err != nil {
 		return err
 	}
 	if err := validateMaxWithdrawalPerTime(p.MaxWithdrawalPerTime); err != nil {
@@ -120,12 +119,12 @@ func (p Params) String() string {
   Inflation Min:          	%s
   Goal Bonded:            	%s
   Blocks Per Year:        	%d
-  Eth Integration Address: 	%s
+  Integration Addresses: 	%s
   Max Withdrawal Per Time:	%s
   Eligible Accounts Pool: 	%s
 `,
 		p.MintDenom, p.InflationRateChange, p.InflationMax, p.InflationMin, p.GoalBonded,
-		p.BlocksPerYear, p.EthIntegrationAddress, p.MaxWithdrawalPerTime, p.EligibleAccountsPool,
+		p.BlocksPerYear, p.IntegrationAddresses, p.MaxWithdrawalPerTime, p.EligibleAccountsPool,
 	)
 }
 
@@ -139,7 +138,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyGoalBonded, &p.GoalBonded, validateGoalBonded),
 		paramtypes.NewParamSetPair(KeyBlocksPerYear, &p.BlocksPerYear, validateBlocksPerYear),
 		paramtypes.NewParamSetPair(KeyMintAir, &p.MintAir, validateMintAir),
-		paramtypes.NewParamSetPair(KeyEthIntegrationAddress, &p.EthIntegrationAddress, validateEthIntegarionAddress),
+		paramtypes.NewParamSetPair(KeyIntegrationAddresses, &p.IntegrationAddresses, validateIntegrationAddresses),
 		paramtypes.NewParamSetPair(KeyMaxWithdrawalPerTime, &p.MaxWithdrawalPerTime, validateMaxWithdrawalPerTime),
 		paramtypes.NewParamSetPair(KeyEligibleAccountsPool, &p.EligibleAccountsPool, validateEligibleAccountsPool),
 	}
@@ -262,14 +261,12 @@ func validateMaxWithdrawalPerTime(i interface{}) error {
 	return nil
 }
 
-func validateEthIntegarionAddress(i interface{}) error {
-	v, ok := i.(string)
+func validateIntegrationAddresses(i interface{}) error {
+	_, ok := i.(map[string]string)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-	if !ethcommon.IsHexAddress(v) {
-		return fmt.Errorf("value is not a valid eth hex address: %s", v)
-	}
+
 	return nil
 }
 

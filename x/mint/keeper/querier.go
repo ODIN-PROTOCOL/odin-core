@@ -22,8 +22,8 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 		case minttypes.QueryAnnualProvisions:
 			return queryAnnualProvisions(ctx, k, legacyQuerierCdc)
 
-		case minttypes.QueryEthIntegrationAddress:
-			return queryEthIntegrationAddress(ctx, k, legacyQuerierCdc)
+		case minttypes.QueryIntegrationAddresses:
+			return queryIntegrationAddresses(ctx, k, legacyQuerierCdc)
 
 		case minttypes.QueryTreasuryPool:
 			return queryTreasuryPool(ctx, k, legacyQuerierCdc)
@@ -67,10 +67,10 @@ func queryAnnualProvisions(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.Le
 	return res, nil
 }
 
-func queryEthIntegrationAddress(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
+func queryIntegrationAddresses(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
 	params := k.GetParams(ctx)
 
-	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, params.EthIntegrationAddress)
+	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, params.IntegrationAddresses)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}

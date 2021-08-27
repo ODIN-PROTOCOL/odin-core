@@ -341,7 +341,10 @@
         "annual_provisions": "0.000100000000000000"
       },
       "params": {
-        "eth_integration_address": "0xa19Df1199CeEfd7831576f1D055E454364337633",
+        "integration_addresses" : {
+          "bsc": "0xa19Df1199CeEfd7831576f1D055E454364337633",
+          "eth": "0xa19Df1199CeEfd7831576f1D055E454364337634"
+        },
         "mint_denom": "loki",
         "inflation_rate_change": "0.130000000000000000",
         "inflation_max": "0.200000000000000000",

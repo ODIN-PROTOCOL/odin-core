@@ -271,21 +271,22 @@ var xxx_messageInfo_QueryAnnualProvisionsResponse proto.InternalMessageInfo
 
 // QueryEthIntegrationAddressRequest is request type for the
 // Query/QueryEthIntegrationAddress RPC method.
-type QueryEthIntegrationAddressRequest struct {
+type QueryIntegrationAddressRequest struct {
+	NetworkName string `protobuf:"bytes,1,opt,name=network_name,json=networkName,proto3" json:"network_name,omitempty"`
 }
 
-func (m *QueryEthIntegrationAddressRequest) Reset()         { *m = QueryEthIntegrationAddressRequest{} }
-func (m *QueryEthIntegrationAddressRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryEthIntegrationAddressRequest) ProtoMessage()    {}
-func (*QueryEthIntegrationAddressRequest) Descriptor() ([]byte, []int) {
+func (m *QueryIntegrationAddressRequest) Reset()         { *m = QueryIntegrationAddressRequest{} }
+func (m *QueryIntegrationAddressRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryIntegrationAddressRequest) ProtoMessage()    {}
+func (*QueryIntegrationAddressRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_3082aecef156f565, []int{6}
 }
-func (m *QueryEthIntegrationAddressRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryIntegrationAddressRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryEthIntegrationAddressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryIntegrationAddressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryEthIntegrationAddressRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryIntegrationAddressRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -295,36 +296,43 @@ func (m *QueryEthIntegrationAddressRequest) XXX_Marshal(b []byte, deterministic 
 		return b[:n], nil
 	}
 }
-func (m *QueryEthIntegrationAddressRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryEthIntegrationAddressRequest.Merge(m, src)
+func (m *QueryIntegrationAddressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIntegrationAddressRequest.Merge(m, src)
 }
-func (m *QueryEthIntegrationAddressRequest) XXX_Size() int {
+func (m *QueryIntegrationAddressRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryEthIntegrationAddressRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryEthIntegrationAddressRequest.DiscardUnknown(m)
+func (m *QueryIntegrationAddressRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIntegrationAddressRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryEthIntegrationAddressRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryIntegrationAddressRequest proto.InternalMessageInfo
+
+func (m *QueryIntegrationAddressRequest) GetNetworkName() string {
+	if m != nil {
+		return m.NetworkName
+	}
+	return ""
+}
 
 // QueryEthIntegrationAddressResponse is response type for the
 // Query/QueryEthIntegrationAddress RPC method.
-type QueryEthIntegrationAddressResponse struct {
-	EthIntegrationAddress string `protobuf:"bytes,1,opt,name=eth_integration_address,json=ethIntegrationAddress,proto3" json:"eth_integration_address,omitempty"`
+type QueryIntegrationAddressResponse struct {
+	IntegrationAddress string `protobuf:"bytes,1,opt,name=integration_address,json=integrationAddress,proto3" json:"integration_address,omitempty"`
 }
 
-func (m *QueryEthIntegrationAddressResponse) Reset()         { *m = QueryEthIntegrationAddressResponse{} }
-func (m *QueryEthIntegrationAddressResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryEthIntegrationAddressResponse) ProtoMessage()    {}
-func (*QueryEthIntegrationAddressResponse) Descriptor() ([]byte, []int) {
+func (m *QueryIntegrationAddressResponse) Reset()         { *m = QueryIntegrationAddressResponse{} }
+func (m *QueryIntegrationAddressResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryIntegrationAddressResponse) ProtoMessage()    {}
+func (*QueryIntegrationAddressResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_3082aecef156f565, []int{7}
 }
-func (m *QueryEthIntegrationAddressResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryIntegrationAddressResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryEthIntegrationAddressResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryIntegrationAddressResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryEthIntegrationAddressResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryIntegrationAddressResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -334,21 +342,21 @@ func (m *QueryEthIntegrationAddressResponse) XXX_Marshal(b []byte, deterministic
 		return b[:n], nil
 	}
 }
-func (m *QueryEthIntegrationAddressResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryEthIntegrationAddressResponse.Merge(m, src)
+func (m *QueryIntegrationAddressResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIntegrationAddressResponse.Merge(m, src)
 }
-func (m *QueryEthIntegrationAddressResponse) XXX_Size() int {
+func (m *QueryIntegrationAddressResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryEthIntegrationAddressResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryEthIntegrationAddressResponse.DiscardUnknown(m)
+func (m *QueryIntegrationAddressResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIntegrationAddressResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryEthIntegrationAddressResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryIntegrationAddressResponse proto.InternalMessageInfo
 
-func (m *QueryEthIntegrationAddressResponse) GetEthIntegrationAddress() string {
+func (m *QueryIntegrationAddressResponse) GetIntegrationAddress() string {
 	if m != nil {
-		return m.EthIntegrationAddress
+		return m.IntegrationAddress
 	}
 	return ""
 }
@@ -444,8 +452,8 @@ func init() {
 	proto.RegisterType((*QueryInflationResponse)(nil), "mint.QueryInflationResponse")
 	proto.RegisterType((*QueryAnnualProvisionsRequest)(nil), "mint.QueryAnnualProvisionsRequest")
 	proto.RegisterType((*QueryAnnualProvisionsResponse)(nil), "mint.QueryAnnualProvisionsResponse")
-	proto.RegisterType((*QueryEthIntegrationAddressRequest)(nil), "mint.QueryEthIntegrationAddressRequest")
-	proto.RegisterType((*QueryEthIntegrationAddressResponse)(nil), "mint.QueryEthIntegrationAddressResponse")
+	proto.RegisterType((*QueryIntegrationAddressRequest)(nil), "mint.QueryIntegrationAddressRequest")
+	proto.RegisterType((*QueryIntegrationAddressResponse)(nil), "mint.QueryIntegrationAddressResponse")
 	proto.RegisterType((*QueryTreasuryPoolRequest)(nil), "mint.QueryTreasuryPoolRequest")
 	proto.RegisterType((*QueryTreasuryPoolResponse)(nil), "mint.QueryTreasuryPoolResponse")
 }
@@ -453,47 +461,48 @@ func init() {
 func init() { proto.RegisterFile("mint/query.proto", fileDescriptor_3082aecef156f565) }
 
 var fileDescriptor_3082aecef156f565 = []byte{
-	// 636 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x41, 0x4f, 0x13, 0x41,
-	0x1c, 0xc5, 0xbb, 0x8a, 0x24, 0x0c, 0x55, 0xcb, 0x40, 0xa5, 0x5d, 0x60, 0x17, 0x97, 0xa8, 0x8d,
-	0x09, 0x3b, 0x82, 0x89, 0x77, 0x2a, 0xc6, 0x90, 0x70, 0xc0, 0xea, 0x49, 0x4d, 0xea, 0xb4, 0x1d,
-	0x96, 0x89, 0xdb, 0x99, 0x65, 0x67, 0x4a, 0x6c, 0xc2, 0xc9, 0xbb, 0x89, 0xc6, 0x6f, 0xe1, 0x87,
-	0xf0, 0xcc, 0x91, 0xc4, 0x8b, 0xf1, 0x80, 0xa6, 0xf5, 0x83, 0x98, 0x9d, 0x99, 0x96, 0xa5, 0x6c,
-	0xab, 0xf1, 0xd2, 0x36, 0xff, 0xf7, 0x9f, 0xf7, 0xde, 0x4e, 0x7e, 0x5d, 0x50, 0x68, 0x53, 0x26,
-	0xd1, 0x61, 0x87, 0xc4, 0x5d, 0x3f, 0x8a, 0xb9, 0xe4, 0x70, 0x2a, 0x99, 0xd8, 0x0b, 0x01, 0x0f,
-	0xb8, 0x1a, 0xa0, 0xe4, 0x97, 0xd6, 0xec, 0xe5, 0x80, 0xf3, 0x20, 0x24, 0x08, 0x47, 0x14, 0x61,
-	0xc6, 0xb8, 0xc4, 0x92, 0x72, 0x26, 0x8c, 0xea, 0x34, 0xb9, 0x68, 0x73, 0x81, 0x1a, 0x58, 0x10,
-	0x74, 0xb4, 0xd1, 0x20, 0x12, 0x6f, 0xa0, 0x26, 0xa7, 0xcc, 0xe8, 0x37, 0x55, 0x56, 0xf2, 0x61,
-	0x06, 0x73, 0x6a, 0x10, 0xe1, 0x18, 0xb7, 0x8d, 0x87, 0xb7, 0x00, 0xe0, 0xb3, 0xa4, 0xcc, 0x9e,
-	0x1a, 0xd6, 0xc8, 0x61, 0x87, 0x08, 0xe9, 0x6d, 0x81, 0xf9, 0x0b, 0x53, 0x11, 0x71, 0x26, 0x08,
-	0xbc, 0x0f, 0xa6, 0xf5, 0xe1, 0x92, 0xb5, 0x6a, 0x55, 0x66, 0x37, 0xf3, 0xbe, 0x32, 0xd7, 0x5b,
-	0xd5, 0xa9, 0x93, 0x33, 0x37, 0x57, 0x33, 0x1b, 0xde, 0x22, 0x28, 0x2a, 0x8b, 0x1d, 0xb6, 0x1f,
-	0xaa, 0xd6, 0x03, 0xef, 0x7d, 0x70, 0x6b, 0x54, 0x30, 0xf6, 0xbb, 0x60, 0x86, 0x0e, 0x86, 0x2a,
-	0x61, 0xa6, 0xea, 0x27, 0x9e, 0x3f, 0xce, 0xdc, 0xbb, 0x01, 0x95, 0x07, 0x9d, 0x86, 0xdf, 0xe4,
-	0x6d, 0x64, 0x9e, 0x5a, 0x7f, 0xad, 0x8b, 0xd6, 0x5b, 0x24, 0xbb, 0x11, 0x11, 0xfe, 0x36, 0x69,
-	0xd6, 0xce, 0x0d, 0x3c, 0x07, 0x2c, 0xab, 0x9c, 0x2d, 0xc6, 0x3a, 0x38, 0xdc, 0x8b, 0xf9, 0x11,
-	0x15, 0xc9, 0xe5, 0x0d, 0x7a, 0x1c, 0x83, 0x95, 0x31, 0xba, 0xa9, 0xf3, 0x0a, 0xcc, 0x61, 0xa5,
-	0xd5, 0xa3, 0xa1, 0xf8, 0x9f, 0xb5, 0x0a, 0x78, 0x24, 0xc4, 0x5b, 0x03, 0xb7, 0x55, 0xfa, 0x13,
-	0x79, 0xb0, 0xc3, 0x24, 0x09, 0x62, 0x55, 0x7a, 0xab, 0xd5, 0x8a, 0x89, 0x18, 0x56, 0x7c, 0x0d,
-	0xbc, 0x49, 0x4b, 0xa6, 0xe7, 0x23, 0xb0, 0x48, 0xe4, 0x41, 0x9d, 0x9e, 0x6f, 0xd4, 0xb1, 0x5e,
-	0xd1, 0x6d, 0x6b, 0x45, 0x92, 0x75, 0xde, 0xb3, 0x41, 0x49, 0xb9, 0xbf, 0x88, 0x09, 0x16, 0x9d,
-	0xb8, 0xbb, 0xc7, 0x79, 0x38, 0x48, 0xfe, 0x60, 0x81, 0x72, 0x86, 0x68, 0x12, 0x23, 0x70, 0x5d,
-	0x9a, 0x79, 0x3d, 0xe2, 0x3c, 0x2c, 0x59, 0xab, 0x57, 0x2b, 0xb3, 0x9b, 0x65, 0x5f, 0x3f, 0xbc,
-	0x9f, 0x00, 0xe9, 0x1b, 0x20, 0xfd, 0xc7, 0x9c, 0xb2, 0xea, 0x83, 0xe4, 0xc2, 0xbe, 0xfc, 0x74,
-	0x2b, 0xff, 0x70, 0x61, 0xc9, 0x01, 0x51, 0xcb, 0xcb, 0x54, 0xf2, 0xe6, 0xd7, 0x29, 0x70, 0x4d,
-	0xf5, 0x81, 0xcf, 0xc1, 0xb4, 0xe6, 0x0d, 0x96, 0x34, 0x7d, 0x97, 0xf1, 0xb5, 0xcb, 0x19, 0x8a,
-	0xae, 0xee, 0x2d, 0xbc, 0xff, 0xf6, 0xfb, 0xf3, 0x95, 0x1b, 0x30, 0x8f, 0x52, 0xff, 0x05, 0xf8,
-	0x06, 0xcc, 0x0c, 0x71, 0x84, 0x4b, 0xa9, 0xd3, 0xa3, 0xf4, 0xda, 0xcb, 0xd9, 0xa2, 0x71, 0x2f,
-	0x29, 0x77, 0x08, 0x0b, 0x29, 0x77, 0x22, 0x49, 0x2c, 0xe0, 0x31, 0x28, 0x8c, 0x82, 0x06, 0xbd,
-	0x94, 0xd7, 0x18, 0x4a, 0xed, 0xb5, 0x89, 0x3b, 0x26, 0xd6, 0x55, 0xb1, 0x65, 0xb8, 0xa8, 0x63,
-	0x2f, 0x51, 0x0b, 0x3f, 0x59, 0xa0, 0x98, 0x09, 0x11, 0xbc, 0x97, 0xf2, 0x9f, 0xc4, 0xa2, 0x5d,
-	0xf9, 0xfb, 0xa2, 0x69, 0x73, 0x47, 0xb5, 0x71, 0xe1, 0x8a, 0x6e, 0x33, 0x86, 0x4d, 0x18, 0x82,
-	0x7c, 0x1a, 0x2e, 0xe8, 0xa4, 0x02, 0x32, 0x90, 0xb4, 0xdd, 0xb1, 0xba, 0xc9, 0x5d, 0x52, 0xb9,
-	0x45, 0x38, 0xaf, 0x73, 0x2f, 0x10, 0x5a, 0xdd, 0x39, 0xe9, 0x39, 0xd6, 0x69, 0xcf, 0xb1, 0x7e,
-	0xf5, 0x1c, 0xeb, 0x63, 0xdf, 0xc9, 0x9d, 0xf6, 0x9d, 0xdc, 0xf7, 0xbe, 0x93, 0x7b, 0x89, 0x52,
-	0x48, 0x3e, 0x25, 0x7c, 0xbb, 0xba, 0xbe, 0x4b, 0xdb, 0x54, 0x92, 0x16, 0xe2, 0x2d, 0xca, 0xd6,
-	0x9b, 0x3c, 0x26, 0xe8, 0x9d, 0xb1, 0x4c, 0xf8, 0x6c, 0x4c, 0xab, 0x37, 0xe7, 0xc3, 0x3f, 0x01,
-	0x00, 0x00, 0xff, 0xff, 0xe2, 0x9d, 0x04, 0x7c, 0xcb, 0x05, 0x00, 0x00,
+	// 654 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0x4f, 0x4f, 0x13, 0x4f,
+	0x1c, 0xc6, 0xbb, 0xbf, 0x1f, 0x92, 0x30, 0x54, 0x2d, 0x03, 0x48, 0xbb, 0xe0, 0x2e, 0xae, 0x7f,
+	0xd2, 0x90, 0xb0, 0x03, 0xf8, 0x0a, 0x28, 0x24, 0x86, 0x84, 0x18, 0x5c, 0x3d, 0xe9, 0xa1, 0x4e,
+	0xdb, 0x61, 0x9d, 0xb0, 0x3b, 0xb3, 0xec, 0x4c, 0x51, 0x22, 0x5e, 0xbc, 0x9b, 0x98, 0xf0, 0x2e,
+	0x7c, 0x15, 0x1e, 0x39, 0x92, 0x78, 0x31, 0x1e, 0xd0, 0xb4, 0xbe, 0x10, 0xb3, 0x33, 0x53, 0xd8,
+	0xfe, 0x53, 0xe3, 0x05, 0x9a, 0xef, 0x33, 0xf3, 0x3c, 0xcf, 0x7c, 0xf3, 0x69, 0x41, 0x29, 0xa6,
+	0x4c, 0xa2, 0xc3, 0x36, 0x49, 0x8f, 0xfd, 0x24, 0xe5, 0x92, 0xc3, 0x89, 0x6c, 0x62, 0xcf, 0x85,
+	0x3c, 0xe4, 0x6a, 0x80, 0xb2, 0x4f, 0x5a, 0xb3, 0x97, 0x42, 0xce, 0xc3, 0x88, 0x20, 0x9c, 0x50,
+	0x84, 0x19, 0xe3, 0x12, 0x4b, 0xca, 0x99, 0x30, 0xaa, 0xd3, 0xe4, 0x22, 0xe6, 0x02, 0x35, 0xb0,
+	0x20, 0xe8, 0x68, 0xbd, 0x41, 0x24, 0x5e, 0x47, 0x4d, 0x4e, 0x99, 0xd1, 0x6f, 0xaa, 0xac, 0xec,
+	0x8f, 0x19, 0xcc, 0xa8, 0x41, 0x82, 0x53, 0x1c, 0x1b, 0x0f, 0x6f, 0x0e, 0xc0, 0x27, 0x59, 0x99,
+	0x3d, 0x35, 0x0c, 0xc8, 0x61, 0x9b, 0x08, 0xe9, 0x6d, 0x82, 0xd9, 0xbe, 0xa9, 0x48, 0x38, 0x13,
+	0x04, 0xae, 0x80, 0x49, 0x7d, 0xb9, 0x6c, 0x2d, 0x5b, 0xd5, 0xe9, 0x8d, 0xa2, 0xaf, 0xcc, 0xf5,
+	0xa9, 0xda, 0xc4, 0xd9, 0x85, 0x5b, 0x08, 0xcc, 0x09, 0x6f, 0x01, 0xcc, 0x2b, 0x8b, 0x1d, 0xb6,
+	0x1f, 0xa9, 0xd6, 0x3d, 0xef, 0x7d, 0x70, 0x6b, 0x50, 0x30, 0xf6, 0xbb, 0x60, 0x8a, 0xf6, 0x86,
+	0x2a, 0x61, 0xaa, 0xe6, 0x67, 0x9e, 0xdf, 0x2e, 0xdc, 0x07, 0x21, 0x95, 0xaf, 0xda, 0x0d, 0xbf,
+	0xc9, 0x63, 0x64, 0x5e, 0xad, 0xff, 0xad, 0x8a, 0xd6, 0x01, 0x92, 0xc7, 0x09, 0x11, 0xfe, 0x36,
+	0x69, 0x06, 0x57, 0x06, 0x9e, 0x03, 0x96, 0x54, 0xce, 0x26, 0x63, 0x6d, 0x1c, 0xed, 0xa5, 0xfc,
+	0x88, 0x8a, 0x6c, 0x79, 0xbd, 0x1e, 0x27, 0xe0, 0xf6, 0x18, 0xdd, 0xd4, 0x79, 0x01, 0x66, 0xb0,
+	0xd2, 0xea, 0xc9, 0xa5, 0xf8, 0x8f, 0xb5, 0x4a, 0x78, 0x20, 0xc4, 0xdb, 0x02, 0x8e, 0xd9, 0x82,
+	0x24, 0x61, 0xaa, 0x1a, 0x6f, 0xb6, 0x5a, 0x29, 0x11, 0xbd, 0x7e, 0xf0, 0x0e, 0x28, 0x32, 0x22,
+	0x5f, 0xf3, 0xf4, 0xa0, 0xce, 0x70, 0x4c, 0x74, 0x72, 0x30, 0x6d, 0x66, 0x8f, 0x71, 0x4c, 0xbc,
+	0x00, 0xb8, 0x63, 0x4d, 0xcc, 0x23, 0x10, 0x98, 0xa5, 0x57, 0x6a, 0x1d, 0x6b, 0xd9, 0x98, 0x41,
+	0x3a, 0x74, 0xd1, 0xb3, 0x41, 0x59, 0x79, 0x3e, 0x4b, 0x09, 0x16, 0xed, 0xf4, 0x78, 0x8f, 0xf3,
+	0xa8, 0xb7, 0xb2, 0x0f, 0x16, 0xa8, 0x8c, 0x10, 0x4d, 0x54, 0x02, 0xae, 0x4b, 0x33, 0xaf, 0x27,
+	0x9c, 0x47, 0x65, 0x6b, 0xf9, 0xff, 0xea, 0xf4, 0x46, 0xc5, 0xd7, 0x2b, 0xf1, 0x33, 0x4c, 0x7d,
+	0x83, 0xa9, 0xbf, 0xc5, 0x29, 0xab, 0xad, 0x65, 0x6b, 0xfc, 0xf4, 0xdd, 0xad, 0xfe, 0xc5, 0x1a,
+	0xb3, 0x0b, 0x22, 0x28, 0xca, 0x5c, 0xf2, 0xc6, 0xe7, 0x09, 0x70, 0x4d, 0xf5, 0x81, 0x4f, 0xc1,
+	0xa4, 0xa6, 0x10, 0x96, 0x35, 0x93, 0xc3, 0x50, 0xdb, 0x95, 0x11, 0x8a, 0xae, 0xee, 0xcd, 0xbd,
+	0xff, 0xf2, 0xf3, 0xf4, 0xbf, 0x1b, 0xb0, 0x88, 0x72, 0xdf, 0x10, 0xf8, 0x12, 0x4c, 0x5d, 0x42,
+	0x0a, 0x17, 0x73, 0xb7, 0x07, 0x99, 0xb6, 0x97, 0x46, 0x8b, 0xc6, 0xbd, 0xac, 0xdc, 0x21, 0x2c,
+	0xe5, 0xdc, 0x89, 0x24, 0xa9, 0x80, 0x27, 0xa0, 0x34, 0x88, 0x1f, 0xf4, 0x72, 0x5e, 0x63, 0xd8,
+	0xb5, 0xef, 0xfe, 0xf6, 0x8c, 0x89, 0x75, 0x55, 0x6c, 0x05, 0x2e, 0xe8, 0xd8, 0x21, 0x96, 0xe1,
+	0xa9, 0x05, 0xe0, 0x30, 0x3a, 0xf0, 0x5e, 0xdf, 0x63, 0xc6, 0xe0, 0x69, 0xdf, 0xff, 0xc3, 0x29,
+	0x53, 0x62, 0x4d, 0x95, 0x58, 0x81, 0x55, 0x5d, 0x62, 0x04, 0x8b, 0xe8, 0x6d, 0x1e, 0xf3, 0x77,
+	0x30, 0x02, 0xc5, 0x3c, 0x5e, 0xd0, 0xc9, 0x05, 0x8d, 0x80, 0xd2, 0x76, 0xc7, 0xea, 0xa6, 0xc2,
+	0xa2, 0xaa, 0x30, 0x0f, 0x67, 0x75, 0x85, 0x3e, 0x46, 0x6b, 0x3b, 0x67, 0x1d, 0xc7, 0x3a, 0xef,
+	0x38, 0xd6, 0x8f, 0x8e, 0x63, 0x7d, 0xec, 0x3a, 0x85, 0xf3, 0xae, 0x53, 0xf8, 0xda, 0x75, 0x0a,
+	0xcf, 0x51, 0x0e, 0xca, 0x47, 0x84, 0x6f, 0xd7, 0x56, 0x77, 0x69, 0x4c, 0x25, 0x69, 0x21, 0xde,
+	0xa2, 0x6c, 0xb5, 0xc9, 0x53, 0x82, 0xde, 0x18, 0xcb, 0x8c, 0xd0, 0xc6, 0xa4, 0xfa, 0x45, 0x7d,
+	0xf8, 0x2b, 0x00, 0x00, 0xff, 0xff, 0xd7, 0x83, 0x6e, 0x56, 0xe3, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -514,8 +523,8 @@ type QueryClient interface {
 	Inflation(ctx context.Context, in *QueryInflationRequest, opts ...grpc.CallOption) (*QueryInflationResponse, error)
 	// Inflation returns current annual provisions.
 	AnnualProvisions(ctx context.Context, in *QueryAnnualProvisionsRequest, opts ...grpc.CallOption) (*QueryAnnualProvisionsResponse, error)
-	// Inflation returns ethereum integration address.
-	EthIntegrationAddress(ctx context.Context, in *QueryEthIntegrationAddressRequest, opts ...grpc.CallOption) (*QueryEthIntegrationAddressResponse, error)
+	// Inflation returns integration address.
+	IntegrationAddress(ctx context.Context, in *QueryIntegrationAddressRequest, opts ...grpc.CallOption) (*QueryIntegrationAddressResponse, error)
 	// Inflation returns current treasury pool.
 	TreasuryPool(ctx context.Context, in *QueryTreasuryPoolRequest, opts ...grpc.CallOption) (*QueryTreasuryPoolResponse, error)
 }
@@ -555,9 +564,9 @@ func (c *queryClient) AnnualProvisions(ctx context.Context, in *QueryAnnualProvi
 	return out, nil
 }
 
-func (c *queryClient) EthIntegrationAddress(ctx context.Context, in *QueryEthIntegrationAddressRequest, opts ...grpc.CallOption) (*QueryEthIntegrationAddressResponse, error) {
-	out := new(QueryEthIntegrationAddressResponse)
-	err := c.cc.Invoke(ctx, "/mint.Query/EthIntegrationAddress", in, out, opts...)
+func (c *queryClient) IntegrationAddress(ctx context.Context, in *QueryIntegrationAddressRequest, opts ...grpc.CallOption) (*QueryIntegrationAddressResponse, error) {
+	out := new(QueryIntegrationAddressResponse)
+	err := c.cc.Invoke(ctx, "/mint.Query/IntegrationAddress", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -581,8 +590,8 @@ type QueryServer interface {
 	Inflation(context.Context, *QueryInflationRequest) (*QueryInflationResponse, error)
 	// Inflation returns current annual provisions.
 	AnnualProvisions(context.Context, *QueryAnnualProvisionsRequest) (*QueryAnnualProvisionsResponse, error)
-	// Inflation returns ethereum integration address.
-	EthIntegrationAddress(context.Context, *QueryEthIntegrationAddressRequest) (*QueryEthIntegrationAddressResponse, error)
+	// Inflation returns integration address.
+	IntegrationAddress(context.Context, *QueryIntegrationAddressRequest) (*QueryIntegrationAddressResponse, error)
 	// Inflation returns current treasury pool.
 	TreasuryPool(context.Context, *QueryTreasuryPoolRequest) (*QueryTreasuryPoolResponse, error)
 }
@@ -600,8 +609,8 @@ func (*UnimplementedQueryServer) Inflation(ctx context.Context, req *QueryInflat
 func (*UnimplementedQueryServer) AnnualProvisions(ctx context.Context, req *QueryAnnualProvisionsRequest) (*QueryAnnualProvisionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AnnualProvisions not implemented")
 }
-func (*UnimplementedQueryServer) EthIntegrationAddress(ctx context.Context, req *QueryEthIntegrationAddressRequest) (*QueryEthIntegrationAddressResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EthIntegrationAddress not implemented")
+func (*UnimplementedQueryServer) IntegrationAddress(ctx context.Context, req *QueryIntegrationAddressRequest) (*QueryIntegrationAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IntegrationAddress not implemented")
 }
 func (*UnimplementedQueryServer) TreasuryPool(ctx context.Context, req *QueryTreasuryPoolRequest) (*QueryTreasuryPoolResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TreasuryPool not implemented")
@@ -665,20 +674,20 @@ func _Query_AnnualProvisions_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_EthIntegrationAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryEthIntegrationAddressRequest)
+func _Query_IntegrationAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryIntegrationAddressRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).EthIntegrationAddress(ctx, in)
+		return srv.(QueryServer).IntegrationAddress(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/mint.Query/EthIntegrationAddress",
+		FullMethod: "/mint.Query/IntegrationAddress",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).EthIntegrationAddress(ctx, req.(*QueryEthIntegrationAddressRequest))
+		return srv.(QueryServer).IntegrationAddress(ctx, req.(*QueryIntegrationAddressRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -718,8 +727,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_AnnualProvisions_Handler,
 		},
 		{
-			MethodName: "EthIntegrationAddress",
-			Handler:    _Query_EthIntegrationAddress_Handler,
+			MethodName: "IntegrationAddress",
+			Handler:    _Query_IntegrationAddress_Handler,
 		},
 		{
 			MethodName: "TreasuryPool",
@@ -898,7 +907,7 @@ func (m *QueryAnnualProvisionsResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryEthIntegrationAddressRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryIntegrationAddressRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -908,20 +917,27 @@ func (m *QueryEthIntegrationAddressRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryEthIntegrationAddressRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryIntegrationAddressRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryEthIntegrationAddressRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryIntegrationAddressRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if len(m.NetworkName) > 0 {
+		i -= len(m.NetworkName)
+		copy(dAtA[i:], m.NetworkName)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.NetworkName)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryEthIntegrationAddressResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryIntegrationAddressResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -931,20 +947,20 @@ func (m *QueryEthIntegrationAddressResponse) Marshal() (dAtA []byte, err error) 
 	return dAtA[:n], nil
 }
 
-func (m *QueryEthIntegrationAddressResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryIntegrationAddressResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryEthIntegrationAddressResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryIntegrationAddressResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.EthIntegrationAddress) > 0 {
-		i -= len(m.EthIntegrationAddress)
-		copy(dAtA[i:], m.EthIntegrationAddress)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.EthIntegrationAddress)))
+	if len(m.IntegrationAddress) > 0 {
+		i -= len(m.IntegrationAddress)
+		copy(dAtA[i:], m.IntegrationAddress)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.IntegrationAddress)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1082,22 +1098,26 @@ func (m *QueryAnnualProvisionsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryEthIntegrationAddressRequest) Size() (n int) {
+func (m *QueryIntegrationAddressRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
+	l = len(m.NetworkName)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
 	return n
 }
 
-func (m *QueryEthIntegrationAddressResponse) Size() (n int) {
+func (m *QueryIntegrationAddressResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.EthIntegrationAddress)
+	l = len(m.IntegrationAddress)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
@@ -1535,7 +1555,7 @@ func (m *QueryAnnualProvisionsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryEthIntegrationAddressRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryIntegrationAddressRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1558,65 +1578,15 @@ func (m *QueryEthIntegrationAddressRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryEthIntegrationAddressRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryIntegrationAddressRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryEthIntegrationAddressRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryEthIntegrationAddressResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryEthIntegrationAddressResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryEthIntegrationAddressResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryIntegrationAddressRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EthIntegrationAddress", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field NetworkName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1644,7 +1614,89 @@ func (m *QueryEthIntegrationAddressResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.EthIntegrationAddress = string(dAtA[iNdEx:postIndex])
+			m.NetworkName = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryIntegrationAddressResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryIntegrationAddressResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryIntegrationAddressResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IntegrationAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IntegrationAddress = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

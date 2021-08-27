@@ -6,6 +6,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	networkNameTag	= "networkNameTag"
+)
+
 // RegisterRoutes registers minting module REST handlers on the provided router.
 func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	r := rest.WithHTTPDeprecationHeaders(rtr)
