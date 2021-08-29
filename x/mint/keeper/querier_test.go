@@ -34,8 +34,8 @@ func TestNewQuerier(t *testing.T) {
 	_, err = querier(ctx, []string{minttypes.QueryAnnualProvisions}, query)
 	require.NoError(t, err)
 
-	_, err = querier(ctx, []string{minttypes.QueryIntegrationAddresses}, query)
-	require.NoError(t, err)
+	_, err = querier(ctx, []string{minttypes.QueryIntegrationAddresses, "bsc"}, query)
+	require.Error(t, err, "integration address not supported")
 
 	_, err = querier(ctx, []string{"foo"}, query)
 	require.Error(t, err)
@@ -94,13 +94,6 @@ func TestQueryIntegrationAddresses(t *testing.T) {
 	legacyQuerierCdc := codec.NewAminoCodec(app.LegacyAmino())
 	querier := mintkeeper.NewQuerier(app.MintKeeper, legacyQuerierCdc.LegacyAmino)
 
-	var integrationAddress string
-
-	res, sdkErr := querier(ctx, []string{minttypes.QueryIntegrationAddresses, "eth"}, abci.RequestQuery{})
-	require.NoError(t, sdkErr)
-
-	err := app.LegacyAmino().UnmarshalJSON(res, integrationAddress)
-	require.NoError(t, err)
-
-	require.Equal(t, app.MintKeeper.GetParams(ctx).IntegrationAddresses["eth"], integrationAddress)
+	_, sdkErr := querier(ctx, []string{minttypes.QueryIntegrationAddresses, "eth"}, abci.RequestQuery{})
+	require.Error(t, sdkErr, "integration address not supported")
 }

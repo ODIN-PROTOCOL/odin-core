@@ -27,7 +27,7 @@ service Query {
   // Inflation returns integration address.
   rpc IntegrationAddress(QueryIntegrationAddressRequest)
       returns (QueryIntegrationAddressResponse) {
-    option (google.api.http).get = "/mint/integration_address/{network_name}";
+    option (google.api.http).get = "/mint/integration_addresses/{network_name}";
   }
   // Inflation returns current treasury pool.
   rpc TreasuryPool(QueryTreasuryPoolRequest)
