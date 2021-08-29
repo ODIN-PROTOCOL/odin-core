@@ -34,7 +34,7 @@ func TestNewQuerier(t *testing.T) {
 	_, err = querier(ctx, []string{minttypes.QueryAnnualProvisions}, query)
 	require.NoError(t, err)
 
-	_, err = querier(ctx, []string{minttypes.QueryEthIntegrationAddress}, query)
+	_, err = querier(ctx, []string{minttypes.QueryIntegrationAddresses}, query)
 	require.NoError(t, err)
 
 	_, err = querier(ctx, []string{"foo"}, query)
@@ -89,18 +89,18 @@ func TestQueryAnnualProvisions(t *testing.T) {
 	require.Equal(t, app.MintKeeper.GetMinter(ctx).AnnualProvisions, annualProvisions)
 }
 
-func TestQueryEthIntegrationAddress(t *testing.T) {
+func TestQueryIntegrationAddresses(t *testing.T) {
 	app, ctx, _ := testapp.CreateTestInput(true)
 	legacyQuerierCdc := codec.NewAminoCodec(app.LegacyAmino())
 	querier := mintkeeper.NewQuerier(app.MintKeeper, legacyQuerierCdc.LegacyAmino)
 
 	var integrationAddress string
 
-	res, sdkErr := querier(ctx, []string{minttypes.QueryEthIntegrationAddress}, abci.RequestQuery{})
+	res, sdkErr := querier(ctx, []string{minttypes.QueryIntegrationAddresses, "eth"}, abci.RequestQuery{})
 	require.NoError(t, sdkErr)
 
-	err := app.LegacyAmino().UnmarshalJSON(res, &integrationAddress)
+	err := app.LegacyAmino().UnmarshalJSON(res, integrationAddress)
 	require.NoError(t, err)
 
-	require.Equal(t, app.MintKeeper.GetParams(ctx).EthIntegrationAddress, integrationAddress)
+	require.Equal(t, app.MintKeeper.GetParams(ctx).IntegrationAddresses["eth"], integrationAddress)
 }

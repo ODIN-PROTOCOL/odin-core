@@ -23,7 +23,7 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 			return queryAnnualProvisions(ctx, k, legacyQuerierCdc)
 
 		case minttypes.QueryIntegrationAddresses:
-			return queryIntegrationAddresses(ctx, k, legacyQuerierCdc)
+			return queryIntegrationAddresses(ctx, path[1:], k, legacyQuerierCdc)
 
 		case minttypes.QueryTreasuryPool:
 			return queryTreasuryPool(ctx, k, legacyQuerierCdc)
@@ -67,10 +67,17 @@ func queryAnnualProvisions(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.Le
 	return res, nil
 }
 
-func queryIntegrationAddresses(ctx sdk.Context, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
-	params := k.GetParams(ctx)
+func queryIntegrationAddresses(ctx sdk.Context, path []string, k Keeper, legacyQuerierCdc *codec.LegacyAmino) ([]byte, error) {
+	if len(path) != 1 {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "integration addresses not specified")
+	}
 
-	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, params.IntegrationAddresses)
+	integrationAddress, ok := k.GetParams(ctx).IntegrationAddresses[path[0]]
+	if !ok {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrNotSupported, "integration address not supported")
+	}
+
+	res, err := codec.MarshalJSONIndent(legacyQuerierCdc, integrationAddress)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
