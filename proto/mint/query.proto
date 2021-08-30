@@ -24,10 +24,10 @@ service Query {
       returns (QueryAnnualProvisionsResponse) {
     option (google.api.http).get = "/mint/annual_provisions";
   }
-  // Inflation returns ethereum integration address.
-  rpc EthIntegrationAddress(QueryEthIntegrationAddressRequest)
-      returns (QueryEthIntegrationAddressResponse) {
-    option (google.api.http).get = "/mint/eth_integration_address";
+  // Inflation returns integration address.
+  rpc IntegrationAddress(QueryIntegrationAddressRequest)
+      returns (QueryIntegrationAddressResponse) {
+    option (google.api.http).get = "/mint/integration_addresses/{network_name}";
   }
   // Inflation returns current treasury pool.
   rpc TreasuryPool(QueryTreasuryPoolRequest)
@@ -69,13 +69,15 @@ message QueryAnnualProvisionsResponse {
   ];
 }
 
-// QueryEthIntegrationAddressRequest is request type for the
+// QueryIntegrationAddressRequest is request type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryEthIntegrationAddressRequest {}
-// QueryEthIntegrationAddressResponse is response type for the
+message QueryIntegrationAddressRequest {
+  string network_name = 1;
+}
+// QueryIntegrationAddressResponse is response type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryEthIntegrationAddressResponse {
-  string eth_integration_address = 1;
+message QueryIntegrationAddressResponse {
+  string integration_address = 1;
 }
 
 // QueryTreasuryPoolRequest is request type for the Query/QueryTreasuryPool RPC

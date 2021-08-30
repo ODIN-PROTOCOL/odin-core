@@ -38,15 +38,15 @@ func (k Keeper) AnnualProvisions(
 	return &minttypes.QueryAnnualProvisionsResponse{AnnualProvisions: minter.AnnualProvisions}, nil
 }
 
-// EthIntegrationAddress returns ethereum integration address
-func (k Keeper) EthIntegrationAddress(
+// IntegrationAddress returns ethereum integration address
+func (k Keeper) IntegrationAddress(
 	c context.Context,
-	_ *minttypes.QueryEthIntegrationAddressRequest,
-) (*minttypes.QueryEthIntegrationAddressResponse, error) {
+	req *minttypes.QueryIntegrationAddressRequest,
+) (*minttypes.QueryIntegrationAddressResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	params := k.GetParams(ctx)
+	addresses := k.GetParams(ctx).IntegrationAddresses
 
-	return &minttypes.QueryEthIntegrationAddressResponse{EthIntegrationAddress: params.EthIntegrationAddress}, nil
+	return &minttypes.QueryIntegrationAddressResponse{IntegrationAddress: addresses[req.NetworkName]}, nil
 }
 
 // TreasuryPool returns current treasury pool
