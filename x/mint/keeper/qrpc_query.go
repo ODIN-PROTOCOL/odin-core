@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
+
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 var _ minttypes.QueryServer = Keeper{}
@@ -58,4 +60,35 @@ func (k Keeper) TreasuryPool(
 	mintPool := k.GetMintPool(ctx)
 
 	return &minttypes.QueryTreasuryPoolResponse{TreasuryPool: mintPool.TreasuryPool}, nil
+}
+
+func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequest) (*minttypes.QueryOdinInfoResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	mintPool := k.GetMintPool(ctx)
+
+	totalActiveSupply := k.bankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec().Sub(k.mintKeeper.GetMintPool(ctx).TreasuryPool.AmountOf(bondDenom).ToDec())
+
+	// communityPool := app.DistrKeeper.GetFeePool(ctx).CommunityPool
+	feePool := k.distrKeeper.GetFeePool(ctx)
+
+	// balances
+	validatorsResp, err := k.stakingQuerier.Validators(c, OdinInfoRequestToValidatorsRequest(request))
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get validators")
+	}
+	accounts, err := ValidatorsToAccounts(validatorsResp.GetValidators())
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "failed to get validators accounts addresses")
+	}
+	// extendedValidatorsResp := ValidatorsResponseToExtendedValidatorsResponse(validatorsResp)
+	// extendedValidatorsResp.Balances = k.GetBalances(ctx, accounts...)
+	balances := k.GetBalances(ctx, accounts...)
+
+	return &minttypes.QueryOdinInfoResponse{
+		// Total:
+		Balances:          balances,
+		CommunityPool:     feePool.CommunityPool,
+		TreasuryPool:      mintPool.TreasuryPool,
+		DataProvidersPool: mintPool.DataProvidersPool,
+	}, nil
 }

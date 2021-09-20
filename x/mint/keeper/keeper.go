@@ -7,7 +7,12 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+
+	"github.com/GeoDB-Limited/odin-core/x/bank/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	"github.com/tendermint/tendermint/libs/log"
+
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // Keeper of the mint store
@@ -16,16 +21,18 @@ type Keeper struct {
 	storeKey         sdk.StoreKey
 	paramSpace       paramtypes.Subspace
 	stakingKeeper    minttypes.StakingKeeper
+	stakingQuerier   stakingkeeper.Querier
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
+	distrKeeper      types.DistributionKeeper
 	feeCollectorName string
 }
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
 	cdc codec.BinaryMarshaler, key sdk.StoreKey, paramSpace paramtypes.Subspace,
-	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
-	feeCollectorName string,
+	sk minttypes.StakingKeeper, sk2 stakingkeeper.Keeper, ak minttypes.AccountKeeper,
+	bk minttypes.BankKeeper, dk types.DistributionKeeper, feeCollectorName string,
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
@@ -38,10 +45,14 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:              cdc,
-		storeKey:         key,
-		paramSpace:       paramSpace,
-		stakingKeeper:    sk,
+		cdc:           cdc,
+		storeKey:      key,
+		paramSpace:    paramSpace,
+		stakingKeeper: sk,
+		distrKeeper:   dk,
+		stakingQuerier: stakingkeeper.Querier{
+			Keeper: sk2,
+		},
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
@@ -186,4 +197,15 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 	k.SetMintPool(ctx, mintPool)
 
 	return nil
+}
+
+func (k Keeper) GetBalances(ctx sdk.Context, addrs ...sdk.AccAddress) []banktypes.Balance {
+	balances := make([]banktypes.Balance, len(addrs))
+	for i, addr := range addrs {
+		balances[i] = banktypes.Balance{
+			Address: addr.String(),
+			Coins:   k.bankKeeper.GetAllBalances(ctx, addr),
+		}
+	}
+	return balances
 }

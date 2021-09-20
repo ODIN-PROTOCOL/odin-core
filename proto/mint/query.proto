@@ -6,8 +6,12 @@ option go_package = "github.com/GeoDB-Limited/odin-core/x/mint/types";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/v1beta1/balance.proto";
 import "mint/mint.proto";
 import "mint/params.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/base/v1beta1/validator.proto";
+
 
 // Query defines the gRPC querier service.
 service Query {
@@ -33,6 +37,12 @@ service Query {
   rpc TreasuryPool(QueryTreasuryPoolRequest)
       returns (QueryTreasuryPoolResponse) {
     option (google.api.http).get = "/mint/treasury_pool";
+  }
+
+  rpc OdinInfo(QueryOdinInfoRequest) returns (QueryOdinInfoResponse) {
+      option (google.api.http).get = "/mint/odin_info";
+      // option (google.api.http).get = "/telemetry/top_balances";
+      // option (google.api.http).post = "/oracle/data_providers_pool";
   }
 }
 
@@ -90,4 +100,58 @@ message QueryTreasuryPoolResponse {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];
+}
+
+// QueryOdinInfoRequest is request type for Query/QueryOdinInfoRequest RPC method.
+message QueryOdinInfoRequest {
+  string status = 1;
+
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryOdinInfoResponse {
+  // int64 totalSupply = 1;
+
+  // int64 balances = 2;
+  repeated cosmos.base.v1beta1.Balance balances = 2 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
+    (gogoproto.nullable) = false
+  ];
+  // int64 community = 3;
+  // github_com_cosmos_cosmos_sdk_types.DecCoins
+  repeated cosmos.base.v1beta1.DecCoin community_pool = 3 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", 
+    (gogoproto.nullable) = false
+  ];
+
+  // int64 treasure = 4;
+  repeated cosmos.base.v1beta1.Coin treasury_pool = 4 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
+  
+  // int64 dataProviders = 5;
+  repeated cosmos.base.v1beta1.Coin data_providers_pool = 5 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message QueryExtendedValidatorsRequest {
+  string status = 1;
+
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryExtendedValidatorsResponse {
+  repeated cosmos.base.v1beta1.Validator validators = 1 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/staking/types.Validator",
+    (gogoproto.nullable) = false
+  ];
+  repeated cosmos.base.v1beta1.Balance balances = 2 [
+    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
+    (gogoproto.nullable) = false
+  ];
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
 }

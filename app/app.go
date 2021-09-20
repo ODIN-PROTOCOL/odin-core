@@ -1,6 +1,12 @@
 package band
 
 import (
+	"io"
+	stdlog "log"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/GeoDB-Limited/odin-core/x/auction"
 	auctionkeeper "github.com/GeoDB-Limited/odin-core/x/auction/keeper"
 	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
@@ -12,11 +18,6 @@ import (
 	odinminttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/telemetry"
 	telemetrykeeper "github.com/GeoDB-Limited/odin-core/x/telemetry/keeper"
-	"io"
-	stdlog "log"
-	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -292,8 +293,8 @@ func NewBandApp(
 		appCodec, keys[stakingtypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName),
 	)
 
-	app.MintKeeper = odinmintkeeper.NewKeeper(appCodec, keys[odinminttypes.StoreKey], app.GetSubspace(odinminttypes.ModuleName), &stakingKeeper,
-		app.AccountKeeper, app.BankKeeper, authtypes.FeeCollectorName)
+	app.MintKeeper = odinmintkeeper.NewKeeper(appCodec, keys[odinminttypes.StoreKey], app.GetSubspace(odinminttypes.ModuleName), &stakingKeeper, app.StakingKeeper,
+		app.AccountKeeper, app.BankKeeper, &app.DistrKeeper, authtypes.FeeCollectorName)
 
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec, keys[distrtypes.StoreKey], app.GetSubspace(distrtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
