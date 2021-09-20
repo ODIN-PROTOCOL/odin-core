@@ -2,14 +2,15 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	oracleclientcommon "github.com/GeoDB-Limited/odin-core/x/oracle/client/common"
 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/version"
-	"strconv"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
@@ -523,7 +524,7 @@ $ %s query oracle data-providers-pool
 func GetCmdQueryRequestPrice() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "request-price",
-		Args:  cobra.NoArgs,
+		Args:  cobra.ExactArgs(3),
 		Short: "queries the latest price on standard price reference oracle",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
