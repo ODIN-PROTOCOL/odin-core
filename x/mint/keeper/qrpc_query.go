@@ -65,11 +65,13 @@ func (k Keeper) TreasuryPool(
 func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequest) (*minttypes.QueryOdinInfoResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 	mintPool := k.GetMintPool(ctx)
-
-	totalActiveSupply := k.bankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec().Sub(k.mintKeeper.GetMintPool(ctx).TreasuryPool.AmountOf(bondDenom).ToDec())
-
-	// communityPool := app.DistrKeeper.GetFeePool(ctx).CommunityPool
+	// commmunity pool
 	feePool := k.distrKeeper.GetFeePool(ctx)
+
+	// Total Supply	(denom: loki)
+	bondDenom := k.odinGovKeeper.BondDenom(ctx)
+	totalSupply := k.odinBankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec() // other not need: .Sub(mintPool.TreasuryPool.AmountOf(bondDenom).ToDec())
+	// not "Active" just total supply
 
 	// balances
 	validatorsResp, err := k.stakingQuerier.Validators(c, OdinInfoRequestToValidatorsRequest(request))
@@ -80,12 +82,10 @@ func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequ
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get validators accounts addresses")
 	}
-	// extendedValidatorsResp := ValidatorsResponseToExtendedValidatorsResponse(validatorsResp)
-	// extendedValidatorsResp.Balances = k.GetBalances(ctx, accounts...)
 	balances := k.GetBalances(ctx, accounts...)
 
 	return &minttypes.QueryOdinInfoResponse{
-		// Total:
+		TotalSupply:       totalSupply,
 		Balances:          balances,
 		CommunityPool:     feePool.CommunityPool,
 		TreasuryPool:      mintPool.TreasuryPool,

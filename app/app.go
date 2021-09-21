@@ -294,7 +294,7 @@ func NewBandApp(
 	)
 
 	app.MintKeeper = odinmintkeeper.NewKeeper(appCodec, keys[odinminttypes.StoreKey], app.GetSubspace(odinminttypes.ModuleName), &stakingKeeper, app.StakingKeeper,
-		app.AccountKeeper, app.BankKeeper, &app.DistrKeeper, authtypes.FeeCollectorName)
+		app.AccountKeeper, app.BankKeeper, &app.DistrKeeper, app.StakingKeeper, app.BankKeeper, authtypes.FeeCollectorName)
 
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec, keys[distrtypes.StoreKey], app.GetSubspace(distrtypes.ModuleName), app.AccountKeeper, app.BankKeeper,

@@ -105,32 +105,32 @@ message QueryTreasuryPoolResponse {
 // QueryOdinInfoRequest is request type for Query/QueryOdinInfoRequest RPC method.
 message QueryOdinInfoRequest {
   string status = 1;
-
+  
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
+// QueryOdinInfoResponse is response type for Query/QueryOdinInfoResponse RPC method.
 message QueryOdinInfoResponse {
-  // int64 totalSupply = 1;
+  string total_supply = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
 
-  // int64 balances = 2;
   repeated cosmos.base.v1beta1.Balance balances = 2 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false
   ];
-  // int64 community = 3;
-  // github_com_cosmos_cosmos_sdk_types.DecCoins
+
   repeated cosmos.base.v1beta1.DecCoin community_pool = 3 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", 
     (gogoproto.nullable) = false
   ];
 
-  // int64 treasure = 4;
   repeated cosmos.base.v1beta1.Coin treasury_pool = 4 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];
   
-  // int64 dataProviders = 5;
   repeated cosmos.base.v1beta1.Coin data_providers_pool = 5 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
@@ -139,7 +139,7 @@ message QueryOdinInfoResponse {
 
 message QueryExtendedValidatorsRequest {
   string status = 1;
-
+  
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
@@ -148,6 +148,7 @@ message QueryExtendedValidatorsResponse {
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/staking/types.Validator",
     (gogoproto.nullable) = false
   ];
+
   repeated cosmos.base.v1beta1.Balance balances = 2 [
     (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
     (gogoproto.nullable) = false

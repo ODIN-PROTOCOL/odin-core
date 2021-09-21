@@ -12,6 +12,7 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	"github.com/tendermint/tendermint/libs/log"
 
+	odingovtypes "github.com/GeoDB-Limited/odin-core/x/gov/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -25,6 +26,8 @@ type Keeper struct {
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
 	distrKeeper      types.DistributionKeeper
+	odinGovKeeper    odingovtypes.StakingKeeper
+	odinBankKeeper   odingovtypes.BankKeeper
 	feeCollectorName string
 }
 
@@ -32,7 +35,8 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.BinaryMarshaler, key sdk.StoreKey, paramSpace paramtypes.Subspace,
 	sk minttypes.StakingKeeper, sk2 stakingkeeper.Keeper, ak minttypes.AccountKeeper,
-	bk minttypes.BankKeeper, dk types.DistributionKeeper, feeCollectorName string,
+	bk minttypes.BankKeeper, dk types.DistributionKeeper, ogk odingovtypes.StakingKeeper,
+	obk odingovtypes.BankKeeper, feeCollectorName string,
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
@@ -55,6 +59,8 @@ func NewKeeper(
 		},
 		bankKeeper:       bk,
 		authKeeper:       ak,
+		odinGovKeeper:    ogk,
+		odinBankKeeper:   obk,
 		feeCollectorName: feeCollectorName,
 	}
 }
