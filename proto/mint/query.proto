@@ -12,7 +12,6 @@ import "mint/params.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "cosmos/base/v1beta1/validator.proto";
 
-
 // Query defines the gRPC querier service.
 service Query {
   // Params returns the total set of minting parameters.
@@ -39,10 +38,13 @@ service Query {
     option (google.api.http).get = "/mint/treasury_pool";
   }
 
-  rpc OdinInfo(QueryOdinInfoRequest) returns (QueryOdinInfoResponse) {
-      option (google.api.http).get = "/mint/odin_info";
-      // option (google.api.http).get = "/telemetry/top_balances";
-      // option (google.api.http).post = "/oracle/data_providers_pool";
+  rpc TotalSupply(QueryTotalSupplyRequest) returns (QueryTotalSupplyResponse) {
+    option (google.api.http).get = "/mint/total_supply";
+  }
+
+  rpc CommunityPool(QueryCommunityPoolRequest)
+      returns (QueryCommunityPoolResponse) {
+    option (google.api.http).get = "/mint/community_pool";
   }
 }
 
@@ -81,14 +83,10 @@ message QueryAnnualProvisionsResponse {
 
 // QueryIntegrationAddressRequest is request type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressRequest {
-  string network_name = 1;
-}
+message QueryIntegrationAddressRequest { string network_name = 1; }
 // QueryIntegrationAddressResponse is response type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressResponse {
-  string integration_address = 1;
-}
+message QueryIntegrationAddressResponse { string integration_address = 1; }
 
 // QueryTreasuryPoolRequest is request type for the Query/QueryTreasuryPool RPC
 // method.
@@ -102,57 +100,25 @@ message QueryTreasuryPoolResponse {
   ];
 }
 
-// QueryOdinInfoRequest is request type for Query/QueryOdinInfoRequest RPC method.
-message QueryOdinInfoRequest {
-  string status = 1;
-  
-  cosmos.base.query.v1beta1.PageRequest pagination = 2;
-}
-
-// QueryOdinInfoResponse is response type for Query/QueryOdinInfoResponse RPC method.
-message QueryOdinInfoResponse {
+// QueryTotalSupplyRequest is request type for Query/QueryTotalSupply RPC method
+message QueryTotalSupplyRequest {}
+// QueryTotalSupplyResponse is response type for Query/QueryTotalSupply RPC
+// method
+message QueryTotalSupplyResponse {
   string total_supply = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable) = false
   ];
-
-  repeated cosmos.base.v1beta1.Balance balances = 2 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
-    (gogoproto.nullable) = false
-  ];
-
-  repeated cosmos.base.v1beta1.DecCoin community_pool = 3 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins", 
-    (gogoproto.nullable) = false
-  ];
-
-  repeated cosmos.base.v1beta1.Coin treasury_pool = 4 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
-  
-  repeated cosmos.base.v1beta1.Coin data_providers_pool = 5 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
 }
 
-message QueryExtendedValidatorsRequest {
-  string status = 1;
-  
-  cosmos.base.query.v1beta1.PageRequest pagination = 2;
-}
-
-message QueryExtendedValidatorsResponse {
-  repeated cosmos.base.v1beta1.Validator validators = 1 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/staking/types.Validator",
+// QueryCommunityPoolRequest is request type for Query/QueryCommunityPool RPC
+// method
+message QueryCommunityPoolRequest {}
+// QueryCommunityPoolResponse is response type for Query/QueryCommunityPool RPC
+// method
+message QueryCommunityPoolResponse {
+  repeated cosmos.base.v1beta1.DecCoin community_pool = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable) = false
   ];
-
-  repeated cosmos.base.v1beta1.Balance balances = 2 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
-    (gogoproto.nullable) = false
-  ];
-
-  cosmos.base.query.v1beta1.PageResponse pagination = 3;
 }

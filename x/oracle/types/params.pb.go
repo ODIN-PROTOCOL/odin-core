@@ -56,11 +56,14 @@ type Params struct {
 	// MaxCalldataSize is the maximum number of bytes that can be present in the
 	// calldata
 	MaxCalldataSize uint64 `protobuf:"varint,10,opt,name=max_calldata_size,json=maxCalldataSize,proto3" json:"max_calldata_size,omitempty"`
-	// DataProviderRewardPerByte is the amount of tokens, user gets for the byte of data provided
+	// DataProviderRewardPerByte is the amount of tokens, user gets for the byte
+	// of data provided
 	DataProviderRewardPerByte github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,11,rep,name=data_provider_reward_per_byte,json=dataProviderRewardPerByte,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"data_provider_reward_per_byte"`
-	// DataProviderRewardThreshold is the maximum amount of tokens that can be paid for data per time
+	// DataProviderRewardThreshold is the maximum amount of tokens that can be
+	// paid for data per time
 	DataProviderRewardThreshold RewardThreshold `protobuf:"bytes,12,opt,name=data_provider_reward_threshold,json=dataProviderRewardThreshold,proto3" json:"data_provider_reward_threshold"`
-	// RewardDecreasingFraction is the percentage by which the cost of data per byte is reduced when the limit is reached
+	// RewardDecreasingFraction is the percentage by which the cost of data per
+	// byte is reduced when the limit is reached
 	RewardDecreasingFraction github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,13,opt,name=reward_decreasing_fraction,json=rewardDecreasingFraction,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"reward_decreasing_fraction"`
 	// Denominations that can be used for withdrawing fee from data requesters
 	DataRequesterFeeDenoms []string `protobuf:"bytes,14,rep,name=data_requester_fee_denoms,json=dataRequesterFeeDenoms,proto3" json:"data_requester_fee_denoms,omitempty"`
@@ -193,7 +196,8 @@ func (m *Params) GetDataRequesterFeeDenoms() []string {
 type RewardThreshold struct {
 	// Amount is the maximum amount of tokens that can be paid for data
 	Amount github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=amount,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"amount"`
-	// Blocks is the number of blocks during which the sum of the reward should not exceed total_reward_amount
+	// Blocks is the number of blocks during which the sum of the reward should
+	// not exceed total_reward_amount
 	Blocks uint64 `protobuf:"varint,2,opt,name=blocks,proto3" json:"blocks,omitempty"`
 }
 

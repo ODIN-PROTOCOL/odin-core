@@ -28,6 +28,12 @@ func NewQuerier(k Keeper, legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
 		case minttypes.QueryTreasuryPool:
 			return queryTreasuryPool(ctx, k, legacyQuerierCdc)
 
+		case minttypes.QueryCommunityPool:
+			return querierCommunityPool(ctx, k, legacyQuerierCdc)
+
+		case minttypes.QueryTotalSupply:
+			return querierTotalSupply(ctx, k, legacyQuerierCdc)
+
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown query path: %s", path[0])
 		}
@@ -87,4 +93,14 @@ func queryIntegrationAddresses(ctx sdk.Context, path []string, k Keeper, legacyQ
 
 func queryTreasuryPool(ctx sdk.Context, k Keeper, cdc *codec.LegacyAmino) ([]byte, error) {
 	return commontypes.QueryOK(cdc, k.GetMintPool(ctx).TreasuryPool)
+}
+
+func querierCommunityPool(ctx sdk.Context, k Keeper, cdc *codec.LegacyAmino) ([]byte, error) {
+	return commontypes.QueryOK(cdc, k.distrKeeper.GetFeePool(ctx).CommunityPool)
+}
+
+func querierTotalSupply(ctx sdk.Context, k Keeper, cdc *codec.LegacyAmino) ([]byte, error) {
+	bondDenom := k.odinGovKeeper.BondDenom(ctx)
+
+	return commontypes.QueryOK(cdc, k.odinBankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec())
 }

@@ -1,8 +1,10 @@
 package keeper_test
 
 import (
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	"fmt"
 	"testing"
+
+	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
@@ -97,3 +99,54 @@ func TestQueryIntegrationAddresses(t *testing.T) {
 	_, sdkErr := querier(ctx, []string{minttypes.QueryIntegrationAddresses, "eth"}, abci.RequestQuery{})
 	require.Error(t, sdkErr, "integration address not supported")
 }
+
+func TestQueryTreasuryPool(t *testing.T) {
+	app, ctx, _ := testapp.CreateTestInput(true)
+	legacyQuerierCdc := codec.NewAminoCodec(app.LegacyAmino())
+	querier := mintkeeper.NewQuerier(app.MintKeeper, legacyQuerierCdc.LegacyAmino)
+	req := require.New(t)
+
+	var treasuryPool sdk.Coins
+	res, sdkErr := querier(ctx, []string{minttypes.QueryTreasuryPool}, abci.RequestQuery{})
+	req.NoError(sdkErr)
+	fmt.Printf("\n!! TreasuryPool: %s!!\n\n", treasuryPool)
+
+	err := app.LegacyAmino().UnmarshalJSON(res, &treasuryPool)
+	req.NoError(err)
+
+	req.Equal(app.MintKeeper.GetMintPool(ctx).TreasuryPool, treasuryPool)
+}
+
+func TestQueryCommunityPool(t *testing.T) {
+	app, ctx, _ := testapp.CreateTestInput(true)
+	legacyQuerierCdc := codec.NewAminoCodec(app.LegacyAmino())
+	querier := mintkeeper.NewQuerier(app.MintKeeper, legacyQuerierCdc.LegacyAmino)
+	req := require.New(t)
+
+	var communityPool sdk.DecCoins
+	res, sdkErr := querier(ctx, []string{minttypes.QueryCommunityPool}, abci.RequestQuery{})
+	req.NoError(sdkErr)
+	fmt.Printf("res: %s\n", res)
+
+	err := app.LegacyAmino().UnmarshalJSON(res, &communityPool)
+	req.NoError(err)
+
+	req.Equal(app.DistrKeeper.GetFeePool(ctx), communityPool)
+}
+
+// func TestQueryTotalSupply(t *testing.T) {
+// 	app, ctx, _ := testapp.CreateTestInput(true)
+// 	legacyQuerierCdc := codec.NewAminoCodec(app.LegacyAmino())
+// 	querier := mintkeeper.NewQuerier(app.MintKeeper, legacyQuerierCdc.LegacyAmino)
+// 	req := require.New(t)
+
+// 	var totalSupply sdk.Dec
+// 	res, sdkErr := querier(ctx, []string{minttypes.QueryTotalSupply}, abci.RequestQuery{})
+// 	req.NoError(sdkErr)
+// 	fmt.Printf("res: %s\n", res)
+
+// 	err := app.LegacyAmino().UnmarshalJSON(res, &totalSupply)
+// 	req.NoError(err)
+
+// 	req.Equal(app.DistrKeeper.GetFeePool(ctx), totalSupply)
+// }

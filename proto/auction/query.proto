@@ -14,7 +14,8 @@ service Query {
     option (google.api.http).get = "/auction/params";
   }
 
-  rpc AuctionStatus(QueryAuctionStatusRequest) returns (QueryAuctionStatusResponse) {
+  rpc AuctionStatus(QueryAuctionStatusRequest)
+      returns (QueryAuctionStatusResponse) {
     option (google.api.http).get = "/auction/status";
   }
 }
@@ -24,7 +25,7 @@ message QueryParamsRequest {}
 
 // QueryCountsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
 // QueryAuctionStatusRequest is request type for the Query/Status RPC method.
@@ -32,5 +33,5 @@ message QueryAuctionStatusRequest {}
 
 // QueryAuctionStatusResponse is response type for the Query/Status RPC method.
 message QueryAuctionStatusResponse {
-  AuctionStatus auction_status = 1 [(gogoproto.nullable) = false];
+  AuctionStatus auction_status = 1 [ (gogoproto.nullable) = false ];
 }

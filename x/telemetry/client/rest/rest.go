@@ -2,12 +2,13 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+
 	commonrest "github.com/GeoDB-Limited/odin-core/x/common/client/rest"
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
@@ -49,6 +50,11 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	rtr.HandleFunc(
 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorBlocks),
 		getValidatorBlocksHandler(clientCtx),
+	).Methods("GET")
+
+	rtr.HandleFunc(
+		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryBalances),
+		queryBalances(clientCtx),
 	).Methods("GET")
 }
 
@@ -259,6 +265,25 @@ func getValidatorBlocksHandler(clientCtx client.Context) http.HandlerFunc {
 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorBlocks),
 			bin,
 		)
+		if rest.CheckInternalServerError(w, err) {
+			return
+		}
+
+		clientCtx = clientCtx.WithHeight(height)
+		rest.PostProcessResponse(w, clientCtx, res)
+	}
+}
+
+func queryBalances(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route := fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryBalances)
+
+		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := clientCtx.Query(route)
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}

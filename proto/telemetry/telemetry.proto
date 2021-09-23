@@ -12,10 +12,8 @@ import "cosmos/base/v1beta1/coin.proto";
 message AverageBlockSizePerDay {
   option (gogoproto.equal) = true;
 
-  google.protobuf.Timestamp date = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp date = 1
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   uint64 bytes = 2;
 }
 
@@ -23,10 +21,8 @@ message AverageBlockSizePerDay {
 message AverageBlockTimePerDay {
   option (gogoproto.equal) = true;
 
-  google.protobuf.Timestamp date = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp date = 1
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   uint64 seconds = 2;
 }
 
@@ -34,10 +30,8 @@ message AverageBlockTimePerDay {
 message AverageTxFeePerDay {
   option (gogoproto.equal) = true;
 
-  google.protobuf.Timestamp date = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp date = 1
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   repeated cosmos.base.v1beta1.Coin fee = 2 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
@@ -48,10 +42,8 @@ message AverageTxFeePerDay {
 message TxVolumePerDay {
   option (gogoproto.equal) = true;
 
-  google.protobuf.Timestamp date = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp date = 1
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   uint64 volume = 2;
 }
 
@@ -71,10 +63,8 @@ message ValidatorBlockStats {
 message ValidatorBlock {
   option (gogoproto.equal) = true;
   uint64 height = 1;
-  google.protobuf.Timestamp time = 2 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime) = true
-  ];
+  google.protobuf.Timestamp time = 2
+      [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
   uint64 txs_count = 3;
   repeated cosmos.base.v1beta1.Coin reward = 4 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",

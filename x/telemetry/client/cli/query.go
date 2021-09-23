@@ -2,6 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -9,8 +12,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
-	"strings"
-	"time"
 )
 
 const (
@@ -35,6 +36,7 @@ func GetQueryCmd() *cobra.Command {
 		GetQueryCmdTxVolume(),
 		GetQueryCmdValidatorBlocks(),
 		GetQueryCmdTopValidators(),
+		GetQueryCmdBalances(),
 	)
 	return coinswapCmd
 }
@@ -395,4 +397,50 @@ func ParseDateInterval(startDateArg, endDateArg string) (*time.Time, *time.Time,
 	}
 
 	return startDate, endDate, nil
+}
+
+// GetQueryCmdBalances returns the command for fetching balances info
+func GetQueryCmdBalances() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "balances [status]",
+		Short: "Query the amount of coins in the balances",
+		// 		Long: strings.TrimSpace(
+		// 			fmt.Sprintf(`Query for extended validators.
+
+		// Example:
+		//   $ %[1]s query %[2]s extended-validators [status]
+		//   $ %[1]s query %[2]s extended-validators [status] --limit=100 --offset=2
+		// `,
+		// 				version.AppName, telemetrytypes.ModuleName,
+		// 			),
+		// ),
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			queryClient := telemetrytypes.NewQueryClient(clientCtx)
+			res, err := queryClient.ExtendedValidators(cmd.Context(), &telemetrytypes.QueryExtendedValidatorsRequest{
+				Status:     args[0],
+				Pagination: pageReq,
+			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.Balances))
+		},
+	}
+
+	flags.AddPaginationFlagsToCmd(cmd, "balances")
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
 }

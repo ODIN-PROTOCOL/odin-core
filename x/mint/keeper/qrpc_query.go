@@ -5,7 +5,6 @@ import (
 
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 var _ minttypes.QueryServer = Keeper{}
@@ -62,33 +61,52 @@ func (k Keeper) TreasuryPool(
 	return &minttypes.QueryTreasuryPoolResponse{TreasuryPool: mintPool.TreasuryPool}, nil
 }
 
-func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequest) (*minttypes.QueryOdinInfoResponse, error) {
-	ctx := sdk.UnwrapSDKContext(c)
-	mintPool := k.GetMintPool(ctx)
-	// commmunity pool
-	feePool := k.distrKeeper.GetFeePool(ctx)
+// func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequest) (*minttypes.QueryOdinInfoResponse, error) {
+// 	ctx := sdk.UnwrapSDKContext(c)
+// 	mintPool := k.GetMintPool(ctx)
+// 	// commmunity pool
+// 	feePool := k.distrKeeper.GetFeePool(ctx)
 
+// 	// Total Supply	(denom: loki)
+// 	bondDenom := k.odinGovKeeper.BondDenom(ctx)
+// 	totalSupply := k.odinBankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec() // other not need: .Sub(mintPool.TreasuryPool.AmountOf(bondDenom).ToDec())
+// 	// not "Active" just total supply
+
+// 	// balances
+// 	validatorsResp, err := k.stakingQuerier.Validators(c, OdinInfoRequestToValidatorsRequest(request))
+// 	if err != nil {
+// 		return nil, sdkerrors.Wrap(err, "failed to get validators")
+// 	}
+// 	accounts, err := ValidatorsToAccounts(validatorsResp.GetValidators())
+// 	if err != nil {
+// 		return nil, sdkerrors.Wrap(err, "failed to get validators accounts addresses")
+// 	}
+// 	balances := k.GetBalances(ctx, accounts...)
+
+// 	return &minttypes.QueryOdinInfoResponse{
+// 		TotalSupply:       totalSupply,
+// 		Balances:          balances,
+// 		CommunityPool:     feePool.CommunityPool,
+// 		TreasuryPool:      mintPool.TreasuryPool,
+// 		DataProvidersPool: mintPool.DataProvidersPool,
+// 	}, nil
+// }
+
+// TotalSupply return Odin Total Supply tokens amount
+func (k Keeper) TotalSupply(c context.Context, request *minttypes.QueryTotalSupplyRequest) (*minttypes.QueryTotalSupplyResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
 	// Total Supply	(denom: loki)
 	bondDenom := k.odinGovKeeper.BondDenom(ctx)
 	totalSupply := k.odinBankKeeper.GetSupply(ctx).GetTotal().AmountOf(bondDenom).ToDec() // other not need: .Sub(mintPool.TreasuryPool.AmountOf(bondDenom).ToDec())
-	// not "Active" just total supply
-
-	// balances
-	validatorsResp, err := k.stakingQuerier.Validators(c, OdinInfoRequestToValidatorsRequest(request))
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to get validators")
-	}
-	accounts, err := ValidatorsToAccounts(validatorsResp.GetValidators())
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to get validators accounts addresses")
-	}
-	balances := k.GetBalances(ctx, accounts...)
-
-	return &minttypes.QueryOdinInfoResponse{
-		TotalSupply:       totalSupply,
-		Balances:          balances,
-		CommunityPool:     feePool.CommunityPool,
-		TreasuryPool:      mintPool.TreasuryPool,
-		DataProvidersPool: mintPool.DataProvidersPool,
+	return &minttypes.QueryTotalSupplyResponse{
+		TotalSupply: totalSupply,
 	}, nil
+}
+
+// CommunityPool return Odin Community Pool tokens amount
+func (k Keeper) CommunityPool(c context.Context, _ *minttypes.QueryCommunityPoolRequest) (*minttypes.QueryCommunityPoolResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	feePool := k.distrKeeper.GetFeePool(ctx)
+
+	return &minttypes.QueryCommunityPoolResponse{CommunityPool: feePool.CommunityPool}, nil
 }

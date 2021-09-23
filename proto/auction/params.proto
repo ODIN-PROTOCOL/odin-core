@@ -8,7 +8,6 @@ import "cosmos/base/v1beta1/coin.proto";
 import "google/protobuf/any.proto";
 import "coinswap/params.proto";
 
-
 // Params is the data structure that keeps the parameters of the auction module.
 message Params {
   option (gogoproto.equal) = false;
@@ -18,5 +17,6 @@ message Params {
     (gogoproto.nullable) = false
   ];
   // ExchangeRate is a rate for buying coins throw the auction
-  repeated coinswap.Exchange exchange_rates = 2 [(gogoproto.nullable) = false];
+  repeated coinswap.Exchange exchange_rates = 2
+      [ (gogoproto.nullable) = false ];
 }

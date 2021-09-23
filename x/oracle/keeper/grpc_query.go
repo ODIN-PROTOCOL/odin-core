@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -250,6 +251,7 @@ func (k Querier) RequestPrice(c context.Context, req *oracletypes.QueryRequestPr
 	return &oracletypes.QueryRequestPriceResponse{}, nil
 }
 
+// DataProvidersPool return Odin DataProviders Pool
 func (k Querier) DataProvidersPool(c context.Context, req *oracletypes.QueryDataProvidersPoolRequest) (*oracletypes.QueryDataProvidersPoolResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
 
@@ -358,8 +360,7 @@ func (k Querier) RequestVerification(
 	if err != nil {
 		return nil, status.Error(
 			codes.InvalidArgument,
-			fmt.Sprintf("unable to parse validator address: %s", err.Error(),
-			),
+			fmt.Sprintf("unable to parse validator address: %s", err.Error()),
 		)
 	}
 

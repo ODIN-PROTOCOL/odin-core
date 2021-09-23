@@ -355,7 +355,8 @@ func (m *QueryDataSourcesRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryDataSourcesResponse is response type for the Query/DataSources RPC method.
+// QueryDataSourcesResponse is response type for the Query/DataSources RPC
+// method.
 type QueryDataSourcesResponse struct {
 	DataSources []DataSource        `protobuf:"bytes,1,rep,name=data_sources,json=dataSources,proto3" json:"data_sources"`
 	Pagination  *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -408,7 +409,8 @@ func (m *QueryDataSourcesResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryOracleScriptRequest is request type for the Query/OracleScript RPC method.
+// QueryOracleScriptRequest is request type for the Query/OracleScript RPC
+// method.
 type QueryOracleScriptRequest struct {
 	OracleScriptId int64 `protobuf:"varint,1,opt,name=oracle_script_id,json=oracleScriptId,proto3" json:"oracle_script_id,omitempty"`
 }
@@ -453,7 +455,8 @@ func (m *QueryOracleScriptRequest) GetOracleScriptId() int64 {
 	return 0
 }
 
-// QueryOracleScriptResponse is response type for the Query/OracleScript RPC method.
+// QueryOracleScriptResponse is response type for the Query/OracleScript RPC
+// method.
 type QueryOracleScriptResponse struct {
 	OracleScript *OracleScript `protobuf:"bytes,1,opt,name=oracle_script,json=oracleScript,proto3" json:"oracle_script,omitempty"`
 }
@@ -498,7 +501,8 @@ func (m *QueryOracleScriptResponse) GetOracleScript() *OracleScript {
 	return nil
 }
 
-// QueryOracleScriptsRequest is request type for the Query/OracleScripts RPC method.
+// QueryOracleScriptsRequest is request type for the Query/OracleScripts RPC
+// method.
 type QueryOracleScriptsRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -543,7 +547,8 @@ func (m *QueryOracleScriptsRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC method.
+// QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC
+// method.
 type QueryOracleScriptsResponse struct {
 	OracleScripts []OracleScript      `protobuf:"bytes,1,rep,name=oracle_scripts,json=oracleScripts,proto3" json:"oracle_scripts"`
 	Pagination    *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -596,7 +601,8 @@ func (m *QueryOracleScriptsResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// QueryRequestReportsRequest is request type for the Query/RequestReports RPC method.
+// QueryRequestReportsRequest is request type for the Query/RequestReports RPC
+// method.
 type QueryRequestReportsRequest struct {
 	RequestId  int64              `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	Pagination *query.PageRequest `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -649,7 +655,8 @@ func (m *QueryRequestReportsRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
-// QueryRequestReportsResponse is response type for the Query/RequestReports RPC method.
+// QueryRequestReportsResponse is response type for the Query/RequestReports RPC
+// method.
 type QueryRequestReportsResponse struct {
 	Reports    []Report            `protobuf:"bytes,1,rep,name=reports,proto3" json:"reports"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -1153,7 +1160,8 @@ func (m *QueryReportersResponse) GetReporter() []string {
 	return nil
 }
 
-// QueryActiveValidatorsRequest is request type for the Query/ActiveValidators RPC method.
+// QueryActiveValidatorsRequest is request type for the Query/ActiveValidators
+// RPC method.
 type QueryActiveValidatorsRequest struct {
 }
 
@@ -1190,7 +1198,8 @@ func (m *QueryActiveValidatorsRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryActiveValidatorsRequest proto.InternalMessageInfo
 
-// QueryActiveValidatorsResponse is response type for the Query/ActiveValidators RPC method.
+// QueryActiveValidatorsResponse is response type for the Query/ActiveValidators
+// RPC method.
 type QueryActiveValidatorsResponse struct {
 	Count int64 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
 }
@@ -1235,7 +1244,8 @@ func (m *QueryActiveValidatorsResponse) GetCount() int64 {
 	return 0
 }
 
-// QueryRequestSearchRequest is request type for the Query/RequestSearch RPC method.
+// QueryRequestSearchRequest is request type for the Query/RequestSearch RPC
+// method.
 type QueryRequestSearchRequest struct {
 	OracleScriptId int64  `protobuf:"varint,1,opt,name=oracle_script_id,json=oracleScriptId,proto3" json:"oracle_script_id,omitempty"`
 	Calldata       []byte `protobuf:"bytes,2,opt,name=calldata,proto3" json:"calldata,omitempty"`
@@ -1304,7 +1314,8 @@ func (m *QueryRequestSearchRequest) GetMinCount() int64 {
 	return 0
 }
 
-// QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method.
+// QueryRequestSearchResponse is response type for the Query/RequestSearch RPC
+// method.
 type QueryRequestSearchResponse struct {
 	RequestPacketData  *OracleRequestPacketData  `protobuf:"bytes,1,opt,name=request_packet_data,json=requestPacketData,proto3" json:"request_packet_data,omitempty"`
 	ResponsePacketData *OracleResponsePacketData `protobuf:"bytes,2,opt,name=response_packet_data,json=responsePacketData,proto3" json:"response_packet_data,omitempty"`
@@ -1357,7 +1368,8 @@ func (m *QueryRequestSearchResponse) GetResponsePacketData() *OracleResponsePack
 	return nil
 }
 
-// QueryRequestPriceRequest is request type for the Query/RequestPrice RPC method.
+// QueryRequestPriceRequest is request type for the Query/RequestPrice RPC
+// method.
 type QueryRequestPriceRequest struct {
 	Symbol   string `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
 	AskCount int64  `protobuf:"varint,2,opt,name=ask_count,json=askCount,proto3" json:"ask_count,omitempty"`
@@ -1418,7 +1430,8 @@ func (m *QueryRequestPriceRequest) GetMinCount() int64 {
 	return 0
 }
 
-// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method.
+// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC
+// method.
 type QueryRequestPriceResponse struct {
 	OracleScriptId int64  `protobuf:"varint,1,opt,name=oracle_script_id,json=oracleScriptId,proto3" json:"oracle_script_id,omitempty"`
 	Calldata       []byte `protobuf:"bytes,2,opt,name=calldata,proto3" json:"calldata,omitempty"`
@@ -1523,7 +1536,8 @@ func (m *QueryDataProvidersPoolRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryDataProvidersPoolRequest proto.InternalMessageInfo
 
-// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method.
+// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC
+// method.
 type QueryDataProvidersPoolResponse struct {
 	Pool github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=pool,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"pool"`
 }
@@ -1612,7 +1626,8 @@ func (m *QueryRequestIDs) GetRequestIds() []int64 {
 	return nil
 }
 
-// QueryDataProviderRewardRequest is request type for the Query/DataProviderReward RPC method.
+// QueryDataProviderRewardRequest is request type for the
+// Query/DataProviderReward RPC method.
 type QueryDataProviderRewardRequest struct {
 }
 
@@ -1649,7 +1664,8 @@ func (m *QueryDataProviderRewardRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryDataProviderRewardRequest proto.InternalMessageInfo
 
-// QueryDataProviderRewardResponse is response type for the Query/DataProviderReward RPC method.
+// QueryDataProviderRewardResponse is response type for the
+// Query/DataProviderReward RPC method.
 type QueryDataProviderRewardResponse struct {
 	RewardPerByte github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=reward_per_byte,json=rewardPerByte,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"reward_per_byte"`
 }
@@ -1694,7 +1710,8 @@ func (m *QueryDataProviderRewardResponse) GetRewardPerByte() github_com_cosmos_c
 	return nil
 }
 
-// QueryPendingRequestRequest is request type for the Query/PendingRequests RPC method.
+// QueryPendingRequestRequest is request type for the Query/PendingRequests RPC
+// method.
 type QueryPendingRequestsRequest struct {
 	// ValidatorAddress is address of a validator
 	ValidatorAddress string `protobuf:"bytes,1,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
@@ -1740,7 +1757,8 @@ func (m *QueryPendingRequestsRequest) GetValidatorAddress() string {
 	return ""
 }
 
-// QueryPendingRequestResponse is response type for the Query/PendingRequests RPC method.
+// QueryPendingRequestResponse is response type for the Query/PendingRequests
+// RPC method.
 type QueryPendingRequestsResponse struct {
 	// RequestIDs is a list of pending request IDs assigned to the given validator
 	RequestIDs []int64 `protobuf:"varint,1,rep,packed,name=request_ids,json=requestIds,proto3" json:"request_ids,omitempty"`
@@ -2166,12 +2184,14 @@ type QueryClient interface {
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	// RequestSearch queries the latest request that match the given input.
 	RequestSearch(ctx context.Context, in *QueryRequestSearchRequest, opts ...grpc.CallOption) (*QueryRequestSearchResponse, error)
-	// RequestPrice queries the latest price on standard price reference oracle script.
+	// RequestPrice queries the latest price on standard price reference oracle
+	// script.
 	RequestPrice(ctx context.Context, in *QueryRequestPriceRequest, opts ...grpc.CallOption) (*QueryRequestPriceResponse, error)
 	DataProvidersPool(ctx context.Context, in *QueryDataProvidersPoolRequest, opts ...grpc.CallOption) (*QueryDataProvidersPoolResponse, error)
 	RequestReports(ctx context.Context, in *QueryRequestReportsRequest, opts ...grpc.CallOption) (*QueryRequestReportsResponse, error)
 	DataProviderReward(ctx context.Context, in *QueryDataProviderRewardRequest, opts ...grpc.CallOption) (*QueryDataProviderRewardResponse, error)
-	// PendingRequests queries list of pending request IDs assigned to given validator.
+	// PendingRequests queries list of pending request IDs assigned to given
+	// validator.
 	PendingRequests(ctx context.Context, in *QueryPendingRequestsRequest, opts ...grpc.CallOption) (*QueryPendingRequestsResponse, error)
 	// RequestVerification verifies a request to make sure that
 	// all information that will be used to report the data is valid
@@ -2385,12 +2405,14 @@ type QueryServer interface {
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	// RequestSearch queries the latest request that match the given input.
 	RequestSearch(context.Context, *QueryRequestSearchRequest) (*QueryRequestSearchResponse, error)
-	// RequestPrice queries the latest price on standard price reference oracle script.
+	// RequestPrice queries the latest price on standard price reference oracle
+	// script.
 	RequestPrice(context.Context, *QueryRequestPriceRequest) (*QueryRequestPriceResponse, error)
 	DataProvidersPool(context.Context, *QueryDataProvidersPoolRequest) (*QueryDataProvidersPoolResponse, error)
 	RequestReports(context.Context, *QueryRequestReportsRequest) (*QueryRequestReportsResponse, error)
 	DataProviderReward(context.Context, *QueryDataProviderRewardRequest) (*QueryDataProviderRewardResponse, error)
-	// PendingRequests queries list of pending request IDs assigned to given validator.
+	// PendingRequests queries list of pending request IDs assigned to given
+	// validator.
 	PendingRequests(context.Context, *QueryPendingRequestsRequest) (*QueryPendingRequestsResponse, error)
 	// RequestVerification verifies a request to make sure that
 	// all information that will be used to report the data is valid

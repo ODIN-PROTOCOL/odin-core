@@ -16,6 +16,7 @@ const (
 	QueryTxVolume           = "tx_volume"
 	QueryValidatorBlocks    = "validator_blocks"
 	QueryTopValidators      = "top_validators"
+	QueryBalances           = "balances"
 
 	DenomTag  = "denom"
 	StatusTag = "status"

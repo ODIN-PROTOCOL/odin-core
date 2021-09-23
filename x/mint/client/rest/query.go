@@ -2,11 +2,12 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
@@ -34,6 +35,16 @@ func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
 		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryTreasuryPool),
 		queryTreasuryPoolHandlerFn(clientCtx),
 	).Methods("GET")
+
+	r.HandleFunc(
+		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryTotalSupply),
+		queryTotalSupplyHandlerFn(clientCtx),
+	).Methods("GET")
+
+	r.HandleFunc(
+		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryCommunityPool),
+		queryCommunityPoolHandlerFn(clientCtx),
+	).Methods("GET")
 }
 
 func queryParamsHandlerFn(clientCtx client.Context) http.HandlerFunc {
@@ -45,7 +56,7 @@ func queryParamsHandlerFn(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		res, height, err := clientCtx.QueryWithData(route, nil)
+		res, height, err := clientCtx.Query(route)
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}
@@ -64,7 +75,7 @@ func queryInflationHandlerFn(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		res, height, err := clientCtx.QueryWithData(route, nil)
+		res, height, err := clientCtx.Query(route)
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}
@@ -83,7 +94,7 @@ func queryAnnualProvisionsHandlerFn(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		res, height, err := clientCtx.QueryWithData(route, nil)
+		res, height, err := clientCtx.Query(route)
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}
@@ -129,8 +140,47 @@ func queryTreasuryPoolHandlerFn(clientCtx client.Context) http.HandlerFunc {
 		}
 
 		res, height, err := cliCtx.Query(route)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		if rest.CheckInternalServerError(w, err) {
+			// if err != nil {
+			// 	rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+func queryTotalSupplyHandlerFn(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route := fmt.Sprintf("custom/%s/%s", minttypes.QuerierRoute, minttypes.QueryTotalSupply)
+
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := cliCtx.Query(route)
+		if rest.CheckInternalServerError(w, err) {
+			return
+		}
+
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+func queryCommunityPoolHandlerFn(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route := fmt.Sprintf("custom/%s/%s", minttypes.QuerierRoute, minttypes.QueryCommunityPool)
+
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := cliCtx.Query(route)
+		if rest.CheckInternalServerError(w, err) {
 			return
 		}
 

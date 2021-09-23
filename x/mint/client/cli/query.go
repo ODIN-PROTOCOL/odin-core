@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -25,6 +26,8 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryAnnualProvisions(),
 		GetCmdQueryIntegrationAddress(),
 		GetCmdQueryTreasuryPool(),
+		GetCmdQueryCommunityPool(),
+		GetCmdQueryTotalSupply(),
 	)
 
 	return mintingQueryCmd
@@ -172,6 +175,64 @@ func GetCmdQueryTreasuryPool() *cobra.Command {
 			}
 
 			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.TreasuryPool))
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryCommunityPool returns the command for fetching community pool info
+func GetCmdQueryCommunityPool() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "community-pool",
+		Short: "Query the amount of coins in the community pool",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := minttypes.NewQueryClient(clientCtx)
+
+			params := &minttypes.QueryCommunityPoolRequest{}
+			res, err := queryClient.CommunityPool(context.Background(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.CommunityPool))
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryTotalSupply returns the command for fetching total supply info
+func GetCmdQueryTotalSupply() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "total-supply",
+		Short: "Query the amount of coins in the total supply",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := minttypes.NewQueryClient(clientCtx)
+
+			params := &minttypes.QueryTotalSupplyRequest{}
+			res, err := queryClient.TotalSupply(context.Background(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.TotalSupply))
 		},
 	}
 
