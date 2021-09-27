@@ -2,6 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -9,8 +12,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/spf13/cobra"
-	"strings"
-	"time"
 )
 
 const (
@@ -236,7 +237,7 @@ func GetQueryCmdAvgTxFee() *cobra.Command {
 func GetQueryCmdTxVolume() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "tx-volume [start-date] [end-date]",
-		Args: cobra.MaximumNArgs(2),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
