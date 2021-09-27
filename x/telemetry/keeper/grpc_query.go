@@ -170,20 +170,3 @@ func (k Keeper) TopValidators(
 		},
 	}, nil
 }
-
-func (k Keeper) Balances(c context.Context, request *telemetrytypes.QueryExtendedValidatorsRequest) (*telemetrytypes.QueryBalancesResponse, error) {
-	ctx := sdk.UnwrapSDKContext(c)
-	// balances
-	validatorsResp, err := k.stakingQuerier.Validators(c, ExtendedValidatorsRequestToValidatorsRequest(request))
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to get validators")
-	}
-	accounts, err := ValidatorsToAccounts(validatorsResp.GetValidators())
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "failed to get validators accounts addresses")
-	}
-	balances := k.GetBalances(ctx, accounts...)
-	return &telemetrytypes.QueryBalancesResponse{
-		Balances: balances,
-	}, nil
-}

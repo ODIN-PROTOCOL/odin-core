@@ -61,6 +61,7 @@ func (k Keeper) TreasuryPool(
 	return &minttypes.QueryTreasuryPoolResponse{TreasuryPool: mintPool.TreasuryPool}, nil
 }
 
+// Odin Info request was split to separated request
 // func (k Keeper) OdinInfo(c context.Context, request *minttypes.QueryOdinInfoRequest) (*minttypes.QueryOdinInfoResponse, error) {
 // 	ctx := sdk.UnwrapSDKContext(c)
 // 	mintPool := k.GetMintPool(ctx)

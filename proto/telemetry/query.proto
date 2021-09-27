@@ -58,10 +58,6 @@ service Query {
       returns (QueryValidatorBlocksResponse) {
     option (google.api.http).get = "/telemetry/validator_blocks";
   }
-
-  rpc Balances(QueryExtendedValidatorsRequest) returns (QueryBalancesResponse) {
-    option (google.api.http).get = "/telemetry/balances";
-  }
 }
 
 // QueryTopBalancesRequest is request type for the Query/TopBalances RPC method.
@@ -193,19 +189,4 @@ message QueryValidatorBlocksRequest {
 message QueryValidatorBlocksResponse {
   repeated ValidatorBlock blocks = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
-}
-
-// // QueryBalancesRequest is request type for the Query/Balances RPC method
-// message QueryBalancesRequest {
-//   string status = 1;
-
-//   cosmos.base.query.v1beta1.PageRequest pagination = 2;
-// }
-
-// QueryBalancesResponse is request type for the Query/Balances RPC method
-message QueryBalancesResponse {
-  repeated cosmos.base.v1beta1.Balance balances = 1 [
-    (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/x/bank/types.Balance",
-    (gogoproto.nullable) = false
-  ];
 }
