@@ -64,7 +64,7 @@ func (k Keeper) GetBlocksByDates(startDate, endDate *time.Time) (map[time.Time][
 		blocksParsed += blocksCount
 		page++
 
-		if blocks.TotalCount == blocksCount {
+		if blocks.TotalCount == blocksParsed {
 			break
 		}
 	}
@@ -152,7 +152,7 @@ func (k Keeper) GetBlocksByValidator(ctx sdk.Context, valAddr sdk.ValAddress) ([
 		blocksParsed += blocksCount
 		page++
 
-		if blocks.TotalCount == blocksCount {
+		if blocks.TotalCount == blocksParsed {
 			break
 		}
 	}
