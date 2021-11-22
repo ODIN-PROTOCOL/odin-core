@@ -26,7 +26,7 @@ service Query {
   }
 
   // AvgBlockSize returns average block size per day.
-  rpc AvgBlockSize(QueryAvgBlockSizeRequest) returns (QueryAvgBlockSizeResponse) {
+  /*rpc AvgBlockSize(QueryAvgBlockSizeRequest) returns (QueryAvgBlockSizeResponse) {
     option (google.api.http).get = "/telemetry/avg_block_size";
   }
 
@@ -43,7 +43,7 @@ service Query {
   // TxVolume returns count of transactions per day.
   rpc TxVolume(QueryTxVolumeRequest) returns (QueryTxVolumeResponse) {
     option (google.api.http).get = "/telemetry/tx_volume";
-  }
+  }*/
 
   // TopValidators returns validators blocks and stake percentage.
   rpc TopValidators(QueryTopValidatorsRequest) returns (QueryTopValidatorsResponse) {

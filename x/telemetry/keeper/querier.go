@@ -19,14 +19,14 @@ func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
 			return queryTopBalances(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryExtendedValidators:
 			return queryExtendedValidators(ctx, path[1:], keeper, cdc, req)
-		case telemetrytypes.QueryAvgBlockSize:
+		/*case telemetrytypes.QueryAvgBlockSize:
 			return queryAvgBlockSize(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryAvgBlockTime:
 			return queryAvgBlockTime(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryAvgTxFee:
 			return queryAvgTxFee(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryTxVolume:
-			return queryTxVolume(ctx, path[1:], keeper, cdc, req)
+			return queryTxVolume(ctx, path[1:], keeper, cdc, req)*/
 		case telemetrytypes.QueryValidatorBlocks:
 			return queryValidatorBlocks(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryTopValidators:

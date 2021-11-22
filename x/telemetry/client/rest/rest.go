@@ -21,7 +21,7 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 		getExtendedValidatorsHandler(clientCtx),
 	).Methods("GET")
 
-	rtr.HandleFunc(
+	/*rtr.HandleFunc(
 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgBlockSize),
 		getAvgBlockSizeHandler(clientCtx),
 	).Methods("GET")
@@ -39,7 +39,7 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	rtr.HandleFunc(
 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTxVolume),
 		getTxVolumeHandler(clientCtx),
-	).Methods("GET")
+	).Methods("GET")*/
 
 	rtr.HandleFunc(
 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopValidators),
