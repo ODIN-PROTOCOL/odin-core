@@ -255,7 +255,7 @@ func NewBandApp(
 		odinminttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
-		coinswaptypes.StoreKey, auctiontypes.StoreKey,
+		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -481,6 +481,7 @@ func NewBandApp(
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
+	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
 
 	return app
