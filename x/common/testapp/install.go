@@ -2,7 +2,7 @@ package testapp
 
 import (
 	"encoding/json"
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -41,7 +41,7 @@ func countSupply(bondDenom string, validators stakingtypes.Validators) sdk.Coins
 }
 
 func CreateDefaultGenesisApp(accountsCount int) TestAppBuilder {
-	dir, err := ioutil.TempDir("", "bandd")
+	dir, err := ioutil.TempDir("", "odind")
 	if err != nil {
 		panic(err)
 	}
@@ -89,7 +89,7 @@ func CreateDefaultGenesisApp(accountsCount int) TestAppBuilder {
 	return builder
 }
 
-func CreateTestApp(params ...bool) (*bandapp.BandApp, sdk.Context) {
+func CreateTestApp(params ...bool) (*odinapp.OdinApp, sdk.Context) {
 	// Set HomeFlag to a temp folder for simulation run.
 	builder := CreateDefaultGenesisApp(DefaultAccountsCount)
 

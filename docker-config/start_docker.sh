@@ -49,7 +49,7 @@ cp ~/.bandd/config/config.toml ~/.bandd/config/config.toml.temp
 cp -r ~/.bandd/files docker-config/
 
 # modify moniker
-sed 's/node-validator/🙎‍♀️Alice \& Co./g' ~/.bandd/config/config.toml.temp > ~/.bandd/config/config.toml
+sed 's/node-validator/🙎‍♀️Alice \& Co./g' ~/.bandd/config/config.toml.temp > ~/.odind/config/config.toml
 
 # register initial validators
 bandd gentx \
@@ -63,7 +63,7 @@ bandd gentx \
     --keyring-backend test
 
 # modify moniker
-sed 's/node-validator/Bobby.fish 🐡/g' ~/.bandd/config/config.toml.temp > ~/.bandd/config/config.toml
+sed 's/node-validator/Bobby.fish 🐡/g' ~/.bandd/config/config.toml.temp > ~/.odind/config/config.toml
 
 bandd gentx \
     --amount 100000000uband \
@@ -76,7 +76,7 @@ bandd gentx \
     --keyring-backend test
 
 # modify moniker
-sed 's/node-validator/Carol/g' ~/.bandd/config/config.toml.temp > ~/.bandd/config/config.toml
+sed 's/node-validator/Carol/g' ~/.bandd/config/config.toml.temp > ~/.odind/config/config.toml
 
 bandd gentx \
     --amount 100000000uband \
@@ -89,7 +89,7 @@ bandd gentx \
     --keyring-backend test
 
 # modify moniker
-sed 's/node-validator/Eve 🦹🏿‍♂️the evil with a really long moniker name/g' ~/.bandd/config/config.toml.temp > ~/.bandd/config/config.toml
+sed 's/node-validator/Eve 🦹🏿‍♂️the evil with a really long moniker name/g' ~/.bandd/config/config.toml.temp > ~/.odind/config/config.toml
 
 bandd gentx \
     --amount 100000000uband \

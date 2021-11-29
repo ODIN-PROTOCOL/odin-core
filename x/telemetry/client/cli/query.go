@@ -30,10 +30,10 @@ func GetQueryCmd() *cobra.Command {
 	coinswapCmd.AddCommand(
 		GetQueryCmdTopBalances(),
 		GetQueryCmdExtendedValidators(),
-		GetQueryCmdAvgBlockSize(),
+		/*GetQueryCmdAvgBlockSize(),
 		GetQueryCmdAvgBlockTime(),
 		GetQueryCmdAvgTxFee(),
-		GetQueryCmdTxVolume(),
+		GetQueryCmdTxVolume(),*/
 		GetQueryCmdValidatorBlocks(),
 		GetQueryCmdTopValidators(),
 	)
@@ -135,7 +135,7 @@ Example:
 }
 
 // GetQueryCmdAvgBlockSize implements the query parameters command.
-func GetQueryCmdAvgBlockSize() *cobra.Command {
+/*func GetQueryCmdAvgBlockSize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "avg-block-size [start-date] [end-date]",
 		Args: cobra.MaximumNArgs(2),
@@ -264,7 +264,7 @@ func GetQueryCmdTxVolume() *cobra.Command {
 
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
-}
+}*/
 
 // GetQueryCmdValidatorBlocks implements the query parameters command.
 func GetQueryCmdValidatorBlocks() *cobra.Command {

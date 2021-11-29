@@ -29,7 +29,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	band "github.com/GeoDB-Limited/odin-core/app"
+	odin "github.com/GeoDB-Limited/odin-core/app"
 	"github.com/GeoDB-Limited/odin-core/app/params"
 	"github.com/GeoDB-Limited/odin-core/hooks/emitter"
 	"github.com/GeoDB-Limited/odin-core/hooks/request"
@@ -48,7 +48,7 @@ const (
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	encodingConfig := band.MakeEncodingConfig()
+	encodingConfig := odin.MakeEncodingConfig()
 	initClientCtx := client.Context{}.
 		WithJSONMarshaler(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -57,11 +57,11 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
-		WithHomeDir(band.DefaultNodeHome)
+		WithHomeDir(odin.DefaultNodeHome)
 
 	rootCmd := &cobra.Command{
-		Use:   "bandd",
-		Short: "Band Consumer App",
+		Use:   "odind",
+		Short: "Odin Consumer App",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
@@ -80,26 +80,26 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 	authclient.Codec = encodingConfig.Marshaler
 
 	rootCmd.AddCommand(
-		InitCmd(band.NewDefaultGenesisState(), band.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, band.DefaultNodeHome),
-		// band.MigrateGenesisCmd(),
-		genutilcli.GenTxCmd(band.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, band.DefaultNodeHome),
-		genutilcli.ValidateGenesisCmd(band.ModuleBasics),
-		AddGenesisAccountCmd(band.DefaultNodeHome),
-		AddGenesisDataSourceCmd(band.DefaultNodeHome),
-		AddGenesisOracleScriptCmd(band.DefaultNodeHome),
+		InitCmd(odin.NewDefaultGenesisState(), odin.DefaultNodeHome),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
+		// odin.MigrateGenesisCmd(),
+		genutilcli.GenTxCmd(odin.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
+		genutilcli.ValidateGenesisCmd(odin.ModuleBasics),
+		AddGenesisAccountCmd(odin.DefaultNodeHome),
+		AddGenesisDataSourceCmd(odin.DefaultNodeHome),
+		AddGenesisOracleScriptCmd(odin.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 	)
 
-	server.AddCommands(rootCmd, band.DefaultNodeHome, newApp, createSimappAndExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, odin.DefaultNodeHome, newApp, createSimappAndExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
 		queryCommand(),
 		txCommand(),
-		keys.Commands(band.DefaultNodeHome),
+		keys.Commands(odin.DefaultNodeHome),
 	)
 
 	rootCmd.PersistentFlags().String(flagWithRequestSearch, "", "[Experimental] Enable mode to save request in sql database")
@@ -128,7 +128,7 @@ func queryCommand() *cobra.Command {
 		authcmd.QueryTxCmd(),
 	)
 
-	band.ModuleBasics.AddQueryCommands(cmd)
+	odin.ModuleBasics.AddQueryCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
@@ -154,7 +154,7 @@ func txCommand() *cobra.Command {
 		authcmd.GetDecodeCommand(),
 	)
 
-	band.ModuleBasics.AddTxCommands(cmd)
+	odin.ModuleBasics.AddTxCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
@@ -188,11 +188,11 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 		panic(err)
 	}
 
-	bandApp := band.NewBandApp(
+	odinApp := odin.NewOdinApp(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
-		band.MakeEncodingConfig(), // Ideally, we would reuse the one created by NewRootCmd.
+		odin.MakeEncodingConfig(), // Ideally, we would reuse the one created by NewRootCmd.
 		appOpts,
 		cast.ToBool(appOpts.Get(flagDisableFeelessReports)),
 		cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)),
@@ -210,37 +210,37 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 	)
 	connStr, _ := appOpts.Get(flagWithRequestSearch).(string)
 	if connStr != "" {
-		bandApp.AddHook(request.NewHook(
-			bandApp.AppCodec(), bandApp.OracleKeeper, connStr))
+		odinApp.AddHook(request.NewHook(
+			odinApp.AppCodec(), odinApp.OracleKeeper, connStr))
 	}
 
 	connStr, _ = appOpts.Get(flagWithEmitter).(string)
 	if connStr != "" {
-		bandApp.AddHook(
-			emitter.NewHook(bandApp.AppCodec(), bandApp.LegacyAmino(), band.MakeEncodingConfig(), bandApp.AccountKeeper, bandApp.BankKeeper,
-				bandApp.StakingKeeper, bandApp.MintKeeper, bandApp.DistrKeeper, bandApp.GovKeeper,
-				bandApp.OracleKeeper, connStr, false))
+		odinApp.AddHook(
+			emitter.NewHook(odinApp.AppCodec(), odinApp.LegacyAmino(), odin.MakeEncodingConfig(), odinApp.AccountKeeper, odinApp.BankKeeper,
+				odinApp.StakingKeeper, odinApp.MintKeeper, odinApp.DistrKeeper, odinApp.GovKeeper,
+				odinApp.OracleKeeper, connStr, false))
 	}
 
-	return bandApp
+	return odinApp
 }
 
 func createSimappAndExport(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailAllowedAddrs []string,
 	appOpts servertypes.AppOptions) (servertypes.ExportedApp, error) {
 
-	encCfg := band.MakeEncodingConfig() // Ideally, we would reuse the one created by NewRootCmd.
+	encCfg := odin.MakeEncodingConfig() // Ideally, we would reuse the one created by NewRootCmd.
 	encCfg.Marshaler = codec.NewProtoCodec(encCfg.InterfaceRegistry)
-	var bandConsumerApp *band.BandApp
+	var odinConsumerApp *odin.OdinApp
 	if height != -1 {
-		bandConsumerApp = band.NewBandApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
+		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
 
-		if err := bandConsumerApp.LoadHeight(height); err != nil {
+		if err := odinConsumerApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		bandConsumerApp = band.NewBandApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
+		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
 	}
 
-	return bandConsumerApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+	return odinConsumerApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
 }

@@ -1,4 +1,4 @@
-package band
+package odin
 
 import (
 	"encoding/json"
@@ -33,7 +33,7 @@ import (
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
-// GenesisState defines a type alias for the Band genesis application state.
+// GenesisState defines a type alias for the Odin genesis application state.
 type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.

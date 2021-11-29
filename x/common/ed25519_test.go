@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	band "github.com/GeoDB-Limited/odin-core/app"
+	odin "github.com/GeoDB-Limited/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"testing"
 )
 
 func Test_FromBech32(t *testing.T) {
 	config := sdk.GetConfig()
-	accountPrefix := band.Bech32MainPrefix
-	validatorPrefix := band.Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixOperator
-	consensusPrefix := band.Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	accountPrefix := odin.Bech32MainPrefix
+	validatorPrefix := odin.Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixOperator
+	consensusPrefix := odin.Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixConsensus
 	config.SetBech32PrefixForAccount(accountPrefix, accountPrefix+sdk.PrefixPublic)
 	config.SetBech32PrefixForValidator(validatorPrefix, validatorPrefix+sdk.PrefixPublic)
 	config.SetBech32PrefixForConsensusNode(consensusPrefix, consensusPrefix+sdk.PrefixPublic)

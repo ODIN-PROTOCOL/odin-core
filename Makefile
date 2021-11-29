@@ -10,8 +10,8 @@ ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
 endif
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=bandchain \
-	-X github.com/cosmos/cosmos-sdk/version.ServerName=bandd \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
+	-X github.com/cosmos/cosmos-sdk/version.ServerName=odind \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags)"
@@ -21,7 +21,7 @@ BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 all: install
 
 install: go.sum
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/bandd
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
 
 faucet: go.sum
@@ -29,11 +29,11 @@ faucet: go.sum
 
 release: go.sum
 	env GOOS=linux GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_linux_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_linux_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=darwin GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_darwin_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_darwin_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=windows GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_windows_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_windows_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=linux GOARCH=amd64 \
 		go build -mod=readonly -o ./build/yoda_linux_amd64 $(BUILD_FLAGS) ./cmd/yoda
 	env GOOS=darwin GOARCH=amd64 \

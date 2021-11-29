@@ -1,4 +1,4 @@
-package band
+package odin
 
 import (
 	"github.com/GeoDB-Limited/odin-core/x/auction"
@@ -12,6 +12,9 @@ import (
 	odinminttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/telemetry"
 	telemetrykeeper "github.com/GeoDB-Limited/odin-core/x/telemetry/keeper"
+	"github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer"
+	ibctransferkeeper "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/keeper"
+	transfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -135,6 +138,7 @@ var (
 		coinswap.AppModuleBasic{},
 		auction.AppModuleBasic{},
 		telemetry.AppModuleBasic{},
+		transfer.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -145,6 +149,7 @@ var (
 		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
+		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -153,12 +158,12 @@ var (
 )
 
 var (
-	_ simapp.App              = (*BandApp)(nil)
-	_ servertypes.Application = (*BandApp)(nil)
+	_ simapp.App              = (*OdinApp)(nil)
+	_ servertypes.Application = (*OdinApp)(nil)
 )
 
-// BandApp is the application of BandChain, extended base ABCI application.
-type BandApp struct {
+// OdinApp is the application of BandChain, extended base ABCI application.
+type OdinApp struct {
 	*baseapp.BaseApp
 	legacyAmino       *codec.LegacyAmino
 	appCodec          codec.Marshaler
@@ -188,10 +193,12 @@ type BandApp struct {
 	CoinswapKeeper   coinswapkeeper.Keeper
 	AuctionKeeper    auctionkeeper.Keeper
 	TelemetryKeeper  telemetrykeeper.Keeper
+	TransferKeeper   ibctransferkeeper.Keeper
 
 	// make scoped keepers public for test purposes
-	ScopedIBCKeeper    capabilitykeeper.ScopedKeeper
-	ScopedOracleKeeper capabilitykeeper.ScopedKeeper
+	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
+	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
+	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -200,7 +207,7 @@ type BandApp struct {
 	sm *module.SimulationManager
 
 	// Deliver context, set during InitGenesis/BeginBlock and cleared during Commit. It allows
-	// anyone with access to BandApp to read/mutate consensus state anytime. USE WITH CARE!
+	// anyone with access to OdinApp to read/mutate consensus state anytime. USE WITH CARE!
 	DeliverContext sdk.Context
 
 	// List of hooks
@@ -213,7 +220,7 @@ func init() {
 		stdlog.Println("Failed to get home dir %2", err)
 	}
 
-	DefaultNodeHome = filepath.Join(userHomeDir, ".band")
+	DefaultNodeHome = filepath.Join(userHomeDir, ".odin")
 }
 
 // SetBech32AddressPrefixesAndBip44CoinType sets the global Bech32 prefixes and HD wallet coin type.
@@ -227,12 +234,12 @@ func SetBech32AddressPrefixesAndBip44CoinType(config *sdk.Config) {
 	config.SetCoinType(Bip44CoinType)
 }
 
-// NewBandApp returns a reference to an initialized BandApp.
-func NewBandApp(
+// NewOdinApp returns a reference to an initialized OdinApp.
+func NewOdinApp(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool, skipUpgradeHeights map[int64]bool,
 	homePath string, invCheckPeriod uint, encodingConfig odinappparams.EncodingConfig, appOpts servertypes.AppOptions,
 	disableFeelessReports bool, owasmCacheSize uint32, baseAppOptions ...func(*baseapp.BaseApp),
-) *BandApp {
+) *OdinApp {
 
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
@@ -248,12 +255,12 @@ func NewBandApp(
 		odinminttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
-		coinswaptypes.StoreKey, auctiontypes.StoreKey,
+		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
-	app := &BandApp{
+	app := &OdinApp{
 		BaseApp:           bApp,
 		legacyAmino:       legacyAmino,
 		appCodec:          appCodec,
@@ -275,6 +282,7 @@ func NewBandApp(
 	// add capability keeper and ScopeToModule for ibc module
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
+	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
 
 	// Add keepers.
@@ -319,6 +327,12 @@ func NewBandApp(
 		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, scopedIBCKeeper,
 	)
 
+	app.TransferKeeper = ibctransferkeeper.NewKeeper(
+		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
+	)
+	transferModule := transfer.NewAppModule(app.TransferKeeper)
+
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govtypes.ProposalHandler).
@@ -359,6 +373,7 @@ func NewBandApp(
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
@@ -398,6 +413,7 @@ func NewBandApp(
 		coinswap.NewAppModule(app.CoinswapKeeper),
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
+		transferModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
@@ -415,7 +431,7 @@ func NewBandApp(
 	app.mm.SetOrderInitGenesis(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName,
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName,
-		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName,
+		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName, transfertypes.ModuleName,
 	)
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
@@ -438,6 +454,7 @@ func NewBandApp(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		oracleModule,
+		transferModule,
 	)
 
 	app.sm.RegisterStoreDecoders()
@@ -464,6 +481,7 @@ func NewBandApp(
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
+	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
 
 	return app
@@ -478,10 +496,10 @@ func MakeCodecs() (codec.Marshaler, *codec.LegacyAmino) {
 }
 
 // Name returns the name of the App.
-func (app *BandApp) Name() string { return app.BaseApp.Name() }
+func (app *OdinApp) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker application updates every begin block.
-func (app *BandApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *OdinApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	app.DeliverContext = ctx
 	res := app.mm.BeginBlock(ctx, req)
 	for _, hook := range app.hooks {
@@ -491,7 +509,7 @@ func (app *BandApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) ab
 }
 
 // EndBlocker application updates every end block.
-func (app *BandApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+func (app *OdinApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	res := app.mm.EndBlock(ctx, req)
 	for _, hook := range app.hooks {
 		hook.AfterEndBlock(ctx, req, res)
@@ -500,7 +518,7 @@ func (app *BandApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.R
 }
 
 // Commit overrides the default BaseApp's ABCI commit by adding DeliverContext clearing.
-func (app *BandApp) Commit() (res abci.ResponseCommit) {
+func (app *OdinApp) Commit() (res abci.ResponseCommit) {
 	for _, hook := range app.hooks {
 		hook.BeforeCommit()
 	}
@@ -509,7 +527,7 @@ func (app *BandApp) Commit() (res abci.ResponseCommit) {
 }
 
 // InitChainer application update at chain initialization
-func (app *BandApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *OdinApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
@@ -522,7 +540,7 @@ func (app *BandApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 }
 
 // DeliverTx overwrite DeliverTx to apply afterDeliverTx hook
-func (app *BandApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
+func (app *OdinApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx {
 	res := app.BaseApp.DeliverTx(req)
 	for _, hook := range app.hooks {
 		hook.AfterDeliverTx(app.DeliverContext, req, res)
@@ -530,7 +548,7 @@ func (app *BandApp) DeliverTx(req abci.RequestDeliverTx) abci.ResponseDeliverTx 
 	return res
 }
 
-func (app *BandApp) Query(req abci.RequestQuery) abci.ResponseQuery {
+func (app *OdinApp) Query(req abci.RequestQuery) abci.ResponseQuery {
 	hookReq := req
 
 	// when a client did not provide a query height, manually inject the latest
@@ -548,12 +566,12 @@ func (app *BandApp) Query(req abci.RequestQuery) abci.ResponseQuery {
 }
 
 // LoadHeight loads a particular height
-func (app *BandApp) LoadHeight(height int64) error {
+func (app *OdinApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height)
 }
 
 // ModuleAccountAddrs returns all the app's module account addresses.
-func (app *BandApp) ModuleAccountAddrs() map[string]bool {
+func (app *OdinApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		modAccAddrs[authtypes.NewModuleAddress(acc).String()] = true
@@ -563,7 +581,7 @@ func (app *BandApp) ModuleAccountAddrs() map[string]bool {
 
 // BlockedAddrs returns all the app's module account addresses that are not
 // allowed to receive external tokens.
-func (app *BandApp) BlockedAddrs() map[string]bool {
+func (app *OdinApp) BlockedAddrs() map[string]bool {
 	blacklistedAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		blacklistedAddrs[authtypes.NewModuleAddress(acc).String()] = !allowedReceivingModAcc[acc]
@@ -571,11 +589,11 @@ func (app *BandApp) BlockedAddrs() map[string]bool {
 	return blacklistedAddrs
 }
 
-// LegacyAmino returns BandApp's amino codec.
+// LegacyAmino returns OdinApp's amino codec.
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *BandApp) LegacyAmino() *codec.LegacyAmino {
+func (app *OdinApp) LegacyAmino() *codec.LegacyAmino {
 	return app.legacyAmino
 }
 
@@ -583,52 +601,52 @@ func (app *BandApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *BandApp) AppCodec() codec.Marshaler {
+func (app *OdinApp) AppCodec() codec.Marshaler {
 	return app.appCodec
 }
 
 // InterfaceRegistry returns Band's InterfaceRegistry
-func (app *BandApp) InterfaceRegistry() types.InterfaceRegistry {
+func (app *OdinApp) InterfaceRegistry() types.InterfaceRegistry {
 	return app.interfaceRegistry
 }
 
 // GetKey returns the KVStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *BandApp) GetKey(storeKey string) *sdk.KVStoreKey {
+func (app *OdinApp) GetKey(storeKey string) *sdk.KVStoreKey {
 	return app.keys[storeKey]
 }
 
 // GetTKey returns the TransientStoreKey for the provided store key.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *BandApp) GetTKey(storeKey string) *sdk.TransientStoreKey {
+func (app *OdinApp) GetTKey(storeKey string) *sdk.TransientStoreKey {
 	return app.tkeys[storeKey]
 }
 
 // GetMemKey returns the MemStoreKey for the provided mem key.
 //
 // NOTE: This is solely used for testing purposes.
-func (app *BandApp) GetMemKey(storeKey string) *sdk.MemoryStoreKey {
+func (app *OdinApp) GetMemKey(storeKey string) *sdk.MemoryStoreKey {
 	return app.memKeys[storeKey]
 }
 
 // GetSubspace returns a param subspace for a given module name.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *BandApp) GetSubspace(moduleName string) paramstypes.Subspace {
+func (app *OdinApp) GetSubspace(moduleName string) paramstypes.Subspace {
 	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
 	return subspace
 }
 
 // SimulationManager implements the SimulationApp interface
-func (app *BandApp) SimulationManager() *module.SimulationManager {
+func (app *OdinApp) SimulationManager() *module.SimulationManager {
 	return app.sm
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
-func (app *BandApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+func (app *OdinApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	rpc.RegisterRoutes(clientCtx, apiSvr.Router)
 	// Register legacy tx routes.
@@ -649,12 +667,12 @@ func (app *BandApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
-func (app *BandApp) RegisterTxService(clientCtx client.Context) {
+func (app *OdinApp) RegisterTxService(clientCtx client.Context) {
 	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
 }
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
-func (app *BandApp) RegisterTendermintService(clientCtx client.Context) {
+func (app *OdinApp) RegisterTendermintService(clientCtx client.Context) {
 	tmservice.RegisterTendermintService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.interfaceRegistry)
 }
 
@@ -694,11 +712,12 @@ func initParamsKeeper(appCodec codec.BinaryMarshaler, legacyAmino *codec.LegacyA
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(coinswaptypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
+	paramsKeeper.Subspace(transfertypes.ModuleName)
 
 	return paramsKeeper
 }
 
 // AddHook appends hook that will be call after process abci request
-func (app *BandApp) AddHook(hook Hook) {
+func (app *OdinApp) AddHook(hook Hook) {
 	app.hooks = append(app.hooks, hook)
 }

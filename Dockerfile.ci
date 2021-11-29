@@ -21,4 +21,4 @@ COPY ./docker-config/validator4/ validator4/
 # generated genesis
 COPY ./docker-config/genesis.json genesis.json
 
-CMD ["bandd", "--help"]
+CMD ["odind", "--help"]
