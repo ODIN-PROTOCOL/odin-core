@@ -234,7 +234,7 @@ func GetCmdEditDataSource() *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Edit an existing data source. The caller must be the current data source's owner.
 Example:
-$ %s tx oracle edit-data-source 1 --name coingecko-price --description The script that queries crypto price from cryptocompare --script ../price.sh --owner band15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --fee 10loki,100geo --from mykey
+$ %s tx oracle edit-data-source 1 --name coingecko-price --description The script that queries crypto price from cryptocompare --script ../price.sh --owner odin15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --fee 10loki,100geo --from mykey
 `,
 				version.AppName,
 			),
@@ -333,7 +333,7 @@ func GetCmdCreateOracleScript() *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Create a new oracle script that will be used by data requests.
 Example:
-$ %s tx oracle create-oracle-script --name eth-price --description "Oracle script for getting Ethereum price" --script ../eth_price.wasm --owner band15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --from mykey
+$ %s tx oracle create-oracle-script --name eth-price --description "Oracle script for getting Ethereum price" --script ../eth_price.wasm --owner odin15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --from mykey
 `,
 				version.AppName,
 			),
@@ -420,7 +420,7 @@ func GetCmdEditOracleScript() *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Edit an existing oracle script that will be used by data requests.
 Example:
-$ %s tx oracle edit-oracle-script 1 --name eth-price --description "Oracle script for getting Ethereum price" --script ../eth_price.wasm --owner band15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --from mykey
+$ %s tx oracle edit-oracle-script 1 --name eth-price --description "Oracle script for getting Ethereum price" --script ../eth_price.wasm --owner odin15d4apf20449ajvwycq8ruaypt7v6d345n9fpt9 --from mykey
 `,
 				version.AppName,
 			),
@@ -552,7 +552,7 @@ func GetCmdAddReporters() *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Add agents authorized to submit report transactions.
 Example:
-$ %s tx oracle add-reporters band1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun band1m5lq9u533qaya4q3nfyl6ulzqkpkhge9q8tpzs --from mykey
+$ %s tx oracle add-reporters odin1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun odin1m5lq9u533qaya4q3nfyl6ulzqkpkhge9q8tpzs --from mykey
 `,
 				version.AppName,
 			),
@@ -597,7 +597,7 @@ func GetCmdRemoveReporter() *cobra.Command {
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Remove an agent from the list of authorized reporters.
 Example:
-$ %s tx oracle remove-reporter band1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun --from mykey
+$ %s tx oracle remove-reporter odin1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun --from mykey
 `,
 				version.AppName,
 			),

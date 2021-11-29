@@ -42,7 +42,7 @@ import "fmt"
 
 // 	rootCmd := &cobra.Command{
 // 		Use:   "bandcli",
-// 		Short: "Command line interface for interacting with bandd",
+// 		Short: "Command line interface for interacting with odind",
 // 	}
 
 // 	// Add --chain-id to persistent flags and mark it required

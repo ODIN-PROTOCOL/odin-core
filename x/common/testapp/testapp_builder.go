@@ -2,7 +2,7 @@ package testapp
 
 import (
 	"encoding/json"
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -10,7 +10,7 @@ import (
 )
 
 type TestAppBuilder interface {
-	Build(chainID string, stateBytes []byte, params ...bool) *bandapp.BandApp
+	Build(chainID string, stateBytes []byte, params ...bool) *odinapp.OdinApp
 	Codec() codec.Marshaler
 	AddGenesis() TestAppBuilder
 	UpdateModules(modulesGenesis map[string]json.RawMessage) TestAppBuilder
@@ -27,8 +27,8 @@ type TestAppBuilder interface {
 }
 
 type testAppBuilder struct {
-	app     *bandapp.BandApp
-	genesis bandapp.GenesisState
+	app     *odinapp.OdinApp
+	genesis odinapp.GenesisState
 
 	*AuthBuilder
 	*StakingBuilder
@@ -72,8 +72,8 @@ func NewTestAppBuilder(dir string, logger log.Logger) TestAppBuilder {
 	builder := testAppBuilder{}
 
 	db := dbm.NewMemDB()
-	encCdc := bandapp.MakeEncodingConfig()
-	builder.app = bandapp.NewBandApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
+	encCdc := odinapp.MakeEncodingConfig()
+	builder.app = odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
 	return &builder
 }
 
@@ -81,7 +81,7 @@ func (b *testAppBuilder) Codec() codec.Marshaler {
 	return b.app.AppCodec()
 }
 
-func (b *testAppBuilder) Build(chainID string, stateBytes []byte, params ...bool) *bandapp.BandApp {
+func (b *testAppBuilder) Build(chainID string, stateBytes []byte, params ...bool) *odinapp.OdinApp {
 	stateBytesNew := stateBytes
 	if stateBytes == nil {
 		stateBytesNew, _ = json.MarshalIndent(b.genesis, "", " ")
@@ -96,7 +96,7 @@ func (b *testAppBuilder) Build(chainID string, stateBytes []byte, params ...bool
 }
 
 func (b *testAppBuilder) AddGenesis() TestAppBuilder {
-	b.genesis = bandapp.NewDefaultGenesisState()
+	b.genesis = odinapp.NewDefaultGenesisState()
 	return b
 }
 

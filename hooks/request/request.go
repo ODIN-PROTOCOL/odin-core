@@ -22,7 +22,7 @@ import (
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )
 
-// Hook inherits from Band app hook to save latest request into SQL database.
+// Hook inherits from Odin app hook to save latest request into SQL database.
 type Hook struct {
 	cdc          codec.JSONMarshaler
 	oracleKeeper oraclekeeper.Keeper
@@ -79,7 +79,7 @@ func initDb(connStr string) *gorp.DbMap {
 	return dbMap
 }
 
-// NewHook creates a request hook instance that will be added in Band App.
+// NewHook creates a request hook instance that will be added in Odin App.
 func NewHook(cdc codec.JSONMarshaler, oracleKeeper oraclekeeper.Keeper, connStr string) *Hook {
 	return &Hook{
 		cdc:          cdc,

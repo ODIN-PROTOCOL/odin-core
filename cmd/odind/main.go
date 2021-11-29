@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	app "github.com/GeoDB-Limited/odin-core/app"
-	"github.com/GeoDB-Limited/odin-core/cmd/bandd/cmd"
+	"github.com/GeoDB-Limited/odin-core/cmd/odind/cmd"
 )
 
 func main() {

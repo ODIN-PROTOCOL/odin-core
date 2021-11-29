@@ -28,7 +28,7 @@ const (
 // Config data structure for yoda daemon.
 type Config struct {
 	ChainID           string `mapstructure:"chain-id"`            // ChainID of the target chain
-	NodeURI           string `mapstructure:"node"`                // Remote RPC URI of BandChain node to connect to
+	NodeURI           string `mapstructure:"node"`                // Remote RPC URI of OdinChain node to connect to
 	Validator         string `mapstructure:"validator"`           // The validator address that I'm responsible for
 	GasPrices         string `mapstructure:"gas-prices"`          // Gas prices of the transaction
 	LogLevel          string `mapstructure:"log-level"`           // Log level of the logger
@@ -66,7 +66,7 @@ func Main() {
 	ctx := &Context{}
 	rootCmd := &cobra.Command{
 		Use:   "yoda",
-		Short: "BandChain oracle daemon to subscribe and response to oracle requests",
+		Short: "OdinChain oracle daemon to subscribe and response to oracle requests",
 	}
 
 	rootCmd.AddCommand(

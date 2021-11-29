@@ -13,7 +13,7 @@ services:
     volumes:
       - ./init-scripts:/init-scripts
       - ./init.sh:/init.sh
-      - vol1:/root/.bandd
+      - vol1:/root/.odind
       - ./genesis.json:/genesis.json
 
   init2:
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./init-scripts:/init-scripts
       - ./init.sh:/init.sh
-      - vol2:/root/.bandd
+      - vol2:/root/.odind
       - ./genesis.json:/genesis.json
 
   init3:
@@ -36,7 +36,7 @@ services:
     command: ./init-scripts/init.sh validator3
     volumes:
       - ./init-scripts:/init-scripts
-      - vol3:/root/.bandd
+      - vol3:/root/.odind
       - ./genesis.json:/genesis.json
 
   init4:
@@ -48,7 +48,7 @@ services:
     volumes:
       - ./run.sh:/run.sh
       - ./init-scripts:/init-scripts
-      - vol4:/root/.bandd
+      - vol4:/root/.odind
       - ./genesis.json:/genesis.json
 
   validator1:
@@ -61,9 +61,9 @@ services:
       default:
         ipv4_address: 172.18.0.11
     command: sh -c "chmod +x ./run.sh && ./run.sh validator1"
-    command: bandd start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
+    command: odind start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
     volumes:
-      - vol1:/root/.bandd
+      - vol1:/root/.odind
 
   multi-validator2-node:
     image: band-validator:latest
@@ -77,9 +77,9 @@ services:
       default:
         ipv4_address: 172.18.0.12
     command: sh -c "chmod +x ./run.sh && ./run.sh validator2"
-    command: bandd start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
+    command: odind start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
     volumes:
-      - vol2:/root/.bandd
+      - vol2:/root/.odind
 
   multi-validator3-node:
     image: band-validator:latest
@@ -93,9 +93,9 @@ services:
       default:
         ipv4_address: 172.18.0.13
     command: sh -c "chmod +x ./run.sh && ./run.sh validator3"
-    command: bandd start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
+    command: odind start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
     volumes:
-      - vol3:/root/.bandd
+      - vol3:/root/.odind
 
   multi-validator4-node:
     image: band-validator:latest
@@ -118,7 +118,7 @@ services:
 
   query-node:
     image: band-validator:latest
-    command: bandd start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
+    command: odind start --rpc.laddr tcp://0.0.0.0:26657 --p2p.persistent_peers 11392b605378063b1c505c0ab123f04bd710d7d7@172.18.0.11:26656,0851086afcd835d5a6fb0ffbf96fcdf74fec742e@172.18.0.12:26656,63808bd64f2ec19acb2a494c8ce8467c595f6fba@172.18.0.14:26656,7b58b086dd915a79836eb8bfa956aeb9488d13b0@172.18.0.13:26656
     ports:
       - 26657:26657
     networks:
@@ -127,7 +127,7 @@ services:
     command: sh -c "chmod +x ./run.sh && ./run.sh query-node"
       - 26655:26656
     volumes:
-      - vol4:/root/.bandd
+      - vol4:/root/.odind
 
   rest-server:
     image: band-validator:latest

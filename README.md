@@ -39,7 +39,7 @@ You can find the latest binaries on our [releases](https://github.com/GeoDB-Limi
 
 ### Building from source
 
-To install OdinChain's daemon `bandd`, you need to have [Go](https://golang.org/) (version 1.13.5 or later)
+To install OdinChain's daemon `odind`, you need to have [Go](https://golang.org/) (version 1.13.5 or later)
 and [gcc](https://gcc.gnu.org/) installed on our machine. Navigate to the Golang
 project [download page](https://golang.org/dl/) and gcc [install page](https://gcc.gnu.org/install/), respectively for
 install and setup instructions.
@@ -88,19 +88,19 @@ cd odin-core
 git checkout testnet-{name}
 make install
 
-# Check that the correction version of bandd is installed
-bandd version --long
+# Check that the correction version of odind is installed
+odind version --long
 
 ### Creating OdinChain Account and Setup Config
 
-Once installed, you can use the `bandd` CLI to create a new OdinChain wallet address and initialize the chain. Please make sure to keep your mnemonic safe!
+Once installed, you can use the `odind` CLI to create a new OdinChain wallet address and initialize the chain. Please make sure to keep your mnemonic safe!
 
 ```bash
 # Create a new odin wallet. Do not lose your mnemonic!
-bandd keys add <YOUR_WALLET>
+odind keys add <YOUR_WALLET>
 
 # Initialize a blockchain environment for generating genesis transaction.
-bandd init --chain-id odin-testnet-{name} <YOUR_MONIKER>
+odind init --chain-id odin-testnet-{name} <YOUR_MONIKER>
 ```
 
 You can then download the official genesis file from the repository. You should also add the initial peer nodes to your
@@ -124,7 +124,7 @@ sed -E -i \
 With all configurations ready, you can start your blockchain node with a single command. In this tutorial, however, we
 will show you a simple way to set up `systemd` to run the node daemon with auto-restart.
 
-- Create a config file, using the contents below, at `/etc/systemd/system/bandd.service`. You will need to edit the
+- Create a config file, using the contents below, at `/etc/systemd/system/odind.service`. You will need to edit the
   default ubuntu username to reflect your machine’s username. Note that you may need to use sudo as it lives in a
   protected folder
 
@@ -134,7 +134,7 @@ Description=odinChain Node Daemon
 After=network-online.target
 [Service]
 User=ubuntu
-ExecStart=/home/ubuntu/go/bin/bandd start
+ExecStart=/home/ubuntu/go/bin/odind start
 Restart=always
 RestartSec=3
 LimitNOFILE=4096
@@ -145,8 +145,8 @@ WantedBy=multi-user.target
 - Install the service and start the node
 
 ```
-sudo systemctl enable bandd
-sudo systemctl start bandd
+sudo systemctl enable odind
+sudo systemctl start odind
 ```
 
 While not required, it is recommended that you run your validator node behind your sentry nodes for DDOS mitigation.
@@ -155,25 +155,25 @@ node will now start connecting to other nodes and syncing the blockchain state.
 
 ### ⚠️ Wait Until Your Chain is Fully Sync
 
-You can tail the log output with `journalctl -u bandd.service -f`. If all goes well, you should see that the node daemon
+You can tail the log output with `journalctl -u odind.service -f`. If all goes well, you should see that the node daemon
 has started syncing. Now you should wait until your node has caught up with the most recent block.
 
 ```bash
-... bandd: I[..] Executed block  ... module=state height=20000 ...
-... bandd: I[..] Committed state ... module=state height=20000 ...
-... bandd: I[..] Executed block  ... module=state height=20001 ...
-... bandd: I[..] Committed state ... module=state height=20001 ...
+... odind: I[..] Executed block  ... module=state height=20000 ...
+... odind: I[..] Committed state ... module=state height=20000 ...
+... odind: I[..] Executed block  ... module=state height=20001 ...
+... odind: I[..] Committed state ... module=state height=20001 ...
 ```
 
 ⚠️ **NOTE:** You should not proceed to the next step until your node caught up to the latest block.
 
 ### Send Yourself odin Token
 
-With everything ready, you will need some odin tokens to apply as a validator. You can use `bandd` keys list command to
+With everything ready, you will need some odin tokens to apply as a validator. You can use `odind` keys list command to
 show your address.
 
 ```bash
-bandd keys list
+odind keys list
 - name: ...
   type: local
   address: odin1g3fd6rslryv498tjqmmjcnq5dlr0r6udm2rxjk
@@ -188,7 +188,7 @@ bandd keys list
 Once you have some odin tokens, you can apply to become a validator by sending `MsgCreateValidator` transaction.
 
 ```bash
-bandd tx staking create-validator \
+odind tx staking create-validator \
     --amount <your-amount-to-stake>odin \
     --commission-max-change-rate 0.01 \
     --commission-max-rate 0.2 \

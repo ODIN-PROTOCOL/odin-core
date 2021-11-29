@@ -19,7 +19,7 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	me "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	owasm "github.com/bandprotocol/go-owasm/api"
@@ -48,7 +48,7 @@ var (
 )
 
 func init() {
-	bandapp.SetBech32AddressPrefixesAndBip44CoinType(sdk.GetConfig())
+	odinapp.SetBech32AddressPrefixesAndBip44CoinType(sdk.GetConfig())
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	Owner = createArbitraryAccount(r)
 	Treasury = createArbitraryAccount(r)
@@ -78,19 +78,19 @@ func (ao EmptyAppOptions) Get(o string) interface{} {
 }
 
 // NewSimApp creates instance of our app using in test.
-func NewSimApp(chainID string, logger log.Logger) *bandapp.BandApp {
+func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	// Set HomeFlag to a temp folder for simulation run.
-	dir, err := ioutil.TempDir("", "bandd")
+	dir, err := ioutil.TempDir("", "odind")
 	if err != nil {
 		panic(err)
 	}
 	viper.Set(cli.HomeFlag, dir)
 
 	db := dbm.NewMemDB()
-	encCdc := bandapp.MakeEncodingConfig()
-	app := bandapp.NewBandApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
+	encCdc := odinapp.MakeEncodingConfig()
+	app := odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
 
-	genesis := bandapp.NewDefaultGenesisState()
+	genesis := odinapp.NewDefaultGenesisState()
 	acc := []authtypes.GenesisAccount{
 		&authtypes.BaseAccount{Address: Owner.Address.String()},
 		&authtypes.BaseAccount{Address: FeePayer.Address.String()},
@@ -195,7 +195,7 @@ func NewSimApp(chainID string, logger log.Logger) *bandapp.BandApp {
 // params[1] - fund pools;
 // Deprecated
 //  - use TestAppBuilder instead
-func CreateTestInput(params ...bool) (*bandapp.BandApp, sdk.Context, me.Keeper) {
+func CreateTestInput(params ...bool) (*odinapp.OdinApp, sdk.Context, me.Keeper) {
 	app := NewSimApp("ODINCHAIN", log.NewNopLogger())
 	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})
 	if len(params) > 0 && params[0] {

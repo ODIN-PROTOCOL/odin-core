@@ -24,7 +24,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	"github.com/GeoDB-Limited/odin-core/app/params"
 	"github.com/GeoDB-Limited/odin-core/hooks/common"
 	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
@@ -54,7 +54,7 @@ type Hook struct {
 	oracleKeeper  oraclekeeper.Keeper
 }
 
-// NewHook creates an emitter hook instance that will be added in Band App.
+// NewHook creates an emitter hook instance that will be added in Odin App.
 func NewHook(
 	cdc codec.Marshaler, legecyAmino *codec.LegacyAmino, encodingConfig params.EncodingConfig, accountKeeper authkeeper.AccountKeeper, bankKeeper bankkeeper.Keeper,
 	stakingKeeper stakingkeeper.Keeper, mintKeeper mintkeeper.Keeper, distrKeeper distrkeeper.Keeper, govKeeper odingovkeeper.Keeper,
@@ -117,7 +117,7 @@ func (h *Hook) FlushMessages() {
 
 // AfterInitChain specify actions need to do after chain initialization (app.Hook interface).
 func (h *Hook) AfterInitChain(ctx sdk.Context, req abci.RequestInitChain, res abci.ResponseInitChain) {
-	var genesisState bandapp.GenesisState
+	var genesisState odinapp.GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
 	}

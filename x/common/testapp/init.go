@@ -1,7 +1,7 @@
 package testapp
 
 import (
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"math/rand"
 )
@@ -16,5 +16,5 @@ var (
 
 func init() {
 	RAND = rand.New(rand.NewSource(Seed))
-	bandapp.SetBech32AddressPrefixesAndBip44CoinType(sdk.GetConfig())
+	odinapp.SetBech32AddressPrefixesAndBip44CoinType(sdk.GetConfig())
 }

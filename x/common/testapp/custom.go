@@ -2,14 +2,14 @@ package testapp
 
 import (
 	"encoding/json"
-	bandapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/GeoDB-Limited/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
-func CreateAppCustomValidators(accountsCount int, powers ...int) (*bandapp.BandApp, sdk.Context, TestAppBuilder) {
+func CreateAppCustomValidators(accountsCount int, powers ...int) (*odinapp.OdinApp, sdk.Context, TestAppBuilder) {
 	builder := CreateDefaultGenesisApp(accountsCount)
 
 	// staking
@@ -36,7 +36,7 @@ func CreateAppCustomValidators(accountsCount int, powers ...int) (*bandapp.BandA
 	return app, app.NewContext(false, tmproto.Header{}), builder
 }
 
-func CreateAppCustomBalances(balancesRate ...int) (*bandapp.BandApp, sdk.Context, TestAppBuilder) {
+func CreateAppCustomBalances(balancesRate ...int) (*odinapp.OdinApp, sdk.Context, TestAppBuilder) {
 	builder := CreateDefaultGenesisApp(len(balancesRate))
 
 	balancesToFill := make([]sdk.Coins, 0, len(balancesRate))
