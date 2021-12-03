@@ -7,7 +7,6 @@ import (
 	"github.com/GeoDB-Limited/odin-core/x/coinswap"
 	coinswapkeeper "github.com/GeoDB-Limited/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
-	odingovkeeper "github.com/GeoDB-Limited/odin-core/x/gov/keeper"
 	odinmintkeeper "github.com/GeoDB-Limited/odin-core/x/mint/keeper"
 	odinminttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/telemetry"
@@ -34,7 +33,6 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
-	odingov "github.com/GeoDB-Limited/odin-core/x/gov"
 	odinmint "github.com/GeoDB-Limited/odin-core/x/mint"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -126,7 +124,7 @@ var (
 		staking.AppModuleBasic{},
 		odinmint.AppModuleBasic{},
 		distr.AppModuleBasic{},
-		odingov.NewAppModuleBasic(gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.CancelProposalHandler)),
+		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
@@ -183,7 +181,7 @@ type OdinApp struct {
 	SlashingKeeper   slashingkeeper.Keeper
 	MintKeeper       odinmintkeeper.Keeper
 	DistrKeeper      distrkeeper.Keeper
-	GovKeeper        odingovkeeper.Keeper
+	GovKeeper        govkeeper.Keeper
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
@@ -340,11 +338,11 @@ func NewOdinApp(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientUpdateProposalHandler(app.IBCKeeper.ClientKeeper))
-	govKeeper := govkeeper.NewKeeper(
+
+	app.GovKeeper = govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
 		&stakingKeeper, govRouter,
 	)
-	app.GovKeeper = odingovkeeper.NewKeeper(appCodec, keys[govtypes.StoreKey], govKeeper, app.AccountKeeper, app.BankKeeper, app.MintKeeper, app.StakingKeeper)
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec, keys[oracletypes.StoreKey], app.GetSubspace(oracletypes.ModuleName), filepath.Join(homePath, "files"),
 		authtypes.FeeCollectorName, app.AccountKeeper, app.BankKeeper, &stakingKeeper, app.DistrKeeper,
@@ -400,7 +398,7 @@ func NewOdinApp(
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
-		odingov.NewAppModule(gov.NewAppModule(appCodec, app.GovKeeper.Keeper, app.AccountKeeper, app.BankKeeper), app.GovKeeper, app.AccountKeeper, app.BankKeeper),
+		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
 		odinmint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper),
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
@@ -445,7 +443,7 @@ func NewOdinApp(
 		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
-		odingov.NewAppModule(gov.NewAppModule(appCodec, app.GovKeeper.Keeper, app.AccountKeeper, app.BankKeeper), app.GovKeeper, app.AccountKeeper, app.BankKeeper),
+		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
 		odinmint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper),
 		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
