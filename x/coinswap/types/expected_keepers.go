@@ -29,8 +29,6 @@ type DistrKeeper interface {
 }
 
 type OracleKeeper interface {
-	GetOraclePool(ctx sdk.Context) (oraclePool oracletypes.OraclePool)
-	SetOraclePool(ctx sdk.Context, oraclePool oracletypes.OraclePool)
-	WithdrawOraclePool(ctx sdk.Context, amount sdk.Coins, recipient sdk.AccAddress) error
-	FundOraclePool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error
+	GetAccumulatedPaymentsForData(ctx sdk.Context) (payments oracletypes.AccumulatedPaymentsForData)
+	SetAccumulatedPaymentsForData(ctx sdk.Context, payments oracletypes.AccumulatedPaymentsForData)
 }

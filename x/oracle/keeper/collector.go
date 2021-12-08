@@ -22,7 +22,7 @@ func (k Keeper) CollectFee(
 	ctx sdk.Context, payer sdk.AccAddress, feeLimit sdk.Coins, askCount uint64, rawRequests []oracletypes.RawRequest,
 ) (sdk.Coins, error) {
 
-	collector := newFeeCollector(k, feeLimit, payer)
+	collector := newFeeCollector(k.distrKeeper, k, feeLimit, payer)
 
 	for _, r := range rawRequests {
 
@@ -44,8 +44,6 @@ func (k Keeper) CollectFee(
 
 	return collector.Collected(), nil
 }
-
-
 
 // CollectReward subtract reward from fee pool and sends it to the data providers for reporting data
 func (k Keeper) CollectReward(
