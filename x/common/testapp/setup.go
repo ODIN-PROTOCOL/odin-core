@@ -206,7 +206,6 @@ func CreateTestInput(params ...bool) (*odinapp.OdinApp, sdk.Context, me.Keeper) 
 
 	if len(params) > 1 && params[1] {
 		app.DistrKeeper.FundCommunityPool(ctx, DefaultCommunityPool, FeePoolProvider.Address)
-		app.OracleKeeper.FundOraclePool(ctx, DefaultDataProvidersPool, OraclePoolProvider.Address)
 
 		ctx = app.NewContext(false, tmproto.Header{})
 	}

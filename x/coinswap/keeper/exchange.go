@@ -2,7 +2,6 @@ package keeper
 
 import (
 	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -42,15 +41,26 @@ func (k Keeper) ExchangeDenom(
 		).Info("performing exchange according to limited precision some coins are lost")
 	}
 
-	err = k.oracleKeeper.WithdrawOraclePool(ctx, sdk.NewCoins(toSend), requester)
-	if err != nil {
-		return sdkerrors.Wrapf(
-			err,
-			"sending coins from module: %s, to account: %s",
-			oracletypes.ModuleName,
-			requester.String(),
-		)
+	feePool := k.distrKeeper.GetFeePool(ctx)
+
+	diff, hasNeg := feePool.CommunityPool.SafeSub(sdk.NewDecCoinsFromCoins(toSend))
+	if hasNeg {
+		k.Logger(ctx).With("lack", diff).Error("oracle pool does not have enough coins to reward data providers")
+		// not return because maybe still enough coins to pay someone
+		return sdkerrors.ErrInsufficientFunds
 	}
+	feePool.CommunityPool = diff
+
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, distrtypes.ModuleName, requester, sdk.NewCoins(toSend))
+	if err != nil {
+		return err
+	}
+
+	k.distrKeeper.SetFeePool(ctx, feePool)
+
+	accumulatedPaymentsForData := k.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
+	accumulatedPaymentsForData.AccumulatedAmount, _ = accumulatedPaymentsForData.AccumulatedAmount.SafeSub(sdk.NewCoins(toSend))
+	k.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
 
 	return nil
 }

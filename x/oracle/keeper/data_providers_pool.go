@@ -1,12 +1,6 @@
 package oraclekeeper
 
-import (
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-)
-
-func (k Keeper) FundOraclePool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error {
+/*func (k Keeper) FundOraclePool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error {
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, oracletypes.ModuleName, amount); err != nil {
 		return err
 	}
@@ -43,3 +37,4 @@ func (k Keeper) WithdrawOraclePool(ctx sdk.Context, amount sdk.Coins, recipient 
 	k.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
 	return nil
 }
+*/

@@ -107,7 +107,6 @@ func CreateTestApp(params ...bool) (*odinapp.OdinApp, sdk.Context) {
 
 	if len(params) > 1 && params[1] {
 		_ = app.DistrKeeper.FundCommunityPool(ctx, DefaultCommunityPool, FeePoolProvider.Address)
-		_ = app.OracleKeeper.FundOraclePool(ctx, DefaultDataProvidersPool, OraclePoolProvider.Address)
 
 		ctx = app.NewContext(false, tmproto.Header{})
 	}

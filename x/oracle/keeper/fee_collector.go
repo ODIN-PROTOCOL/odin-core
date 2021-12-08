@@ -2,11 +2,13 @@ package oraclekeeper
 
 import (
 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 type feeCollector struct {
+	distrKeeper  oracletypes.DistrKeeper
 	oracleKeeper Keeper
 	payer        sdk.AccAddress
 	collected    sdk.Coins
@@ -25,18 +27,26 @@ func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins) error {
 	}
 
 	// Actual send coins
-	return coll.oracleKeeper.FundOraclePool(ctx, coins, coll.payer)
+	err := coll.distrKeeper.FundCommunityPool(ctx, coins, coll.payer)
+	if err == nil {
+		accumulatedPaymentsForData := coll.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(coins...)
+
+		coll.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+	}
+
+	return err
 }
 
 func (coll *feeCollector) Collected() sdk.Coins {
 	return coll.collected
 }
 
-func newFeeCollector(oracleKeeper Keeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
+func newFeeCollector(distrKeeper oracletypes.DistrKeeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
 	return &feeCollector{
-		oracleKeeper: oracleKeeper,
-		payer:        payer,
-		collected:    sdk.NewCoins(),
-		limit:        feeLimit,
+		distrKeeper: distrKeeper,
+		payer:       payer,
+		collected:   sdk.NewCoins(),
+		limit:       feeLimit,
 	}
 }
