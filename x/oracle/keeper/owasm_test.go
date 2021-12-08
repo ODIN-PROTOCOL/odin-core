@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -96,7 +97,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 	require.Equal(t, sdk.Events{
 		sdk.NewEvent(
 			banktypes.EventTypeTransfer,
-			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName).String()),
+			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(banktypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki[0].String())),
 		sdk.NewEvent(
@@ -105,7 +106,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 		),
 		sdk.NewEvent(
 			banktypes.EventTypeTransfer,
-			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName).String()),
+			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(banktypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki[0].String())),
 		sdk.NewEvent(
@@ -114,7 +115,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 		),
 		sdk.NewEvent(
 			banktypes.EventTypeTransfer,
-			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName).String()),
+			sdk.NewAttribute(banktypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(banktypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki[0].String())),
 		sdk.NewEvent(
@@ -651,7 +652,7 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 	require.Equal(t, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))), coins)
 
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
-	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))))
+	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))))
 }
 
 func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
@@ -677,7 +678,7 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 	require.Equal(t, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))), coins)
 
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
-	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))))
+	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))))
 }
 
 func TestCollectFeeWithMixedAndFeeNotEnough(t *testing.T) {
@@ -750,7 +751,7 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 	// Treasury balance
 	// start: 0band, 0abc
 	// collect 3 band and 1 abc => 3band, 1abc
-	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(103000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))))
+	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName), sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(103000000)), sdk.NewCoin("minigeo", sdk.NewInt(99000000))))
 }
 
 func TestCollectFeeWithWithManyUnitFail(t *testing.T) {

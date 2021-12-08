@@ -42,11 +42,12 @@ func (coll *feeCollector) Collected() sdk.Coins {
 	return coll.collected
 }
 
-func newFeeCollector(distrKeeper oracletypes.DistrKeeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
+func newFeeCollector(distrKeeper oracletypes.DistrKeeper, oracleKeeper Keeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
 	return &feeCollector{
-		distrKeeper: distrKeeper,
-		payer:       payer,
-		collected:   sdk.NewCoins(),
-		limit:       feeLimit,
+		distrKeeper:  distrKeeper,
+		oracleKeeper: oracleKeeper,
+		payer:        payer,
+		collected:    sdk.NewCoins(),
+		limit:        feeLimit,
 	}
 }

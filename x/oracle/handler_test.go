@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"strings"
 	"testing"
 	"time"
@@ -271,7 +272,7 @@ func TestRequestDataSuccess(t *testing.T) {
 	event := abci.Event{
 		Type: banktypes.EventTypeTransfer,
 		Attributes: []abci.EventAttribute{
-			{Key: []byte(banktypes.AttributeKeyRecipient), Value: []byte(app.AccountKeeper.GetModuleAddress(oracletypes.ModuleName).String())},
+			{Key: []byte(banktypes.AttributeKeyRecipient), Value: []byte(app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String())},
 			{Key: []byte(banktypes.AttributeKeySender), Value: []byte(testapp.FeePayer.Address.String())},
 			{Key: []byte(sdk.AttributeKeyAmount), Value: []byte("2000000loki")},
 		},

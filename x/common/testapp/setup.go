@@ -206,6 +206,10 @@ func CreateTestInput(params ...bool) (*odinapp.OdinApp, sdk.Context, me.Keeper) 
 
 	if len(params) > 1 && params[1] {
 		app.DistrKeeper.FundCommunityPool(ctx, DefaultCommunityPool, FeePoolProvider.Address)
+		accumulatedPaymentsForData := app.OracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(DefaultDataProvidersPool...)
+
+		app.OracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
 
 		ctx = app.NewContext(false, tmproto.Header{})
 	}
