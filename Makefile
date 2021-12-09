@@ -6,6 +6,9 @@ BINDIR ?= $(GOPATH)/bin
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
 
+DEB_BIN_DIR ?= /usr/local/bin
+DEB_LIB_DIR ?= /usr/lib
+
 ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
 endif
@@ -23,6 +26,10 @@ all: install
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
+
+build: go.sum
+	go build -mod=readonly -o ./build/odind $(BUILD_FLAGS) ./cmd/odind
+	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
 
 faucet: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/faucet
@@ -93,6 +100,31 @@ TM_P2P              = third_party/proto/tendermint/p2p
 GOGO_PROTO_TYPES    = third_party/proto/gogoproto
 COSMOS_PROTO_TYPES  = third_party/proto/cosmos_proto
 CONFIO_TYPES        = third_party/proto/confio
+
+deb:
+	rm -rf /tmp/GeoDB
+
+	mkdir -p /tmp/GeoDB/deb/$(DEB_BIN_DIR)
+	cp -f ./build/yoda /tmp/GeoDB/deb/$(DEB_BIN_DIR)/yoda
+	cp -f ./build/odind /tmp/GeoDB/deb/$(DEB_BIN_DIR)/odind
+	chmod +x /tmp/GeoDB/deb/$(DEB_BIN_DIR)/odind /tmp/GeoDB/deb/$(DEB_BIN_DIR)/yoda
+
+	mkdir -p /tmp/GeoDB/deb/$(DEB_LIB_DIR)
+
+	mkdir -p /tmp/GeoDB/deb/DEBIAN
+	cp ./deployment/deb/control /tmp/GeoDB/deb/DEBIAN/control
+	printf "Version: " >> /tmp/GeoDB/deb/DEBIAN/control
+	printf "$(VERSION)" >> /tmp/GeoDB/deb/DEBIAN/control
+	echo "" >> /tmp/GeoDB/deb/DEBIAN/control
+	#cp ./deployment/deb/postinst /tmp/GeoDB/deb/DEBIAN/postinst
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/postinst
+	#cp ./deployment/deb/postrm /tmp/GeoDB/deb/DEBIAN/postrm
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/postrm
+	#cp ./deployment/deb/triggers /tmp/GeoDB/deb/DEBIAN/triggers
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/triggers
+	dpkg-deb --build /tmp/GeoDB/deb/ .
+	-rm -rf /tmp/GeoDB
+	cp ./odinprotocol_$(VERSION)_amd64.deb ./odinprotocol_v$(VERSION)_amd64.deb
 
 proto-update-deps:
 	@mkdir -p $(GOGO_PROTO_TYPES)
