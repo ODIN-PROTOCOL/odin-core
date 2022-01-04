@@ -13,14 +13,14 @@ import (
 
 type Keeper struct {
 	storeKey       sdk.StoreKey
-	cdc            codec.BinaryMarshaler
+	cdc            codec.BinaryCodec
 	paramstore     paramstypes.Subspace
 	oracleKeeper   auctiontypes.OracleKeeper
 	coinswapKeeper auctiontypes.CoinswapKeeper
 }
 
 func NewKeeper(
-	cdc codec.BinaryMarshaler,
+	cdc codec.BinaryCodec,
 	key sdk.StoreKey,
 	subspace paramstypes.Subspace,
 	ok auctiontypes.OracleKeeper,
@@ -69,14 +69,14 @@ func (k Keeper) GetExchangeRates(ctx sdk.Context) (res []coinswaptypes.Exchange)
 
 func (k Keeper) SetAuctionStatus(ctx sdk.Context, status auctiontypes.AuctionStatus) {
 	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshalBinaryBare(&status)
+	b := k.cdc.MustMarshal(&status)
 	store.Set(auctiontypes.AuctionStatusStoreKey, b)
 }
 
 func (k Keeper) GetAuctionStatus(ctx sdk.Context) (payments auctiontypes.AuctionStatus) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(auctiontypes.AuctionStatusStoreKey)
-	k.cdc.MustUnmarshalBinaryBare(bz, &payments)
+	k.cdc.MustUnmarshal(bz, &payments)
 	return
 }
 

@@ -23,7 +23,7 @@ func (k Keeper) GetOracleScript(ctx sdk.Context, id oracletypes.OracleScriptID) 
 		return oracletypes.OracleScript{}, sdkerrors.Wrapf(oracletypes.ErrOracleScriptNotFound, "id: %d", id)
 	}
 	var oracleScript oracletypes.OracleScript
-	k.cdc.MustUnmarshalBinaryBare(bz, &oracleScript)
+	k.cdc.MustUnmarshal(bz, &oracleScript)
 	return oracleScript, nil
 }
 
@@ -44,7 +44,7 @@ func (k Keeper) GetPaginatedOracleScripts(
 		pagination,
 		func(key []byte, value []byte, accumulate bool) (bool, error) {
 			var oracleScript oracletypes.OracleScript
-			if err := k.cdc.UnmarshalBinaryBare(value, &oracleScript); err != nil {
+			if err := k.cdc.Unmarshal(value, &oracleScript); err != nil {
 				return false, err
 			}
 			if accumulate {
@@ -73,7 +73,7 @@ func (k Keeper) MustGetOracleScript(ctx sdk.Context, id oracletypes.OracleScript
 func (k Keeper) SetOracleScript(ctx sdk.Context, id oracletypes.OracleScriptID, oracleScript oracletypes.OracleScript) {
 	oracleScript.ID = id
 	store := ctx.KVStore(k.storeKey)
-	store.Set(oracletypes.OracleScriptStoreKey(id), k.cdc.MustMarshalBinaryBare(&oracleScript))
+	store.Set(oracletypes.OracleScriptStoreKey(id), k.cdc.MustMarshal(&oracleScript))
 }
 
 // AddOracleScript adds the given oracle script to the storage.
@@ -102,7 +102,7 @@ func (k Keeper) GetAllOracleScripts(ctx sdk.Context) (oracleScripts []oracletype
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var oracleScript oracletypes.OracleScript
-		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &oracleScript)
+		k.cdc.MustUnmarshal(iterator.Value(), &oracleScript)
 		oracleScripts = append(oracleScripts, oracleScript)
 	}
 	return oracleScripts

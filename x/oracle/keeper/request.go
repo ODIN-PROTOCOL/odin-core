@@ -25,7 +25,7 @@ func (k Keeper) GetRequest(ctx sdk.Context, id oracletypes.RequestID) (oracletyp
 		return oracletypes.Request{}, sdkerrors.Wrapf(oracletypes.ErrRequestNotFound, "id: %d", id)
 	}
 	var request oracletypes.Request
-	k.cdc.MustUnmarshalBinaryBare(bz, &request)
+	k.cdc.MustUnmarshal(bz, &request)
 	return request, nil
 }
 
@@ -86,7 +86,7 @@ func (k Keeper) GetPaginatedRequests(
 // SetRequest saves the given data request to the store without performing any validation.
 func (k Keeper) SetRequest(ctx sdk.Context, id oracletypes.RequestID, request oracletypes.Request) {
 	request.ID = id
-	ctx.KVStore(k.storeKey).Set(oracletypes.RequestStoreKey(id), k.cdc.MustMarshalBinaryBare(&request))
+	ctx.KVStore(k.storeKey).Set(oracletypes.RequestStoreKey(id), k.cdc.MustMarshal(&request))
 }
 
 // DeleteRequest removes the given data request from the store.
@@ -146,7 +146,7 @@ func (k Keeper) SetPendingResolveList(ctx sdk.Context, ids []oracletypes.Request
 		intVs[idx] = int64(id)
 	}
 
-	bz := k.cdc.MustMarshalBinaryBare(&oracletypes.PendingResolveList{RequestIds: intVs})
+	bz := k.cdc.MustMarshal(&oracletypes.PendingResolveList{RequestIds: intVs})
 	if bz == nil {
 		bz = []byte{}
 	}
@@ -160,7 +160,7 @@ func (k Keeper) GetPendingResolveList(ctx sdk.Context) (ids []oracletypes.Reques
 		return []oracletypes.RequestID{}
 	}
 	pendingResolveList := oracletypes.PendingResolveList{}
-	k.cdc.MustUnmarshalBinaryBare(bz, &pendingResolveList)
+	k.cdc.MustUnmarshal(bz, &pendingResolveList)
 	for _, rid := range pendingResolveList.RequestIds {
 		ids = append(ids, oracletypes.RequestID(rid))
 	}

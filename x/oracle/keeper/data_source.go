@@ -23,7 +23,7 @@ func (k Keeper) GetDataSource(ctx sdk.Context, id oracletypes.DataSourceID) (ora
 		return oracletypes.DataSource{}, sdkerrors.Wrapf(oracletypes.ErrDataSourceNotFound, "id: %d", id)
 	}
 	var dataSource oracletypes.DataSource
-	k.cdc.MustUnmarshalBinaryBare(bz, &dataSource)
+	k.cdc.MustUnmarshal(bz, &dataSource)
 	return dataSource, nil
 }
 
@@ -40,7 +40,7 @@ func (k Keeper) MustGetDataSource(ctx sdk.Context, id oracletypes.DataSourceID) 
 func (k Keeper) SetDataSource(ctx sdk.Context, id oracletypes.DataSourceID, dataSource oracletypes.DataSource) {
 	dataSource.ID = id
 	store := ctx.KVStore(k.storeKey)
-	store.Set(oracletypes.DataSourceStoreKey(id), k.cdc.MustMarshalBinaryBare(&dataSource))
+	store.Set(oracletypes.DataSourceStoreKey(id), k.cdc.MustMarshal(&dataSource))
 }
 
 // AddDataSource adds the given data source to the storage.
@@ -67,7 +67,7 @@ func (k Keeper) GetAllDataSources(ctx sdk.Context) (dataSources []oracletypes.Da
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var dataSource oracletypes.DataSource
-		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &dataSource)
+		k.cdc.MustUnmarshal(iterator.Value(), &dataSource)
 		dataSources = append(dataSources, dataSource)
 	}
 	return dataSources
@@ -90,7 +90,7 @@ func (k Keeper) GetPaginatedDataSources(
 		pagination,
 		func(key []byte, value []byte, accumulate bool) (bool, error) {
 			var dataSource oracletypes.DataSource
-			if err := k.cdc.UnmarshalBinaryBare(value, &dataSource); err != nil {
+			if err := k.cdc.Unmarshal(value, &dataSource); err != nil {
 				return false, err
 			}
 			if accumulate {

@@ -18,10 +18,11 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data *minttypes.GenesisState) {
 
 	balances := keeper.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
 	if balances.IsZero() {
-		if err := keeper.bankKeeper.SetBalances(ctx, moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
+		if err := keeper.bankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
 			panic(err)
 		}
 
+		keeper.SetMintModuleCoinsAccount(ctx, sdk.AccAddress(data.ModuleCoinsAccount))
 		keeper.authKeeper.SetModuleAccount(ctx, moduleAcc)
 	}
 
@@ -33,5 +34,6 @@ func ExportGenesis(ctx sdk.Context, keeper Keeper) *minttypes.GenesisState {
 	minter := keeper.GetMinter(ctx)
 	params := keeper.GetParams(ctx)
 	mintPool := keeper.GetMintPool(ctx)
-	return minttypes.NewGenesisState(minter, params, mintPool)
+	mintModuleCoinsAccount := keeper.GetMintModuleCoinsAccount(ctx)
+	return minttypes.NewGenesisState(minter, params, mintPool, mintModuleCoinsAccount)
 }

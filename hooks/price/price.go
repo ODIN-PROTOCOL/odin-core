@@ -76,7 +76,7 @@ package price
 // 					for idx, symbol := range input.Symbols {
 // 						price := NewPrice(symbol, input.Multiplier, output.Pxs[idx], result.ResponsePacketData.RequestID, result.ResponsePacketData.ResolveTime)
 // 						err := h.db.Put([]byte(fmt.Sprintf("%d,%d,%s", result.RequestPacketData.AskCount, result.RequestPacketData.MinCount, symbol)),
-// 							h.cdc.MustMarshalBinaryBare(price), nil)
+// 							h.cdc.MustMarshal(price), nil)
 // 						if err != nil {
 // 							panic(err)
 // 						}
@@ -129,7 +129,7 @@ package price
 // 				return common.QueryResultError(fmt.Errorf("Error while iterate over prices list: %s", err.Error())), true
 // 			}
 
-// 			bz := h.cdc.MustMarshalBinaryBare(symbols)
+// 			bz := h.cdc.MustMarshal(symbols)
 // 			return common.QueryResultSuccess(bz, req.Height), true
 // 		default:
 // 			return abci.ResponseQuery{}, false

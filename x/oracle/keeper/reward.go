@@ -9,12 +9,12 @@ import (
 func (k Keeper) SetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress, reward sdk.Coins) {
 	key := oracletypes.DataProviderRewardsPrefixKey(acc)
 	if !k.HasDataProviderReward(ctx, acc) {
-		ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshalBinaryBare(oracletypes.NewDataProviderAccumulatedReward(acc, reward)))
+		ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(oracletypes.NewDataProviderAccumulatedReward(acc, reward)))
 		return
 	}
 	oldReward := k.GetDataProviderAccumulatedReward(ctx, acc)
 	newReward := oldReward.Add(reward...)
-	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshalBinaryBare(oracletypes.NewDataProviderAccumulatedReward(acc, newReward)))
+	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(oracletypes.NewDataProviderAccumulatedReward(acc, newReward)))
 }
 
 func (k Keeper) ClearDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) {
@@ -25,7 +25,7 @@ func (k Keeper) GetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAdd
 	key := oracletypes.DataProviderRewardsPrefixKey(acc)
 	bz := ctx.KVStore(k.storeKey).Get(key)
 	dataProviderReward := oracletypes.DataProviderAccumulatedReward{}
-	k.cdc.MustUnmarshalBinaryBare(bz, &dataProviderReward)
+	k.cdc.MustUnmarshal(bz, &dataProviderReward)
 	return dataProviderReward.DataProviderReward
 }
 

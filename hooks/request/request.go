@@ -24,7 +24,7 @@ import (
 
 // Hook inherits from Odin app hook to save latest request into SQL database.
 type Hook struct {
-	cdc          codec.JSONMarshaler
+	cdc          codec.JSONCodec
 	oracleKeeper oraclekeeper.Keeper
 	dbMap        *gorp.DbMap
 	trans        *gorp.Transaction
@@ -80,7 +80,7 @@ func initDb(connStr string) *gorp.DbMap {
 }
 
 // NewHook creates a request hook instance that will be added in Odin App.
-func NewHook(cdc codec.JSONMarshaler, oracleKeeper oraclekeeper.Keeper, connStr string) *Hook {
+func NewHook(cdc codec.JSONCodec, oracleKeeper oraclekeeper.Keeper, connStr string) *Hook {
 	return &Hook{
 		cdc:          cdc,
 		oracleKeeper: oracleKeeper,

@@ -11,7 +11,7 @@ import (
 
 type TestAppBuilder interface {
 	Build(chainID string, stateBytes []byte, params ...bool) *odinapp.OdinApp
-	Codec() codec.Marshaler
+	Codec() codec.Codec
 	AddGenesis() TestAppBuilder
 	UpdateModules(modulesGenesis map[string]json.RawMessage) TestAppBuilder
 
@@ -77,7 +77,7 @@ func NewTestAppBuilder(dir string, logger log.Logger) TestAppBuilder {
 	return &builder
 }
 
-func (b *testAppBuilder) Codec() codec.Marshaler {
+func (b *testAppBuilder) Codec() codec.Codec {
 	return b.app.AppCodec()
 }
 

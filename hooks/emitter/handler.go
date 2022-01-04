@@ -5,9 +5,9 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/GeoDB-Limited/odin-core/hooks/common"

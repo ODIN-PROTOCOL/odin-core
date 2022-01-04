@@ -1,6 +1,7 @@
 package odin
 
 import (
+	"fmt"
 	"github.com/GeoDB-Limited/odin-core/x/auction"
 	auctionkeeper "github.com/GeoDB-Limited/odin-core/x/auction/keeper"
 	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
@@ -11,9 +12,9 @@ import (
 	odinminttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/telemetry"
 	telemetrykeeper "github.com/GeoDB-Limited/odin-core/x/telemetry/keeper"
-	"github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer"
-	ibctransferkeeper "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/keeper"
-	transfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
+	"github.com/cosmos/ibc-go/v2/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -66,16 +67,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	evidencekeeper "github.com/cosmos/cosmos-sdk/x/evidence/keeper"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
+	"github.com/cosmos/cosmos-sdk/x/feegrant"
+	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
+	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	ibc "github.com/cosmos/cosmos-sdk/x/ibc/core"
-	ibcclient "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client"
-	porttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/05-port/types"
-	ibchost "github.com/cosmos/cosmos-sdk/x/ibc/core/24-host"
-	ibckeeper "github.com/cosmos/cosmos-sdk/x/ibc/core/keeper"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
@@ -91,6 +91,12 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ibc "github.com/cosmos/ibc-go/v2/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v2/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
+	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
 
 	odinappparams "github.com/GeoDB-Limited/odin-core/app/params"
 
@@ -124,7 +130,10 @@ var (
 		staking.AppModuleBasic{},
 		odinmint.AppModuleBasic{},
 		distr.AppModuleBasic{},
-		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler),
+		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpdateClientProposal, nil),
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpgradeProposal, nil),
+		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
@@ -137,6 +146,7 @@ var (
 		auction.AppModuleBasic{},
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
+		feegrantmodule.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -164,7 +174,7 @@ var (
 type OdinApp struct {
 	*baseapp.BaseApp
 	legacyAmino       *codec.LegacyAmino
-	appCodec          codec.Marshaler
+	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
 
 	invCheckPeriod uint
@@ -191,6 +201,7 @@ type OdinApp struct {
 	CoinswapKeeper   coinswapkeeper.Keeper
 	AuctionKeeper    auctionkeeper.Keeper
 	TelemetryKeeper  telemetrykeeper.Keeper
+	FeeGrantKeeper   feegrantkeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
 
 	// make scoped keepers public for test purposes
@@ -210,6 +221,9 @@ type OdinApp struct {
 
 	// List of hooks
 	hooks []Hook
+
+	// the configurator
+	configurator module.Configurator
 }
 
 func init() {
@@ -245,7 +259,7 @@ func NewOdinApp(
 
 	bApp := baseapp.NewBaseApp(appName, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
-	bApp.SetAppVersion(version.Version)
+	bApp.SetVersion(version.Version)
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
 	keys := sdk.NewKVStoreKeys(
@@ -254,6 +268,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
+		feegrant.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -314,7 +329,8 @@ func NewOdinApp(
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
 		app.GetSubspace(crisistypes.ModuleName), invCheckPeriod, app.BankKeeper, authtypes.FeeCollectorName,
 	)
-	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath)
+	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
+	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
@@ -322,7 +338,7 @@ func NewOdinApp(
 
 	// create IBC Keeper
 	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, scopedIBCKeeper,
+		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
@@ -337,7 +353,7 @@ func NewOdinApp(
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibchost.RouterKey, ibcclient.NewClientUpdateProposalHandler(app.IBCKeeper.ClientKeeper))
+		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
 
 	app.GovKeeper = govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
@@ -370,7 +386,6 @@ func NewOdinApp(
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -402,6 +417,7 @@ func NewOdinApp(
 		odinmint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper),
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
 		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper),
+		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		upgrade.NewAppModule(app.UpgradeKeeper),
 		evidence.NewAppModule(app.EvidenceKeeper),
@@ -430,10 +446,12 @@ func NewOdinApp(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName,
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName,
 		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName, transfertypes.ModuleName,
+		feegrant.ModuleName,
 	)
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
-	app.mm.RegisterServices(module.NewConfigurator(app.MsgServiceRouter(), app.GRPCQueryRouter()))
+	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	app.mm.RegisterServices(app.configurator)
 
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	//
@@ -465,7 +483,18 @@ func NewOdinApp(
 	// initialize BaseApp.
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
-	anteHandler := ante.NewAnteHandler(app.AccountKeeper, app.BankKeeper, ante.DefaultSigVerificationGasConsumer, encodingConfig.TxConfig.SignModeHandler())
+	anteHandler, err := ante.NewAnteHandler(
+		ante.HandlerOptions{
+			AccountKeeper:   app.AccountKeeper,
+			BankKeeper:      app.BankKeeper,
+			FeegrantKeeper:  app.FeeGrantKeeper,
+			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
+			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+		},
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create ante handler: %s", err))
+	}
 	if !disableFeelessReports {
 		anteHandler = bandante.NewFeelessReportsAnteHandler(anteHandler, app.OracleKeeper)
 	}
@@ -488,7 +517,7 @@ func NewOdinApp(
 // MakeCodecs constructs the *std.Codec and *codec.LegacyAmino instances used by
 // Gaia. It is useful for tests and clients who do not want to construct the
 // full gaia application
-func MakeCodecs() (codec.Marshaler, *codec.LegacyAmino) {
+func MakeCodecs() (codec.Codec, *codec.LegacyAmino) {
 	config := MakeEncodingConfig()
 	return config.Marshaler, config.Amino
 }
@@ -599,7 +628,7 @@ func (app *OdinApp) LegacyAmino() *codec.LegacyAmino {
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
 // for modules to register their own custom testing types.
-func (app *OdinApp) AppCodec() codec.Marshaler {
+func (app *OdinApp) AppCodec() codec.Codec {
 	return app.appCodec
 }
 
@@ -695,7 +724,7 @@ func GetMaccPerms() map[string][]string {
 }
 
 // initParamsKeeper init params keeper and its subspaces
-func initParamsKeeper(appCodec codec.BinaryMarshaler, legacyAmino *codec.LegacyAmino, key, tkey sdk.StoreKey) paramskeeper.Keeper {
+func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino, key, tkey sdk.StoreKey) paramskeeper.Keeper {
 	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)

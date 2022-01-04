@@ -1,11 +1,14 @@
 package types
 
+import sdk "github.com/cosmos/cosmos-sdk/types"
+
 // NewGenesisState creates a new GenesisState object
-func NewGenesisState(minter Minter, params Params, mintPool MintPool) *GenesisState {
+func NewGenesisState(minter Minter, params Params, mintPool MintPool, mintModuleCoinsAccount sdk.AccAddress) *GenesisState {
 	return &GenesisState{
-		Minter:   minter,
-		Params:   params,
-		MintPool: mintPool,
+		Minter:             minter,
+		Params:             params,
+		MintPool:           mintPool,
+		ModuleCoinsAccount: mintModuleCoinsAccount.String(),
 	}
 }
 

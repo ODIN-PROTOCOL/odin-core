@@ -17,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/snapshots"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -50,7 +49,7 @@ const (
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	encodingConfig := odin.MakeEncodingConfig()
 	initClientCtx := client.Context{}.
-		WithJSONMarshaler(encodingConfig.Marshaler).
+		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
@@ -67,7 +66,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 				return err
 			}
 
-			return server.InterceptConfigsPreRunHandler(cmd)
+			return server.InterceptConfigsPreRunHandler(cmd, "", nil)
 		},
 	}
 
@@ -77,7 +76,6 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 }
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
-	authclient.Codec = encodingConfig.Marshaler
 
 	rootCmd.AddCommand(
 		InitCmd(odin.NewDefaultGenesisState(), odin.DefaultNodeHome),

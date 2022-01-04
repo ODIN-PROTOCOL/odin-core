@@ -14,14 +14,14 @@ import (
 )
 
 func TestDecodeStore(t *testing.T) {
-	cdc, _ := simapp.MakeCodecs()
-	dec := simulation.NewDecodeStore(cdc)
+	cdc := simapp.MakeTestEncodingConfig()
+	dec := simulation.NewDecodeStore(cdc.Marshaler)
 
 	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15))
 
 	kvPairs := kv.Pairs{
 		Pairs: []kv.Pair{
-			{Key: minttypes.MinterKey, Value: cdc.MustMarshalBinaryBare(&minter)},
+			{Key: minttypes.MinterKey, Value: cdc.Marshaler.MustMarshal(&minter)},
 			{Key: []byte{0x99}, Value: []byte{0x99}},
 		},
 	}

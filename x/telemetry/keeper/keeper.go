@@ -17,7 +17,7 @@ import (
 )
 
 type Keeper struct {
-	cdc            codec.BinaryMarshaler
+	cdc            codec.BinaryCodec
 	txCfg          client.TxConfig
 	bankKeeper     bankkeeper.ViewKeeper
 	distrKeeper    telemetrytypes.DistrKeeper
@@ -25,7 +25,7 @@ type Keeper struct {
 }
 
 func NewKeeper(
-	cdc codec.BinaryMarshaler,
+	cdc codec.BinaryCodec,
 	txCfg client.TxConfig,
 	bk bankkeeper.ViewKeeper,
 	sk stakingkeeper.Keeper,

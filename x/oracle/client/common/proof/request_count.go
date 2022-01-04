@@ -67,7 +67,7 @@ func GetRequestsCountProofHandlerFn(cliCtx client.Context) http.HandlerFunc {
 
 		// Parse requests count
 		rs := gogotypes.Int64Value{}
-		oracletypes.ModuleCdc.MustUnmarshalBinaryLengthPrefixed(value, &rs)
+		oracletypes.ModuleCdc.MustUnmarshalLengthPrefixed(value, &rs)
 
 		requestsCountProof := RequestsCountProof{
 			Count:       uint64(rs.GetValue()),

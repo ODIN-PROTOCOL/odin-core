@@ -4,6 +4,9 @@ const (
 	// ModuleName
 	ModuleName = "mint"
 
+	// ModuleVersion defines the current module version
+	ModuleVersion = 1
+
 	// StoreKey is the default store key for mint
 	StoreKey = ModuleName
 
@@ -18,11 +21,11 @@ const (
 	LegacyRoute = "minting"
 
 	// Query endpoints supported by the minting querier
-	QueryParams                = "parameters"
-	QueryInflation             = "inflation"
-	QueryAnnualProvisions      = "annual_provisions"
-	QueryIntegrationAddresses  = "integration_addresses"
-	QueryTreasuryPool          = "treasury_pool"
+	QueryParams               = "parameters"
+	QueryInflation            = "inflation"
+	QueryAnnualProvisions     = "annual_provisions"
+	QueryIntegrationAddresses = "integration_addresses"
+	QueryTreasuryPool         = "treasury_pool"
 )
 
 var (
@@ -31,5 +34,6 @@ var (
 	// MinterKey is used for the keeper store
 	MinterKey = append(GlobalStoreKeyPrefix, []byte("Minter")...)
 	// MintPoolStoreKey is the key for global mint pool state
-	MintPoolStoreKey = append(GlobalStoreKeyPrefix, []byte("MintPool")...)
+	MintPoolStoreKey          = append(GlobalStoreKeyPrefix, []byte("MintPool")...)
+	MintModuleCoinsAccountKey = append(GlobalStoreKeyPrefix, []byte("MintModuleCoinsAccount")...)
 )

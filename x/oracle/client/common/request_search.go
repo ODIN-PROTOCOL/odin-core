@@ -10,13 +10,13 @@ import (
 )
 
 func queryLatestRequest(clientCtx client.Context, requestSearchRequest *oracletypes.QueryRequestSearchRequest) (oracletypes.RequestID, error) {
-	bin := clientCtx.JSONMarshaler.MustMarshalJSON(requestSearchRequest)
+	bin := clientCtx.JSONCodec.MustMarshalJSON(requestSearchRequest)
 	bz, _, err := clientCtx.QueryWithData(fmt.Sprintf("%s/%s/1", common.AppHook, oracletypes.QueryLatestRequest), bin)
 	if err != nil {
 		return 0, err
 	}
 	var containerIDs oracletypes.QueryRequestIDs
-	err = clientCtx.JSONMarshaler.UnmarshalJSON(bz, &containerIDs)
+	err = clientCtx.JSONCodec.UnmarshalJSON(bz, &containerIDs)
 	if err != nil {
 		return 0, err
 	}
@@ -67,14 +67,14 @@ func QuerySearchLatestRequest(
 }
 
 func queryMultiRequest(clientCtx client.Context, requestSearchParams *oracletypes.QueryRequestSearchRequest, limit int) (*oracletypes.QueryRequestIDs, error) {
-	bin := clientCtx.JSONMarshaler.MustMarshalJSON(requestSearchParams)
+	bin := clientCtx.JSONCodec.MustMarshalJSON(requestSearchParams)
 
 	bz, _, err := clientCtx.QueryWithData(fmt.Sprintf("%s/%s/%d", common.AppHook, oracletypes.QueryLatestRequest, limit), bin)
 	if err != nil {
 		return nil, err
 	}
 	var containerIDs oracletypes.QueryRequestIDs
-	err = clientCtx.JSONMarshaler.UnmarshalJSON(bz, &containerIDs)
+	err = clientCtx.JSONCodec.UnmarshalJSON(bz, &containerIDs)
 	if err != nil {
 		return nil, err
 	}

@@ -2,18 +2,20 @@ package types
 
 import (
 	"encoding/json"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 )
 
 // NewGenesisState creates a new GenesisState instance
-func NewGenesisState(params Params, dataSources []DataSource, oracleScripts []OracleScript) *GenesisState {
+func NewGenesisState(params Params, dataSources []DataSource, oracleScripts []OracleScript, oracleModuleCoinsAccount sdk.AccAddress) *GenesisState {
 	return &GenesisState{
-		Params:        params,
-		DataSources:   dataSources,
-		OracleScripts: oracleScripts,
-		OraclePool:    InitialOraclePool(),
+		Params:             params,
+		DataSources:        dataSources,
+		OracleScripts:      oracleScripts,
+		OraclePool:         InitialOraclePool(),
+		ModuleCoinsAccount: oracleModuleCoinsAccount.String(),
 	}
 }
 
@@ -28,7 +30,7 @@ func DefaultGenesisState() *GenesisState {
 }
 
 // GetGenesisStateFromAppState returns oracle GenesisState given raw application genesis state.
-func GetGenesisStateFromAppState(cdc codec.JSONMarshaler, appState map[string]json.RawMessage) *GenesisState {
+func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.RawMessage) *GenesisState {
 	var genesisState GenesisState
 
 	if appState[ModuleName] != nil {
