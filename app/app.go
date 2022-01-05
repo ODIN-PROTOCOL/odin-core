@@ -105,6 +105,7 @@ import (
 	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 
+	odinbank "github.com/GeoDB-Limited/odin-core/x/bank"
 	bandbankkeeper "github.com/GeoDB-Limited/odin-core/x/bank/keeper"
 	owasm "github.com/bandprotocol/go-owasm/api"
 )
@@ -185,7 +186,7 @@ type OdinApp struct {
 
 	// keepers
 	AccountKeeper    authkeeper.AccountKeeper
-	BankKeeper       *bandbankkeeper.WrappedBankKeeper
+	BankKeeper       bandbankkeeper.WrappedBankKeeper
 	CapabilityKeeper *capabilitykeeper.Keeper
 	StakingKeeper    stakingkeeper.Keeper
 	SlashingKeeper   slashingkeeper.Keeper
@@ -410,7 +411,7 @@ func NewOdinApp(
 		genutil.NewAppModule(app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx, encodingConfig.TxConfig),
 		auth.NewAppModule(appCodec, app.AccountKeeper, nil),
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
+		odinbank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),

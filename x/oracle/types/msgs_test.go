@@ -11,9 +11,9 @@ import (
 
 var (
 	GoodTestAddr    = sdk.AccAddress(make([]byte, 20))
-	BadTestAddr     = sdk.AccAddress([]byte("BAD_ADDR"))
+	BadTestAddr     = sdk.AccAddress(make([]byte, 256))
 	GoodTestValAddr = sdk.ValAddress(make([]byte, 20))
-	BadTestValAddr  = sdk.ValAddress([]byte("BAD_ADDR"))
+	BadTestValAddr  = sdk.ValAddress(make([]byte, 256))
 
 	MsgPk            = secp256k1.GenPrivKey().PubKey()
 	GoodTestAddr2    = sdk.AccAddress(MsgPk.Address())

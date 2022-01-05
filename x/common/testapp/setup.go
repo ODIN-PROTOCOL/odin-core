@@ -2,6 +2,7 @@ package testapp
 
 import (
 	"encoding/json"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/cli"
 	"io/ioutil"
@@ -41,6 +42,7 @@ var (
 	Carol              Account
 	OraclePoolProvider Account
 	FeePoolProvider    Account
+	NotBondedPool      Account
 	Validators         []Account
 	DataSources        []oracletypes.DataSource
 	OracleScripts      []oracletypes.OracleScript
@@ -59,6 +61,7 @@ func init() {
 	Carol = createArbitraryAccount(r)
 	OraclePoolProvider = createArbitraryAccount(r)
 	FeePoolProvider = createArbitraryAccount(r)
+	NotBondedPool = createArbitraryAccount(r)
 	for i := 0; i < 3; i++ {
 		Validators = append(Validators, createArbitraryAccount(r))
 	}
@@ -108,8 +111,14 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	genesis[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
 
 	validators := make([]stakingtypes.Validator, 0, len(Validators))
+	signingInfos := make([]slashingtypes.SigningInfo, 0, len(Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(Validators))
 	bamt := []sdk.Int{Coins100000000loki[0].Amount, Coins1000000loki[0].Amount, Coins99999999loki[0].Amount}
+	bamtSum := 0
+	for _, i := range bamt {
+		bamtSum += int(i.Int64())
+	}
+
 	// bondAmt := sdk.NewInt(1000000)
 	for idx, val := range Validators {
 		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
@@ -124,7 +133,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 			OperatorAddress:   sdk.ValAddress(val.Address).String(),
 			ConsensusPubkey:   pkAny,
 			Jailed:            false,
-			Status:            stakingtypes.Unbonded,
+			Status:            stakingtypes.Bonded,
 			Tokens:            bamt[idx],
 			DelegatorShares:   sdk.OneDec(),
 			Description:       stakingtypes.Description{},
@@ -133,7 +142,14 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
 			MinSelfDelegation: sdk.ZeroInt(),
 		}
+		consAddr, err := validator.GetConsAddr()
+		validatorSigningInfo := slashingtypes.NewValidatorSigningInfo(consAddr, 0, 0, time.Unix(0, 0), false, 0)
+		if err != nil {
+			panic(err)
+		}
+
 		validators = append(validators, validator)
+		signingInfos = append(signingInfos, slashingtypes.SigningInfo{Address: consAddr.String(), ValidatorSigningInfo: validatorSigningInfo})
 		delegations = append(delegations, stakingtypes.NewDelegation(acc[4+idx].GetAddress(), val.Address.Bytes(), sdk.OneDec()))
 	}
 	// set validators and delegations
@@ -141,6 +157,10 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	stakingParams.BondDenom = DefaultBondDenom
 	stakingGenesis := stakingtypes.NewGenesisState(stakingParams, validators, delegations)
 	genesis[stakingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(stakingGenesis)
+
+	slashingParams := slashingtypes.DefaultParams()
+	slashingGenesis := slashingtypes.NewGenesisState(slashingParams, signingInfos, nil)
+	genesis[slashingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(slashingGenesis)
 
 	// Fund seed accounts and validators with 1000000odin and 100000000odin initially.
 	balances := []banktypes.Balance{
@@ -152,13 +172,26 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 		{Address: Peter.Address.String(), Coins: Coins1000000loki},
 		{Address: Alice.Address.String(), Coins: Coins1000000loki.Add(Coin100000000minigeo)},
 		{Address: Bob.Address.String(), Coins: Coins1000000loki},
-		{Address: Validators[0].Address.String(), Coins: Coins100000000loki},
-		{Address: Validators[1].Address.String(), Coins: Coins100000000loki},
-		{Address: Validators[2].Address.String(), Coins: Coins100000000loki},
 		{Address: Carol.Address.String(), Coins: Coins1000000loki},
 		{Address: OraclePoolProvider.Address.String(), Coins: DefaultDataProvidersPool},
 		{Address: FeePoolProvider.Address.String(), Coins: DefaultCommunityPool},
+		{Address: Validators[0].Address.String(), Coins: Coins100000000loki},
+		{Address: Validators[1].Address.String(), Coins: Coins100000000loki},
+		{Address: Validators[2].Address.String(), Coins: Coins100000000loki},
 	}
+	/*totalSupply := sdk.NewCoins()
+	for idx := 0; idx < len(balances); idx++ {
+		// add genesis acc tokens and delegated tokens to total supply
+		totalSupply = totalSupply.Add(balances[idx].Coins...)
+	}*/ /*
+		for idx := 0; idx < len(balances)-len(validators); idx++ {
+			// add genesis acc tokens and delegated tokens to total supply
+			totalSupply = totalSupply.Add(balances[idx].Coins...)
+		}
+		for idx := 0; idx < len(validators); idx++ {
+			// add genesis acc tokens and delegated tokens to total supply
+			totalSupply = totalSupply.Add(balances[idx+len(balances)-len(validators)].Coins.Add(sdk.NewCoin(DefaultBondDenom, bamt[idx]))...)
+		}*/
 	totalSupply := sdk.NewCoins()
 	for idx := 0; idx < len(balances)-len(validators); idx++ {
 		// add genesis acc tokens and delegated tokens to total supply
@@ -166,8 +199,14 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	}
 	for idx := 0; idx < len(validators); idx++ {
 		// add genesis acc tokens and delegated tokens to total supply
-		totalSupply = totalSupply.Add(balances[idx+len(balances)-len(validators)].Coins.Add(sdk.NewCoin(DefaultBondDenom, bamt[idx]))...)
+		totalSupply = totalSupply.Add(balances[idx+len(balances)-len(validators)].Coins.Add(sdk.NewCoin("loki", bamt[idx]))...)
 	}
+
+	// add bonded amount to bonded pool module account
+	balances = append(balances, banktypes.Balance{
+		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
+		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(int64(bamtSum)))},
+	})
 
 	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
 	genesis[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
@@ -187,6 +226,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 		Validators:    []abci.ValidatorUpdate{},
 		AppStateBytes: stateBytes,
 	})
+
 	return app
 }
 

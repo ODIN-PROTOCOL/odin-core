@@ -6,6 +6,7 @@ import (
 	"fmt"
 	odin "github.com/GeoDB-Limited/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	legacy "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	"testing"
 )
 
@@ -18,7 +19,10 @@ func Test_FromBech32(t *testing.T) {
 	config.SetBech32PrefixForValidator(validatorPrefix, validatorPrefix+sdk.PrefixPublic)
 	config.SetBech32PrefixForConsensusNode(consensusPrefix, consensusPrefix+sdk.PrefixPublic)
 	bech32ConsPub := "odinvalconspub1addwnpepqge86lvslkpfk0rlz0ah9tat0vntx8yele36hhfpflehfehydlutkvdvhfm"
-	mustConsPub := sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, bech32ConsPub)
+	mustConsPub, err := legacy.UnmarshalPubKey(sdk.PrefixConsensus+sdk.PrefixPublic, bech32ConsPub)
+	if err != nil {
+		t.Error(err)
+	}
 	fmt.Println(mustConsPub.String())
 	fmt.Println(mustConsPub.Type())
 	bb := &bytes.Buffer{}
