@@ -12,9 +12,11 @@ import (
 	odinminttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/telemetry"
 	telemetrykeeper "github.com/GeoDB-Limited/odin-core/x/telemetry/keeper"
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	"github.com/cosmos/ibc-go/v2/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
 	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
+	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -73,7 +75,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/x/params"
@@ -93,7 +94,6 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	ibc "github.com/cosmos/ibc-go/v2/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v2/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
 	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
 	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
@@ -105,6 +105,7 @@ import (
 	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 
+	ibchelpers "github.com/GeoDB-Limited/odin-core/app/helpers"
 	odinbank "github.com/GeoDB-Limited/odin-core/x/bank"
 	bandbankkeeper "github.com/GeoDB-Limited/odin-core/x/bank/keeper"
 	owasm "github.com/bandprotocol/go-owasm/api"
@@ -132,8 +133,8 @@ var (
 		odinmint.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
-			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpdateClientProposal, nil),
-			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpgradeProposal, nil),
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpdateClientProposal, ibchelpers.EmptyRestHandler),
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpgradeProposal, ibchelpers.EmptyRestHandler),
 		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
