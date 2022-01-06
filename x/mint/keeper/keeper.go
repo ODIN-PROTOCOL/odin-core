@@ -12,7 +12,7 @@ import (
 
 // Keeper of the mint store
 type Keeper struct {
-	cdc              codec.BinaryMarshaler
+	cdc              codec.BinaryCodec
 	storeKey         sdk.StoreKey
 	paramSpace       paramtypes.Subspace
 	stakingKeeper    minttypes.StakingKeeper
@@ -23,7 +23,7 @@ type Keeper struct {
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
-	cdc codec.BinaryMarshaler, key sdk.StoreKey, paramSpace paramtypes.Subspace,
+	cdc codec.BinaryCodec, key sdk.StoreKey, paramSpace paramtypes.Subspace,
 	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
 	feeCollectorName string,
 ) Keeper {
@@ -61,15 +61,31 @@ func (k Keeper) GetMinter(ctx sdk.Context) (minter minttypes.Minter) {
 		panic("stored minter should not have been nil")
 	}
 
-	k.cdc.MustUnmarshalBinaryBare(b, &minter)
+	k.cdc.MustUnmarshal(b, &minter)
 	return
 }
 
 // set the minter
 func (k Keeper) SetMinter(ctx sdk.Context, minter minttypes.Minter) {
 	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshalBinaryBare(&minter)
+	b := k.cdc.MustMarshal(&minter)
 	store.Set(minttypes.MinterKey, b)
+}
+
+// get the module coins account
+func (k Keeper) GetMintModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddress) {
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(minttypes.MintModuleCoinsAccountKey)
+	if b == nil {
+		panic("stored account should not have been nil")
+	}
+
+	return sdk.AccAddress(b)
+}
+
+// set the module coins account
+func (k Keeper) SetMintModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
+	ctx.KVStore(k.storeKey).Set(minttypes.MintModuleCoinsAccountKey, account)
 }
 
 // GetMintPool returns the mint pool info
@@ -80,14 +96,14 @@ func (k Keeper) GetMintPool(ctx sdk.Context) (mintPool minttypes.MintPool) {
 		panic("Stored fee pool should not have been nil")
 	}
 
-	k.cdc.MustUnmarshalBinaryBare(b, &mintPool)
+	k.cdc.MustUnmarshal(b, &mintPool)
 	return
 }
 
 // SetMintPool sets mint pool to the store
 func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
 	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshalBinaryBare(&mintPool)
+	b := k.cdc.MustMarshal(&mintPool)
 	store.Set(minttypes.MintPoolStoreKey, b)
 }
 

@@ -12,7 +12,7 @@ import (
 
 type Keeper struct {
 	storeKey     sdk.StoreKey
-	cdc          codec.BinaryMarshaler
+	cdc          codec.BinaryCodec
 	paramstore   paramstypes.Subspace
 	bankKeeper   coinswaptypes.BankKeeper
 	distrKeeper  coinswaptypes.DistrKeeper
@@ -20,7 +20,7 @@ type Keeper struct {
 }
 
 func NewKeeper(
-	cdc codec.BinaryMarshaler,
+	cdc codec.BinaryCodec,
 	key sdk.StoreKey,
 	subspace paramstypes.Subspace,
 	bk coinswaptypes.BankKeeper,
@@ -72,14 +72,14 @@ func (k Keeper) GetExchanges(ctx sdk.Context) (res []coinswaptypes.Exchange) {
 }
 
 func (k Keeper) SetInitialRate(ctx sdk.Context, value sdk.Dec) {
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(&gogotypes.StringValue{Value: value.String()})
+	bz := k.cdc.MustMarshalLengthPrefixed(&gogotypes.StringValue{Value: value.String()})
 	ctx.KVStore(k.storeKey).Set(coinswaptypes.InitialRateStoreKey, bz)
 }
 
 func (k Keeper) GetInitialRate(ctx sdk.Context) (rate sdk.Dec) {
 	bz := ctx.KVStore(k.storeKey).Get(coinswaptypes.InitialRateStoreKey)
 	var rawRate gogotypes.StringValue
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &rawRate)
+	k.cdc.MustUnmarshalLengthPrefixed(bz, &rawRate)
 	rate = sdk.MustNewDecFromStr(rawRate.Value)
 	return rate
 }

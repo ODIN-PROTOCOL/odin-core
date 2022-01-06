@@ -18,7 +18,7 @@ func (k Keeper) HasReport(ctx sdk.Context, rid oracletypes.RequestID, val sdk.Va
 func (k Keeper) SetReport(ctx sdk.Context, rid oracletypes.RequestID, rep oracletypes.Report) {
 	val, _ := sdk.ValAddressFromBech32(rep.Validator)
 	key := oracletypes.ReportsOfValidatorPrefixKey(rid, val)
-	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshalBinaryBare(&rep))
+	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(&rep))
 }
 
 // AddReport performs sanity checks and adds a new batch from one validator to one request
@@ -84,7 +84,7 @@ func (k Keeper) GetRequestReports(ctx sdk.Context, rid oracletypes.RequestID) (r
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		var rep oracletypes.Report
-		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &rep)
+		k.cdc.MustUnmarshal(iterator.Value(), &rep)
 		reports = append(reports, rep)
 	}
 	return reports
@@ -108,7 +108,7 @@ func (k Keeper) GetPaginatedRequestReports(
 		pagination,
 		func(key []byte, value []byte, accumulate bool) (bool, error) {
 			var report oracletypes.Report
-			if err := k.cdc.UnmarshalBinaryBare(value, &report); err != nil {
+			if err := k.cdc.Unmarshal(value, &report); err != nil {
 				return false, err
 			}
 			if accumulate {

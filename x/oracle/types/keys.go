@@ -7,6 +7,8 @@ import (
 const (
 	// ModuleName is the name of the module.
 	ModuleName = "oracle"
+	// ModuleVersion defines the current module version
+	ModuleVersion = 1
 
 	// Version defines the current version the IBC oracle module supports
 	// TODO: Using our new version for oracle packet (new ics?)
@@ -48,6 +50,8 @@ var (
 	AccumulatedPaymentsForDataStoreKey = append(GlobalStoreKeyPrefix, []byte("AccumulatedPaymentsForData")...)
 	// OraclePoolStoreKey is the key that keeps the oracle pool
 	OraclePoolStoreKey = append(GlobalStoreKeyPrefix, []byte("OraclePool")...) // key for global oracle pool state
+
+	OracleModuleCoinsAccountKey = append(GlobalStoreKeyPrefix, []byte("OracleModuleCoinsAccount")...)
 
 	// RequestStoreKeyPrefix is the prefix for request store.
 	RequestStoreKeyPrefix = []byte{0x01}

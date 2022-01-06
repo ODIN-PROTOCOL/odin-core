@@ -3,6 +3,7 @@ package oracle_test
 import (
 	"encoding/hex"
 	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -62,7 +63,8 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
 	// NOTE: we intentionally keep ctx.BlockHeight = 0, so distr's AllocateTokens doesn't get called.
 
-	app.BankKeeper.SetBalance(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName), sdk.NewInt64Coin("loki", 100))
+	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)))
+	app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, authtypes.FeeCollectorName, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)))
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
 
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
@@ -134,7 +136,8 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	}}
 	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
-	app.BankKeeper.SetBalance(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName), sdk.NewInt64Coin("loki", 50))
+	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
+	app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, authtypes.FeeCollectorName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
 	mintParams := app.MintKeeper.GetParams(ctx)
 	mintParams.InflationMin = sdk.ZeroDec()
@@ -163,7 +166,7 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
 		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
 	})
-	require.Equal(t, sdk.Coins(nil), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
+	require.Equal(t, sdk.Coins{}, app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))
 	require.Equal(t, sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDec(1)}}, app.DistrKeeper.GetFeePool(ctx).CommunityPool)
 	require.Equal(t, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.NewDecCoins(sdk.NewDecCoinFromDec("loki", sdk.NewDecWithPrec(43015, 3)))}, app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress))

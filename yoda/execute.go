@@ -12,7 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/version"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/client"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
@@ -217,7 +217,7 @@ func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (stri
 	}
 
 	var d oracletypes.DataSource
-	cdc.MustUnmarshalBinaryBare(res.Response.Value, &d)
+	cdc.MustUnmarshal(res.Response.Value, &d)
 
 	hash, _ := c.dataSourceCache.LoadOrStore(id, d.Filename)
 
@@ -233,7 +233,7 @@ func GetRequest(c *Context, l *Logger, id oracletypes.RequestID) (oracletypes.Re
 	}
 
 	var r oracletypes.Request
-	cdc.MustUnmarshalBinaryBare(res.Response.Value, &r)
+	cdc.MustUnmarshal(res.Response.Value, &r)
 
 	return r, nil
 }

@@ -359,7 +359,7 @@ func getRequestsPricesHandler(clientCtx client.Context) http.HandlerFunc {
 				return
 			}
 			var price hookprice.Price
-			err = clientCtx.LegacyAmino.UnmarshalBinaryBare(res, &price)
+			err = clientCtx.LegacyAmino.Unmarshal(res, &price)
 			if err != nil {
 				rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 				return
@@ -391,7 +391,7 @@ func getRequestsPriceSymbolsHandler(clientCtx client.Context) http.HandlerFunc {
 		}
 
 		var symbols []string
-		if err := clientCtx.LegacyAmino.UnmarshalBinaryBare(res, &symbols); err != nil {
+		if err := clientCtx.LegacyAmino.Unmarshal(res, &symbols); err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}

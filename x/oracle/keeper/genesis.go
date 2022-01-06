@@ -42,7 +42,7 @@ func InitGenesis(ctx sdk.Context, k Keeper, data *types.GenesisState) {
 
 	balances := k.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
 	if balances.IsZero() {
-		if err := k.bankKeeper.SetBalances(ctx, moduleAcc.GetAddress(), data.OraclePool.DataProvidersPool); err != nil {
+		if err := k.bankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.OraclePool.DataProvidersPool); err != nil {
 			panic(err)
 		}
 
@@ -55,9 +55,10 @@ func InitGenesis(ctx sdk.Context, k Keeper, data *types.GenesisState) {
 // ExportGenesis returns a GenesisState for a given context and keeper.
 func ExportGenesis(ctx sdk.Context, k Keeper) *types.GenesisState {
 	return &types.GenesisState{
-		Params:        k.GetParams(ctx),
-		DataSources:   k.GetAllDataSources(ctx),
-		OracleScripts: k.GetAllOracleScripts(ctx),
-		OraclePool:    k.GetOraclePool(ctx),
+		Params:             k.GetParams(ctx),
+		DataSources:        k.GetAllDataSources(ctx),
+		OracleScripts:      k.GetAllOracleScripts(ctx),
+		OraclePool:         k.GetOraclePool(ctx),
+		ModuleCoinsAccount: k.GetOracleModuleCoinsAccount(ctx).String(),
 	}
 }

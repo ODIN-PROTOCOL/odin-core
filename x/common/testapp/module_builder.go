@@ -96,7 +96,7 @@ func (b StakingBuilder) Build() (stakingtypes.Validators, stakingtypes.Delegatio
 			ConsensusPubkey:   pkAny,
 			Jailed:            false,
 			Status:            stakingtypes.Unbonded,
-			Tokens:            sdk.TokensFromConsensusPower(int64(b.Powers[i])),
+			Tokens:            sdk.TokensFromConsensusPower(int64(b.Powers[i]), sdk.DefaultPowerReduction),
 			DelegatorShares:   delegatorShares,
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),

@@ -277,18 +277,18 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: []byte(sdk.AttributeKeyAmount), Value: []byte("2000000loki")},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
 	require.Equal(t, abci.Event(event), res.Events[2])
-	require.Equal(t, abci.Event(event), res.Events[4])
+	require.Equal(t, abci.Event(event), res.Events[6])
+	require.Equal(t, abci.Event(event), res.Events[10])
 	event = abci.Event{
 		Type: sdk.EventTypeMessage,
 		Attributes: []abci.EventAttribute{
 			{Key: []byte(banktypes.AttributeKeySender), Value: []byte(testapp.FeePayer.Address.String())},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[1])
 	require.Equal(t, abci.Event(event), res.Events[3])
-	require.Equal(t, abci.Event(event), res.Events[5])
+	require.Equal(t, abci.Event(event), res.Events[7])
+	require.Equal(t, abci.Event(event), res.Events[11])
 
 	event = abci.Event{
 		Type: oracletypes.EventTypeRequest,
@@ -304,7 +304,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: []byte(oracletypes.AttributeKeyValidator), Value: []byte(testapp.Validators[0].ValAddress.String())},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[6])
+	require.Equal(t, abci.Event(event), res.Events[12])
 	event = abci.Event{
 		Type: oracletypes.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -314,7 +314,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: []byte(oracletypes.AttributeKeyCalldata), Value: []byte("beeb")},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[7])
+	require.Equal(t, abci.Event(event), res.Events[13])
 	event = abci.Event{
 		Type: oracletypes.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -324,7 +324,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: []byte(oracletypes.AttributeKeyCalldata), Value: []byte("beeb")},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[8])
+	require.Equal(t, abci.Event(event), res.Events[14])
 	event = abci.Event{
 		Type: oracletypes.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -334,7 +334,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: []byte(oracletypes.AttributeKeyCalldata), Value: []byte("beeb")},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[9])
+	require.Equal(t, abci.Event(event), res.Events[15])
 }
 
 func TestRequestDataFail(t *testing.T) {

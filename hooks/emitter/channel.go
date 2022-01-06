@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	"github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 
 	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 )

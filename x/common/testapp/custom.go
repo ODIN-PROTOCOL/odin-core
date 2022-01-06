@@ -41,7 +41,7 @@ func CreateAppCustomBalances(balancesRate ...int) (*odinapp.OdinApp, sdk.Context
 
 	balancesToFill := make([]sdk.Coins, 0, len(balancesRate))
 	for _, br := range balancesRate {
-		balancesToFill = append(balancesToFill, sdk.NewCoins(sdk.NewCoin(builder.GetStakingBuilder().BondDenom, sdk.TokensFromConsensusPower(int64(br)))))
+		balancesToFill = append(balancesToFill, sdk.NewCoins(sdk.NewCoin(builder.GetStakingBuilder().BondDenom, sdk.TokensFromConsensusPower(int64(br), sdk.DefaultPowerReduction))))
 	}
 
 	bankBuilder := NewBankBuilder(len(balancesRate), fillBalances(builder.GetAuthBuilder().Accounts, balancesToFill...), sdk.NewCoins())
