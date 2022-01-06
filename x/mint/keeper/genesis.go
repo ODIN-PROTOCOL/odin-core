@@ -18,11 +18,16 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, data *minttypes.GenesisState) {
 
 	balances := keeper.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
 	if balances.IsZero() {
-		if err := keeper.bankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
+		addr, err := sdk.AccAddressFromBech32(data.ModuleCoinsAccount)
+		if err != nil {
 			panic(err)
 		}
 
-		keeper.SetMintModuleCoinsAccount(ctx, sdk.AccAddress(data.ModuleCoinsAccount))
+		if err := keeper.bankKeeper.SendCoins(ctx, addr, moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
+			panic(err)
+		}
+
+		keeper.SetMintModuleCoinsAccount(ctx, addr)
 		keeper.authKeeper.SetModuleAccount(ctx, moduleAcc)
 	}
 
