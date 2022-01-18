@@ -114,7 +114,7 @@ import (
 const (
 	appName          = "OdinApp"
 	Bech32MainPrefix = "odin"
-	Bip44CoinType    = 494
+	Bip44CoinType    = 118
 )
 
 var (
