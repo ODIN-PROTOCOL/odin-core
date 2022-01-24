@@ -435,7 +435,7 @@ func NewOdinApp(
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
 	// over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(
-		upgradetypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName, distrtypes.ModuleName,
+		upgradetypes.ModuleName, capabilitytypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName, distrtypes.ModuleName,
 		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
 		ibchost.ModuleName,
 	)
