@@ -248,5 +248,5 @@ func queryValidatorByConsAddr(
 		return nil, sdkerrors.Wrap(err, "failed to query validator by cons address")
 	}
 
-	return commontypes.QueryOK(cdc, validator)
+	return commontypes.QueryOK(cdc, *validator)
 }
