@@ -487,7 +487,7 @@ var (
 
 	pattern_Query_ValidatorBlocks_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_blocks"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_by_consaddr"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_by_cons_addr"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
