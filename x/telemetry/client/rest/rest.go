@@ -46,10 +46,10 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 		getTopValidatorsHandler(clientCtx),
 	).Methods("GET")
 
-	rtr.HandleFunc(
+	/*rtr.HandleFunc(
 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorBlocks),
 		getValidatorBlocksHandler(clientCtx),
-	).Methods("GET")
+	).Methods("GET")*/
 }
 
 func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
