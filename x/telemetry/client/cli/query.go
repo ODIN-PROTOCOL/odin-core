@@ -33,9 +33,10 @@ func GetQueryCmd() *cobra.Command {
 		/*GetQueryCmdAvgBlockSize(),
 		GetQueryCmdAvgBlockTime(),
 		GetQueryCmdAvgTxFee(),
-		GetQueryCmdTxVolume(),*/
-		GetQueryCmdValidatorBlocks(),
+		GetQueryCmdTxVolume(),
+		GetQueryCmdValidatorBlocks(),*/
 		GetQueryCmdTopValidators(),
+		GetQueryCmdValidatorByConsAddr(),
 	)
 	return coinswapCmd
 }
@@ -396,4 +397,31 @@ func ParseDateInterval(startDateArg, endDateArg string) (*time.Time, *time.Time,
 	}
 
 	return startDate, endDate, nil
+}
+
+func GetQueryCmdValidatorByConsAddr() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "validator-by-consaddr [status]",
+		Short: "Query for validator by consensus address",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := telemetrytypes.NewQueryClient(clientCtx)
+			res, err := queryClient.ValidatorByConsAddr(cmd.Context(), &telemetrytypes.QueryValidatorByConsAddrRequest{
+				ConsensusAddress: args[0],
+			})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
 }

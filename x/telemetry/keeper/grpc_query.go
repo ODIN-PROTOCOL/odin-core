@@ -12,6 +12,20 @@ import (
 
 var _ telemetrytypes.QueryServer = Keeper{}
 
+func (k Keeper) ValidatorByConsAddr(c context.Context, request *telemetrytypes.QueryValidatorByConsAddrRequest) (*telemetrytypes.QueryValidatorByConsAddrResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	consAddr, err := sdk.ConsAddressFromHex(request.ConsensusAddress)
+	if err != nil {
+		return nil, err
+	}
+	val, ok := k.stakingQuerier.Keeper.GetValidatorByConsAddr(ctx, consAddr)
+	if !ok {
+		return nil, sdkerrors.ErrNotFound
+	}
+
+	return &telemetrytypes.QueryValidatorByConsAddrResponse{Validator: val}, nil
+}
+
 func (k Keeper) TopBalances(
 	c context.Context,
 	request *telemetrytypes.QueryTopBalancesRequest,
