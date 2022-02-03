@@ -52,7 +52,7 @@ func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
 	).Methods("GET")*/
 
 	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorByConsAddress),
+		fmt.Sprintf("/%s/%s/{consensus_address}", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorByConsAddress),
 		getValidatorByConsAddressHandler(clientCtx),
 	).Methods("GET")
 }
@@ -280,16 +280,16 @@ func getValidatorByConsAddressHandler(clientCtx client.Context) http.HandlerFunc
 			return
 		}
 
-		var request telemetrytypes.QueryValidatorByConsAddrRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+		vars := mux.Vars(r)
+		validatorConsAddr := vars["consensus_address"]
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorByConsAddress),
-			bin,
-		)
+		res, height, err := clientCtx.Query(fmt.Sprintf(
+			"custom/%s/%s/%s",
+			telemetrytypes.QuerierRoute,
+			telemetrytypes.QueryValidatorByConsAddress,
+			validatorConsAddr,
+		))
+
 		if rest.CheckInternalServerError(w, err) {
 			return
 		}

@@ -32,7 +32,7 @@ func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
 		case telemetrytypes.QueryTopValidators:
 			return queryTopValidators(ctx, path[1:], keeper, cdc, req)
 		case telemetrytypes.QueryValidatorByConsAddress:
-			return queryValidatorByConsAddr(ctx, path[1:], keeper, cdc, req)
+			return queryValidatorByConsAddr(ctx, path[1:], keeper, cdc)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown telemetry query endpoint")
 		}
@@ -232,15 +232,13 @@ func queryValidatorByConsAddr(
 	path []string,
 	k Keeper,
 	cdc *codec.LegacyAmino,
-	req abci.RequestQuery,
 ) ([]byte, error) {
-	if len(path) > 1 {
-		return nil, sdkerrors.ErrInvalidRequest
+	if len(path) != 1 {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "consensus address not specified")
 	}
 
-	var request telemetrytypes.QueryValidatorByConsAddrRequest
-	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	request := telemetrytypes.QueryValidatorByConsAddrRequest{
+		ConsensusAddress: path[0],
 	}
 
 	validator, err := k.ValidatorByConsAddr(sdk.WrapSDKContext(ctx), &request)
@@ -248,5 +246,5 @@ func queryValidatorByConsAddr(
 		return nil, sdkerrors.Wrap(err, "failed to query validator by cons address")
 	}
 
-	return commontypes.QueryOK(cdc, *validator)
+	return commontypes.QueryOK(cdc, validator.Validator)
 }
