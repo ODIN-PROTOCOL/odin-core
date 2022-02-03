@@ -56,7 +56,7 @@ service Query {
   }
 
   rpc ValidatorByConsAddr(QueryValidatorByConsAddrRequest) returns (QueryValidatorByConsAddrResponse) {
-    option (google.api.http).get = "/telemetry/validator_by_consaddr";
+    option (google.api.http).get = "/telemetry/validator_by_cons_addr";
   }
 }
 
