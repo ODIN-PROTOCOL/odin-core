@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"encoding/hex"
 	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -15,11 +14,11 @@ var _ telemetrytypes.QueryServer = Keeper{}
 
 func (k Keeper) ValidatorByConsAddr(c context.Context, request *telemetrytypes.QueryValidatorByConsAddrRequest) (*telemetrytypes.QueryValidatorByConsAddrResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	consAddrBytes, err := hex.DecodeString(request.ConsensusAddress)
+	consAddr, err := sdk.ConsAddressFromHex(request.ConsensusAddress)
 	if err != nil {
 		return nil, err
 	}
-	val, ok := k.stakingQuerier.Keeper.GetValidatorByConsAddr(ctx, sdk.ConsAddress(consAddrBytes))
+	val, ok := k.stakingQuerier.Keeper.GetValidatorByConsAddr(ctx, consAddr)
 	if !ok {
 		return nil, sdkerrors.ErrNotFound
 	}
