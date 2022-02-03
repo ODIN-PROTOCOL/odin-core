@@ -238,9 +238,12 @@ func queryValidatorByConsAddr(
 		return nil, sdkerrors.ErrInvalidRequest
 	}
 
-	validator, err := k.ValidatorByConsAddr(sdk.WrapSDKContext(ctx), &telemetrytypes.QueryValidatorByConsAddrRequest{
-		ConsensusAddress: path[0],
-	})
+	var request telemetrytypes.QueryValidatorByConsAddrRequest
+	if err := cdc.UnmarshalJSON(req.Data, &request); err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
+	}
+
+	validator, err := k.ValidatorByConsAddr(sdk.WrapSDKContext(ctx), &request)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to query validator by cons address")
 	}
