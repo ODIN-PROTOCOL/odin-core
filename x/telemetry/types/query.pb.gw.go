@@ -177,19 +177,26 @@ func local_request_Query_ValidatorBlocks_0(ctx context.Context, marshaler runtim
 
 }
 
-var (
-	filter_Query_ValidatorByConsAddr_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_Query_ValidatorByConsAddr_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq QueryValidatorByConsAddrRequest
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["consensus_address"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "consensus_address")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Query_ValidatorByConsAddr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.ConsensusAddress, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "consensus_address", err)
 	}
 
 	msg, err := client.ValidatorByConsAddr(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -201,11 +208,22 @@ func local_request_Query_ValidatorByConsAddr_0(ctx context.Context, marshaler ru
 	var protoReq QueryValidatorByConsAddrRequest
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["consensus_address"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "consensus_address")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Query_ValidatorByConsAddr_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.ConsensusAddress, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "consensus_address", err)
 	}
 
 	msg, err := server.ValidatorByConsAddr(ctx, &protoReq)
@@ -487,7 +505,7 @@ var (
 
 	pattern_Query_ValidatorBlocks_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_blocks"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_by_cons_addr"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"telemetry", "validator_by_cons_addr", "consensus_address"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
