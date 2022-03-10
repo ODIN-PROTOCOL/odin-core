@@ -180,7 +180,7 @@ func (k Querier) IsReporter(c context.Context, req *oracletypes.QueryIsReporterR
 	if err != nil {
 		return nil, err
 	}
-	return &types.QueryIsReporterResponse{IsReporter: k.Keeper.IsReporter(ctx, val, rep)}, nil
+	return &oracletypes.QueryIsReporterResponse{IsReporter: k.Keeper.IsReporter(ctx, val, rep)}, nil
 }
 
 // Reporters queries all reporters of a given validator address.
