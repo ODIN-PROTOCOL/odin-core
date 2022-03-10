@@ -37,7 +37,7 @@ func TestReporterStoreKey(t *testing.T) {
 
 func TestValidatorStatusStoreKey(t *testing.T) {
 	val, _ := sdk.ValAddressFromHex("b80f2a5df7d5710b15622d1a9f1e3830ded5bda8")
-	expect, _ := hex.DecodeString("05b80f2a5df7d5710b15622d1a9f1e3830ded5bda8")
+	expect, _ := hex.DecodeString("06b80f2a5df7d5710b15622d1a9f1e3830ded5bda8")
 	require.Equal(t, expect, ValidatorStatusStoreKey(val))
 }
 
