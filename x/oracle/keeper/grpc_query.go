@@ -169,6 +169,20 @@ func (k Querier) Validator(c context.Context, req *oracletypes.QueryValidatorReq
 	return &oracletypes.QueryValidatorResponse{Status: &validatorStatus}, nil
 }
 
+// IsReporter queries grant of account on this validator
+func (k Querier) IsReporter(c context.Context, req *oracletypes.QueryIsReporterRequest) (*oracletypes.QueryIsReporterResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	val, err := sdk.ValAddressFromBech32(req.ValidatorAddress)
+	if err != nil {
+		return nil, err
+	}
+	rep, err := sdk.AccAddressFromBech32(req.ReporterAddress)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryIsReporterResponse{IsReporter: k.Keeper.IsReporter(ctx, val, rep)}, nil
+}
+
 // Reporters queries all reporters of a given validator address.
 func (k Querier) Reporters(c context.Context, req *oracletypes.QueryReportersRequest) (*oracletypes.QueryReportersResponse, error) {
 	if req == nil {
@@ -358,8 +372,7 @@ func (k Querier) RequestVerification(
 	if err != nil {
 		return nil, status.Error(
 			codes.InvalidArgument,
-			fmt.Sprintf("unable to parse validator address: %s", err.Error(),
-			),
+			fmt.Sprintf("unable to parse validator address: %s", err.Error()),
 		)
 	}
 
@@ -381,20 +394,9 @@ func (k Querier) RequestVerification(
 	}
 
 	// Provided reporter should be authorized by the provided validator
-	reporters := k.GetReporters(ctx, validator)
 	reporter := sdk.AccAddress(reporterPubKey.Address().Bytes())
-	isReporterAuthorizedByValidator := false
-	for _, existingReporter := range reporters {
-		if reporter.Equals(existingReporter) {
-			isReporterAuthorizedByValidator = true
-			break
-		}
-	}
-	if !isReporterAuthorizedByValidator {
-		return nil, status.Error(
-			codes.PermissionDenied,
-			fmt.Sprintf("%s is not an authorized reporter of %s", reporter, req.Validator),
-		)
+	if !k.Keeper.IsReporter(ctx, validator, reporter) {
+		return nil, status.Error(codes.PermissionDenied, fmt.Sprintf("%s is not an authorized reporter of %s", reporter, req.Validator))
 	}
 
 	// Provided request should exist on chain
