@@ -3,6 +3,11 @@ package yoda
 import (
 	"bufio"
 	"fmt"
+	"context"
+	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/kyokomi/emoji"
 
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -136,6 +141,10 @@ func keysListCmd(c *Context) *cobra.Command {
 		Short:   "List all the keys in the keychain",
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
 			keys, err := kb.List()
 			if err != nil {
 				return err
@@ -145,7 +154,20 @@ func keysListCmd(c *Context) *cobra.Command {
 				if isShowAddr {
 					fmt.Printf("%s ", key.GetAddress().String())
 				} else {
-					fmt.Printf("%s => %s\n", key.GetName(), key.GetAddress().String())
+					queryClient := oracletypes.NewQueryClient(clientCtx)
+					r, err := queryClient.IsReporter(
+						context.Background(),
+						&oracletypes.QueryIsReporterRequest{ValidatorAddress: cfg.Validator, ReporterAddress: key.GetAddress().String()},
+					)
+					s := ":question:"
+					if err == nil {
+						if r.IsReporter {
+							s = ":white_check_mark:"
+						} else {
+							s = ":x:"
+						}
+					}
+					emoji.Printf("%s%s => %s\n", s, key.GetName(), key.GetAddress().String())
 				}
 			}
 			return nil
@@ -153,6 +175,7 @@ func keysListCmd(c *Context) *cobra.Command {
 	}
 	cmd.Flags().BoolP(flagAddress, "a", false, "Output the address only")
 	viper.BindPFlag(flagAddress, cmd.Flags().Lookup(flagAddress))
+	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
 }
 
