@@ -26,6 +26,9 @@ all: install
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
+	
+install-yoda: go.sum
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
 
 build: go.sum
 	go build -mod=readonly -o ./build/odind $(BUILD_FLAGS) ./cmd/odind
