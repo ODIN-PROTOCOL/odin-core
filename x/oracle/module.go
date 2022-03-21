@@ -3,6 +3,7 @@ package oracle
 import (
 	"context"
 	"encoding/json"
+	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
 	"math"
 	"math/rand"
 
@@ -97,6 +98,14 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 	keeper oraclekeeper.Keeper
+}
+
+func (am AppModule) NegotiateAppVersion(ctx sdk.Context, order channeltypes.Order, connectionID string, portID string, counterparty channeltypes.Counterparty, proposedVersion string) (version string, err error) {
+	if proposedVersion != oracletypes.Version {
+		return "", sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "failed to negotiate app version: expected %s, got %s", oracletypes.Version, proposedVersion)
+	}
+
+	return oracletypes.Version, nil
 }
 
 // NewAppModule creates a new AppModule object.
@@ -325,26 +334,20 @@ func (am AppModule) OnChanCloseConfirm(
 func (am AppModule) OnRecvPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
-) (*sdk.Result, channeltypes.Acknowledgement, error) {
+	relayer sdk.AccAddress,
+) ibcexported.Acknowledgement {
+
 	var data oracletypes.OracleRequestPacketData
 	if err := oracletypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		return nil, channeltypes.NewErrorAcknowledgement(err.Error()), sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 oracle request packet data: %s", err.Error())
+		// TODO: Ack with non-deterministic error break consensus?
+		return channeltypes.NewErrorAcknowledgement("cannot unmarshal oracle request packet data")
 	}
 
-	source := oracletypes.IBCSource{SourceChannel: packet.DestinationChannel, SourcePort: packet.DestinationPort}
-	id, err := am.keeper.PrepareRequest(ctx, &data, sdk.AccAddress{}, &source) // TODO: add fee payer
-
-	var acknowledgement channeltypes.Acknowledgement
+	id, err := am.keeper.OnRecvPacket(ctx, packet, data, relayer)
 	if err != nil {
-		acknowledgement = channeltypes.NewErrorAcknowledgement(err.Error())
-	} else {
-		acknowledgement = channeltypes.NewResultAcknowledgement(oracletypes.ModuleCdc.MustMarshalJSON(oracletypes.NewOracleRequestPacketAcknowledgement(id)))
+		return channeltypes.NewErrorAcknowledgement(err.Error())
 	}
-
-	// NOTE: acknowledgement will be written synchronously during IBC handler execution.
-	return &sdk.Result{
-		Events: ctx.EventManager().Events().ToABCIEvents(),
-	}, acknowledgement, nil
+	return channeltypes.NewResultAcknowledgement(oracletypes.ModuleCdc.MustMarshalJSON(oracletypes.NewOracleRequestPacketAcknowledgement(id)))
 }
 
 // OnAcknowledgementPacket implements the IBCModule interface
@@ -352,22 +355,20 @@ func (am AppModule) OnAcknowledgementPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
 	acknowledgement []byte,
-) (*sdk.Result, error) {
+	relayer sdk.AccAddress,
+) error {
 	// Do nothing for out-going packet
-	return &sdk.Result{
-		Events: ctx.EventManager().Events().ToABCIEvents(),
-	}, nil
+	return nil
 }
 
 // OnTimeoutPacket implements the IBCModule interface
 func (am AppModule) OnTimeoutPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
-) (*sdk.Result, error) {
+	relayer sdk.AccAddress,
+) error {
 	// Do nothing for out-going packet
-	return &sdk.Result{
-		Events: ctx.EventManager().Events().ToABCIEvents(),
-	}, nil
+	return nil
 }
 
 // ConsensusVersion returns the current module store definitions version

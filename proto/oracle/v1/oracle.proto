@@ -327,3 +327,16 @@ message RequestVerification {
     (gogoproto.casttype) = "ExternalID"
   ];
 }
+
+// IBCChannel is information of IBC protocol to allow communicating with other
+// chain
+message IBCChannel {
+  option (gogoproto.equal) = true;
+
+  // PortID is port ID used for sending response packet when request is
+  // resolved.
+  string port_id = 1;
+  // ChannelID is channel ID used for sending response packet when request is
+  // resolved.
+  string channel_id = 2;
+}
