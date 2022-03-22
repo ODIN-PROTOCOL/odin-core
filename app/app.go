@@ -389,6 +389,7 @@ func NewOdinApp(
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
