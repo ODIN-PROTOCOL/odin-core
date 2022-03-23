@@ -137,7 +137,7 @@ func queryRequests(ctx sdk.Context, path []string, k Keeper, req abci.RequestQue
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONUnmarshal, err.Error())
 	}
 	ctx, _ = ctx.CacheContext()
-	requests, pageRes, err := k.GetPaginatedRequests(ctx, params.Limit, params.Offset)
+	requests, pageRes, err := k.GetPaginatedRequests(ctx, params.Limit, params.Offset, params.Reverse)
 	if err != nil {
 		return nil, err
 	}
