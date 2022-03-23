@@ -129,7 +129,7 @@ func (k Querier) Requests(c context.Context, req *oracletypes.QueryRequestsReque
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	requests, pageRes, err := k.GetPaginatedRequests(ctx, req.Pagination.Limit, req.Pagination.Offset)
+	requests, pageRes, err := k.GetPaginatedRequests(ctx, req.Pagination.Limit, req.Pagination.Offset, req.Pagination.Reverse)
 	if err != nil {
 		return nil, err
 	}
