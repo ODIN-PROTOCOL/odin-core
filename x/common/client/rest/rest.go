@@ -15,7 +15,7 @@ func EmptyOrDefault(val, defVal string) string {
 	return val
 }
 
-func СheckPaginationParams(w http.ResponseWriter, r *http.Request) (commontypes.QueryPaginationParams, bool) {
+func CheckPaginationParams(w http.ResponseWriter, r *http.Request) (commontypes.QueryPaginationParams, bool) {
 	urlQuery := r.URL.Query()
 	limit, err := strconv.ParseUint(EmptyOrDefault(urlQuery.Get(LimitTag), strconv.Itoa(rest.DefaultLimit)), 10, 64)
 	if rest.CheckBadRequestError(w, err) {
@@ -33,6 +33,10 @@ func СheckPaginationParams(w http.ResponseWriter, r *http.Request) (commontypes
 	if rest.CheckBadRequestError(w, err) {
 		return commontypes.QueryPaginationParams{}, false
 	}
+	reverse, err := strconv.ParseBool(EmptyOrDefault(urlQuery.Get(ReverseTag), "false"))
+	if rest.CheckBadRequestError(w, err) {
+		return commontypes.QueryPaginationParams{}, false
+	}
 
-	return commontypes.QueryPaginationParams{PageRequest: query.PageRequest{Offset: offset, Limit: limit, CountTotal: countTotal}, Desc: desc}, true
+	return commontypes.QueryPaginationParams{PageRequest: query.PageRequest{Offset: offset, Limit: limit, CountTotal: countTotal, Reverse: reverse}, Desc: desc}, true
 }
