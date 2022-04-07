@@ -274,7 +274,7 @@ func GetQueryCmdRequest() *cobra.Command {
 // GetQueryCmdRequests implements the query requests with pagination command.
 func GetQueryCmdRequests() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "requests [limit] [offset]",
+		Use:  "requests [limit] [offset] [reverse]",
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -291,11 +291,17 @@ func GetQueryCmdRequests() *cobra.Command {
 				return err
 			}
 
+			reverse, err := strconv.ParseBool(args[2])
+			if err != nil {
+				return err
+			}
+
 			queryClient := oracletypes.NewQueryClient(clientCtx)
 			res, err := queryClient.Requests(cmd.Context(), &oracletypes.QueryRequestsRequest{
 				Pagination: &query.PageRequest{
-					Limit:  limit,
-					Offset: offset,
+					Limit:   limit,
+					Offset:  offset,
+					Reverse: reverse,
 				},
 			})
 			if err != nil {
