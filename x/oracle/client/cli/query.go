@@ -275,7 +275,7 @@ func GetQueryCmdRequest() *cobra.Command {
 func GetQueryCmdRequests() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "requests [limit] [offset] [reverse]",
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -290,7 +290,6 @@ func GetQueryCmdRequests() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			reverse, err := strconv.ParseBool(args[2])
 			if err != nil {
 				return err
