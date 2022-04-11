@@ -77,7 +77,7 @@ func (k Keeper) GetMintModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddre
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(minttypes.MintModuleCoinsAccountKey)
 	if b == nil {
-		panic("stored account should not have been nil")
+		return nil
 	}
 
 	return sdk.AccAddress(b)

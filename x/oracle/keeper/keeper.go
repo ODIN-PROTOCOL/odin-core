@@ -295,7 +295,7 @@ func (k Keeper) GetOracleModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAdd
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(oracletypes.OracleModuleCoinsAccountKey)
 	if b == nil {
-		panic("stored account should not have been nil")
+		return nil
 	}
 
 	return sdk.AccAddress(b)
