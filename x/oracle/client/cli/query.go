@@ -132,19 +132,19 @@ func GetQueryCmdDataSource() *cobra.Command {
 // GetQueryCmdDataSources implements the query data sources with pagination command.
 func GetQueryCmdDataSources() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "data-sources [limit] [offset]",
-		Args: cobra.ExactArgs(2),
+		Use:  "data-sources",
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			limit, err := strconv.ParseUint(args[0], 10, 64)
+			limit, err := cmd.Flags().GetUint64(flagLimit)
 			if err != nil {
 				return err
 			}
-			offset, err := strconv.ParseUint(args[1], 10, 64)
+			offset, err := cmd.Flags().GetUint64(flagOffset)
 			if err != nil {
 				return err
 			}
@@ -163,6 +163,9 @@ func GetQueryCmdDataSources() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+
+	cmd.Flags().Uint64(flagLimit, 0, "Pagination limit")
+	cmd.Flags().Uint64(flagOffset, 0, "Pagination offset")
 
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
@@ -203,19 +206,19 @@ func GetQueryCmdOracleScript() *cobra.Command {
 // GetQueryCmdOracleScripts implements the query oracle scripts with pagination command.
 func GetQueryCmdOracleScripts() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "oracle-scripts [limit] [offset]",
-		Args: cobra.ExactArgs(2),
+		Use:  "oracle-scripts",
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			limit, err := strconv.ParseUint(args[0], 10, 64)
+			limit, err := cmd.Flags().GetUint64(flagLimit)
 			if err != nil {
 				return err
 			}
-			offset, err := strconv.ParseUint(args[1], 10, 64)
+			offset, err := cmd.Flags().GetUint64(flagOffset)
 			if err != nil {
 				return err
 			}
@@ -234,6 +237,9 @@ func GetQueryCmdOracleScripts() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+
+	cmd.Flags().Uint64(flagLimit, 0, "Pagination limit")
+	cmd.Flags().Uint64(flagOffset, 0, "Pagination offset")
 
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
@@ -274,23 +280,23 @@ func GetQueryCmdRequest() *cobra.Command {
 // GetQueryCmdRequests implements the query requests with pagination command.
 func GetQueryCmdRequests() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "requests [limit] [offset] [reverse]",
-		Args: cobra.ExactArgs(3),
+		Use:  "requests",
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			limit, err := strconv.ParseUint(args[0], 10, 64)
+			limit, err := cmd.Flags().GetUint64(flagLimit)
 			if err != nil {
 				return err
 			}
-			offset, err := strconv.ParseUint(args[1], 10, 64)
+			offset, err := cmd.Flags().GetUint64(flagOffset)
 			if err != nil {
 				return err
 			}
-			reverse, err := strconv.ParseBool(args[2])
+			reverse, err := cmd.Flags().GetBool(flagReverse)
 			if err != nil {
 				return err
 			}
@@ -310,6 +316,10 @@ func GetQueryCmdRequests() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+
+	cmd.Flags().Uint64(flagLimit, 0, "Pagination limit")
+	cmd.Flags().Uint64(flagOffset, 0, "Pagination offset")
+	cmd.Flags().Bool(flagReverse, false, "Pagination reverse")
 
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
@@ -371,8 +381,8 @@ func GetQueryCmdRequestSearch() *cobra.Command {
 // GetQueryCmdRequestReports implements the query request reports with pagination command.
 func GetQueryCmdRequestReports() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "request-reports [id] [limit] [offset]",
-		Args: cobra.ExactArgs(3),
+		Use:  "request-reports [id]",
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -383,11 +393,11 @@ func GetQueryCmdRequestReports() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			limit, err := strconv.ParseUint(args[1], 10, 64)
+			limit, err := cmd.Flags().GetUint64(flagLimit)
 			if err != nil {
 				return err
 			}
-			offset, err := strconv.ParseUint(args[2], 10, 64)
+			offset, err := cmd.Flags().GetUint64(flagOffset)
 			if err != nil {
 				return err
 			}
@@ -407,6 +417,9 @@ func GetQueryCmdRequestReports() *cobra.Command {
 			return clientCtx.PrintProto(res)
 		},
 	}
+
+	cmd.Flags().Uint64(flagLimit, 0, "Pagination limit")
+	cmd.Flags().Uint64(flagOffset, 0, "Pagination offset")
 
 	flags.AddQueryFlagsToCmd(cmd)
 	return cmd
@@ -528,7 +541,7 @@ $ %s query oracle data-providers-pool
 
 func GetCmdQueryRequestPrice() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "request-price",
+		Use:   "request-price [symbol] [ask-count] [min-count]",
 		Args:  cobra.ExactArgs(3),
 		Short: "queries the latest price on standard price reference oracle",
 		RunE: func(cmd *cobra.Command, args []string) error {
