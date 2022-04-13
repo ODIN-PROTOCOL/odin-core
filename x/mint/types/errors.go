@@ -8,4 +8,5 @@ var (
 	ErrInvalidWithdrawalAmount              = sdkerrors.Register(ModuleName, 123, "The given withdrawal amount is invalid")
 	ErrExceedsWithdrawalLimitPerTime        = sdkerrors.Register(ModuleName, 124, "The given amount exceeds the withdrawal limit per time")
 	ErrWithdrawalAmountExceedsModuleBalance = sdkerrors.Register(ModuleName, 125, "The given amount to withdraw exceeds module balance")
+	ErrMintVolumeExceedsLimit               = sdkerrors.Register(ModuleName, 126, "The given volume to mint exceeds allowed mint volume")
 )

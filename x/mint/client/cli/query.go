@@ -25,6 +25,10 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryAnnualProvisions(),
 		GetCmdQueryIntegrationAddress(),
 		GetCmdQueryTreasuryPool(),
+		// TODO add
+		//  GetCmdQueryMaxAllowedMintVolume
+		//  GetCmdQueryAllowedMintDenoms
+		//  GetCmdQueryAllowedMinter
 	)
 
 	return mintingQueryCmd

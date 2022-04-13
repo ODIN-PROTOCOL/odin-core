@@ -15,6 +15,9 @@ service Msg {
   // module.
   rpc WithdrawCoinsToAccFromTreasury(MsgWithdrawCoinsToAccFromTreasury)
       returns (MsgWithdrawCoinsToAccFromTreasuryResponse);
+  // MintCoins defines a method for minting from mint module.
+  rpc MintCoins(MsgMintCoins)
+      returns (MsgMintCoinsResponse);
 }
 
 // MsgWithdrawCoinsToAccFromTreasury is a message for withdrawing from mint
@@ -35,3 +38,19 @@ message MsgWithdrawCoinsToAccFromTreasury {
 
 // MsgWithdrawCoinsToAccFromTreasuryResponse
 message MsgWithdrawCoinsToAccFromTreasuryResponse {}
+
+// MsgMintCoins is a message for minting from mint module.
+message MsgMintCoins {
+  option (gogoproto.equal) = true;
+
+  // Amount is the amount of coins to mint
+  repeated cosmos.base.v1beta1.Coin amount = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // Sender is the message signer who submits this report transaction
+  string sender = 2;
+}
+
+// MsgMintCoinsResponse
+message MsgMintCoinsResponse {}

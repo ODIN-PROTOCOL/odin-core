@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -19,13 +20,14 @@ type Keeper struct {
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
 	feeCollectorName string
+	cosmosBankKeeper bankkeeper.BaseKeeper
 }
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
 	cdc codec.BinaryCodec, key sdk.StoreKey, paramSpace paramtypes.Subspace,
 	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
-	feeCollectorName string,
+	feeCollectorName string, cbk bankkeeper.BaseKeeper,
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
@@ -45,6 +47,7 @@ func NewKeeper(
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
+		cosmosBankKeeper: cbk,
 	}
 }
 
@@ -199,6 +202,58 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 	}
 
 	mintPool.TreasuryPool = mintPool.TreasuryPool.Sub(amount)
+	k.SetMintPool(ctx, mintPool)
+
+	return nil
+}
+
+// IsAllowedMintDenom checks if denom exists in the allowed mint denoms list
+func (k Keeper) IsAllowedMintDenom(ctx sdk.Context, coin sdk.Coin) bool {
+	params := k.GetParams(ctx)
+	denom := coin.Denom
+
+	for i := range params.AllowedMintDenoms {
+		if denom == params.AllowedMintDenoms[i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsAllowedMinter checks if address exists in the allowed minters list
+func (k Keeper) IsAllowedMinter(ctx sdk.Context, addr string) bool {
+	params := k.GetParams(ctx)
+
+	for i := range params.AllowedMinter {
+		if addr == params.AllowedMinter[i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+// MintVolumeExceeded checks if minting volume exceeds the limit
+func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
+	moduleParams := k.GetParams(ctx)
+	return amt.IsAnyGT(moduleParams.MaxAllowedMintVolume)
+}
+
+// MintNewCoins issue new coins
+func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
+	mintPool := k.GetMintPool(ctx)
+
+	if err := k.cosmosBankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
+		return sdkerrors.Wrapf(
+			err,
+			"failed to mint %s new coins",
+			amount.String(),
+			minttypes.ModuleName,
+		)
+	}
+
+	mintPool.TreasuryPool = mintPool.TreasuryPool.Add(amount...)
 	k.SetMintPool(ctx, mintPool)
 
 	return nil

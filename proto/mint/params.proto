@@ -55,4 +55,14 @@ message Params {
   // eligible to withdraw accounts
   repeated string eligible_accounts_pool = 10
       [ (gogoproto.moretags) = "yaml:\"eligible_accounts_pool\"" ];
+  // max allowed mint volume
+  repeated cosmos.base.v1beta1.Coin max_allowed_mint_volume = 11 [
+    (gogoproto.moretags) = "yaml:\"max_allowed_mint_volume\"",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
+  // allowed mint denoms
+  repeated string allowed_mint_denoms = 12;
+  // allowed minter
+  repeated string allowed_minter = 13;
 }

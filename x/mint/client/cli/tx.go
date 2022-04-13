@@ -24,7 +24,10 @@ func NewTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	txCmd.AddCommand(NewCmdWithdrawCoinsToAccFromTreasury())
+	txCmd.AddCommand(
+		NewCmdWithdrawCoinsToAccFromTreasury(),
+		NewCmdMintCoins(),
+	)
 
 	return txCmd
 }
@@ -68,6 +71,39 @@ func NewCmdWithdrawCoinsToAccFromTreasury() *cobra.Command {
 
 	cmd.Flags().String(flagReceiver, "", "Account address to withdraw coins to")
 	cmd.Flags().String(flagAmount, "", "Amount of coins to withdraw")
+
+	return cmd
+}
+
+// NewCmdMintCoins implements coins minting transaction command.
+func NewCmdMintCoins() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:  "mint-coins [amount]",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+			amountStr, err := cmd.Flags().GetString(flagAmount)
+			if err != nil {
+				return sdkerrors.Wrapf(err, "flag: %s", flagAmount)
+			}
+			amount, err := sdk.ParseCoinsNormalized(amountStr)
+			if err != nil {
+				return sdkerrors.Wrapf(err, "amount: %s", amountStr)
+			}
+
+			msg := minttypes.NewMsgMintCoins(amount, clientCtx.GetFromAddress())
+			if err := msg.ValidateBasic(); err != nil {
+				return sdkerrors.Wrapf(err, "amount: %s", amount)
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	cmd.Flags().String(flagAmount, "", "Amount of coins to mint")
 
 	return cmd
 }

@@ -5,20 +5,24 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// NewMinter returns a new Minter object with the given inflation and annual
-// provisions values.
-func NewMinter(inflation, annualProvisions sdk.Dec) Minter {
+// TODO add func NewCurrentMintVolume()
+
+// NewMinter returns a new Minter object with the given inflation,
+// annual provisions and current mint volume values.
+func NewMinter(inflation, annualProvisions sdk.Dec, currentMintVolume sdk.Coins) Minter {
 	return Minter{
-		Inflation:        inflation,
-		AnnualProvisions: annualProvisions,
+		Inflation:         inflation,
+		AnnualProvisions:  annualProvisions,
+		CurrentMintVolume: currentMintVolume,
 	}
 }
 
 // InitialMinter returns an initial Minter object with a given inflation value.
-func InitialMinter(inflation sdk.Dec) Minter {
+func InitialMinter(inflation sdk.Dec, currentMintVolume sdk.Coins) Minter {
 	return NewMinter(
 		inflation,
 		sdk.NewDec(0),
+		sdk.NewCoins(currentMintVolume...),
 	)
 }
 
@@ -27,6 +31,7 @@ func InitialMinter(inflation sdk.Dec) Minter {
 func DefaultInitialMinter() Minter {
 	return InitialMinter(
 		sdk.NewDecWithPrec(13, 2),
+		sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))),
 	)
 }
 
