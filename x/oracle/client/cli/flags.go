@@ -16,4 +16,7 @@ const (
 	flagFee            = "fee"
 	flagSchema         = "schema"
 	flagSourceCodeURL  = "url"
+	flagOffset         = "offset"
+	flagLimit          = "limit"
+	flagReverse        = "reverse"
 )

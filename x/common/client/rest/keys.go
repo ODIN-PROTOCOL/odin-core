@@ -5,4 +5,5 @@ const (
 	OffsetTag     = "offset"
 	DescTag       = "desc"
 	CountTotalTag = "count_total"
+	ReverseTag    = "reverse"
 )
