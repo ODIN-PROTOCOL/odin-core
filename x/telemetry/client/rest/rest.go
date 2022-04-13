@@ -64,7 +64,7 @@ func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		paginationParams, ok := commonrest.СheckPaginationParams(w, r)
+		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}
@@ -94,7 +94,7 @@ func getExtendedValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		paginationParams, ok := commonrest.СheckPaginationParams(w, r)
+		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}

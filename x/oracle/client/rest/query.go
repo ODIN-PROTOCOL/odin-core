@@ -110,7 +110,7 @@ func getDataSourcesHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		params, ok := commonrest.СheckPaginationParams(w, r)
+		params, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}
@@ -164,7 +164,7 @@ func getOracleScriptsHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		params, ok := commonrest.СheckPaginationParams(w, r)
+		params, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}
@@ -220,7 +220,7 @@ func getRequestsHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		params, ok := commonrest.СheckPaginationParams(w, r)
+		params, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}
@@ -251,7 +251,7 @@ func getRequestReportsHandler(clientCtx client.Context) http.HandlerFunc {
 			return
 		}
 
-		params, ok := commonrest.СheckPaginationParams(w, r)
+		params, ok := commonrest.CheckPaginationParams(w, r)
 		if !ok {
 			return
 		}
