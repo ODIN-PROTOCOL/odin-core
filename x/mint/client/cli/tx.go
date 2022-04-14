@@ -12,6 +12,7 @@ import (
 const (
 	flagReceiver = "receiver"
 	flagAmount   = "amount"
+	flagUpdate   = "update"
 )
 
 // NewTxCmd returns a root CLI command handler for all x/mint transaction commands.
@@ -85,13 +86,10 @@ func NewCmdMintCoins() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			amountStr, err := cmd.Flags().GetString(flagAmount)
+
+			amount, err := sdk.ParseCoinsNormalized(args[0])
 			if err != nil {
-				return sdkerrors.Wrapf(err, "flag: %s", flagAmount)
-			}
-			amount, err := sdk.ParseCoinsNormalized(amountStr)
-			if err != nil {
-				return sdkerrors.Wrapf(err, "amount: %s", amountStr)
+				return sdkerrors.Wrapf(err, "amount: %s", amount)
 			}
 
 			msg := minttypes.NewMsgMintCoins(amount, clientCtx.GetFromAddress())
@@ -102,8 +100,6 @@ func NewCmdMintCoins() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
 		},
 	}
-
-	cmd.Flags().String(flagAmount, "", "Amount of coins to mint")
 
 	return cmd
 }

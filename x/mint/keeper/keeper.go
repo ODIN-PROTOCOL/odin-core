@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
@@ -20,14 +19,13 @@ type Keeper struct {
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
 	feeCollectorName string
-	cosmosBankKeeper bankkeeper.BaseKeeper
 }
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
 	cdc codec.BinaryCodec, key sdk.StoreKey, paramSpace paramtypes.Subspace,
 	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
-	feeCollectorName string, cbk bankkeeper.BaseKeeper,
+	feeCollectorName string,
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
@@ -47,7 +45,6 @@ func NewKeeper(
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
-		cosmosBankKeeper: cbk,
 	}
 }
 
@@ -244,7 +241,7 @@ func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
 func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 	mintPool := k.GetMintPool(ctx)
 
-	if err := k.cosmosBankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
+	if err := k.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
 		return sdkerrors.Wrapf(
 			err,
 			"failed to mint %s new coins",

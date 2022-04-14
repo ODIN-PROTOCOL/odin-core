@@ -62,7 +62,7 @@ message Params {
     (gogoproto.nullable) = false
   ];
   // allowed mint denoms
-  repeated string allowed_mint_denoms = 12;
+  repeated string allowed_mint_denoms = 12 [ (gogoproto.moretags) = "yaml:\"allowed_mint_denoms\"" ];
   // allowed minter
-  repeated string allowed_minter = 13;
+  repeated string allowed_minter = 13 [ (gogoproto.moretags) = "yaml:\"allowed_minter\"" ];
 }
