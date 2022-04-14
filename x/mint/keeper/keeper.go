@@ -246,7 +246,6 @@ func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 			err,
 			"failed to mint %s new coins",
 			amount.String(),
-			minttypes.ModuleName,
 		)
 	}
 
