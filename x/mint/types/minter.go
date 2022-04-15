@@ -5,8 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// TODO add func NewCurrentMintVolume()
-
 // NewMinter returns a new Minter object with the given inflation,
 // annual provisions and current mint volume values.
 func NewMinter(inflation, annualProvisions sdk.Dec, currentMintVolume sdk.Coins) Minter {
