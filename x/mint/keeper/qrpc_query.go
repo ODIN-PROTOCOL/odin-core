@@ -60,7 +60,7 @@ func (k Keeper) TreasuryPool(
 	return &minttypes.QueryTreasuryPoolResponse{TreasuryPool: mintPool.TreasuryPool}, nil
 }
 
-// TreasuryPool returns current treasury pool
+// CurrentMintVolume returns current mint volume
 func (k Keeper) CurrentMintVolume(
 	c context.Context,
 	_ *minttypes.QueryCurrentMintVolumeRequest,
