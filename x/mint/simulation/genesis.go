@@ -111,7 +111,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 		allowedMintDenoms,
 		allowedMinter,
 	)
-	mintGenesis := minttypes.NewGenesisState(minttypes.InitialMinter(inflation, maxAllowedMintVolume), params, minttypes.InitialMintPool(), sdk.AccAddress("odin13jp4udqlxknzrpsk9jkr3hpmp6gy242xm0s2kq"))
+	mintGenesis := minttypes.NewGenesisState(minttypes.InitialMinter(inflation), params, minttypes.InitialMintPool(), sdk.AccAddress("odin13jp4udqlxknzrpsk9jkr3hpmp6gy242xm0s2kq"))
 
 	bz, err := json.MarshalIndent(&mintGenesis, "", " ")
 	if err != nil {
