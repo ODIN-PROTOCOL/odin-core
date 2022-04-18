@@ -55,7 +55,7 @@ func TestNextInflation(t *testing.T) {
 }
 
 func TestBlockProvision(t *testing.T) {
-	minter := InitialMinter(sdk.NewDecWithPrec(1, 1), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
+	minter := InitialMinter(sdk.NewDecWithPrec(1, 1))
 	params := DefaultParams()
 
 	secondsPerYear := int64(60 * 60 * 8766)
@@ -89,7 +89,7 @@ func TestBlockProvision(t *testing.T) {
 // using sdk.Dec operations: (current implementation)
 // BenchmarkBlockProvision-4 3000000 429 ns/op
 func BenchmarkBlockProvision(b *testing.B) {
-	minter := InitialMinter(sdk.NewDecWithPrec(1, 1), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
+	minter := InitialMinter(sdk.NewDecWithPrec(1, 1))
 	params := DefaultParams()
 
 	s1 := rand.NewSource(100)
@@ -105,7 +105,7 @@ func BenchmarkBlockProvision(b *testing.B) {
 // Next inflation benchmarking
 // BenchmarkNextInflation-4 1000000 1828 ns/op
 func BenchmarkNextInflation(b *testing.B) {
-	minter := InitialMinter(sdk.NewDecWithPrec(1, 1), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
+	minter := InitialMinter(sdk.NewDecWithPrec(1, 1))
 	params := DefaultParams()
 	bondedRatio := sdk.NewDecWithPrec(1, 1)
 
@@ -119,7 +119,7 @@ func BenchmarkNextInflation(b *testing.B) {
 // Next annual provisions benchmarking
 // BenchmarkNextAnnualProvisions-4 5000000 251 ns/op
 func BenchmarkNextAnnualProvisions(b *testing.B) {
-	minter := InitialMinter(sdk.NewDecWithPrec(1, 1), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
+	minter := InitialMinter(sdk.NewDecWithPrec(1, 1))
 	params := DefaultParams()
 	totalSupply := sdk.NewInt(100000000000000)
 
