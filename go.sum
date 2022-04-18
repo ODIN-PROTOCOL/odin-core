@@ -105,6 +105,8 @@ github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/
 github.com/Workiva/go-datastructures v1.0.52/go.mod h1:Z+F2Rca0qCsVYDS8z7bAGm8f3UkzuWYS/oBZz5a7VVA=
 github.com/Workiva/go-datastructures v1.0.53 h1:J6Y/52yX10Xc5JjXmGtWoSSxs3mZnGSaq37xZZh7Yig=
 github.com/Workiva/go-datastructures v1.0.53/go.mod h1:1yZL+zfsztete+ePzZz/Zb1/t5BnDuE2Ya2MMGhzP6A=
+github.com/YuriyNasretdinov/golang-soft-mocks v0.0.0-20200411201603-950168e8c224 h1:hxP9GmVdoSG1qN8/4r7srlLRhZpcvnzvlRPkLC7F/+8=
+github.com/YuriyNasretdinov/golang-soft-mocks v0.0.0-20200411201603-950168e8c224/go.mod h1:HtZNgivTuGb78RjDVoRMB9N2KLPyfAGX944v86VNgUE=
 github.com/Zilliqa/gozilliqa-sdk v1.2.1-0.20201201074141-dd0ecada1be6/go.mod h1:eSYp2T6f0apnuW8TzhV3f6Aff2SE8Dwio++U4ha4yEM=
 github.com/a8m/expect v1.0.0/go.mod h1:4IwSCMumY49ScypDnjNbYEjgVeqy1/U2cEs3Lat96eA=
 github.com/adlio/schema v1.1.13/go.mod h1:L5Z7tw+7lRK1Fnpi/LT/ooCP1elkXn0krMWBQHUhEDE=
