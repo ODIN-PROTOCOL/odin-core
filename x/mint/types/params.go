@@ -10,16 +10,19 @@ import (
 
 // Parameter store keys
 var (
-	KeyMintDenom             = []byte("MintDenom")
-	KeyInflationRateChange   = []byte("InflationRateChange")
-	KeyInflationMax          = []byte("InflationMax")
-	KeyInflationMin          = []byte("InflationMin")
-	KeyGoalBonded            = []byte("GoalBonded")
-	KeyBlocksPerYear         = []byte("BlocksPerYear")
-	KeyMintAir               = []byte("MintAir")
-	KeyIntegrationAddresses  = []byte("IntegrationAddresses")
-	KeyMaxWithdrawalPerTime  = []byte("MaxWithdrawalPerTime")
-	KeyEligibleAccountsPool  = []byte("EligibleAccountsPool")
+	KeyMintDenom            = []byte("MintDenom")
+	KeyInflationRateChange  = []byte("InflationRateChange")
+	KeyInflationMax         = []byte("InflationMax")
+	KeyInflationMin         = []byte("InflationMin")
+	KeyGoalBonded           = []byte("GoalBonded")
+	KeyBlocksPerYear        = []byte("BlocksPerYear")
+	KeyMintAir              = []byte("MintAir")
+	KeyIntegrationAddresses = []byte("IntegrationAddresses")
+	KeyMaxWithdrawalPerTime = []byte("MaxWithdrawalPerTime")
+	KeyEligibleAccountsPool = []byte("EligibleAccountsPool")
+	KeyMaxAllowedMintVolume = []byte("MaxAllowedMintVolume")
+	KeyAllowedMintDenoms    = []byte("AllowedMintDenoms")
+	KeyAllowedMinter        = []byte("AllowedMinter")
 )
 
 // ParamTable for minting module.
@@ -35,36 +38,45 @@ func NewParams(
 	mintAir bool,
 	integrationAddresses map[string]string,
 	eligibleAccountsPool []string,
+	maxAllowedMintVolume sdk.Coins,
+	allowedMintDenoms []string,
+	AllowedMinter []string,
 
 ) Params {
 
 	return Params{
-		MintDenom:             mintDenom,
-		InflationRateChange:   inflationRateChange,
-		InflationMax:          inflationMax,
-		InflationMin:          inflationMin,
-		GoalBonded:            goalBonded,
-		BlocksPerYear:         blocksPerYear,
-		MintAir:               mintAir,
-		IntegrationAddresses:  integrationAddresses,
-		MaxWithdrawalPerTime:  MaxWithdrawalPerTime,
-		EligibleAccountsPool:  eligibleAccountsPool,
+		MintDenom:            mintDenom,
+		InflationRateChange:  inflationRateChange,
+		InflationMax:         inflationMax,
+		InflationMin:         inflationMin,
+		GoalBonded:           goalBonded,
+		BlocksPerYear:        blocksPerYear,
+		MintAir:              mintAir,
+		IntegrationAddresses: integrationAddresses,
+		MaxWithdrawalPerTime: MaxWithdrawalPerTime,
+		EligibleAccountsPool: eligibleAccountsPool,
+		MaxAllowedMintVolume: maxAllowedMintVolume,
+		AllowedMintDenoms:    allowedMintDenoms,
+		AllowedMinter:        AllowedMinter,
 	}
 }
 
 // default minting module parameters
 func DefaultParams() Params {
 	return Params{
-		MintDenom:             sdk.DefaultBondDenom,
-		InflationRateChange:   sdk.NewDecWithPrec(13, 2),
-		InflationMax:          sdk.NewDecWithPrec(20, 2),
-		InflationMin:          sdk.NewDecWithPrec(7, 2),
-		GoalBonded:            sdk.NewDecWithPrec(67, 2),
-		BlocksPerYear:         uint64(60 * 60 * 8766 / 5), // assuming 5 second block times
-		MintAir:               false,
-		IntegrationAddresses:  map[string]string{}, // default value (might be invalid for actual use)
-		MaxWithdrawalPerTime:  sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
-		EligibleAccountsPool:  []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
+		MintDenom:            sdk.DefaultBondDenom,
+		InflationRateChange:  sdk.NewDecWithPrec(13, 2),
+		InflationMax:         sdk.NewDecWithPrec(20, 2),
+		InflationMin:         sdk.NewDecWithPrec(7, 2),
+		GoalBonded:           sdk.NewDecWithPrec(67, 2),
+		BlocksPerYear:        uint64(60 * 60 * 8766 / 5), // assuming 5 second block times
+		MintAir:              false,
+		IntegrationAddresses: map[string]string{}, // default value (might be invalid for actual use)
+		MaxWithdrawalPerTime: sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
+		EligibleAccountsPool: []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
+		MaxAllowedMintVolume: sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))},
+		AllowedMintDenoms:    []string{"minigeo"},
+		AllowedMinter:        []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
 	}
 }
 
@@ -98,6 +110,15 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateEligibleAccountsPool(p.EligibleAccountsPool); err != nil {
+		return err
+	}
+	if err := validateMaxAllowedMintVolume(p.MaxAllowedMintVolume); err != nil {
+		return err
+	}
+	if err := validateAllowedMintDenoms(p.AllowedMintDenoms); err != nil {
+		return err
+	}
+	if err := validateAllowedMinter(p.AllowedMinter); err != nil {
 		return err
 	}
 	if p.InflationMax.LT(p.InflationMin) {
@@ -141,6 +162,9 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyIntegrationAddresses, &p.IntegrationAddresses, validateIntegrationAddresses),
 		paramtypes.NewParamSetPair(KeyMaxWithdrawalPerTime, &p.MaxWithdrawalPerTime, validateMaxWithdrawalPerTime),
 		paramtypes.NewParamSetPair(KeyEligibleAccountsPool, &p.EligibleAccountsPool, validateEligibleAccountsPool),
+		paramtypes.NewParamSetPair(KeyMaxAllowedMintVolume, &p.MaxAllowedMintVolume, validateMaxAllowedMintVolume),
+		paramtypes.NewParamSetPair(KeyAllowedMintDenoms, &p.AllowedMintDenoms, validateAllowedMintDenoms),
+		paramtypes.NewParamSetPair(KeyAllowedMinter, &p.AllowedMinter, validateAllowedMinter),
 	}
 }
 
@@ -275,5 +299,38 @@ func validateMintAir(i interface{}) error {
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
+	return nil
+}
+
+func validateMaxAllowedMintVolume(i interface{}) error {
+	v, ok := i.(sdk.Coins)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	if !v.IsValid() {
+		return fmt.Errorf("max allowed mint volume parameter is not valid: %s", v)
+	}
+	if v.IsAnyNegative() {
+		return fmt.Errorf("max allowed mint volume cannot be negative: %s", v)
+	}
+
+	return nil
+}
+
+func validateAllowedMintDenoms(i interface{}) error {
+	_, ok := i.([]string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	return nil
+}
+
+func validateAllowedMinter(i interface{}) error {
+	_, ok := i.([]string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
 	return nil
 }
