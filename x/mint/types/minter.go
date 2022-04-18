@@ -16,11 +16,11 @@ func NewMinter(inflation, annualProvisions sdk.Dec, currentMintVolume sdk.Coins)
 }
 
 // InitialMinter returns an initial Minter object with a given inflation value.
-func InitialMinter(inflation sdk.Dec, currentMintVolume sdk.Coins) Minter {
+func InitialMinter(inflation sdk.Dec) Minter {
 	return NewMinter(
 		inflation,
 		sdk.NewDec(0),
-		sdk.NewCoins(currentMintVolume...),
+		sdk.NewCoins(),
 	)
 }
 
@@ -29,7 +29,6 @@ func InitialMinter(inflation sdk.Dec, currentMintVolume sdk.Coins) Minter {
 func DefaultInitialMinter() Minter {
 	return InitialMinter(
 		sdk.NewDecWithPrec(13, 2),
-		sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))),
 	)
 }
 
