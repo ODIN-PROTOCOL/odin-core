@@ -34,6 +34,11 @@ func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
 		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryTreasuryPool),
 		queryTreasuryPoolHandlerFn(clientCtx),
 	).Methods("GET")
+
+	r.HandleFunc(
+		fmt.Sprintf("%s/%s", minttypes.LegacyRoute, minttypes.QueryCurrentMintVolume),
+		queryCurrentMintVolumeHandlerFn(clientCtx),
+	).Methods("GET")
 }
 
 func queryParamsHandlerFn(clientCtx client.Context) http.HandlerFunc {
@@ -122,6 +127,26 @@ func queryIntegrationAddressHandlerFn(clientCtx client.Context) http.HandlerFunc
 func queryTreasuryPoolHandlerFn(clientCtx client.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		route := fmt.Sprintf("custom/%s/%s", minttypes.QuerierRoute, minttypes.QueryTreasuryPool)
+
+		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+		if !ok {
+			return
+		}
+
+		res, height, err := cliCtx.Query(route)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		cliCtx = cliCtx.WithHeight(height)
+		rest.PostProcessResponse(w, cliCtx, res)
+	}
+}
+
+func queryCurrentMintVolumeHandlerFn(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		route := fmt.Sprintf("custom/%s/%s", minttypes.QuerierRoute, minttypes.QueryCurrentMintVolume)
 
 		cliCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
 		if !ok {

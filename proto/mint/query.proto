@@ -34,6 +34,11 @@ service Query {
       returns (QueryTreasuryPoolResponse) {
     option (google.api.http).get = "/mint/treasury_pool";
   }
+  // CurrentMintVolume returns current minted coins volume.
+  rpc CurrentMintVolume(QueryCurrentMintVolumeRequest)
+      returns (QueryCurrentMintVolumeResponse) {
+    option (google.api.http).get = "/mint/current_mint_volume";
+  }
 }
 
 // QueryParamsRequest is request type for the Query/QueryParams RPC
@@ -91,3 +96,16 @@ message QueryTreasuryPoolResponse {
     (gogoproto.nullable) = false
   ];
 }
+
+// QueryCurrentMintVolumeRequest is request type for the Query/QueryCurrentMintVolume RPC
+// method.
+message QueryCurrentMintVolumeRequest {}
+// QueryCurrentMintVolumeResponse is response type for the Query/QueryCurrentMintVolume
+// RPC method.
+message QueryCurrentMintVolumeResponse {
+  repeated cosmos.base.v1beta1.Coin current_mint_volume = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
+}
+

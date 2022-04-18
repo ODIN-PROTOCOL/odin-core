@@ -240,6 +240,7 @@ func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
 // MintNewCoins issue new coins
 func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 	mintPool := k.GetMintPool(ctx)
+	minter := k.GetMinter(ctx)
 
 	if err := k.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
 		return sdkerrors.Wrapf(
@@ -251,6 +252,9 @@ func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 
 	mintPool.TreasuryPool = mintPool.TreasuryPool.Add(amount...)
 	k.SetMintPool(ctx, mintPool)
+
+	minter.CurrentMintVolume = minter.CurrentMintVolume.Add(amount...)
+	k.SetMinter(ctx, minter)
 
 	return nil
 }

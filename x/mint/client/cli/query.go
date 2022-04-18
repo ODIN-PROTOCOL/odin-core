@@ -25,6 +25,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryAnnualProvisions(),
 		GetCmdQueryIntegrationAddress(),
 		GetCmdQueryTreasuryPool(),
+		GetCmdQueryCurrentMintVolume(),
 	)
 
 	return mintingQueryCmd
@@ -172,6 +173,35 @@ func GetCmdQueryTreasuryPool() *cobra.Command {
 			}
 
 			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.TreasuryPool))
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryCurrentMintVolume returns the command for getting minted coins volume
+func GetCmdQueryCurrentMintVolume() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "current-mint-volume",
+		Short: "Query the amount of minted coins",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := minttypes.NewQueryClient(clientCtx)
+
+			params := &minttypes.QueryCurrentMintVolumeRequest{}
+			res, err := queryClient.CurrentMintVolume(context.Background(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.CurrentMintVolume))
 		},
 	}
 
