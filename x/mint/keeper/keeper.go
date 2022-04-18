@@ -203,3 +203,54 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 
 	return nil
 }
+
+// IsAllowedMintDenom checks if denom exists in the allowed mint denoms list
+func (k Keeper) IsAllowedMintDenom(ctx sdk.Context, coin sdk.Coin) bool {
+	params := k.GetParams(ctx)
+	denom := coin.Denom
+
+	for i := range params.AllowedMintDenoms {
+		if denom == params.AllowedMintDenoms[i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsAllowedMinter checks if address exists in the allowed minters list
+func (k Keeper) IsAllowedMinter(ctx sdk.Context, addr string) bool {
+	params := k.GetParams(ctx)
+
+	for i := range params.AllowedMinter {
+		if addr == params.AllowedMinter[i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+// MintVolumeExceeded checks if minting volume exceeds the limit
+func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
+	moduleParams := k.GetParams(ctx)
+	return amt.IsAnyGT(moduleParams.MaxAllowedMintVolume)
+}
+
+// MintNewCoins issue new coins
+func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
+	mintPool := k.GetMintPool(ctx)
+
+	if err := k.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
+		return sdkerrors.Wrapf(
+			err,
+			"failed to mint %s new coins",
+			amount.String(),
+		)
+	}
+
+	mintPool.TreasuryPool = mintPool.TreasuryPool.Add(amount...)
+	k.SetMintPool(ctx, mintPool)
+
+	return nil
+}

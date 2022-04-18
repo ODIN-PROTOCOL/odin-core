@@ -16,6 +16,9 @@ func NewHandler(k mintkeeper.Keeper) sdk.Handler {
 		case *minttypes.MsgWithdrawCoinsToAccFromTreasury:
 			res, err := msgServer.WithdrawCoinsToAccFromTreasury(sdk.WrapSDKContext(ctx), msg)
 			return sdk.WrapServiceResult(ctx, res, err)
+		case *minttypes.MsgMintCoins: // DONE
+			res, err := msgServer.MintCoins(sdk.WrapSDKContext(ctx), msg)
+			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", minttypes.ModuleName, msg)
 		}

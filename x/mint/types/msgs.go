@@ -5,7 +5,10 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const TypeMsgWithdrawCoinsToAccFromTreasury = "withdraw_coins_from_treasury"
+const (
+	TypeMsgWithdrawCoinsToAccFromTreasury = "withdraw_coins_from_treasury"
+	TypeMsgMintCoins                      = "mint_coins"
+)
 
 // NewMsgWithdrawCoinsToAccFromTreasury returns a new MsgWithdrawCoinsToAccFromTreasury
 func NewMsgWithdrawCoinsToAccFromTreasury(
@@ -63,6 +66,60 @@ func (msg MsgWithdrawCoinsToAccFromTreasury) GetSignBytes() []byte {
 
 // GetSigners implements the sdk.Msg interface.
 func (msg MsgWithdrawCoinsToAccFromTreasury) GetSigners() []sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		panic(err)
+	}
+	return []sdk.AccAddress{addr}
+}
+
+// NewMsgMintCoins returns a new MsgMintCoins
+func NewMsgMintCoins(
+	amt sdk.Coins,
+	sender sdk.AccAddress,
+) MsgMintCoins {
+	return MsgMintCoins{
+		Amount: amt,
+		Sender: sender.String(),
+	}
+}
+
+// Route implements the sdk.Msg interface.
+func (msg MsgMintCoins) Route() string {
+	return RouterKey
+}
+
+// Type implements the sdk.Msg interface.
+func (msg MsgMintCoins) Type() string {
+	return TypeMsgMintCoins
+}
+
+// ValidateBasic implements the sdk.Msg interface.
+func (msg MsgMintCoins) ValidateBasic() error {
+	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return err
+	}
+	if err := sdk.VerifyAddressFormat(sender); err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "sender: %s", msg.Sender)
+	}
+	if !msg.Amount.IsValid() {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidCoins, "amount: %s", msg.Amount.String())
+	}
+	if msg.Amount.IsAnyNegative() {
+		return sdkerrors.Wrapf(ErrInvalidWithdrawalAmount, "amount: %s", msg.Amount.String())
+	}
+
+	return nil
+}
+
+// GetSignBytes implements the sdk.Msg interface.
+func (msg MsgMintCoins) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+
+// GetSigners implements the sdk.Msg interface.
+func (msg MsgMintCoins) GetSigners() []sdk.AccAddress {
 	addr, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		panic(err)

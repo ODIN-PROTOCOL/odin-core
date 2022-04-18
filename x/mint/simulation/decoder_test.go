@@ -17,7 +17,7 @@ func TestDecodeStore(t *testing.T) {
 	cdc := simapp.MakeTestEncodingConfig()
 	dec := simulation.NewDecodeStore(cdc.Marshaler)
 
-	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15))
+	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
 
 	kvPairs := kv.Pairs{
 		Pairs: []kv.Pair{

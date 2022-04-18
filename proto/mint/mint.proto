@@ -22,6 +22,8 @@ message MintPool {
 
 // Minter represents the minting state.
 message Minter {
+  option (gogoproto.equal) = true;
+
   // current annual inflation rate
   string inflation = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -31,6 +33,12 @@ message Minter {
   string annual_provisions = 2 [
     (gogoproto.moretags) = "yaml:\"annual_provisions\"",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // current mint volume
+  repeated cosmos.base.v1beta1.Coin current_mint_volume = 3 [
+    (gogoproto.moretags) = "yaml:\"current_mint_volume\"",
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];
 }
