@@ -3,6 +3,7 @@ package cli
 import (
 	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -12,7 +13,6 @@ import (
 const (
 	flagReceiver = "receiver"
 	flagAmount   = "amount"
-	flagUpdate   = "update"
 )
 
 // NewTxCmd returns a root CLI command handler for all x/mint transaction commands.
@@ -73,6 +73,8 @@ func NewCmdWithdrawCoinsToAccFromTreasury() *cobra.Command {
 	cmd.Flags().String(flagReceiver, "", "Account address to withdraw coins to")
 	cmd.Flags().String(flagAmount, "", "Amount of coins to withdraw")
 
+	flags.AddTxFlagsToCmd(cmd)
+
 	return cmd
 }
 
@@ -100,6 +102,8 @@ func NewCmdMintCoins() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
