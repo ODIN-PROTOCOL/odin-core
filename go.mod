@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/Masterminds/squirrel v1.5.2
-	github.com/YuriyNasretdinov/golang-soft-mocks v0.0.0-20200411201603-950168e8c224
 	github.com/bandprotocol/go-owasm v0.0.0-20210311072328-a6859c27139c
 	github.com/confio/ics23/go v0.6.6
 	github.com/cosmos/cosmos-sdk v0.44.5
@@ -36,7 +35,6 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
-	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tendermint/tendermint v0.34.15
 	github.com/tendermint/tm-db v0.6.6
 	github.com/ziutek/mymysql v1.5.4 // indirect

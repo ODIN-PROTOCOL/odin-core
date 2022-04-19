@@ -111,17 +111,6 @@ func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
 func (k Keeper) GetParams(ctx sdk.Context) minttypes.Params {
 	var params minttypes.Params
 	paramsPtr := &params
-	/*closeFunc := paramtypes.Subspace.GetParamSet
-	p := int32(1111100)
-	soft.RegisterFunc(closeFunc, &p)
-	soft.Mock(closeFunc, func(s paramtypes.Subspace, ctx sdk.Context, ps paramtypes.ParamSet) {
-		for _, pair := range ps.ParamSetPairs() {
-			s.GetIfExists(ctx, pair.Key, pair.Value)
-		}
-		return
-	})
-
-	k.paramSpace.GetParamSet(ctx, &params) */
 	for _, pair := range paramsPtr.ParamSetPairs() {
 		k.paramSpace.GetIfExists(ctx, pair.Key, pair.Value)
 	}
