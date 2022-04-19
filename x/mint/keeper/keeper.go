@@ -238,6 +238,8 @@ func (k Keeper) IsAllowedMinter(ctx sdk.Context, addr string) bool {
 // MintVolumeExceeded checks if minting volume exceeds the limit
 func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
 	moduleParams := k.GetParams(ctx)
+	minter := k.GetMinter(ctx)
+	amt = amt.Add(minter.CurrentMintVolume...)
 	return amt.IsAnyGT(moduleParams.MaxAllowedMintVolume)
 }
 
