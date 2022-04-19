@@ -26,6 +26,7 @@ const (
 	QueryAnnualProvisions     = "annual_provisions"
 	QueryIntegrationAddresses = "integration_addresses"
 	QueryTreasuryPool         = "treasury_pool"
+	QueryCurrentMintVolume    = "current_mint_volume"
 )
 
 var (

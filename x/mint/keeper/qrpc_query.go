@@ -59,3 +59,14 @@ func (k Keeper) TreasuryPool(
 
 	return &minttypes.QueryTreasuryPoolResponse{TreasuryPool: mintPool.TreasuryPool}, nil
 }
+
+// CurrentMintVolume returns current mint volume
+func (k Keeper) CurrentMintVolume(
+	c context.Context,
+	_ *minttypes.QueryCurrentMintVolumeRequest,
+) (*minttypes.QueryCurrentMintVolumeResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	minter := k.GetMinter(ctx)
+
+	return &minttypes.QueryCurrentMintVolumeResponse{CurrentMintVolume: minter.CurrentMintVolume}, nil
+}
