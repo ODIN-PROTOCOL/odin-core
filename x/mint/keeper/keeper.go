@@ -108,12 +108,8 @@ func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
 }
 
 // GetParams returns the total set of minting parameters.
-func (k Keeper) GetParams(ctx sdk.Context) minttypes.Params {
-	var params minttypes.Params
-	paramsPtr := &params
-	for _, pair := range paramsPtr.ParamSetPairs() {
-		k.paramSpace.GetIfExists(ctx, pair.Key, pair.Value)
-	}
+func (k Keeper) GetParams(ctx sdk.Context) (params minttypes.Params) {
+	k.paramSpace.GetParamSet(ctx, &params)
 	return params
 }
 

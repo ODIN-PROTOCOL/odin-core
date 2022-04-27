@@ -1,6 +1,7 @@
 package odin
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/GeoDB-Limited/odin-core/x/auction"
 	auctionkeeper "github.com/GeoDB-Limited/odin-core/x/auction/keeper"
@@ -333,6 +334,30 @@ func NewOdinApp(
 	)
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
+
+	cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.0", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		var pz odinminttypes.Params
+		for _, pair := range pz.ParamSetPairs() {
+			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
+				pz.AllowedMinter = make([]string, 0)
+			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
+				pz.AllowedMintDenoms = make([]string, 0)
+			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
+				pz.MaxAllowedMintVolume = sdk.Coins{}
+			} else {
+				app.ParamsKeeper.Subspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
+			}
+		}
+		app.MintKeeper.SetParams(ctx, pz)
+
+		minter := app.MintKeeper.GetMinter(ctx)
+		minter.CurrentMintVolume = sdk.Coins{}
+		app.MintKeeper.SetMinter(ctx, minter)
+
+		return app.mm.RunMigrations(ctx, cfg, fromVM)
+	})
 
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
