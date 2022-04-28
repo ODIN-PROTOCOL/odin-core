@@ -340,6 +340,7 @@ func NewOdinApp(
 	app.UpgradeKeeper.SetUpgradeHandler("v0.5.0", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		var pz odinminttypes.Params
 		for _, pair := range pz.ParamSetPairs() {
+			logger.Info(fmt.Sprintf("processing %s", string(pair.Key)))
 			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
 				pz.AllowedMinter = make([]string, 0)
 			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
