@@ -110,6 +110,8 @@ import (
 	odinbank "github.com/GeoDB-Limited/odin-core/x/bank"
 	bandbankkeeper "github.com/GeoDB-Limited/odin-core/x/bank/keeper"
 	owasm "github.com/bandprotocol/go-owasm/api"
+
+	_ "net/http/pprof"
 )
 
 const (
@@ -255,6 +257,8 @@ func NewOdinApp(
 	homePath string, invCheckPeriod uint, encodingConfig odinappparams.EncodingConfig, appOpts servertypes.AppOptions,
 	disableFeelessReports bool, owasmCacheSize uint32, baseAppOptions ...func(*baseapp.BaseApp),
 ) *OdinApp {
+
+	go http.ListenAndServe("localhost:9090", nil)
 
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
