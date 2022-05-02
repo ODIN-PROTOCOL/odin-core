@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	app "github.com/GeoDB-Limited/odin-core/app"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

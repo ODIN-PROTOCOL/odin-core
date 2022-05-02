@@ -1,7 +1,7 @@
 package types
 
 import (
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

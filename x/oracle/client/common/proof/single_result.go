@@ -3,11 +3,11 @@ package proof
 import (
 	"context"
 	"encoding/json"
-	"github.com/GeoDB-Limited/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"net/http"
 	"strconv"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/ethereum/go-ethereum/accounts/abi"

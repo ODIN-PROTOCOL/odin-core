@@ -3,10 +3,10 @@ package emitter
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	"github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // handleMsgRequestData implements emitter handler for MsgRequestData.

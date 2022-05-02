@@ -10,8 +10,8 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func parseEvents(events sdk.StringEvents) common.EvMap {

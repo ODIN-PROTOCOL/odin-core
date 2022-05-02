@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	ics23 "github.com/confio/ics23/go"
 	"github.com/cosmos/cosmos-sdk/client"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"

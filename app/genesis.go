@@ -2,13 +2,13 @@ package odin
 
 import (
 	"encoding/json"
-	"github.com/GeoDB-Limited/odin-core/x/auction"
-	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
-	"github.com/GeoDB-Limited/odin-core/x/coinswap"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"time"
 
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -29,7 +29,7 @@ import (
 	ibc "github.com/cosmos/ibc-go/v2/modules/core"
 	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GenesisState defines a type alias for the Odin genesis application state.

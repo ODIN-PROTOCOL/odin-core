@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 )
 
 func mustDecodeString(hexstr string) []byte {

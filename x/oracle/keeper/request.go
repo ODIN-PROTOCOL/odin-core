@@ -1,7 +1,7 @@
 package oraclekeeper
 
 import (
-	"github.com/GeoDB-Limited/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/pkg/errors"
@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasRequest checks if the request of this ID exists in the storage.

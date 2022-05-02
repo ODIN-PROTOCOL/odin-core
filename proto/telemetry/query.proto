@@ -1,7 +1,7 @@
 syntax = "proto3";
 package telemetry;
 
-option go_package = "github.com/GeoDB-Limited/odin-core/x/telemetry/types";
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";

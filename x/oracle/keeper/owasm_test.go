@@ -2,7 +2,7 @@ package oraclekeeper_test
 
 import (
 	"encoding/hex"
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/obi"
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
-	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func TestGetRandomValidatorsSuccessActivateAll(t *testing.T) {

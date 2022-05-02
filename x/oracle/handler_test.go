@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
-	"github.com/GeoDB-Limited/odin-core/x/oracle"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func TestCreateDataSourceSuccess(t *testing.T) {

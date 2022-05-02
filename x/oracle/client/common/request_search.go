@@ -2,9 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	commontypes "github.com/GeoDB-Limited/odin-core/x/common/types"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"sort"
 )

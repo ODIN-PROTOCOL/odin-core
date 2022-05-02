@@ -7,8 +7,8 @@ import (
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	app "github.com/GeoDB-Limited/odin-core/app"
-	"github.com/GeoDB-Limited/odin-core/cmd/odind/cmd"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/cmd/odind/cmd"
 )
 
 func main() {

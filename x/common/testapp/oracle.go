@@ -2,8 +2,8 @@ package testapp
 
 import (
 	"fmt"
-	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"path/filepath"
 )
 

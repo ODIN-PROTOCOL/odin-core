@@ -3,7 +3,7 @@ package odin
 import (
 	"github.com/cosmos/cosmos-sdk/std"
 
-	"github.com/GeoDB-Limited/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
 )
 
 // MakeEncodingConfig creates an EncodingConfig for testing

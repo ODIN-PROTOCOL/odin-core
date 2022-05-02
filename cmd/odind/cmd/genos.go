@@ -15,8 +15,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/bandprotocol/go-owasm/api"
 )
 

@@ -3,7 +3,7 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/GeoDB-Limited/odin-core/x/bank/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/bank/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

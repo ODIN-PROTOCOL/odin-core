@@ -11,8 +11,8 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	owasm "github.com/bandprotocol/go-owasm/api"
 )
 

@@ -2,8 +2,8 @@ package rest
 
 import (
 	"fmt"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/client/common/proof"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common/proof"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/gorilla/mux"

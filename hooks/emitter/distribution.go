@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 func (h *Hook) getCurrentRewardAndCurrentRatio(ctx sdk.Context, addr sdk.ValAddress) (string, string) {

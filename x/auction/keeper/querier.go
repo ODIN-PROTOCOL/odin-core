@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
-	commontypes "github.com/GeoDB-Limited/odin-core/x/common/types"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

@@ -16,8 +16,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	app "github.com/GeoDB-Limited/odin-core/app"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

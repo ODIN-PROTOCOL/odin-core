@@ -20,9 +20,9 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	odinapp "github.com/GeoDB-Limited/odin-core/app"
-	me "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	me "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	owasm "github.com/bandprotocol/go-owasm/api"
 )
 

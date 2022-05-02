@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	band "github.com/GeoDB-Limited/odin-core/app"
+	band "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

@@ -1,10 +1,10 @@
 package oraclekeeper_test
 
 import (
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
-	commontypes "github.com/GeoDB-Limited/odin-core/x/common/types"
-	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"testing"

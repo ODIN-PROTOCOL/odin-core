@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func compile(code []byte) []byte {

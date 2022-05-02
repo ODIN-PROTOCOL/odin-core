@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

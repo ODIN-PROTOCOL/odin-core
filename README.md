@@ -7,14 +7,14 @@
 
 <p align="center">OdinChain - Decentralized Data Delivery Network<br/><br/>
 
-<a href="https://pkg.go.dev/badge/github.com/GeoDB-Limited/odin-core">
-    <img src="https://pkg.go.dev/badge/github.com/GeoDB-Limited/odin-core">
+<a href="https://pkg.go.dev/badge/github.com/ODIN-PROTOCOL/odin-core">
+    <img src="https://pkg.go.dev/badge/github.com/ODIN-PROTOCOL/odin-core">
 </a>
-<a href="https://goreportcard.com/badge/github.com/GeoDB-Limited/odin-core">
-    <img src="https://goreportcard.com/badge/github.com/GeoDB-Limited/odin-core">
+<a href="https://goreportcard.com/badge/github.com/ODIN-PROTOCOL/odin-core">
+    <img src="https://goreportcard.com/badge/github.com/ODIN-PROTOCOL/odin-core">
 </a>
-<a href="https://github.com/GeoDB-Limited/odin-core/workflows/Tests/badge.svg">
-    <img src="https://github.com/GeoDB-Limited/odin-core/workflows/Tests/badge.svg">
+<a href="https://github.com/ODIN-PROTOCOL/odin-core/workflows/Tests/badge.svg">
+    <img src="https://github.com/ODIN-PROTOCOL/odin-core/workflows/Tests/badge.svg">
 </a>
 
 <p align="center">
@@ -35,7 +35,7 @@ _Name:_ **odin-testnet-vidar**
 
 ### Binaries
 
-You can find the latest binaries on our [releases](https://github.com/GeoDB-Limited/odin-core/releases) page.
+You can find the latest binaries on our [releases](https://github.com/ODIN-PROTOCOL/odin-core/releases) page.
 
 ### Building from source
 
@@ -83,7 +83,7 @@ source ~/.profile
 Next, you will need to clone and build OdinChain. The canonical version for this GuanYu Mainnet is v1.2.6.
 
 ```bash
-git clone https://github.com/GeoDB-Limited/odin-core
+git clone https://github.com/ODIN-PROTOCOL/odin-core
 cd odin-core
 git checkout testnet-{name}
 make install
@@ -108,7 +108,7 @@ Tendermint configuration file.
 
 ```bash
 # Download genesis file from the repository.
-wget https://raw.githubusercontent.com/GeoDB-Limited/odin-core/master/testnets/odin-testnet-{name}/genesis.json
+wget https://raw.githubusercontent.com/ODIN-PROTOCOL/odin-core/master/testnets/odin-testnet-{name}/genesis.json
 # Check genesis hash
 sudo apt-get install jq
 # Move the genesis file to the proper location

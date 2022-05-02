@@ -1,15 +1,15 @@
 package keeper_test
 
 import (
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/stretchr/testify/require"
 
-	mintkeeper "github.com/GeoDB-Limited/odin-core/x/mint/keeper"
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/GeoDB-Limited/odin-core/x/mint/simulation"
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"

@@ -2,7 +2,7 @@ package types
 
 import (
 	"fmt"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )

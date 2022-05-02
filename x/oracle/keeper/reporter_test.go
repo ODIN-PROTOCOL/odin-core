@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 )
 
 func TestCheckSelfReporter(t *testing.T) {

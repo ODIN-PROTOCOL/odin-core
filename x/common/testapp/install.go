@@ -2,8 +2,8 @@ package testapp
 
 import (
 	"encoding/json"
-	odinapp "github.com/GeoDB-Limited/odin-core/app"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

@@ -1,7 +1,7 @@
 package proof
 
 import (
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // ResultEthereum is an Ethereum version of Result for solidity ABI-encoding.

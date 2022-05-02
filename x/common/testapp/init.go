@@ -1,7 +1,7 @@
 package testapp
 
 import (
-	odinapp "github.com/GeoDB-Limited/odin-core/app"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"math/rand"
 )

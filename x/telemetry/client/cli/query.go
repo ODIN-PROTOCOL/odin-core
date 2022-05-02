@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"

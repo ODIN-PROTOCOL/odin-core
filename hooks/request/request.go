@@ -17,9 +17,9 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Hook inherits from Odin app hook to save latest request into SQL database.

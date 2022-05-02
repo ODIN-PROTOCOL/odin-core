@@ -1,8 +1,8 @@
 package oraclekeeper
 
 import (
-	commontypes "github.com/GeoDB-Limited/odin-core/x/common/types"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

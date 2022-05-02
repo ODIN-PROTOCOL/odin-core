@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	odinbankkeeper "github.com/GeoDB-Limited/odin-core/x/bank/keeper"
+	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

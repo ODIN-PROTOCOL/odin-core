@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

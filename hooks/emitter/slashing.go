@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/slashing/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 // handleEventSlash implements emitter handler for Slashing event.

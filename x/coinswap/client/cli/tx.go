@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"

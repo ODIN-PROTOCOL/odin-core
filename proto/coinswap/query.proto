@@ -1,7 +1,7 @@
 syntax = "proto3";
 package coinswap;
 
-option go_package = "github.com/GeoDB-Limited/odin-core/x/coinswap/types";
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types";
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";

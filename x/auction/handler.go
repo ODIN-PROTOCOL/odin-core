@@ -1,8 +1,8 @@
 package auction
 
 import (
-	auctionkeeper "github.com/GeoDB-Limited/odin-core/x/auction/keeper"
-	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

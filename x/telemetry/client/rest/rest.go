@@ -2,8 +2,8 @@ package rest
 
 import (
 	"fmt"
-	commonrest "github.com/GeoDB-Limited/odin-core/x/common/client/rest"
-	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"

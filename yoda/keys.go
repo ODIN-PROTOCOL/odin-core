@@ -2,9 +2,9 @@ package yoda
 
 import (
 	"bufio"
-	"fmt"
 	"context"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"fmt"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/kyokomi/emoji"
@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	app "github.com/GeoDB-Limited/odin-core/app"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

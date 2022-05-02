@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	odin "github.com/GeoDB-Limited/odin-core/app"
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -12,7 +12,7 @@ package executor
 //
 //	"github.com/google/shlex"
 //
-//	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+//	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 //)
 //
 //type DockerExec struct {

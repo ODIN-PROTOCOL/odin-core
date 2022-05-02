@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	odin "github.com/GeoDB-Limited/odin-core/app"
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	legacy "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	"testing"

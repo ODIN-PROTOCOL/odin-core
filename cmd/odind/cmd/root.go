@@ -28,10 +28,10 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	odin "github.com/GeoDB-Limited/odin-core/app"
-	"github.com/GeoDB-Limited/odin-core/app/params"
-	"github.com/GeoDB-Limited/odin-core/hooks/emitter"
-	"github.com/GeoDB-Limited/odin-core/hooks/request"
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/emitter"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/request"
 )
 
 const (

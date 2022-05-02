@@ -2,8 +2,8 @@ package request
 
 import (
 	"encoding/hex"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
 	sq "github.com/Masterminds/squirrel"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (

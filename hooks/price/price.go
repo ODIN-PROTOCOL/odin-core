@@ -11,10 +11,10 @@ package price
 // 	"github.com/syndtr/goleveldb/leveldb/util"
 // 	abci "github.com/tendermint/tendermint/abci/types"
 
-// 	"github.com/GeoDB-Limited/odin-core/hooks/common"
-// 	"github.com/GeoDB-Limited/odin-core/pkg/obi"
-// 	"github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-// 	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+// 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+// 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+// 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+// 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 // )
 
 // // Hook uses levelDB to store the latest price of standard price reference.

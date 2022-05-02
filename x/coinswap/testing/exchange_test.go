@@ -1,8 +1,8 @@
 package testing
 
 import (
-	swaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	swaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"testing"

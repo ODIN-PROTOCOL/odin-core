@@ -1,4 +1,4 @@
-module github.com/GeoDB-Limited/odin-core
+module github.com/ODIN-PROTOCOL/odin-core
 
 go 1.15
 

@@ -1,7 +1,7 @@
 package rest
 
 import (
-	commontypes "github.com/GeoDB-Limited/odin-core/x/common/types"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"net/http"

@@ -3,7 +3,7 @@ package oraclekeeper_test
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 )
 
 func defaultVotes() []abci.VoteInfo {

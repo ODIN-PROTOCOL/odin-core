@@ -2,7 +2,7 @@ package rest
 
 import (
 	"fmt"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"

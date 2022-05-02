@@ -24,10 +24,10 @@ import (
 	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	oraclecli "github.com/GeoDB-Limited/odin-core/x/oracle/client/cli"
-	oraclerest "github.com/GeoDB-Limited/odin-core/x/oracle/client/rest"
-	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
+	oraclerest "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/rest"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

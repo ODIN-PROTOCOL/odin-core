@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	mintkeeper "github.com/GeoDB-Limited/odin-core/x/mint/keeper"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -24,12 +24,12 @@ import (
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	odinapp "github.com/GeoDB-Limited/odin-core/app"
-	"github.com/GeoDB-Limited/odin-core/app/params"
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	oraclekeeper "github.com/GeoDB-Limited/odin-core/x/oracle/keeper"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Hook uses Kafka functionality to act as an event producer for all events in the blockchains.

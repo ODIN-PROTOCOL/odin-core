@@ -2,9 +2,9 @@ package oracle_test
 
 import (
 	"encoding/hex"
-	"github.com/GeoDB-Limited/odin-core/x/common/testapp"
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"

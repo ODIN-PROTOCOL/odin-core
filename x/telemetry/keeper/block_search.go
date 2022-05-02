@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	telemetrytypes "github.com/GeoDB-Limited/odin-core/x/telemetry/types"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/tendermint/tendermint/rpc/core"

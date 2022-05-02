@@ -2,8 +2,8 @@ package keeper
 
 import (
 	"fmt"
-	auctiontypes "github.com/GeoDB-Limited/odin-core/x/auction/types"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

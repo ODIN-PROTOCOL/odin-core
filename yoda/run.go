@@ -15,10 +15,10 @@ import (
 	httpclient "github.com/tendermint/tendermint/rpc/client/http"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
-	"github.com/GeoDB-Limited/odin-core/yoda/executor"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 )
 
 const (

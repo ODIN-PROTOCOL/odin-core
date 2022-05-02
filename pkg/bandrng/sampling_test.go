@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/GeoDB-Limited/odin-core/pkg/bandrng"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
 )
 
 func TestChooseOneOne(t *testing.T) {

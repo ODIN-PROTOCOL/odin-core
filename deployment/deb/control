@@ -1,7 +1,7 @@
 Package: odinprotocol
 Priority: optional
 Architecture: amd64
-Homepage: https://github.com/GeoDB-Limited/odin-core
+Homepage: https://github.com/ODIN-PROTOCOL/odin-core
 Maintainer: https://github.com/slandymani
 Provides: odinprotocol
 Conflicts: odinprotocol

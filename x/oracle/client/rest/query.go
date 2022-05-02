@@ -2,11 +2,11 @@ package rest
 
 import (
 	"fmt"
-	hookscommon "github.com/GeoDB-Limited/odin-core/hooks/common"
-	hookprice "github.com/GeoDB-Limited/odin-core/hooks/price"
-	commonrest "github.com/GeoDB-Limited/odin-core/x/common/client/rest"
-	oracleclientcommon "github.com/GeoDB-Limited/odin-core/x/oracle/client/common"
-	oracletypes "github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	hookscommon "github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	hookprice "github.com/ODIN-PROTOCOL/odin-core/hooks/price"
+	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
+	oracleclientcommon "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"

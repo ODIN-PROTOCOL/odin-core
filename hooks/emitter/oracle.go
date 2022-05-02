@@ -3,8 +3,8 @@ package emitter
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/GeoDB-Limited/odin-core/hooks/common"
-	"github.com/GeoDB-Limited/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func parseBytes(b []byte) []byte {

@@ -24,8 +24,8 @@ import "fmt"
 // 	"github.com/tendermint/go-amino"
 // 	"github.com/tendermint/tendermint/libs/cli"
 
-// 	"github.com/GeoDB-Limited/odin-core/app"
-// 	bandclient "github.com/GeoDB-Limited/odin-core/client"
+// 	"github.com/ODIN-PROTOCOL/odin-core/app"
+// 	bandclient "github.com/ODIN-PROTOCOL/odin-core/client"
 // )
 
 // const flagCosmosHDPath = "cosmos-hd-path"

@@ -1,8 +1,8 @@
 package mint
 
 import (
-	mintkeeper "github.com/GeoDB-Limited/odin-core/x/mint/keeper"
-	minttypes "github.com/GeoDB-Limited/odin-core/x/mint/types"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

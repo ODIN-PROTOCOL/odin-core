@@ -2,7 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
-	coinswaptypes "github.com/GeoDB-Limited/odin-core/x/coinswap/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
