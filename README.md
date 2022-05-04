@@ -115,7 +115,7 @@ sudo apt-get install jq
 mv genesis.json $HOME/.odin/config
 # Add some persistent peers
 sed -E -i \
-  's/persistent_peers = \".*\"/persistent_peers = \"11392b605378063b1c505c0ab123f04bd710d7d7@node.testnet.odinprotocol.io/asgard/service/' \
+  's/persistent_peers = \".*\"/persistent_peers = \"492a4e30c10194e1d8f6fa194ba3f63b1aa73484@35.195.4.110:26656,417c2df701780c7f8751bc4a298411374082ef9e@34.78.138.110:26656,ea43cac04a556d01050a09a5699c3ba272a91116@34.78.239.23:26656,4edb332575e5108b131f0a7c0d9ac237569634ad@34.77.171.169:26656' \
   $HOME/.odin/config/config.toml
 ```
 

@@ -26,6 +26,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ibctypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v2/modules/core"
 	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 
@@ -48,6 +49,7 @@ func NewDefaultGenesisState() GenesisState {
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
 	oracleGenesis := oracletypes.DefaultGenesisState()
+	transferGenesis := ibctypes.DefaultGenesisState()
 	// Override the genesis parameters.
 	authGenesis.Params.TxSizeCostPerByte = 5
 	stakingGenesis.Params.BondDenom = denom
@@ -83,5 +85,6 @@ func NewDefaultGenesisState() GenesisState {
 		oracletypes.ModuleName:     cdc.MustMarshalJSON(oracleGenesis),
 		coinswaptypes.ModuleName:   coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
+		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
 	}
 }
