@@ -118,7 +118,7 @@ func (k msgServer) CreateDataSource(goCtx context.Context, msg *oracletypes.MsgC
 	}
 
 	id := k.AddDataSource(ctx, oracletypes.NewDataSource(
-		owner, msg.Name, msg.Description, k.AddExecutableFile(msg.Executable), msg.Fee,
+		owner, msg.Name, msg.Description, k.AddExecutableFile(msg.Executable), msg.Fee, msg.PreferredDenom,
 	))
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
@@ -162,7 +162,7 @@ func (k msgServer) EditDataSource(goCtx context.Context, msg *oracletypes.MsgEdi
 
 	// Can safely use MustEdit here, as we already checked that the data source exists above.
 	k.MustEditDataSource(ctx, msg.DataSourceID, oracletypes.NewDataSource(
-		owner, msg.Name, msg.Description, k.AddExecutableFile(msg.Executable), msg.Fee,
+		owner, msg.Name, msg.Description, k.AddExecutableFile(msg.Executable), msg.Fee, msg.PreferredDenom,
 	))
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(

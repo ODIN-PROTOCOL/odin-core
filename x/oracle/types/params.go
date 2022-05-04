@@ -32,10 +32,10 @@ const (
 )
 
 var (
-	DefaultDataProviderRewardPerByte = sdk.NewCoins(sdk.NewInt64Coin(DefaultDataProviderRewardDenom, 1000000)) // 1 * 10^6
+	DefaultDataProviderRewardPerByte = sdk.NewCoins(sdk.NewInt64Coin(DefaultDataProviderRewardDenom, 1000000), sdk.NewInt64Coin("loki", 1000000)) // 1 * 10^6
 	DefaultDataRequesterFeeDenoms    = []string{DefaultDataRequesterFeeDenom}
 	DefaultFeeLimit                  = sdk.NewCoins()
-	DefaultRewardThresholdAmount     = sdk.NewCoins(sdk.NewInt64Coin(DefaultDataProviderRewardDenom, 200000000000)) // 200000 * 10^6
+	DefaultRewardThresholdAmount     = sdk.NewCoins(sdk.NewInt64Coin(DefaultDataProviderRewardDenom, 200000000000), sdk.NewInt64Coin("loki", 200000000000)) // 200000 * 10^6
 	DefaultRewardDecreasingFraction  = sdk.NewDec(1).Quo(sdk.NewDec(20))
 )
 

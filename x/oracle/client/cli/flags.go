@@ -19,4 +19,5 @@ const (
 	flagOffset         = "offset"
 	flagLimit          = "limit"
 	flagReverse        = "reverse"
+	flagPreferredDenom = "preferred-denom"
 )

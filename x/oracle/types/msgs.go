@@ -162,15 +162,16 @@ func (msg MsgReportData) GetSignBytes() []byte {
 
 // NewMsgCreateDataSource creates a new MsgCreateDataSource instance
 func NewMsgCreateDataSource(
-	name, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress,
+	name, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress, preferredDenom string,
 ) *MsgCreateDataSource {
 	return &MsgCreateDataSource{
-		Name:        name,
-		Description: description,
-		Executable:  executable,
-		Fee:         fee,
-		Owner:       owner.String(),
-		Sender:      sender.String(),
+		Name:           name,
+		Description:    description,
+		Executable:     executable,
+		Fee:            fee,
+		Owner:          owner.String(),
+		Sender:         sender.String(),
+		PreferredDenom: preferredDenom,
 	}
 }
 
@@ -231,16 +232,17 @@ func (msg MsgCreateDataSource) GetSignBytes() []byte {
 
 // NewMsgEditDataSource creates a new MsgEditDataSource instance
 func NewMsgEditDataSource(
-	dataSourceID DataSourceID, name string, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress,
+	dataSourceID DataSourceID, name string, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress, preferredDenom string,
 ) *MsgEditDataSource {
 	return &MsgEditDataSource{
-		DataSourceID: dataSourceID,
-		Name:         name,
-		Description:  description,
-		Executable:   executable,
-		Fee:          fee,
-		Owner:        owner.String(),
-		Sender:       sender.String(),
+		DataSourceID:   dataSourceID,
+		Name:           name,
+		Description:    description,
+		Executable:     executable,
+		Fee:            fee,
+		Owner:          owner.String(),
+		Sender:         sender.String(),
+		PreferredDenom: preferredDenom,
 	}
 }
 

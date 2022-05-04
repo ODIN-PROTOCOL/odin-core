@@ -26,9 +26,9 @@ const (
 // AddGenesisDataSourceCmd returns add-data-source cobra Command.
 func AddGenesisDataSourceCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "add-data-source [name] [description] [owner] [filepath] (--fee [fee])",
+		Use:   "add-data-source [name] [description] [owner] [filepath] [preferred-denom] (--fee [fee])",
 		Short: "Add a data source to genesis.json",
-		Args:  cobra.ExactArgs(5),
+		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			depCdc := clientCtx.JSONCodec
@@ -41,6 +41,7 @@ func AddGenesisDataSourceCmd(defaultNodeHome string) *cobra.Command {
 
 			name := args[0]
 			description := args[1]
+			preferredDenom := args[4]
 
 			f := filecache.New(filepath.Join(defaultNodeHome, "files"))
 			data, err := ioutil.ReadFile(args[3])
@@ -75,7 +76,7 @@ func AddGenesisDataSourceCmd(defaultNodeHome string) *cobra.Command {
 			oracleGenState := types.GetGenesisStateFromAppState(cdc, appState)
 
 			oracleGenState.DataSources = append(oracleGenState.DataSources, types.NewDataSource(
-				owner, name, description, filename, coins,
+				owner, name, description, filename, coins, preferredDenom,
 			))
 
 			oracleGenStateBz, err := cdc.MarshalJSON(oracleGenState)

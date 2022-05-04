@@ -23,6 +23,7 @@ message DataSource {
     (gogoproto.nullable) = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
+  string preferred_denom = 7;
 }
 
 // OracleScript is the data structure for storing oracle scripts in the storage.

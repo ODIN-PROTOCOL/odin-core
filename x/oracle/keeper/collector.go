@@ -76,7 +76,10 @@ func (k Keeper) CollectReward(
 
 		var reward sdk.Coins
 		for {
-			reward = collector.CalculateReward(rawRep.Data, currentRewardPerByte)
+			rewPerByteInPreferredDenomInt := currentRewardPerByte.AmountOf(ds.PreferredDenom)
+			rewPerByteInPreferredDenom := sdk.NewCoins(sdk.NewInt64Coin(ds.PreferredDenom, rewPerByteInPreferredDenomInt.Int64()))
+
+			reward = collector.CalculateReward(rawRep.Data, rewPerByteInPreferredDenom)
 			if reward.Add(accumulatedAmount...).IsAllLT(oracleParams.DataProviderRewardThreshold.Amount) {
 				break
 			}

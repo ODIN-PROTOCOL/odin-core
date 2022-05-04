@@ -607,6 +607,7 @@ func rawRequestsFromFees(ctx sdk.Context, k oraclekeeper.Keeper, fees []sdk.Coin
 			"there is no real code",
 			"no file",
 			f,
+			"minigeo",
 		))
 
 		rawRequests = append(rawRequests, oracletypes.NewRawRequest(
