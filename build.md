@@ -17,17 +17,16 @@ source ~/.bash_profile
 
 Now, you can install and run the application.
 
-```
-# Clone the source of the tutorial repository
-git clone https://github.com/bandprotocol/bandchain.git
-cd bandchain/chain/
-```
-
 ```bash
+# Clone the source of the tutorial repository
+git clone https://github.com/ODIN-PROTOCOL/odin-core
+cd odin-core
+
 # Install the app into your $GOBIN
 make install
 
 # Now you should be able to run the following commands:
+odind version
 odind help
 ```
 

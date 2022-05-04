@@ -27,9 +27,8 @@
 
 <br/>
 
-_Current TestNet name is "**vidar** - another son of the supreme god Odin and Grid (a giantess), and his powers were
-matched only by that of Thor."_ <br>
-_Name:_ **odin-testnet-vidar**
+_Current TestNet name is "**havi** - one of the names of supreme god Odin."_ <br>
+_Name:_ **odin-testnet-havi-1**
 
 ## Installation
 
@@ -90,6 +89,7 @@ make install
 
 # Check that the correction version of odind is installed
 odind version --long
+```
 
 ### Creating OdinChain Account and Setup Config
 
