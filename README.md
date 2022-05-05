@@ -100,7 +100,7 @@ Once installed, you can use the `odind` CLI to create a new OdinChain wallet add
 odind keys add <YOUR_WALLET>
 
 # Initialize a blockchain environment for generating genesis transaction.
-odind init --chain-id odin-testnet-{name} <YOUR_MONIKER>
+odind init --chain-id odin-testnet-havi-1 <YOUR_MONIKER>
 ```
 
 You can then download the official genesis file from the repository. You should also add the initial peer nodes to your
@@ -189,7 +189,7 @@ Once you have some odin tokens, you can apply to become a validator by sending `
 
 ```bash
 odind tx staking create-validator \
-    --amount <your-amount-to-stake>odin \
+    --amount <your-amount-to-stake>loki \
     --commission-max-change-rate 0.01 \
     --commission-max-rate 0.2 \
     --commission-rate 0.1 \
@@ -197,7 +197,7 @@ odind tx staking create-validator \
     --min-self-delegation 1 \
     --moniker <your-moniker> \
     --pubkey $(odind tendermint show-validator) \
-    --chain-id odin-guanyu-mainnet
+    --chain-id odin-testnet-havi-1
 ```
 
 Once the transaction is mined, you should see yourself on the [validator page](https://testnet.odinprotocol.io/validators).
