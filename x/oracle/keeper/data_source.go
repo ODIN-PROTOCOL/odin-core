@@ -57,7 +57,6 @@ func (k Keeper) MustEditDataSource(ctx sdk.Context, id oracletypes.DataSourceID,
 	dataSource.Name = modify(dataSource.Name, new.Name)
 	dataSource.Description = modify(dataSource.Description, new.Description)
 	dataSource.Filename = modify(dataSource.Filename, new.Filename)
-	dataSource.PreferredDenom = modify(dataSource.PreferredDenom, new.PreferredDenom)
 	k.SetDataSource(ctx, id, dataSource)
 }
 
