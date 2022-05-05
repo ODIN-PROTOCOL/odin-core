@@ -75,21 +75,18 @@ func (k Keeper) CollectReward(
 			return nil, sdkerrors.Wrapf(err, "parsing data source owner address: %s", dsOwnerAddr)
 		}
 
-		// DONE begin
-		//var rewPerByteInFeeDenom sdk.Coins // DONE moved up from cycle
 		for _, fee := range ds.Fee {
-			rewPerByteInFeeDenom = sdk.NewCoins(sdk.NewCoin(fee.Denom, currentRewardPerByte.AmountOf(fee.Denom)))
+			rewPerByteInFeeDenom = rewPerByteInFeeDenom.Add(sdk.NewCoins(sdk.NewCoin(fee.Denom, currentRewardPerByte.AmountOf(fee.Denom)))...)
 		}
-		// DONE end
 
 		var reward sdk.Coins
 		for {
-			reward = collector.CalculateReward(rawRep.Data, rewPerByteInFeeDenom) // DONE changed from currentRewardPerByte
+			reward = collector.CalculateReward(rawRep.Data, rewPerByteInFeeDenom)
 			if reward.Add(accumulatedAmount...).IsAllLT(oracleParams.DataProviderRewardThreshold.Amount) {
 				break
 			}
 
-			rewPerByteInFeeDenom, _ = sdk.NewDecCoinsFromCoins(rewPerByteInFeeDenom...).MulDec( // FIXME (apparently not) currentRewardPerByte <- rewPerByteInFeeDenom or?
+			rewPerByteInFeeDenom, _ = sdk.NewDecCoinsFromCoins(rewPerByteInFeeDenom...).MulDec(
 				sdk.NewDec(1).Sub(oracleParams.RewardDecreasingFraction),
 			).TruncateDecimal()
 		}
@@ -103,7 +100,7 @@ func (k Keeper) CollectReward(
 
 	k.SetAccumulatedDataProvidersRewards(
 		ctx,
-		oracletypes.NewDataProvidersAccumulatedRewards(rewPerByteInFeeDenom, accumulatedAmount), // FIXME change to rewPerByteInFeeDenom or?
+		oracletypes.NewDataProvidersAccumulatedRewards(rewPerByteInFeeDenom, accumulatedAmount),
 	)
 
 	return collector.Collected(), nil

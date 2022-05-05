@@ -17,7 +17,7 @@ func TestCollectReward(t *testing.T) {
 	dataSource := types.NewDataSource(
 		testapp.Alice.Address, "NAME1",
 		"DESCRIPTION1", "filename1",
-		sdk.NewCoins(sdk.NewInt64Coin("minigeo", 10)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 10), sdk.NewInt64Coin("minigeo", 10)),
 	)
 	k.SetDataSource(ctx, 1, dataSource)
 
