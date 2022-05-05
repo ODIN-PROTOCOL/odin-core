@@ -30,14 +30,13 @@ func TestCreateDataSourceSuccess(t *testing.T) {
 	executable := []byte("executable")
 	executableHash := sha256.Sum256(executable)
 	filename := hex.EncodeToString(executableHash[:])
-	preferredDenom := "minigeo"
-	msg := oracletypes.NewMsgCreateDataSource(name, description, executable, testapp.EmptyCoins, owner, testapp.Alice.Address, preferredDenom)
+	msg := oracletypes.NewMsgCreateDataSource(name, description, executable, testapp.EmptyCoins, owner, testapp.Alice.Address)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	require.NoError(t, err)
 	dsID := oracletypes.DataSourceID(dsCount + 1)
 	ds, err := k.GetDataSource(ctx, dsID)
 	require.NoError(t, err)
-	expectedDS := oracletypes.NewDataSource(testapp.Owner.Address, name, description, filename, testapp.EmptyCoins, preferredDenom)
+	expectedDS := oracletypes.NewDataSource(testapp.Owner.Address, name, description, filename, testapp.EmptyCoins)
 	expectedDS.ID = dsID
 	require.Equal(t, expectedDS, ds)
 	event := abci.Event{
@@ -58,8 +57,7 @@ func TestCreateGzippedExecutableDataSourceFail(t *testing.T) {
 	zw.Write(executable)
 	zw.Close()
 	sender := testapp.Alice.Address
-	preferredDenom := "minigeo"
-	msg := oracletypes.NewMsgCreateDataSource(name, description, buf.Bytes()[:5], testapp.EmptyCoins, owner, sender, preferredDenom)
+	msg := oracletypes.NewMsgCreateDataSource(name, description, buf.Bytes()[:5], testapp.EmptyCoins, owner, sender)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	require.EqualError(t, err, "unexpected EOF: uncompression failed")
 	require.Nil(t, res)
@@ -72,14 +70,13 @@ func TestEditDataSourceSuccess(t *testing.T) {
 	newExecutable := []byte("executable2")
 	newExecutableHash := sha256.Sum256(newExecutable)
 	newFilename := hex.EncodeToString(newExecutableHash[:])
-	newPreferredDenom := "minigeo"
-	msg := oracletypes.NewMsgEditDataSource(1, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address, newPreferredDenom)
+	msg := oracletypes.NewMsgEditDataSource(1, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	require.NoError(t, err)
 	dsID := oracletypes.DataSourceID(1)
 	ds, err := k.GetDataSource(ctx, dsID)
 	require.NoError(t, err)
-	expectedDS := oracletypes.NewDataSource(testapp.Owner.Address, newName, newDescription, newFilename, testapp.Coins1000000loki, newPreferredDenom)
+	expectedDS := oracletypes.NewDataSource(testapp.Owner.Address, newName, newDescription, newFilename, testapp.Coins1000000loki)
 	expectedDS.ID = dsID
 	require.Equal(t, expectedDS, ds)
 	event := abci.Event{
@@ -94,14 +91,13 @@ func TestEditDataSourceFail(t *testing.T) {
 	newName := "beeb"
 	newDescription := "new_description"
 	newExecutable := []byte("executable2")
-	newPreferredDenom := "minigeo"
 	// Bad ID
-	msg := oracletypes.NewMsgEditDataSource(42, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address, newPreferredDenom)
+	msg := oracletypes.NewMsgEditDataSource(42, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	// require.EqualError(t, err, "data source not found: id: 42")
 	require.Nil(t, res)
 	// Not owner
-	msg = oracletypes.NewMsgEditDataSource(1, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Bob.Address, newPreferredDenom)
+	msg = oracletypes.NewMsgEditDataSource(1, newName, newDescription, newExecutable, testapp.EmptyCoins, testapp.Owner.Address, testapp.Bob.Address)
 	res, err = oracle.NewHandler(k)(ctx, msg)
 	// require.EqualError(t, err, "editor not authorized")
 	require.Nil(t, res)
@@ -110,7 +106,7 @@ func TestEditDataSourceFail(t *testing.T) {
 	zw := gz.NewWriter(&buf)
 	zw.Write(newExecutable)
 	zw.Close()
-	msg = oracletypes.NewMsgEditDataSource(1, newName, newDescription, buf.Bytes()[:5], testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address, newPreferredDenom)
+	msg = oracletypes.NewMsgEditDataSource(1, newName, newDescription, buf.Bytes()[:5], testapp.EmptyCoins, testapp.Owner.Address, testapp.Owner.Address)
 	res, err = oracle.NewHandler(k)(ctx, msg)
 	// require.EqualError(t, err, "uncompression failed: unexpected EOF")
 	_ = err

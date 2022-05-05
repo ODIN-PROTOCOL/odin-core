@@ -118,8 +118,6 @@ message MsgCreateDataSource {
   string owner = 5;
   // Sender is the signer of this message.
   string sender = 6;
-  // PreferredDenom is the preferred rewarding denom.
-  string preferred_denom = 7;
 }
 
 // MsgCreateDataSourceResponse
@@ -152,8 +150,6 @@ message MsgEditDataSource {
   // Sender is the signer of this message. Must be the current data source's
   // owner.
   string sender = 7;
-  // PreferredDenom is the preferred rewarding denom.
-  string preferred_denom = 8;
 }
 
 // MsgEditDataSourceResponse

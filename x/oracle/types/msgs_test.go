@@ -70,8 +70,8 @@ func TestMsgGetSigners(t *testing.T) {
 	anotherVal := sdk.ValAddress([]byte("98765432109876543210"))
 	signers := []sdk.AccAddress{signerAcc}
 	emptyCoins := sdk.NewCoins()
-	require.Equal(t, signers, NewMsgCreateDataSource("name", "desc", []byte("exec"), emptyCoins, anotherAcc, signerAcc, "minigeo").GetSigners())
-	require.Equal(t, signers, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), emptyCoins, anotherAcc, signerAcc, "minigeo").GetSigners())
+	require.Equal(t, signers, NewMsgCreateDataSource("name", "desc", []byte("exec"), emptyCoins, anotherAcc, signerAcc).GetSigners())
+	require.Equal(t, signers, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), emptyCoins, anotherAcc, signerAcc).GetSigners())
 	require.Equal(t, signers, NewMsgCreateOracleScript("name", "desc", "schema", "url", []byte("code"), anotherAcc, signerAcc).GetSigners())
 	require.Equal(t, signers, NewMsgEditOracleScript(1, "name", "desc", "schema", "url", []byte("code"), anotherAcc, signerAcc).GetSigners())
 	require.Equal(t, signers, NewMsgRequestData(1, []byte("calldata"), 10, 5, "client-id", emptyCoins, 1, 1, signerAcc).GetSigners())
@@ -125,28 +125,28 @@ func TestMsgGetSigners(t *testing.T) {
 
 func TestMsgCreateDataSourceValidation(t *testing.T) {
 	performValidateTests(t, []validateTestCase{
-		{true, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, BadTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, BadTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), BadCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource(strings.Repeat("x", 200), "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", strings.Repeat("x", 5000), []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", []byte{}, GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", []byte(strings.Repeat("x", 20000)), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgCreateDataSource("name", "desc", DoNotModifyBytes, GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
+		{true, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, BadTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, BadTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", []byte("exec"), BadCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource(strings.Repeat("x", 200), "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", strings.Repeat("x", 5000), []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", []byte{}, GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", []byte(strings.Repeat("x", 20000)), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgCreateDataSource("name", "desc", DoNotModifyBytes, GoodCoins, GoodTestAddr, GoodTestAddr)},
 	})
 }
 
 func TestMsgEditDataSourceValidation(t *testing.T) {
 	performValidateTests(t, []validateTestCase{
-		{true, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, BadTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, BadTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), BadCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, strings.Repeat("x", 200), "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", strings.Repeat("x", 5000), []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", "desc", []byte{}, GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
-		{false, NewMsgEditDataSource(1, "name", "desc", []byte(strings.Repeat("x", 20000)), GoodCoins, GoodTestAddr, GoodTestAddr, "minigeo")},
+		{true, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, BadTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), GoodCoins, GoodTestAddr, BadTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", "desc", []byte("exec"), BadCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, strings.Repeat("x", 200), "desc", []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", strings.Repeat("x", 5000), []byte("exec"), GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", "desc", []byte{}, GoodCoins, GoodTestAddr, GoodTestAddr)},
+		{false, NewMsgEditDataSource(1, "name", "desc", []byte(strings.Repeat("x", 20000)), GoodCoins, GoodTestAddr, GoodTestAddr)},
 	})
 }
 

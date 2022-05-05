@@ -140,7 +140,7 @@ $ %s tx oracle request 1 4 3 --calldata 1234abcdef --client-id cliend-id --fee-l
 // GetCmdCreateDataSource implements the create data source command handler.
 func GetCmdCreateDataSource() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create-data-source (--name [name]) (--description [description]) (--script [path-to-script]) (--fee [fee]) (--preferred-denom [preferred-denom]) (--owner [owner])",
+		Use:   "create-data-source (--name [name]) (--description [description]) (--script [path-to-script]) (--fee [fee]) (--owner [owner])",
 		Short: "Create a new data source",
 		Args:  cobra.NoArgs,
 		Long: strings.TrimSpace(
@@ -186,11 +186,6 @@ $ %s tx oracle create-data-source --name coingecko-price --description "The scri
 				return err
 			}
 
-			preferredDenom, err := cmd.Flags().GetString(flagPreferredDenom)
-			if err != nil {
-				return err
-			}
-
 			rawOwner, err := cmd.Flags().GetString(flagOwner)
 			if err != nil {
 				return err
@@ -208,7 +203,6 @@ $ %s tx oracle create-data-source --name coingecko-price --description "The scri
 				fee,
 				owner,
 				clientCtx.GetFromAddress(),
-				preferredDenom,
 			)
 
 			err = msg.ValidateBasic()
@@ -224,7 +218,6 @@ $ %s tx oracle create-data-source --name coingecko-price --description "The scri
 	cmd.Flags().String(flagScript, "", "Path to this data source script")
 	cmd.Flags().String(flagFee, "", "Fee for usage of this data source")
 	cmd.Flags().String(flagOwner, "", "Owner of this data source")
-	cmd.Flags().String(flagPreferredDenom, "", "Preferred rewarding denom of this data source")
 
 	flags.AddTxFlagsToCmd(cmd)
 
@@ -235,7 +228,7 @@ $ %s tx oracle create-data-source --name coingecko-price --description "The scri
 // GetCmdEditDataSource implements the edit data source command handler.
 func GetCmdEditDataSource() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "edit-data-source [id] (--name [name]) (--description [description]) (--script [path-to-script]) (--fee [fee]) (--preferred-denom [preferred-denom]) (--owner [owner])",
+		Use:   "edit-data-source [id] (--name [name]) (--description [description]) (--script [path-to-script]) (--fee [fee]) (--owner [owner])",
 		Short: "Edit data source",
 		Args:  cobra.ExactArgs(1),
 		Long: strings.TrimSpace(
@@ -286,11 +279,6 @@ $ %s tx oracle edit-data-source 1 --name coingecko-price --description The scrip
 				return err
 			}
 
-			preferredDenom, err := cmd.Flags().GetString(flagPreferredDenom)
-			if err != nil {
-				return err
-			}
-
 			fee, err := sdk.ParseCoinsNormalized(rawFee)
 			if err != nil {
 				return err
@@ -314,7 +302,6 @@ $ %s tx oracle edit-data-source 1 --name coingecko-price --description The scrip
 				fee,
 				owner,
 				clientCtx.GetFromAddress(),
-				preferredDenom,
 			)
 
 			err = msg.ValidateBasic()
@@ -331,7 +318,6 @@ $ %s tx oracle edit-data-source 1 --name coingecko-price --description The scrip
 	cmd.Flags().String(flagScript, oracletypes.DoNotModify, "Path to this data source script")
 	cmd.Flags().String(flagFee, "", "Fee for usage of this data source")
 	cmd.Flags().String(flagOwner, "", "Owner of this data source")
-	cmd.Flags().String(flagPreferredDenom, "", "Preferred rewarding denom of this data source")
 
 	flags.AddTxFlagsToCmd(cmd)
 
