@@ -2,7 +2,7 @@
 
 ## Building the `odin` application
 
-If you want to build the `odin` application in this repo to see the functionalities, **Go 1.13.0+** is required .
+If you want to build the `odin` application in this repo to see the functionalities, **Go 1.15.0+** is required .
 
 Add some parameters to environment is necessary if you have never used the `go mod` before.
 
@@ -17,17 +17,16 @@ source ~/.bash_profile
 
 Now, you can install and run the application.
 
-```
-# Clone the source of the tutorial repository
-git clone https://github.com/bandprotocol/bandchain.git
-cd bandchain/chain/
-```
-
 ```bash
+# Clone the source of the tutorial repository
+git clone https://github.com/ODIN-PROTOCOL/odin-core
+cd odin-core
+
 # Install the app into your $GOBIN
 make install
 
 # Now you should be able to run the following commands:
+odind version
 odind help
 ```
 

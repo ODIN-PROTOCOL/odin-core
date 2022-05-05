@@ -27,9 +27,8 @@
 
 <br/>
 
-_Current TestNet name is "**vidar** - another son of the supreme god Odin and Grid (a giantess), and his powers were
-matched only by that of Thor."_ <br>
-_Name:_ **odin-testnet-vidar**
+_Current TestNet name is "**havi** - one of the names of supreme god Odin."_ <br>
+_Name:_ **odin-testnet-havi-1**
 
 ## Installation
 
@@ -39,7 +38,7 @@ You can find the latest binaries on our [releases](https://github.com/ODIN-PROTO
 
 ### Building from source
 
-To install OdinChain's daemon `odind`, you need to have [Go](https://golang.org/) (version 1.13.5 or later)
+To install OdinChain's daemon `odind`, you need to have [Go](https://golang.org/) (version 1.15.0 or later)
 and [gcc](https://gcc.gnu.org/) installed on our machine. Navigate to the Golang
 project [download page](https://golang.org/dl/) and gcc [install page](https://gcc.gnu.org/install/), respectively for
 install and setup instructions.
@@ -70,9 +69,9 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y build-essential curl wget
 
-wget https://golang.org/dl/go1.14.9.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.14.9.linux-amd64.tar.gz
-rm go1.14.9.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.18.1.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.18.1.linux-amd64.tar.gz
+rm go1.18.1.linux-amd64.tar.gz
 
 echo "export PATH=\$PATH:/usr/local/go/bin:~/go/bin" >> $HOME/.profile
 source ~/.profile
@@ -90,6 +89,7 @@ make install
 
 # Check that the correction version of odind is installed
 odind version --long
+```
 
 ### Creating OdinChain Account and Setup Config
 
@@ -100,7 +100,7 @@ Once installed, you can use the `odind` CLI to create a new OdinChain wallet add
 odind keys add <YOUR_WALLET>
 
 # Initialize a blockchain environment for generating genesis transaction.
-odind init --chain-id odin-testnet-{name} <YOUR_MONIKER>
+odind init --chain-id odin-testnet-havi-1 <YOUR_MONIKER>
 ```
 
 You can then download the official genesis file from the repository. You should also add the initial peer nodes to your
@@ -115,7 +115,7 @@ sudo apt-get install jq
 mv genesis.json $HOME/.odin/config
 # Add some persistent peers
 sed -E -i \
-  's/persistent_peers = \".*\"/persistent_peers = \"11392b605378063b1c505c0ab123f04bd710d7d7@node.testnet.odinprotocol.io/asgard/service/' \
+  's/persistent_peers = \".*\"/persistent_peers = \"492a4e30c10194e1d8f6fa194ba3f63b1aa73484@35.195.4.110:26656,417c2df701780c7f8751bc4a298411374082ef9e@34.78.138.110:26656,ea43cac04a556d01050a09a5699c3ba272a91116@34.78.239.23:26656,4edb332575e5108b131f0a7c0d9ac237569634ad@34.77.171.169:26656' \
   $HOME/.odin/config/config.toml
 ```
 
@@ -189,7 +189,7 @@ Once you have some odin tokens, you can apply to become a validator by sending `
 
 ```bash
 odind tx staking create-validator \
-    --amount <your-amount-to-stake>odin \
+    --amount <your-amount-to-stake>loki \
     --commission-max-change-rate 0.01 \
     --commission-max-rate 0.2 \
     --commission-rate 0.1 \
@@ -197,7 +197,7 @@ odind tx staking create-validator \
     --min-self-delegation 1 \
     --moniker <your-moniker> \
     --pubkey $(odind tendermint show-validator) \
-    --chain-id odin-guanyu-mainnet
+    --chain-id odin-testnet-havi-1
 ```
 
 Once the transaction is mined, you should see yourself on the [validator page](https://testnet.odinprotocol.io/validators).
