@@ -103,6 +103,18 @@ func (k msgServer) ReportData(goCtx context.Context, msg *oracletypes.MsgReportD
 func (k msgServer) CreateDataSource(goCtx context.Context, msg *oracletypes.MsgCreateDataSource) (*oracletypes.MsgCreateDataSourceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	for _, fee := range msg.Fee {
+		if !k.IsAllowedFeeDenom(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+		if !k.IsInDataProviderRewardPerByte(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+		if !k.IsInDataProviderRewardThreshold(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+	}
+
 	// unzip if it's a zip file
 	if gzip.IsGzipped(msg.Executable) {
 		var err error
@@ -131,6 +143,18 @@ func (k msgServer) CreateDataSource(goCtx context.Context, msg *oracletypes.MsgC
 
 func (k msgServer) EditDataSource(goCtx context.Context, msg *oracletypes.MsgEditDataSource) (*oracletypes.MsgEditDataSourceResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	for _, fee := range msg.Fee {
+		if !k.IsAllowedFeeDenom(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+		if !k.IsInDataProviderRewardPerByte(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+		if !k.IsInDataProviderRewardThreshold(ctx, fee.Denom) {
+			return nil, sdkerrors.Wrapf(oracletypes.ErrInvalidFeeDenom, "denom: %s", msg.Fee)
+		}
+	}
 
 	dataSource, err := k.GetDataSource(ctx, msg.DataSourceID)
 	if err != nil {

@@ -305,3 +305,42 @@ func (k Keeper) GetOracleModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAdd
 func (k Keeper) SetOracleModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
 	ctx.KVStore(k.storeKey).Set(oracletypes.OracleModuleCoinsAccountKey, account)
 }
+
+// IsAllowedFeeDenom checks if fee denom exists in data requester fee denoms list
+func (k Keeper) IsAllowedFeeDenom(ctx sdk.Context, feeDenom string) bool {
+	params := k.GetParams(ctx)
+
+	for _, paramsFeeDenom := range params.DataRequesterFeeDenoms {
+		if feeDenom == paramsFeeDenom {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsInDataProviderRewardPerByte checks if fee denom exists in data provider reward per byte list
+func (k Keeper) IsInDataProviderRewardPerByte(ctx sdk.Context, feeDenom string) bool {
+	params := k.GetParams(ctx)
+
+	for _, paramsRewardPerByte := range params.DataProviderRewardPerByte {
+		if feeDenom == paramsRewardPerByte.Denom {
+			return true
+		}
+	}
+
+	return false
+}
+
+// IsInDataProviderRewardThreshold checks if fee denom exists in data provider reward threshold list
+func (k Keeper) IsInDataProviderRewardThreshold(ctx sdk.Context, feeDenom string) bool {
+	params := k.GetParams(ctx)
+
+	for _, paramsRewardThreshold := range params.DataProviderRewardThreshold.Amount {
+		if feeDenom == paramsRewardThreshold.Denom {
+			return true
+		}
+	}
+
+	return false
+}
