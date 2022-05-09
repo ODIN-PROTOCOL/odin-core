@@ -335,9 +335,7 @@ func NewOdinApp(
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
-	cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
-
-	app.UpgradeKeeper.SetUpgradeHandler("v0.5.0", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.3", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		var pz odinminttypes.Params
 		for _, pair := range pz.ParamSetPairs() {
 			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
@@ -356,7 +354,7 @@ func NewOdinApp(
 		minter.CurrentMintVolume = sdk.Coins{}
 		app.MintKeeper.SetMinter(ctx, minter)
 
-		return app.mm.RunMigrations(ctx, cfg, fromVM)
+		return fromVM, nil
 	})
 
 	app.StakingKeeper = *stakingKeeper.SetHooks(
