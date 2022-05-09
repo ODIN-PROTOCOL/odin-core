@@ -345,7 +345,7 @@ func NewOdinApp(
 			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
 				pz.MaxAllowedMintVolume = sdk.Coins{}
 			} else {
-				app.ParamsKeeper.Subspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
+				app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
 			}
 		}
 		app.MintKeeper.SetParams(ctx, pz)
