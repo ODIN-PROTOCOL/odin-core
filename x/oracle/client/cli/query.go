@@ -43,6 +43,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryRequestPrice(),
 		GetQueryCmdData(),
 		GetCmdQueryDataProviderReward(),
+		GetCmdQueryDataProviderAccumulatedReward(),
 	)
 	return oracleCmd
 }
@@ -616,6 +617,32 @@ func GetCmdQueryDataProviderReward() *cobra.Command {
 
 			queryClient := oracletypes.NewQueryClient(clientCtx)
 			res, err := queryClient.DataProviderReward(cmd.Context(), &oracletypes.QueryDataProviderRewardRequest{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func GetCmdQueryDataProviderAccumulatedReward() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:  "data-provider-accumulated-reward [data-provider-address]",
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := oracletypes.NewQueryClient(clientCtx)
+			res, err := queryClient.DataProviderAccumulatedReward(cmd.Context(), &oracletypes.QueryDataProviderAccumulatedRewardRequest{
+				DataProviderAddress: args[0],
+			})
 			if err != nil {
 				return err
 			}
