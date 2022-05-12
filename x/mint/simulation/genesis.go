@@ -91,10 +91,10 @@ func RandomizedGenState(simState *module.SimulationState) {
 	}
 	privateKeyBytes := crypto.FromECDSA(privateKey)
 	integrationAddresses := map[string]string{"eth": hexutil.Encode(privateKeyBytes)}
-	eligibleAccountsPool := []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"}
+	eligibleAccountsPool := []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"}
 	maxAllowedMintVolume := sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))}
-	allowedMintDenoms := []string{"minigeo"}
-	allowedMinter := []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"}
+	allowedMintDenoms := []*minttypes.AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}}
+	allowedMinter := []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"}
 
 	params := minttypes.NewParams(
 		mintDenom,

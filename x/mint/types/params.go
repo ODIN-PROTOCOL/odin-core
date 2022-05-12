@@ -39,7 +39,7 @@ func NewParams(
 	integrationAddresses map[string]string,
 	eligibleAccountsPool []string,
 	maxAllowedMintVolume sdk.Coins,
-	allowedMintDenoms []string,
+	allowedMintDenoms []*AllowedDenom,
 	AllowedMinter []string,
 
 ) Params {
@@ -73,10 +73,10 @@ func DefaultParams() Params {
 		MintAir:              false,
 		IntegrationAddresses: map[string]string{}, // default value (might be invalid for actual use)
 		MaxWithdrawalPerTime: sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
-		EligibleAccountsPool: []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
+		EligibleAccountsPool: []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
 		MaxAllowedMintVolume: sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))},
-		AllowedMintDenoms:    []string{"minigeo"},
-		AllowedMinter:        []string{"odin1pl07tk6hcpp2an3rug75as4dfgd743qp80g63g"},
+		AllowedMintDenoms:    []*AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}},
+		AllowedMinter:        []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
 	}
 }
 
@@ -318,7 +318,7 @@ func validateMaxAllowedMintVolume(i interface{}) error {
 }
 
 func validateAllowedMintDenoms(i interface{}) error {
-	_, ok := i.([]string)
+	_, ok := i.([]*AllowedDenom)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
