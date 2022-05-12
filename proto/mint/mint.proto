@@ -48,9 +48,9 @@ message AllowedDenom {
   option (gogoproto.equal) = true;
 
   // little version of coin
-  string little_denom = 1
-    [ (gogoproto.moretags) = "yaml:\"little_denom\"" ];
+  string token_denom = 1
+    [ (gogoproto.moretags) = "yaml:\"token_denom\"" ];
   // large version of coin
-  string large_denom = 2
-    [ (gogoproto.moretags) = "yaml:\"large_denom\"" ];
+  string token_unit_denom = 2
+    [ (gogoproto.moretags) = "yaml:\"token_unit_denom\"" ];
 }
