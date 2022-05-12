@@ -210,7 +210,7 @@ func (k Keeper) IsAllowedMintDenom(ctx sdk.Context, coin sdk.Coin) bool {
 	denom := coin.Denom
 
 	for i := range params.AllowedMintDenoms {
-		if denom == params.AllowedMintDenoms[i] {
+		if denom == params.AllowedMintDenoms[i].TokenUnitDenom {
 			return true
 		}
 	}
