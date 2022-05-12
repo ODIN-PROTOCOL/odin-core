@@ -121,6 +121,11 @@ service Query {
       returns (QueryRequestVerificationResponse) {
     option (google.api.http).get = "/oracle/v1/verify_request";
   }
+
+  // DataProviderAccumulatedReward queries oracle info of reporter rewards for given reporter address.
+  rpc DataProviderAccumulatedReward(QueryDataProviderAccumulatedRewardRequest) returns (QueryDataProviderAccumulatedRewardResponse) {
+    option (google.api.http).get = "/oracle/data_provider_accumulated_reward/{data_provider_address}";
+  }
 }
 
 // QueryCountsRequest is request type for the Query/Count RPC method.
@@ -341,4 +346,15 @@ message QueryRequestVerificationResponse {
   // DataSourceID is the ID of a data source that relates to the targeted
   // external ID
   uint64 data_source_id = 5;
+}
+
+// QueryDataProviderAccumulatedRewardRequest is request type for the Query/DataProviderAccumulatedReward RPC method.
+message QueryDataProviderAccumulatedRewardRequest {string data_provider_address = 1;}
+
+// QueryDataProviderAccumulatedRewardResponse is response type for the Query/DataProviderAccumulatedReward RPC method.
+message QueryDataProviderAccumulatedRewardResponse {
+  repeated cosmos.base.v1beta1.Coin accumulated_reward = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
 }

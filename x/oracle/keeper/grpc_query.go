@@ -478,3 +478,17 @@ func (k Querier) RequestVerification(
 		DataSourceId: uint64(*dataSourceID),
 	}, nil
 }
+
+// DataProviderAccumulatedReward queries reward of a given data provider address.
+func (k Querier) DataProviderAccumulatedReward(c context.Context, req *oracletypes.QueryDataProviderAccumulatedRewardRequest) (*oracletypes.QueryDataProviderAccumulatedRewardResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	addr, err := sdk.AccAddressFromBech32(req.DataProviderAddress)
+	if err != nil {
+		return nil, err
+	}
+	accumulatedReward := k.GetDataProviderAccumulatedReward(ctx, addr)
+	return &oracletypes.QueryDataProviderAccumulatedRewardResponse{AccumulatedReward: accumulatedReward}, nil
+}
