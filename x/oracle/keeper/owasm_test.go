@@ -385,7 +385,7 @@ func TestResolveRequestSuccess(t *testing.T) {
 	k.ResolveRequest(ctx, 42)
 	expectResult := oracletypes.NewResult(
 		BasicClientID, 1, BasicCalldata, 2, 1,
-		42, 1, 1, testapp.ParseTime(1581589790).Unix(),
+		42, 1, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_SUCCESS, []byte("beeb"),
 	)
 	require.Equal(t, expectResult, k.MustGetResult(ctx, 42))
@@ -462,7 +462,7 @@ func TestResolveRequestOutOfGas(t *testing.T) {
 	k.ResolveRequest(ctx, 42)
 	result := oracletypes.NewResult(
 		BasicClientID, 1, BasicCalldata, 2, 1,
-		42, 1, 1, testapp.ParseTime(1581589790).Unix(),
+		42, 1, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
@@ -531,7 +531,7 @@ func TestResolveRequestNoReturnData(t *testing.T) {
 	))
 	k.ResolveRequest(ctx, 42)
 	result := oracletypes.NewResult(
-		BasicClientID, 3, BasicCalldata, 2, 1, 42, 1, 1, testapp.ParseTime(1581589790).Unix(),
+		BasicClientID, 3, BasicCalldata, 2, 1, 42, 1, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
@@ -560,7 +560,7 @@ func TestResolveRequestWasmFailure(t *testing.T) {
 	))
 	k.ResolveRequest(ctx, 42)
 	result := oracletypes.NewResult(
-		BasicClientID, 6, BasicCalldata, 2, 1, 42, 1, 1, testapp.ParseTime(1581589790).Unix(),
+		BasicClientID, 6, BasicCalldata, 2, 1, 42, 1, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))

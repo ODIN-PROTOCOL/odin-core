@@ -40,7 +40,7 @@ func TestSaveResultOK(t *testing.T) {
 	k.SaveResult(ctx, 42, types.RESOLVE_STATUS_SUCCESS, BasicResult)
 	// TODO: Fix this test when change fee limit and request key.
 	expect := types.NewResult(
-		BasicClientID, 1, BasicCalldata, 2, 2, 42, 1, 1, testapp.ParseTime(0).Unix(),
+		BasicClientID, 1, BasicCalldata, 2, 2, 42, 1, 0, testapp.ParseTime(0).Unix(),
 		testapp.ParseTime(200).Unix(), types.RESOLVE_STATUS_SUCCESS, BasicResult,
 	)
 	result, err := k.GetResult(ctx, 42)
