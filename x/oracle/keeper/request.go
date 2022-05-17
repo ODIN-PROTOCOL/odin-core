@@ -55,6 +55,8 @@ func (k Keeper) GetPaginatedRequests(
 		var result oracletypes.Result
 		obi.MustDecode(value, &result)
 
+		reports := k.GetRequestReports(ctx, result.RequestID)
+
 		request := oracletypes.RequestResult{
 			RequestPacketData: &oracletypes.OracleRequestPacketData{
 				ClientID:       result.ClientID,
@@ -66,11 +68,13 @@ func (k Keeper) GetPaginatedRequests(
 			ResponsePacketData: &oracletypes.OracleResponsePacketData{
 				RequestID:     result.RequestID,
 				AnsCount:      result.AnsCount,
+				RequestHeight: result.RequestHeight,
 				RequestTime:   result.RequestTime,
 				ResolveTime:   result.ResolveTime,
 				ResolveStatus: result.ResolveStatus,
 				Result:        result.Result,
 			},
+			Reports: reports,
 		}
 		if accumulate {
 			requests = append(requests, request)
