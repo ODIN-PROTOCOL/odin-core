@@ -179,19 +179,17 @@ message OracleResponsePacketData {
   // actually responded to this oracle request prior to this oracle request
   // being resolved.
   uint64 ans_count = 3;
-  // RequestHeight is block height that the request has been created
-  int64 request_height = 4;
   // RequestTime is the UNIX epoch time at which the request was sent to
   // BandChain.
-  int64 request_time = 5;
+  int64 request_time = 4;
   // ResolveTime is the UNIX epoch time at which the request was resolved to the
   // final result.
-  int64 resolve_time = 6;
+  int64 resolve_time = 5;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
-  ResolveStatus resolve_status = 7;
+  ResolveStatus resolve_status = 6;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 8;
+  bytes result = 7;
 }
 
 message RequestResult {
