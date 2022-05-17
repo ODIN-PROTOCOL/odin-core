@@ -152,28 +152,33 @@ func queryRequestByID(ctx sdk.Context, path []string, k Keeper, _ abci.RequestQu
 	if err != nil {
 		return commontypes.QueryBadRequest(cdc, err.Error())
 	}
-	result, err := k.GetResult(ctx, oracletypes.RequestID(id))
+	request, err := k.GetRequest(ctx, oracletypes.RequestID(id))
 	if err != nil {
-		return nil, err
+		if oracletypes.RequestID(id) > k.GetRequestLastExpired(ctx) {
+			return commontypes.QueryNotFound(cdc, err.Error())
+		}
+
+		result := k.MustGetResult(ctx, oracletypes.RequestID(id))
+		return commontypes.QueryOK(cdc, oracletypes.QueryRequestResponse{
+			Request: &oracletypes.Request{},
+			Result:  &result,
+			Reports: nil,
+		})
 	}
-	request := &oracletypes.RequestResult{
-		RequestPacketData: &oracletypes.OracleRequestPacketData{
-			ClientID:       result.ClientID,
-			OracleScriptID: result.OracleScriptID,
-			Calldata:       result.Calldata,
-			AskCount:       result.AskCount,
-			MinCount:       result.MinCount,
-		},
-		ResponsePacketData: &oracletypes.OracleResponsePacketData{
-			RequestID:     result.RequestID,
-			AnsCount:      result.AnsCount,
-			RequestTime:   result.RequestTime,
-			ResolveTime:   result.ResolveTime,
-			ResolveStatus: result.ResolveStatus,
-			Result:        result.Result,
-		},
+	reports := k.GetRequestReports(ctx, oracletypes.RequestID(id))
+	if !k.HasResult(ctx, oracletypes.RequestID(id)) {
+		return commontypes.QueryOK(cdc, oracletypes.QueryRequestResponse{
+			Request: &request,
+			Result:  nil,
+			Reports: reports,
+		})
 	}
-	return commontypes.QueryOK(cdc, oracletypes.QueryRequestResponse{Request: request})
+	result := k.MustGetResult(ctx, oracletypes.RequestID(id))
+	return commontypes.QueryOK(cdc, oracletypes.QueryRequestResponse{
+		Request: &request,
+		Result:  &result,
+		Reports: reports,
+	})
 }
 
 func queryValidatorStatus(ctx sdk.Context, path []string, k Keeper, _ abci.RequestQuery, cdc *codec.LegacyAmino) ([]byte, error) {

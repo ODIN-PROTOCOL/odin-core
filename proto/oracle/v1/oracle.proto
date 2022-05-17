@@ -196,8 +196,8 @@ message OracleResponsePacketData {
 
 message RequestResult {
   option (gogoproto.equal) = true;
-  OracleRequestPacketData request_packet_data = 1;
-  OracleResponsePacketData response_packet_data = 2;
+  Request request = 1;
+  Result result = 2;
   repeated Report reports = 3 [ (gogoproto.nullable) = false ];
 }
 
@@ -232,19 +232,17 @@ message Result {
   // actually responded to this oracle request prior to this oracle request
   // being resolved.
   uint64 ans_count = 7;
-  // RequestHeight is block height that the request has been created
-  int64 request_height = 8;
   // RequestTime is the UNIX epoch time at which the request was sent to
   // BandChain.
-  int64 request_time = 9;
+  int64 request_time = 8;
   // ResolveTime is the UNIX epoch time at which the request was resolved to the
   // final result.
-  int64 resolve_time = 10;
+  int64 resolve_time = 9;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
   ResolveStatus resolve_status = 11;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 12;
+  bytes result = 10;
 }
 
 // ValidatorStatus maintains whether a validator is an active oracle provider.

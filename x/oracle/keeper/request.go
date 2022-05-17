@@ -1,10 +1,13 @@
 package oraclekeeper
 
 import (
+	"fmt"
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -55,29 +58,23 @@ func (k Keeper) GetPaginatedRequests(
 		var result oracletypes.Result
 		obi.MustDecode(value, &result)
 
+		request, err := k.GetRequest(ctx, result.RequestID)
+		if err != nil {
+			lastExpired := k.GetRequestLastExpired(ctx)
+			if result.RequestID > lastExpired {
+				return false, status.Error(codes.NotFound, fmt.Sprintf("unable to get request from chain: request id (%d) > latest expired request id (%d)", result.RequestID, lastExpired))
+			}
+		}
+
 		reports := k.GetRequestReports(ctx, result.RequestID)
 
-		request := oracletypes.RequestResult{
-			RequestPacketData: &oracletypes.OracleRequestPacketData{
-				ClientID:       result.ClientID,
-				OracleScriptID: result.OracleScriptID,
-				Calldata:       result.Calldata,
-				AskCount:       result.AskCount,
-				MinCount:       result.MinCount,
-			},
-			ResponsePacketData: &oracletypes.OracleResponsePacketData{
-				RequestID:     result.RequestID,
-				AnsCount:      result.AnsCount,
-				RequestHeight: result.RequestHeight,
-				RequestTime:   result.RequestTime,
-				ResolveTime:   result.ResolveTime,
-				ResolveStatus: result.ResolveStatus,
-				Result:        result.Result,
-			},
+		requestResult := oracletypes.RequestResult{
+			Request: &request,
+			Result:  &result,
 			Reports: reports,
 		}
 		if accumulate {
-			requests = append(requests, request)
+			requests = append(requests, requestResult)
 		}
 		return true, nil
 	})

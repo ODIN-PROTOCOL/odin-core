@@ -93,7 +93,6 @@ func (k Keeper) SaveResult(
 		r.MinCount,                         // MinCount
 		id,                                 // RequestID
 		reportCount,                        // AnsCount
-		r.RequestHeight,                    // RequestHeight
 		int64(r.RequestTime),               // RequestTime
 		ctx.BlockTime().Unix(),             // ResolveTime
 		status,                             // ResolveStatus
