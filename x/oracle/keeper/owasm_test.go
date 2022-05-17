@@ -430,7 +430,7 @@ func TestResolveRequestSuccessComplex(t *testing.T) {
 			IDs:      []int64{1, 2},
 			Calldata: string(BasicCalldata),
 		}), 2, 1,
-		42, 2, 1, testapp.ParseTime(1581589790).Unix(),
+		42, 2, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_SUCCESS,
 		obi.MustEncode(testapp.Wasm4Output{Ret: "beebd1v1beebd1v2beebd2v1beebd2v2"}),
 	)
@@ -500,7 +500,7 @@ func TestResolveReadNilExternalData(t *testing.T) {
 			IDs:      []int64{1, 2},
 			Calldata: string(BasicCalldata),
 		}), 2, 1,
-		42, 2, 1, testapp.ParseTime(1581589790).Unix(),
+		42, 2, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_SUCCESS,
 		obi.MustEncode(testapp.Wasm4Output{Ret: "beebd1v2beebd2v1"}),
 	)
@@ -585,7 +585,7 @@ func TestResolveRequestCallReturnDataSeveralTimes(t *testing.T) {
 	k.ResolveRequest(ctx, 42)
 
 	result := oracletypes.NewResult(
-		BasicClientID, 9, BasicCalldata, 2, 1, 42, 0, 1, testapp.ParseTime(1581589790).Unix(),
+		BasicClientID, 9, BasicCalldata, 2, 1, 42, 0, 42, testapp.ParseTime(1581589790).Unix(),
 		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
