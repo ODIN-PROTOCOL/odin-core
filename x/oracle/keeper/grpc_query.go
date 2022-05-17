@@ -99,10 +99,15 @@ func (k Querier) Request(c context.Context, req *oracletypes.QueryRequestRequest
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	result, err := k.GetResult(ctx, oracletypes.RequestID(req.RequestId))
+	rid := oracletypes.RequestID(req.RequestId)
+
+	result, err := k.GetResult(ctx, rid)
 	if err != nil {
 		return nil, err
 	}
+
+	reports := k.GetRequestReports(ctx, rid)
+
 	request := &oracletypes.RequestResult{
 		RequestPacketData: &oracletypes.OracleRequestPacketData{
 			ClientID:       result.ClientID,
@@ -114,11 +119,13 @@ func (k Querier) Request(c context.Context, req *oracletypes.QueryRequestRequest
 		ResponsePacketData: &oracletypes.OracleResponsePacketData{
 			RequestID:     result.RequestID,
 			AnsCount:      result.AnsCount,
+			RequestHeight: result.RequestHeight,
 			RequestTime:   result.RequestTime,
 			ResolveTime:   result.ResolveTime,
 			ResolveStatus: result.ResolveStatus,
 			Result:        result.Result,
 		},
+		Reports: reports,
 	}
 	return &oracletypes.QueryRequestResponse{Request: request}, nil
 }

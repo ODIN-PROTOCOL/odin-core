@@ -179,23 +179,26 @@ message OracleResponsePacketData {
   // actually responded to this oracle request prior to this oracle request
   // being resolved.
   uint64 ans_count = 3;
+  // RequestHeight is block height that the request has been created
+  int64 request_height = 4;
   // RequestTime is the UNIX epoch time at which the request was sent to
   // BandChain.
-  int64 request_time = 4;
+  int64 request_time = 5;
   // ResolveTime is the UNIX epoch time at which the request was resolved to the
   // final result.
-  int64 resolve_time = 5;
+  int64 resolve_time = 6;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
-  ResolveStatus resolve_status = 6;
+  ResolveStatus resolve_status = 7;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 7;
+  bytes result = 8;
 }
 
 message RequestResult {
   option (gogoproto.equal) = true;
   OracleRequestPacketData request_packet_data = 1;
   OracleResponsePacketData response_packet_data = 2;
+  repeated Report reports = 3 [ (gogoproto.nullable) = false ];
 }
 
 // Result encodes a result of request and store in chain
@@ -229,17 +232,19 @@ message Result {
   // actually responded to this oracle request prior to this oracle request
   // being resolved.
   uint64 ans_count = 7;
+  // RequestHeight is block height that the request has been created
+  int64 request_height = 8;
   // RequestTime is the UNIX epoch time at which the request was sent to
   // BandChain.
-  int64 request_time = 8;
+  int64 request_time = 9;
   // ResolveTime is the UNIX epoch time at which the request was resolved to the
   // final result.
-  int64 resolve_time = 9;
+  int64 resolve_time = 10;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
-  ResolveStatus resolve_status = 10;
+  ResolveStatus resolve_status = 11;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 11;
+  bytes result = 12;
 }
 
 // ValidatorStatus maintains whether a validator is an active oracle provider.
