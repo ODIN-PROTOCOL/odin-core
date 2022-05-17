@@ -99,28 +99,26 @@ func (k Querier) Request(c context.Context, req *oracletypes.QueryRequestRequest
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	result, err := k.GetResult(ctx, oracletypes.RequestID(req.RequestId))
+	rid := oracletypes.RequestID(req.RequestId)
+
+	request, err := k.GetRequest(ctx, rid)
+	if err != nil {
+		lastExpired := k.GetRequestLastExpired(ctx)
+		if rid > lastExpired {
+			return nil, status.Error(codes.NotFound, fmt.Sprintf("unable to get request from chain: request id (%d) > latest expired request id (%d)", rid, lastExpired))
+		}
+		result := k.MustGetResult(ctx, rid)
+		return &oracletypes.QueryRequestResponse{Request: nil, Reports: nil, Result: &result}, nil
+	}
+
+	result, err := k.GetResult(ctx, rid)
 	if err != nil {
 		return nil, err
 	}
-	request := &oracletypes.RequestResult{
-		RequestPacketData: &oracletypes.OracleRequestPacketData{
-			ClientID:       result.ClientID,
-			OracleScriptID: result.OracleScriptID,
-			Calldata:       result.Calldata,
-			AskCount:       result.AskCount,
-			MinCount:       result.MinCount,
-		},
-		ResponsePacketData: &oracletypes.OracleResponsePacketData{
-			RequestID:     result.RequestID,
-			AnsCount:      result.AnsCount,
-			RequestTime:   result.RequestTime,
-			ResolveTime:   result.ResolveTime,
-			ResolveStatus: result.ResolveStatus,
-			Result:        result.Result,
-		},
-	}
-	return &oracletypes.QueryRequestResponse{Request: request}, nil
+
+	reports := k.GetRequestReports(ctx, rid)
+
+	return &oracletypes.QueryRequestResponse{Request: &request, Result: &result, Reports: reports}, nil
 }
 
 // Requests queries all requests with pagination.

@@ -54,8 +54,9 @@ func NewQueryRequestSearchRequest(oid int64, callData []byte, askCount, minCount
 
 func NewQueryRequestSearchResponse(req QueryRequestResponse) *QueryRequestSearchResponse {
 	return &QueryRequestSearchResponse{
-		RequestPacketData:  req.Request.RequestPacketData,
-		ResponsePacketData: req.Request.ResponsePacketData,
+		Request: req.Request,
+		Result:  req.Result,
+		Reports: req.Reports,
 	}
 }
 

@@ -194,7 +194,15 @@ message QueryRequestReportsResponse {
 message QueryRequestRequest {int64 request_id = 1;}
 
 // QueryRequestResponse is response type for the Query/Request RPC method.
-message QueryRequestResponse {RequestResult request = 1;}
+message QueryRequestResponse {
+  // Request is an oracle request
+  Request request = 1;
+  // Result is a final form of result data
+  Result result = 2;
+  // Reports is list of result data as raw reports that are fulfilled by
+  // assigned validators
+  repeated Report reports = 3 [ (gogoproto.nullable) = false ];
+}
 
 // QueryRequestsRequest is request type for the Query/Requests RPC method.
 message QueryRequestsRequest {
@@ -258,8 +266,9 @@ message QueryRequestSearchRequest {
 
 // QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method.
 message QueryRequestSearchResponse {
-  OracleRequestPacketData request_packet_data = 1;
-  OracleResponsePacketData response_packet_data = 2;
+  Request request = 1;
+  Result result = 2;
+  repeated Report reports = 3 [ (gogoproto.nullable) = false ];
 }
 
 // QueryRequestPriceRequest is request type for the Query/RequestPrice RPC method.

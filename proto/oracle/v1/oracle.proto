@@ -194,8 +194,9 @@ message OracleResponsePacketData {
 
 message RequestResult {
   option (gogoproto.equal) = true;
-  OracleRequestPacketData request_packet_data = 1;
-  OracleResponsePacketData response_packet_data = 2;
+  Request request = 1;
+  Result result = 2;
+  repeated Report reports = 3 [ (gogoproto.nullable) = false ];
 }
 
 // Result encodes a result of request and store in chain
@@ -237,9 +238,9 @@ message Result {
   int64 resolve_time = 9;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
-  ResolveStatus resolve_status = 10;
+  ResolveStatus resolve_status = 11;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 11;
+  bytes result = 10;
 }
 
 // ValidatorStatus maintains whether a validator is an active oracle provider.
