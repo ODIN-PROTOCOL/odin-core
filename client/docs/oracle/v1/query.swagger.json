@@ -88,6 +88,37 @@
         ]
       }
     },
+    "/oracle/data_provider_accumulated_reward/{data_provider_address}": {
+      "get": {
+        "summary": "DataProviderAccumulatedReward queries oracle info of reporter rewards for given reporter address.",
+        "operationId": "DataProviderAccumulatedReward",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataProviderAccumulatedRewardResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_provider_address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
     "/oracle/data_provider_reward": {
       "get": {
         "operationId": "DataProviderReward",
@@ -111,7 +142,7 @@
       }
     },
     "/oracle/data_providers_pool": {
-      "get": {
+      "post": {
         "operationId": "DataProvidersPool",
         "responses": {
           "200": {
@@ -381,7 +412,7 @@
       }
     },
     "/oracle/request_prices": {
-      "get": {
+      "post": {
         "summary": "RequestPrice queries the latest price on standard price reference oracle script.",
         "operationId": "RequestPrice",
         "responses": {
@@ -398,28 +429,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ask_count",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "min_count",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
         "tags": [
           "Query"
         ]
@@ -944,95 +953,19 @@
       },
       "description": "DataSource is the data structure for storing data sources in the storage."
     },
-    "oracle.v1.OracleRequestPacketData": {
+    "oracle.v1.IBCSource": {
       "type": "object",
       "properties": {
-        "client_id": {
+        "source_channel": {
           "type": "string",
-          "description": "ClientID is the unique identifier of this oracle request, as specified by\nthe client. This same unique ID will be sent back to the requester with the\noracle response."
+          "title": "SourceChannel"
         },
-        "oracle_script_id": {
+        "source_port": {
           "type": "string",
-          "format": "int64",
-          "description": "OracleScriptID is the unique identifier of the oracle script to be\nexecuted."
-        },
-        "calldata": {
-          "type": "string",
-          "format": "byte",
-          "description": "Calldata is the calldata bytes available for oracle executor to read."
-        },
-        "ask_count": {
-          "type": "string",
-          "format": "uint64",
-          "description": "AskCount is the number of validators that are requested to respond to this\noracle request. Higher value means more security, at a higher gas cost."
-        },
-        "min_count": {
-          "type": "string",
-          "format": "uint64",
-          "description": "MinCount is the minimum number of validators necessary for the request to\nproceed to the execution phase. Higher value means more security, at the\ncost of liveness."
-        },
-        "fee_limit": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
-          },
-          "description": "FeeLimit is the maximum tokens that will be paid to all data source\nproviders."
-        },
-        "request_key": {
-          "type": "string",
-          "title": "RequestKey is the key from request chain to match data source fee payer on\nBandchain"
-        },
-        "prepare_gas": {
-          "type": "string",
-          "format": "uint64",
-          "title": "PrepareGas is amount of gas to pay to prepare raw requests"
-        },
-        "execute_gas": {
-          "type": "string",
-          "format": "uint64",
-          "title": "ExecuteGas is amount of gas to reserve for executing"
+          "title": "SourcePort"
         }
       },
-      "description": "OracleRequestPacketData encodes an oracle request sent from other blockchains\nto BandChain."
-    },
-    "oracle.v1.OracleResponsePacketData": {
-      "type": "object",
-      "properties": {
-        "client_id": {
-          "type": "string",
-          "description": "ClientID is the unique identifier matched with that of the oracle request\npacket."
-        },
-        "request_id": {
-          "type": "string",
-          "format": "int64",
-          "description": "RequestID is BandChain's unique identifier for this oracle request."
-        },
-        "ans_count": {
-          "type": "string",
-          "format": "uint64",
-          "description": "AnsCount is the number of validators among to the asked validators that\nactually responded to this oracle request prior to this oracle request\nbeing resolved."
-        },
-        "request_time": {
-          "type": "string",
-          "format": "int64",
-          "description": "RequestTime is the UNIX epoch time at which the request was sent to\nBandChain."
-        },
-        "resolve_time": {
-          "type": "string",
-          "format": "int64",
-          "description": "ResolveTime is the UNIX epoch time at which the request was resolved to the\nfinal result."
-        },
-        "resolve_status": {
-          "$ref": "#/definitions/oracle.v1.ResolveStatus",
-          "description": "ResolveStatus is the status of this oracle request, which can be OK,\nFAILURE, or EXPIRED."
-        },
-        "result": {
-          "type": "string",
-          "format": "byte",
-          "description": "Result is the final aggregated value only available if status if OK."
-        }
-      },
-      "description": "OracleResponsePacketData encodes an oracle response from BandChain to the\nrequester."
+      "title": "IBCSource"
     },
     "oracle.v1.OracleScript": {
       "type": "object",
@@ -1168,6 +1101,18 @@
         }
       },
       "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+    },
+    "oracle.v1.QueryDataProviderAccumulatedRewardResponse": {
+      "type": "object",
+      "properties": {
+        "accumulated_reward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryDataProviderAccumulatedRewardResponse is response type for the Query/DataProviderAccumulatedReward RPC method."
     },
     "oracle.v1.QueryDataProviderRewardResponse": {
       "type": "object",
@@ -1339,7 +1284,19 @@
       "type": "object",
       "properties": {
         "request": {
-          "$ref": "#/definitions/oracle.v1.RequestResult"
+          "$ref": "#/definitions/oracle.v1.Request",
+          "title": "Request is an oracle request"
+        },
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result",
+          "title": "Result is a final form of result data"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          },
+          "title": "Reports is list of result data as raw reports that are fulfilled by\nassigned validators"
         }
       },
       "description": "QueryRequestResponse is response type for the Query/Request RPC method."
@@ -1347,11 +1304,17 @@
     "oracle.v1.QueryRequestSearchResponse": {
       "type": "object",
       "properties": {
-        "request_packet_data": {
-          "$ref": "#/definitions/oracle.v1.OracleRequestPacketData"
+        "request": {
+          "$ref": "#/definitions/oracle.v1.Request"
         },
-        "response_packet_data": {
-          "$ref": "#/definitions/oracle.v1.OracleResponsePacketData"
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          }
         }
       },
       "description": "QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method."
@@ -1427,6 +1390,24 @@
       },
       "description": "RawRequest is the data structure for storing raw reporter in the storage."
     },
+    "oracle.v1.RawRequest": {
+      "type": "object",
+      "properties": {
+        "external_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "data_source_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "RawRequest is the data structure for storing raw requests in the storage."
+    },
     "oracle.v1.Report": {
       "type": "object",
       "properties": {
@@ -1446,14 +1427,72 @@
       },
       "description": "Report is the data structure for storing reports in the storage."
     },
+    "oracle.v1.Request": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "oracle_script_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte"
+        },
+        "requested_validators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "min_count": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "request_height": {
+          "type": "string",
+          "format": "int64"
+        },
+        "request_time": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "raw_requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.RawRequest"
+          }
+        },
+        "ibc_source": {
+          "$ref": "#/definitions/oracle.v1.IBCSource"
+        },
+        "execute_gas": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Request is the data structure for storing requests in the storage."
+    },
     "oracle.v1.RequestResult": {
       "type": "object",
       "properties": {
-        "request_packet_data": {
-          "$ref": "#/definitions/oracle.v1.OracleRequestPacketData"
+        "request": {
+          "$ref": "#/definitions/oracle.v1.Request"
         },
-        "response_packet_data": {
-          "$ref": "#/definitions/oracle.v1.OracleResponsePacketData"
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          }
         }
       }
     },
@@ -1467,6 +1506,65 @@
       ],
       "default": "RESOLVE_STATUS_OPEN_UNSPECIFIED",
       "description": "ResolveStatus encodes the status of an oracle request.\n\n - RESOLVE_STATUS_OPEN_UNSPECIFIED: Open - the request is not yet resolved.\n - RESOLVE_STATUS_SUCCESS: Success - the request has been resolved successfully with no errors.\n - RESOLVE_STATUS_FAILURE: Failure - an error occured during the request's resolve call.\n - RESOLVE_STATUS_EXPIRED: Expired - the request does not get enough reports from validator within the\ntimeframe."
+    },
+    "oracle.v1.Result": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "description": "ClientID is the unique identifier of this oracle request, as specified by\nthe client. This same unique ID will be sent back to the requester with the\noracle response."
+        },
+        "oracle_script_id": {
+          "type": "string",
+          "format": "int64",
+          "description": "OracleScriptID is the unique identifier of the oracle script to be\nexecuted."
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte",
+          "description": "Calldata is the calldata bytes available for oracle executor to read."
+        },
+        "ask_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "AskCount is the number of validators that are requested to respond to this\noracle request. Higher value means more security, at a higher gas cost."
+        },
+        "min_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "MinCount is the minimum number of validators necessary for the request to\nproceed to the execution phase. Higher value means more security, at the\ncost of liveness."
+        },
+        "request_id": {
+          "type": "string",
+          "format": "int64",
+          "description": "RequestID is BandChain's unique identifier for this oracle request."
+        },
+        "ans_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "AnsCount is the number of validators among to the asked validators that\nactually responded to this oracle request prior to this oracle request\nbeing resolved."
+        },
+        "request_time": {
+          "type": "string",
+          "format": "int64",
+          "description": "RequestTime is the UNIX epoch time at which the request was sent to\nBandChain."
+        },
+        "resolve_time": {
+          "type": "string",
+          "format": "int64",
+          "description": "ResolveTime is the UNIX epoch time at which the request was resolved to the\nfinal result."
+        },
+        "resolve_status": {
+          "$ref": "#/definitions/oracle.v1.ResolveStatus",
+          "description": "ResolveStatus is the status of this oracle request, which can be OK,\nFAILURE, or EXPIRED."
+        },
+        "result": {
+          "type": "string",
+          "format": "byte",
+          "description": "Result is the final aggregated value only available if status if OK."
+        }
+      },
+      "title": "Result encodes a result of request and store in chain"
     },
     "oracle.v1.RewardThreshold": {
       "type": "object",
