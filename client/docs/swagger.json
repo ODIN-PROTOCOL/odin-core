@@ -1,8 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "oracle/v1/query.proto",
-    "version": "version not set"
+    "title": "ODIN",
+    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.",
+    "version": "0.5.5"
   },
   "consumes": [
     "application/json"
@@ -10,7 +11,282 @@
   "produces": [
     "application/json"
   ],
+  "host": "odinprotocol.io",
+  "schemes": [
+    "https"
+  ],
+  "tags": [
+    {
+      "name": "Auction",
+      "description": "Auction"
+    },
+    {
+      "name": "Coinswap",
+      "description": "Coinswap"
+    },
+    {
+      "name": "Mint",
+      "description": "Mint"
+    },
+    {
+      "name": "Oracle",
+      "description": "Oracle"
+    },
+    {
+      "name": "Telemetry",
+      "description": "Telemetry"
+    }
+  ],
   "paths": {
+    "/auction/params": {
+      "get": {
+        "operationId": "AuctionParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/auction.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Auction"
+        ]
+      }
+    },
+    "/auction/status": {
+      "get": {
+        "operationId": "AuctionStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/auction.QueryAuctionStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Auction"
+        ]
+      }
+    },
+    "/coinswap/params": {
+      "get": {
+        "operationId": "CoinswapParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/coinswap.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Coinswap"
+        ]
+      }
+    },
+    "/coinswap/rate/{from}/{to}": {
+      "get": {
+        "summary": "Counts queries the number of data sources, oracle scripts, and requests.",
+        "operationId": "Rate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/coinswap.QueryRateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Coinswap"
+        ]
+      }
+    },
+    "/mint/annual_provisions": {
+      "get": {
+        "summary": "Inflation returns current annual provisions.",
+        "operationId": "AnnualProvisions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryAnnualProvisionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/current_mint_volume": {
+      "get": {
+        "summary": "CurrentMintVolume returns current minted coins volume.",
+        "operationId": "CurrentMintVolume",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryCurrentMintVolumeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/integration_addresses/{network_name}": {
+      "get": {
+        "summary": "Inflation returns integration address.",
+        "operationId": "IntegrationAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryIntegrationAddressResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "network_name",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/parameters": {
+      "get": {
+        "summary": "Inflation returns current inflation.",
+        "operationId": "Inflation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryInflationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/params": {
+      "get": {
+        "summary": "Params returns the total set of minting parameters.",
+        "operationId": "MintParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/treasury_pool": {
+      "get": {
+        "summary": "Inflation returns current treasury pool.",
+        "operationId": "TreasuryPool",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/mint.QueryTreasuryPoolResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
     "/oracle/active_validators": {
       "get": {
         "summary": "ActiveValidators queries all active oracle validators.",
@@ -30,7 +306,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -53,7 +329,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -84,7 +360,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -115,7 +391,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -137,7 +413,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -159,7 +435,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -224,7 +500,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -256,7 +532,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -321,7 +597,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -353,14 +629,14 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
     "/oracle/params": {
       "get": {
         "summary": "Params queries the oracle parameters.",
-        "operationId": "Params",
+        "operationId": "OracleParams",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -376,7 +652,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -407,7 +683,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -430,7 +706,7 @@
           }
         },
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -501,7 +777,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -554,7 +830,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -619,7 +895,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -651,7 +927,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -683,7 +959,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -722,7 +998,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -792,7 +1068,7 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
         ]
       }
     },
@@ -823,59 +1099,416 @@
           }
         ],
         "tags": [
-          "Query"
+          "Oracle"
+        ]
+      }
+    },
+    "/telemetry/top_balances": {
+      "get": {
+        "summary": "TopBalances returns all the system balances for specific denom.",
+        "operationId": "TopBalances",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetry.QueryTopBalancesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "denom",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/top_validators": {
+      "get": {
+        "summary": "TopValidators returns validators blocks and stake percentage.",
+        "operationId": "TopValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetry.QueryTopValidatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validator_blocks": {
+      "get": {
+        "summary": "ValidatorBlocks returns validator approved blocks.",
+        "operationId": "ValidatorBlocks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetry.QueryValidatorBlocksResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validator_by_cons_addr/{consensus_address}": {
+      "get": {
+        "operationId": "ValidatorByConsAddr",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetry.QueryValidatorByConsAddrResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "consensus_address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validators_balances": {
+      "get": {
+        "summary": "ExtendedValidators returns validators balances.",
+        "operationId": "ExtendedValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/telemetry.QueryExtendedValidatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Telemetry"
         ]
       }
     }
   },
   "definitions": {
-    "cosmos.base.query.v1beta1.PageRequest": {
+    "auction.AuctionStatus": {
       "type": "object",
       "properties": {
-        "key": {
-          "type": "string",
-          "format": "byte",
-          "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set."
-        },
-        "offset": {
-          "type": "string",
-          "format": "uint64",
-          "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set."
-        },
-        "limit": {
-          "type": "string",
-          "format": "uint64",
-          "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app."
-        },
-        "count_total": {
+        "pending": {
           "type": "boolean",
           "format": "boolean",
-          "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set."
-        },
-        "reverse": {
-          "type": "boolean",
-          "format": "boolean",
-          "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43"
+          "title": "Pending is the status of the auction (active or not)"
         }
-      },
-      "description": "message SomeRequest {\n         Foo some_parameter = 1;\n         PageRequest pagination = 2;\n }",
-      "title": "PageRequest is to be embedded in gRPC request messages for efficient\npagination. Ex:"
+      }
     },
-    "cosmos.base.query.v1beta1.PageResponse": {
+    "auction.Params": {
       "type": "object",
       "properties": {
-        "next_key": {
-          "type": "string",
-          "format": "byte",
-          "description": "next_key is the key to be passed to PageRequest.key to\nquery the next page most efficiently. It will be empty if\nthere are no more results."
+        "auction_start_threshold": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "title": "AuctionStartThreshold is the threshold at which the auction starts"
         },
-        "total": {
-          "type": "string",
-          "format": "uint64",
-          "title": "total is total number of results available if PageRequest.count_total\nwas set, its value is undefined otherwise"
+        "exchange_rates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/coinswap.Exchange"
+          },
+          "title": "ExchangeRate is a rate for buying coins throw the auction"
         }
       },
-      "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
+      "description": "Params is the data structure that keeps the parameters of the auction module."
+    },
+    "auction.QueryAuctionStatusResponse": {
+      "type": "object",
+      "properties": {
+        "auction_status": {
+          "$ref": "#/definitions/auction.AuctionStatus"
+        }
+      },
+      "description": "QueryAuctionStatusResponse is response type for the Query/Status RPC method."
+    },
+    "auction.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/auction.Params"
+        }
+      },
+      "description": "QueryCountsResponse is response type for the Query/Params RPC method."
+    },
+    "coinswap.Exchange": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "rate_multiplier": {
+          "type": "string"
+        }
+      }
     },
     "cosmos.base.v1beta1.Coin": {
       "type": "object",
@@ -924,6 +1557,363 @@
           }
         }
       }
+    },
+    "coinswap.Params": {
+      "type": "object",
+      "properties": {
+        "exchange_rates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/coinswap.Exchange"
+          }
+        }
+      }
+    },
+    "coinswap.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/coinswap.Params"
+        }
+      },
+      "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+    },
+    "coinswap.QueryRateResponse": {
+      "type": "object",
+      "properties": {
+        "rate": {
+          "type": "string"
+        },
+        "initial_rate": {
+          "type": "string"
+        }
+      },
+      "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+    },
+    "mint.Params": {
+      "type": "object",
+      "properties": {
+        "mint_denom": {
+          "type": "string",
+          "title": "type of coin to mint"
+        },
+        "inflation_rate_change": {
+          "type": "string",
+          "title": "maximum annual change in inflation rate"
+        },
+        "inflation_max": {
+          "type": "string",
+          "title": "maximum inflation rate"
+        },
+        "inflation_min": {
+          "type": "string",
+          "title": "minimum inflation rate"
+        },
+        "goal_bonded": {
+          "type": "string",
+          "title": "goal of percent bonded atoms"
+        },
+        "blocks_per_year": {
+          "type": "string",
+          "format": "uint64",
+          "title": "expected blocks per year"
+        },
+        "max_withdrawal_per_time": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "title": "max amount to withdraw per time"
+        },
+        "integration_addresses": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "map with smart contracts addresses"
+        },
+        "mint_air": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "flag if minting from air"
+        },
+        "eligible_accounts_pool": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "eligible to withdraw accounts"
+        },
+        "max_allowed_mint_volume": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "title": "max allowed mint volume"
+        },
+        "allowed_mint_denoms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "allowed mint denoms"
+        },
+        "allowed_minter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "allowed minter"
+        }
+      },
+      "description": "Params holds parameters for the mint module."
+    },
+    "mint.QueryAnnualProvisionsResponse": {
+      "type": "object",
+      "properties": {
+        "annual_provisions": {
+          "type": "string"
+        }
+      },
+      "description": "QueryAnnualProvisionsResponse is response type for the\nQuery/QueryAnnualProvisions RPC method."
+    },
+    "mint.QueryCurrentMintVolumeResponse": {
+      "type": "object",
+      "properties": {
+        "current_mint_volume": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryCurrentMintVolumeResponse is response type for the Query/QueryCurrentMintVolume\nRPC method."
+    },
+    "mint.QueryInflationResponse": {
+      "type": "object",
+      "properties": {
+        "inflation": {
+          "type": "string"
+        }
+      },
+      "description": "QueryInflationResponse is response type for the Query/QueryInflation RPC\nmethod."
+    },
+    "mint.QueryIntegrationAddressResponse": {
+      "type": "object",
+      "properties": {
+        "integration_address": {
+          "type": "string"
+        }
+      },
+      "description": "QueryIntegrationAddressResponse is response type for the\nQuery/QueryEthIntegrationAddress RPC method."
+    },
+    "mint.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/mint.Params"
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/QueryParams RPC\nmethod."
+    },
+    "mint.QueryTreasuryPoolResponse": {
+      "type": "object",
+      "properties": {
+        "treasury_pool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryTreasuryPoolResponse is response type for the Query/QueryTreasuryPool\nRPC method."
+    },
+    "cosmos.base.query.v1beta1.PageRequest": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "format": "byte",
+          "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set."
+        },
+        "offset": {
+          "type": "string",
+          "format": "uint64",
+          "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set."
+        },
+        "limit": {
+          "type": "string",
+          "format": "uint64",
+          "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app."
+        },
+        "count_total": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set."
+        },
+        "reverse": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43"
+        }
+      },
+      "description": "message SomeRequest {\n         Foo some_parameter = 1;\n         PageRequest pagination = 2;\n }",
+      "title": "PageRequest is to be embedded in gRPC request messages for efficient\npagination. Ex:"
+    },
+    "cosmos.base.query.v1beta1.PageResponse": {
+      "type": "object",
+      "properties": {
+        "next_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "next_key is the key to be passed to PageRequest.key to\nquery the next page most efficiently. It will be empty if\nthere are no more results."
+        },
+        "total": {
+          "type": "string",
+          "format": "uint64",
+          "title": "total is total number of results available if PageRequest.count_total\nwas set, its value is undefined otherwise"
+        }
+      },
+      "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
+    },
+    "cosmos.base.v1beta1.Balance": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "address is the address of the balance holder."
+        },
+        "coins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "description": "coins defines the different coins this balance holds."
+        }
+      }
+    },
+    "cosmos.base.v1beta1.BondStatus": {
+      "type": "string",
+      "enum": [
+        "BOND_STATUS_UNSPECIFIED",
+        "BOND_STATUS_UNBONDED",
+        "BOND_STATUS_UNBONDING",
+        "BOND_STATUS_BONDED"
+      ],
+      "default": "BOND_STATUS_UNSPECIFIED",
+      "description": "BondStatus is the status of a validator.\n\n - BOND_STATUS_UNSPECIFIED: UNSPECIFIED defines an invalid validator status.\n - BOND_STATUS_UNBONDED: UNBONDED defines a validator that is not bonded.\n - BOND_STATUS_UNBONDING: UNBONDING defines a validator that is unbonding.\n - BOND_STATUS_BONDED: BONDED defines a validator that is bonded."
+    },
+    "cosmos.base.v1beta1.Commission": {
+      "type": "object",
+      "properties": {
+        "commission_rates": {
+          "$ref": "#/definitions/cosmos.base.v1beta1.CommissionRates",
+          "description": "commission_rates defines the initial commission rates to be used for creating a validator."
+        },
+        "update_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "update_time is the last time the commission rate was changed."
+        }
+      },
+      "description": "Commission defines commission parameters for a given validator."
+    },
+    "cosmos.base.v1beta1.CommissionRates": {
+      "type": "object",
+      "properties": {
+        "rate": {
+          "type": "string",
+          "description": "rate is the commission rate charged to delegators, as a fraction."
+        },
+        "max_rate": {
+          "type": "string",
+          "description": "max_rate defines the maximum commission rate which validator can ever charge, as a fraction."
+        },
+        "max_change_rate": {
+          "type": "string",
+          "description": "max_change_rate defines the maximum daily increase of the validator commission, as a fraction."
+        }
+      },
+      "description": "CommissionRates defines the initial commission rates to be used for creating\na validator."
+    },
+    "cosmos.base.v1beta1.Description": {
+      "type": "object",
+      "properties": {
+        "moniker": {
+          "type": "string",
+          "description": "moniker defines a human-readable name for the validator."
+        },
+        "identity": {
+          "type": "string",
+          "description": "identity defines an optional identity signature (ex. UPort or Keybase)."
+        },
+        "website": {
+          "type": "string",
+          "description": "website defines an optional website link."
+        },
+        "security_contact": {
+          "type": "string",
+          "description": "security_contact defines an optional email for security contact."
+        },
+        "details": {
+          "type": "string",
+          "description": "details define other optional details."
+        }
+      },
+      "description": "Description defines a validator description."
+    },
+    "cosmos.base.v1beta1.Validator": {
+      "type": "object",
+      "properties": {
+        "operator_address": {
+          "type": "string",
+          "description": "operator_address defines the address of the validator's operator; bech encoded in JSON."
+        },
+        "consensus_pubkey": {
+          "$ref": "#/definitions/google.protobuf.Any",
+          "description": "consensus_pubkey is the consensus public key of the validator, as a Protobuf Any."
+        },
+        "jailed": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "jailed defined whether the validator has been jailed from bonded status or not."
+        },
+        "status": {
+          "$ref": "#/definitions/cosmos.base.v1beta1.BondStatus",
+          "description": "status is the validator status (bonded/unbonding/unbonded)."
+        },
+        "tokens": {
+          "type": "string",
+          "description": "tokens define the delegated tokens (incl. self-delegation)."
+        },
+        "delegator_shares": {
+          "type": "string",
+          "description": "delegator_shares defines total shares issued to a validator's delegators."
+        },
+        "description": {
+          "$ref": "#/definitions/cosmos.base.v1beta1.Description",
+          "description": "description defines the description terms for the validator."
+        },
+        "unbonding_height": {
+          "type": "string",
+          "format": "int64",
+          "description": "unbonding_height defines, if unbonding, the height at which this validator has begun unbonding."
+        },
+        "unbonding_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "unbonding_time defines, if unbonding, the min time for the validator to complete unbonding."
+        },
+        "commission": {
+          "$ref": "#/definitions/cosmos.base.v1beta1.Commission",
+          "description": "commission defines the commission parameters."
+        },
+        "min_self_delegation": {
+          "type": "string",
+          "description": "min_self_delegation is the validator's self declared minimum self delegation."
+        }
+      },
+      "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
     },
     "oracle.v1.DataSource": {
       "type": "object",
@@ -1597,6 +2587,120 @@
         }
       },
       "description": "ValidatorStatus maintains whether a validator is an active oracle provider."
+    },
+    "telemetry.QueryExtendedValidatorsResponse": {
+      "type": "object",
+      "properties": {
+        "validators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Validator"
+          }
+        },
+        "balances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Balance"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      }
+    },
+    "telemetry.QueryTopBalancesResponse": {
+      "type": "object",
+      "properties": {
+        "balances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Balance"
+          },
+          "title": "map\u003cstring, int64\u003e transactionsCount = 1;"
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryTopBalancesResponse is response type for the Query/TopBalances RPC method."
+    },
+    "telemetry.QueryTopValidatorsResponse": {
+      "type": "object",
+      "properties": {
+        "top_validators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/telemetry.ValidatorBlockStats"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryTopValidatorsResponse is response type for the Query/TopValidators RPC method."
+    },
+    "telemetry.QueryValidatorBlocksResponse": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/telemetry.ValidatorBlock"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryValidatorBlocksResponse is response type for the Query/ValidatorBlocks RPC method."
+    },
+    "telemetry.QueryValidatorByConsAddrResponse": {
+      "type": "object",
+      "properties": {
+        "validator": {
+          "$ref": "#/definitions/cosmos.base.v1beta1.Validator"
+        }
+      }
+    },
+    "telemetry.ValidatorBlock": {
+      "type": "object",
+      "properties": {
+        "height": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "txs_count": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "reward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "ValidatorBlock represents block approved by validator."
+    },
+    "telemetry.ValidatorBlockStats": {
+      "type": "object",
+      "properties": {
+        "validator_address": {
+          "type": "string"
+        },
+        "blocks_count": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "stake_percentage": {
+          "type": "string"
+        }
+      },
+      "description": "ValidatorBlockStats represents validators blocks and stake percentage."
     }
   }
 }
