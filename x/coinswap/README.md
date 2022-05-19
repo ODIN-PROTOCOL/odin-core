@@ -8,6 +8,8 @@ Parameters define exchange rates and fees. They can be modified using the Govern
 
 ### Example
 
+Default parameters in `genesis.json`:
+
 ```json
 {
   "params": {
@@ -60,6 +62,7 @@ odind query coinswap rate [from-denom] [to-denom] [flags]
 
 The module parameters have the `ExchangeRates` field, which stores an array of decimal coins.<br>
 Rates might look like `2.000000000000000000loki,1.000000000000000000minigeo`, which means `1 loki = 1 / 2 minigeo = 0.5 minigeo` or `1 minigeo = 2 / 1 loki = 2 loki`.<br>
+When exchanging coins, the multiplier for the number of coins for exchange is calculated by the formula `m = x / y`, where `x` - received coins rate, `y` - exchanged coins rate.
 
 ## Fees
 
