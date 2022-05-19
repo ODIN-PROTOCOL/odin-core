@@ -1,6 +1,6 @@
 # Coinswap Module
 
-This document introduces the [Parameters](#parameters), [Transactions](#transactions), [Queries](#queries), [Rates Balancing](#rates-balancing) and [Fees](#fees) of the Coinswap module. The module provides the logic to exchange coins.
+This document introduces the [Parameters](#parameters), [Transactions](#transactions), [Queries](#queries), [Rates Balancing](#rates-balancing), [Fees](#fees) and [Possible Changes](#further-possible-module-changes) of the Coinswap module. The module provides the logic to exchange coins.
 
 ## Parameters
 
@@ -62,8 +62,13 @@ odind query coinswap rate [from-denom] [to-denom] [flags]
 
 The module parameters have the `ExchangeRates` field, which stores an array of decimal coins.<br>
 Rates might look like `2.000000000000000000loki,1.000000000000000000minigeo`, which means `1 loki = 1 / 2 minigeo = 0.5 minigeo` or `1 minigeo = 2 / 1 loki = 2 loki`.<br>
-When exchanging coins, the multiplier for the number of coins for exchange is calculated by the formula `m = x / y`, where `x` - received coins rate, `y` - exchanged coins rate.
+When exchanging coins, the multiplier for the number of coins for exchange is calculated by the formula `m = x / y`, where `x` is received coins rate, `y` is exchanged coins rate.
 
 ## Fees
 
 Fees are taken from coins for exchange and sent to the distribution pool. Coins that the user receives as a result of the exchange are also stored in the distribution pool.
+
+## Further Possible Module Changes
+
+* Adding different fees for different coins for exchange;
+* Adding isolated coinswap pools (so some coins cannot be exchanged for others), possibly with different exchange rates for some cases.
