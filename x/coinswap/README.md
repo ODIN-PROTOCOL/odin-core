@@ -7,7 +7,7 @@ This document introduces the [Concepts](#concepts), [Parameters](#parameters), [
 Exchanging logic is partially inspired by Osmosis pools (however, there is only one exchanging pool in the Coinswap module [for now](#further-possible-module-changes)).<br>
 Pool operates with decimal coins for better exchange rates balancing and collecting fees. Exchange rates performed via a number of "balances". Each balance represents a unit of value (a denomination's weight, in other words), so they are equal to each other.<br>
 Coins that the user receives as a result of the exchange are stored in the distribution pool.<br>
-Unlike Osmosis, pool is always accessible and require no specific fee except for exchanging.
+Unlike Osmosis, pool is always accessible and does not require any specific fee except for exchanging.
 
 ## Parameters
 
