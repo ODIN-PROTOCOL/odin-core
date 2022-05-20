@@ -19,7 +19,7 @@ Possible default parameters in `genesis.json`:
 ```json
 {
   "params": {
-    "exchange_rates": [
+    "weights": [
       {
         "denom": "loki",
         "amount": "2.000000000000000000"
@@ -70,9 +70,9 @@ Fees are taken from coins for exchange and sent to the distribution pool.
 
 ## Rates Balancing
 
-The module parameters have the `ExchangeRates` field, which stores an array of decimal coins.<br>
-Rates might look like `2.000000000000000000loki,1.000000000000000000minigeo`, which means `1 loki = 1 / 2 minigeo = 0.5 minigeo` or `1 minigeo = 2 / 1 loki = 2 loki`.<br>
-When exchanging coins, the multiplier for the number of coins for exchange is calculated by the formula `m = x / y`, where `x` is received coins rate, `y` is exchanged coins rate.
+The module parameters have the `Weights` field, which stores an array of decimal coins.<br>
+Weights might look like `2.000000000000000000loki,1.000000000000000000minigeo`, which means `1 loki = 1 / 2 minigeo = 0.5 minigeo` or `1 minigeo = 2 / 1 loki = 2 loki`.<br>
+When exchanging coins, the multiplier for the number of coins for exchange is calculated by the formula `m = x / y`, where `x` is received coins weight, `y` is exchanged coins weight.
 
 ## Exchange Example
 
@@ -85,7 +85,7 @@ func Exchange(params Params, amount sdk.DecCoin, toDenom string) (exchanged sdk.
 	amount = amount.Sub(fee)
 
 	// exchange coins
-	multiplier := params.ExchangeRates.AmountOf(toDenom).Quo(params.ExchangeRates.AmountOf(amount.Denom))
+	multiplier := params.Weights.AmountOf(toDenom).Quo(params.Weights.AmountOf(amount.Denom))
 	exchangedCoins := sdk.NewDecCoinFromDec(toDenom, amount.Amount.Mul(multiplier))
 
 	return exchangedCoins
@@ -94,7 +94,7 @@ func Exchange(params Params, amount sdk.DecCoin, toDenom string) (exchanged sdk.
 func TestNewExchange(t *testing.T) {
 	// set module params
 	var moduleParams Params
-	moduleParams.ExchangeRates = sdk.NewDecCoins(sdk.NewInt64DecCoin("minigeo", 1), sdk.NewInt64DecCoin("loki", 2))
+	moduleParams.Weights = sdk.NewDecCoins(sdk.NewInt64DecCoin("minigeo", 1), sdk.NewInt64DecCoin("loki", 2))
 	moduleParams.Fee = sdk.MustNewDecFromStr("0.001000000000000000")
 
 	// exchange coins
