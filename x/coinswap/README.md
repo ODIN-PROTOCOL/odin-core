@@ -6,7 +6,8 @@ This document introduces the [Concepts](#concepts), [Parameters](#parameters), [
 
 Exchanging logic is partially inspired by Osmosis pools (however, there is only one exchanging pool in the Coinswap module [for now](#further-possible-module-changes)).<br>
 Pool operates with decimal coins for better exchange rates balancing and collecting fees. Exchange rates performed via a number of "balances". Each balance represents a unit of value (a denomination's weight, in other words), so they are equal to each other.<br>
-Coins that the user receives as a result of the exchange are stored in the distribution pool.
+Coins that the user receives as a result of the exchange are stored in the distribution pool.<br>
+Unlike Osmosis, pool is always accessible and require no specific fee except for exchanging.
 
 ## Parameters
 
@@ -66,7 +67,7 @@ odind query coinswap rate [from-denom] [to-denom] [flags]
 
 ## Fees
 
-Fees are taken from coins for exchange and sent to the distribution pool.
+Fees are taken from coins for exchange and sent to the distribution pool. Unlike Osmosis, fee is taken only for the exchange.
 
 ## Rates Balancing
 
@@ -119,5 +120,5 @@ So, as we can see, module provides simple and governable rates balancing mechani
 ## Further Possible Module Changes
 
 * Adding different fees for different coins for exchange;
-* Adding isolated coinswap pools (so some coins cannot be exchanged for others), possibly with different exchange rates for some cases;
+* Adding isolated coinswap pools (so some coins cannot be exchanged for others), possibly with fee for joining, different exchange rates for some cases, etc.;
   * Moving fee parameter to isolated pool structure.
