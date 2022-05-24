@@ -2327,7 +2327,7 @@
           "example": "id: 999: request not found"
         }
       },
-      "description": "QueryRequestResponse is response type for the Query/Request RPC method."
+      "description": "QueryRequestResponse is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
     },
     "oracle.v1.QueryReportersResponse.BadRequest": {
       "type": "object",
@@ -2341,7 +2341,7 @@
           "example": "decoding bech32 failed: invalid checksum (expected 3xsq2g got wvumwr)"
         }
       },
-      "description": "QueryReportersResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryReportersResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
     },
     "oracle.v1.QueryDataSourceResponse.BadRequest": {
       "type": "object",
@@ -2355,7 +2355,7 @@
           "example": "id: 10: data source not found"
         }
       },
-      "description": "QueryDataSourceResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryDataSourceResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
     },
     "oracle.v1.QueryOracleScriptResponse.BadRequest": {
       "type": "object",
@@ -2369,7 +2369,7 @@
           "example": "id: 10: oracle script not found"
         }
       },
-      "description": "QueryOracleScriptResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryOracleScriptResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
     },
     "oracle.v1.QueryDataProviderAccumulatedRewardResponse.BadRequest": {
       "type": "object",
@@ -2388,7 +2388,7 @@
           }
         }
       },
-      "description": "QueryDataProviderAccumulatedRewardResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryDataProviderAccumulatedRewardResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odin prefix."
     },
     "oracle.v1.QueryPendingRequestsResponse.BadRequest": {
       "type": "object",
@@ -2407,7 +2407,7 @@
           }
         }
       },
-      "description": "QueryPendingRequestsResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryPendingRequestsResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
     },
     "oracle.v1.QueryIsReporterResponse.BadRequest": {
       "type": "object",
@@ -2426,7 +2426,7 @@
           }
         }
       },
-      "description": "QueryRequestResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryRequestResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter."
     },
     "oracle.v1.QueryRequestVerificationResponse.BadRequest": {
       "type": "object",
@@ -2445,7 +2445,7 @@
           }
         }
       },
-      "description": "QueryRequestVerificationResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryRequestVerificationResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the chain ID is entered correctly. Chain ID is available upon request <node-address>:26657/status?."
     },
     "oracle.v1.QueryValidatorResponse.BadRequest": {
       "type": "object",
@@ -2464,7 +2464,7 @@
           }
         }
       },
-      "description": "QueryValidatorResponse.BadRequest is response type for the Query/Request RPC method."
+      "description": "QueryValidatorResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
     },
     "oracle.v1.QueryRequestSearchResponse": {
       "type": "object",
