@@ -376,9 +376,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request response.",
             "schema": {
-              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+              "$ref": "#/definitions/oracle.v1.QueryDataProviderAccumulatedRewardResponse.BadRequest"
             }
           }
         },
@@ -515,6 +515,12 @@
               "$ref": "#/definitions/oracle.v1.QueryDataSourceResponse"
             }
           },
+          "400": {
+            "description": "A bad request response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataSourceResponse.BadRequest"
+            }
+          },
           "default": {
             "description": "An unexpected error response",
             "schema": {
@@ -612,6 +618,12 @@
               "$ref": "#/definitions/oracle.v1.QueryOracleScriptResponse"
             }
           },
+          "400": {
+            "description": "A bad request response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryOracleScriptResponse.BadRequest"
+            }
+          },
           "default": {
             "description": "An unexpected error response",
             "schema": {
@@ -665,6 +677,12 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/oracle.v1.QueryReportersResponse"
+            }
+          },
+          "400": {
+            "description": "A bad request response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryReportersResponse.BadRequest"
             }
           },
           "default": {
@@ -910,6 +928,12 @@
               "$ref": "#/definitions/oracle.v1.QueryRequestResponse"
             }
           },
+          "400": {
+            "description": "A bad request response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestResponse.BadRequest"
+            }
+          },
           "default": {
             "description": "An unexpected error response",
             "schema": {
@@ -943,9 +967,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request response.",
             "schema": {
-              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+              "$ref": "#/definitions/oracle.v1.QueryPendingRequestsResponse.BadRequest"
             }
           }
         },
@@ -975,9 +999,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request response.",
             "schema": {
-              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+              "$ref": "#/definitions/oracle.v1.QueryIsReporterResponse.BadRequest"
             }
           }
         },
@@ -1014,9 +1038,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request response.",
             "schema": {
-              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+              "$ref": "#/definitions/oracle.v1.QueryRequestVerificationResponse.BadRequest"
             }
           }
         },
@@ -1084,9 +1108,9 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request error response",
             "schema": {
-              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+              "$ref": "#/definitions/oracle.v1.QueryValidatorResponse.BadRequest"
             }
           }
         },
@@ -2290,6 +2314,157 @@
         }
       },
       "description": "QueryRequestResponse is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryRequestResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "400"
+        },
+        "result": {
+          "type": "string",
+          "example": "id: 999: request not found"
+        }
+      },
+      "description": "QueryRequestResponse is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryReportersResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "400"
+        },
+        "result": {
+          "type": "string",
+          "example": "decoding bech32 failed: invalid checksum (expected 3xsq2g got wvumwr)"
+        }
+      },
+      "description": "QueryReportersResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryDataSourceResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "400"
+        },
+        "result": {
+          "type": "string",
+          "example": "id: 10: data source not found"
+        }
+      },
+      "description": "QueryDataSourceResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryOracleScriptResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "example": "400"
+        },
+        "result": {
+          "type": "string",
+          "example": "id: 10: oracle script not found"
+        }
+      },
+      "description": "QueryOracleScriptResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryDataProviderAccumulatedRewardResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "3"
+        },
+        "message": {
+          "type": "string",
+          "example": "decoding bech32 failed: invalid checksum (expected c9sd90 got gs39am): invalid request"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+          }
+        }
+      },
+      "description": "QueryDataProviderAccumulatedRewardResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryPendingRequestsResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "3"
+        },
+        "message": {
+          "type": "string",
+          "example": "rpc error: code = InvalidArgument desc = unable to parse given validator address: decoding bech32 failed: invalid checksum (expected yvjhfz got gav3rj): invalid request"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+          }
+        }
+      },
+      "description": "QueryPendingRequestsResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryIsReporterResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "3"
+        },
+        "message": {
+          "type": "string",
+          "example": "decoding bech32 failed: invalid checksum (expected c9sd90 got gs39am): invalid request"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+          }
+        }
+      },
+      "description": "QueryRequestResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryRequestVerificationResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "3"
+        },
+        "message": {
+          "type": "string",
+          "example": "rpc error: code = FailedPrecondition desc = provided chain ID does not match the validator's chain ID; expected odin-testnet-havi-1, got : invalid request"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+          }
+        }
+      },
+      "description": "QueryRequestVerificationResponse.BadRequest is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryValidatorResponse.BadRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": "3"
+        },
+        "message": {
+          "type": "string",
+          "example": "decoding bech32 failed: invalid checksum (expected yvjhfz got gav3rj): invalid request"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+          }
+        }
+      },
+      "description": "QueryValidatorResponse.BadRequest is response type for the Query/Request RPC method."
     },
     "oracle.v1.QueryRequestSearchResponse": {
       "type": "object",
