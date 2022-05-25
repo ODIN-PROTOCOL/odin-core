@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "ODIN",
-    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.\n### Errors solving\nTo avoid the `Not Implemented` error, use the queries as they are presented below.\n```text \ncode:\t\t12\nmessage:\t\"Not Implemented\"\ndetails:\t[]",
+    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.",
     "version": "0.5.5"
   },
   "tags": [
