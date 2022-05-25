@@ -11,7 +11,8 @@
   "produces": [
     "application/json"
   ],
-  "host": "node.odin-freya-website.odinprotocol.io/a/api/",
+  "host": "node.odin-freya-website.odinprotocol.io",
+  "basePath": "/a/api",
   "schemes": [
     "https"
   ],
