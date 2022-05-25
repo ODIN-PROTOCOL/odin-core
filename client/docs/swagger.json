@@ -3,7 +3,7 @@
   "info": {
     "title": "ODIN",
     "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.<br><br>To avoid the Not Implemented error, use the queries as they are presented below.",
-    "version": "0.5.5"
+    "version": "0.5.6"
   },
   "consumes": [
     "application/json"
@@ -11,7 +11,7 @@
   "produces": [
     "application/json"
   ],
-  "host": "odinprotocol.io",
+  "host": "node.odin-freya-website.odinprotocol.io/a/api/",
   "schemes": [
     "https"
   ],
