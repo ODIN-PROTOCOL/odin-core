@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "ODIN",
-    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.\n### Errors solving\n```text \ncode:\t\t12\nmessage:\t\"Not Implemented\"\ndetails:\t[]",
+    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.\n### Errors solving\nTo avoid the `Not Implemented` error, use the queries as they are presented below.\n```text \ncode:\t\t12\nmessage:\t\"Not Implemented\"\ndetails:\t[]",
     "version": "0.5.5"
   },
   "tags": [
@@ -104,7 +104,7 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "A bad request error response. To solve the error, check that the denoms are entered correctly. They must be two versions (little and large) of the same coin. For example, loki and odin.",
             "content": {
               "application/json": {
                 "schema": {
@@ -190,16 +190,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryIntegrationAddressResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/grpc.gateway.runtime.Error"
                 }
               }
             }
@@ -372,7 +362,7 @@
             }
           },
           "default": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odin prefix.",
             "content": {
               "application/json": {
                 "schema": {
@@ -526,7 +516,7 @@
             }
           },
           "400": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, try to input different (lesser) number.",
             "content": {
               "application/json": {
                 "schema": {
@@ -641,7 +631,7 @@
             }
           },
           "400": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, try to input different (lesser) number.",
             "content": {
               "application/json": {
                 "schema": {
@@ -704,7 +694,7 @@
             }
           },
           "400": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
             "content": {
               "application/json": {
                 "schema": {
@@ -979,7 +969,7 @@
             }
           },
           "400": {
-            "description": "A bad request response.",
+            "description": "A bad request response.  To solve the error, try to input different (lesser) number.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1021,7 +1011,7 @@
             }
           },
           "default": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1063,7 +1053,7 @@
             }
           },
           "default": {
-            "description": "A bad request response.",
+            "description": "A bad request response. To solve the error, check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1100,7 +1090,7 @@
     },
     "/oracle/v1/verify_request": {
       "get": {
-        "summary": "RequestVerification verifies a request to make sure that\nall information that will be used to report the data is valid",
+        "summary": "RequestVerification verifies a request to make sure that all information that will be used to report the data is valid",
         "operationId": "RequestVerification",
         "responses": {
           "200": {
@@ -1114,7 +1104,7 @@
             }
           },
           "default": {
-            "description": "A bad request response.",
+            "description": "A bad request response.  To solve the error, check that the chain ID is entered correctly. Chain ID is available upon request https://node.odin-freya-website.odinprotocol.io/a/status?. Also check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1204,7 +1194,7 @@
             }
           },
           "default": {
-            "description": "A bad request error response",
+            "description": "A bad request error response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1524,7 +1514,7 @@
             }
           },
           "default": {
-            "description": "An unexpected error response",
+            "description": "An unexpected error response. To solve the error, check that the address is entered correctly. The address must follow the hex format.",
             "content": {
               "application/json": {
                 "schema": {
