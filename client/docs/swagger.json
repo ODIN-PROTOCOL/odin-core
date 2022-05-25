@@ -38,6 +38,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/auction.QueryParamsResponse"
+                },
+                "example": {
+                  "auction_start_threshold": [
+                    {
+                      "denom": "loki",
+                      "amount": "10000000000"
+                    }
+                  ],
+                  "exchange_rates": [
+                    {
+                      "from": "minigeo",
+                      "to": "loki",
+                      "rate_multiplier": "0.100000000000000000"
+                    }
+                  ]
                 }
               }
             }
@@ -58,7 +73,8 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/auction.QueryAuctionStatusResponse"
-                }
+                },
+                "example": true
               }
             }
           }
@@ -78,6 +94,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/coinswap.QueryParamsResponse"
+                },
+                "example": {
+                  "exchange_rates": [
+                    {
+                      "from": "loki",
+                      "to": "odin",
+                      "rate_multiplier": "0.000001000000000000"
+                    },
+                    {
+                      "from": "odin",
+                      "to": "loki",
+                      "rate_multiplier": "1000000.000000000000000000"
+                    }
+                  ]
                 }
               }
             }
@@ -99,6 +129,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/coinswap.QueryRateResponse"
+                },
+                "example": {
+                  "rate": "1000000.000000000000000000",
+                  "initial_rate": "1.000000000000000000"
                 }
               }
             }
@@ -148,6 +182,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryAnnualProvisionsResponse"
+                },
+                "example": {
+                  "annual_provisions": "189801421997.621310592231083057"
                 }
               }
             }
@@ -169,6 +206,14 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryCurrentMintVolumeResponse"
+                },
+                "example": {
+                  "current_mint_volume": [
+                    {
+                      "denom": "loki",
+                      "amount": "100500"
+                    }
+                  ]
                 }
               }
             }
@@ -221,6 +266,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryInflationResponse"
+                },
+                "example": {
+                  "inflation": "0.134813177627161211"
                 }
               }
             }
@@ -242,6 +290,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryParamsResponse"
+                },
+                "example": {
+                  "params": {
+                    "mint_denom": "loki",
+                    "inflation_rate_change": "0.130000000000000000",
+                    "inflation_max": "0.200000000000000000",
+                    "inflation_min": "0.070000000000000000",
+                    "goal_bonded": "0.670000000000000000",
+                    "blocks_per_year": "10519200",
+                    "max_withdrawal_per_time": [
+                      {
+                        "denom": "loki",
+                        "amount": "100000000000"
+                      }
+                    ],
+                    "integration_addresses": {
+                      "bsc": "0xa19Df1199CeEfd7831576f1D055E454364337633",
+                      "eth": "0xa19Df1199CeEfd7831576f1D055E454364337634"
+                    },
+                    "mint_air": true,
+                    "eligible_accounts_pool": [
+                      "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "odin1xvzq479t52cdv57d3j6293macxfakjph42xegv"
+                    ],
+                    "max_allowed_mint_volume": [],
+                    "allowed_mint_denoms": [],
+                    "allowed_minter": []
+                  }
                 }
               }
             }
@@ -263,6 +339,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mint.QueryTreasuryPoolResponse"
+                },
+                "example": {
+                  "treasury_pool": [
+                    {
+                      "denom": "loki",
+                      "amount": "100000000000"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1020000"
+                    }
+                  ]
                 }
               }
             }
@@ -284,6 +372,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryActiveValidatorsResponse"
+                },
+                "example": {
+                  "address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "power": "461290946"
                 }
               }
             }
@@ -305,6 +397,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryCountsResponse"
+                },
+                "example": {
+                  "data_source_count": "4",
+                  "oracle_script_count": "3",
+                  "request_count": "26"
                 }
               }
             }
@@ -326,6 +423,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataResponse"
+                },
+                "example": {
+                  "data": "#!/usr/bin/env python3\nimport requests\nimport sys\n\nURL = \"https://qrng.anu.edu.au/API/jsonI.php?length={length}&type=uint8\"\nHEADERS = {\"Content-Type\": \"application/json\"}\n\n\ndef main(length):\n    url = URL.format(length=length)\n    r = requests.post(url, headers=HEADERS)\n    r.raise_for_status()\n\n    pxs = r.json()\n\n    res = [str(i) for i in pxs['data']]\n\n    return \" \".join(res)\n\n\nif __name__ == \"__main__\":\n    try:\n        print(main(sys.argv[1]))\n    except Exception as e:\n        print(e, file=sys.stderr)\n        sys.exit(1)}"
                 }
               }
             }
@@ -357,6 +457,14 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataProviderAccumulatedRewardResponse"
+                },
+                "example": {
+                  "accumulated_reward": [
+                    {
+                      "denom": "string",
+                      "amount": "string"
+                    }
+                  ]
                 }
               }
             }
@@ -397,7 +505,17 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataProviderRewardResponse"
-                }
+                },
+                "example": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1"
+                    }
+                ]
               }
             }
           }
@@ -417,6 +535,14 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataProvidersPoolResponse"
+                },
+                "example": {
+                  "pool": [
+                    {
+                      "denom": "loki",
+                      "amount": "1000000000"
+                    }
+                  ]
                 }
               }
             }
@@ -438,7 +564,58 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataSourcesResponse"
-                }
+                },
+                "example": [
+                  {
+                    "id": "1",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Random numbers",
+                    "filename": "8590975b33eba0ca4c293abae3859435b596226046ab5548665bfcb6125a1973",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "2",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Osmosis pools info",
+                    "filename": "d2c57251a60577916a7eec00086e909709d03e789616fd025daa178244d1a5f2",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "3",
+                    "owner": "odin1qkcew3z8amynvzpwcw0vla63elns0g98ueslfm",
+                    "name": "_)_)_)_)_)_)",
+                    "description": "_)__)_)_)_)_))",
+                    "filename": "f4885d7dfd17e274f03e7419d6e96af4e5fabcc248af7bbd2829b72d7c389ca1",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "4",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "TWAP from Osmosis",
+                    "filename": "f88bdd83ba15da95735a1a4d7db4acffa50b59ac04759a08a0cb7df577024f07",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1000000"
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -511,6 +688,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryDataSourceResponse"
+                },
+                "example": {
+                  "id": "1",
+                  "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "name": "Random numbers",
+                  "filename": "8590975b33eba0ca4c293abae3859435b596226046ab5548665bfcb6125a1973",
+                  "fee": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    }
+                  ]
                 }
               }
             }
@@ -553,7 +742,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryOracleScriptsResponse"
-                }
+                },
+                "example": [
+                  {
+                    "id": "1",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Random numbers",
+                    "description": "Generate random numbers",
+                    "filename": "5b6cf5a37ebbb1346a30d8c6372b7b94fdeee50eef662db7d315ac5a369b201b",
+                    "schema": "{length:i64}/{numbers:[i64]}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
+                  },
+                  {
+                    "id": "2",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Osmosis pools info",
+                    "filename": "ed2cdcaa573a936d2005fd05a4d579aa511704e45c9544e387760341dc6c82f6",
+                    "schema": "{base_symbol:string,quote_symbol:string}/{pools:[{pool_id:u64,price:string,liquidity:string,liquidity_atom:string}]}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmPTQQo987ivosWD7ibXijuADm5ggL7G4vhhnZuzgSDC2c"
+                  },
+                  {
+                    "id": "3",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "TWAP from Osmosis",
+                    "filename": "4da8c3201e47a55daacfdec2a41b00be33cab98ae37fbc7c051d0e66017bb3b0",
+                    "schema": "{from:string, to:string, range:u64}/{twap:string}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
+                  }
+                ]
               }
             }
           }
@@ -626,6 +842,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryOracleScriptResponse"
+                },
+                "example": {
+                  "id": "1",
+                  "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "name": "Random numbers",
+                  "description": "Generate random numbers",
+                  "filename": "5b6cf5a37ebbb1346a30d8c6372b7b94fdeee50eef662db7d315ac5a369b201b",
+                  "schema": "{length:i64}/{numbers:[i64]}",
+                  "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
                 }
               }
             }
@@ -668,6 +893,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryParamsResponse"
+                },
+                "example": {
+                  "max_raw_request_count": "12",
+                  "max_ask_count": "16",
+                  "expiration_block_count": "100",
+                  "base_owasm_gas": "150000",
+                  "per_validator_request_gas": "30000",
+                  "sampling_try_count": "3",
+                  "oracle_reward_percentage": "70",
+                  "inactive_penalty_duration": "600000000000",
+                  "max_data_size": "1024",
+                  "max_calldata_size": "1024",
+                  "data_provider_reward_per_byte": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1"
+                    }
+                  ],
+                  "data_provider_reward_threshold": {
+                    "amount": [
+                      {
+                        "denom": "loki",
+                        "amount": "200000000000"
+                      },
+                      {
+                        "denom": "minigeo",
+                        "amount": "200000000000"
+                      }
+                    ],
+                    "blocks": "28820"
+                  },
+                  "reward_decreasing_fraction": "0.200000000000000000",
+                  "data_requester_fee_denoms": [
+                    "loki",
+                    "minigeo"
+                  ]
                 }
               }
             }
@@ -689,7 +954,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryReportersResponse"
-                }
+                },
+                "example": [
+                  "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "odin10tdtpkn2yylmz4lnduqjz5ezwz5cp8cqxhljnu"
+                ]
               }
             }
           },
@@ -730,6 +999,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryRequestPriceResponse"
+                },
+                "example": {
+                  "oracle_script_id": "0",
+                  "calldata": null,
+                  "ask_count": "0",
+                  "min_count": "0"
                 }
               }
             }
@@ -750,7 +1025,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryRequestReportsResponse"
-                }
+                },
+                "example": [
+                  {
+                    "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                    "in_before_resolve": true,
+                    "raw_reports": [
+                      {
+                        "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -891,7 +1177,99 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryRequestsResponse"
-                }
+                },
+                "example": [
+                  {
+                    "request": {
+                      "id": "1",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAg=",
+                      "requested_validators": [
+                        "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                      ],
+                      "min_count": "1",
+                      "request_height": "315",
+                      "request_time": "1651344012",
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "raw_requests": [
+                        {
+                          "data_source_id": "1",
+                          "calldata": "OA=="
+                        }
+                      ],
+                      "execute_gas": "200000"
+                    },
+                    "result": {
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAg=",
+                      "ask_count": "1",
+                      "min_count": "1",
+                      "request_id": "1",
+                      "ans_count": "1",
+                      "request_time": "1651344012",
+                      "resolve_time": "1651344028",
+                      "resolve_status": 1,
+                      "result": "AAAACAAAAAAAAAB9AAAAAAAAAIsAAAAAAAAAyQAAAAAAAABzAAAAAAAAAC0AAAAAAAAA8QAAAAAAAABlAAAAAAAAAJQ="
+                    },
+                    "reports": [
+                      {
+                        "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                        "in_before_resolve": true,
+                        "raw_reports": [
+                          {
+                            "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "request": {
+                      "id": "2",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAE=",
+                      "requested_validators": [
+                        "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                      ],
+                      "min_count": "1",
+                      "request_height": "29173",
+                      "request_time": "1651498278",
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "raw_requests": [
+                        {
+                          "data_source_id": "1",
+                          "calldata": "MQ=="
+                        }
+                      ],
+                      "execute_gas": "200000"
+                    },
+                    "result": {
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAE=",
+                      "ask_count": "1",
+                      "min_count": "1",
+                      "request_id": "2",
+                      "ans_count": "1",
+                      "request_time": "1651498278",
+                      "resolve_time": "1651498294",
+                      "resolve_status": 1,
+                      "result": "AAAAAQAAAAAAAADC"
+                    },
+                    "reports": [
+                      {
+                        "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                        "in_before_resolve": true,
+                        "raw_reports": [
+                          {
+                            "data": "MTk0Cg=="
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -964,6 +1342,51 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryRequestResponse"
+                },
+                "example": {
+                  "request": {
+                    "id": "1",
+                    "oracle_script_id": "1",
+                    "calldata": "AAAAAAAAAAg=",
+                    "requested_validators": [
+                      "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                    ],
+                    "min_count": "1",
+                    "request_height": "315",
+                    "request_time": "1651344012",
+                    "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "raw_requests": [
+                      {
+                        "data_source_id": "1",
+                        "calldata": "OA=="
+                      }
+                    ],
+                    "execute_gas": "200000"
+                  },
+                  "result": {
+                    "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "oracle_script_id": "1",
+                    "calldata": "AAAAAAAAAAg=",
+                    "ask_count": "1",
+                    "min_count": "1",
+                    "request_id": "1",
+                    "ans_count": "1",
+                    "request_time": "1651344012",
+                    "resolve_time": "1651344028",
+                    "resolve_status": 1,
+                    "result": "AAAACAAAAAAAAAB9AAAAAAAAAIsAAAAAAAAAyQAAAAAAAABzAAAAAAAAAC0AAAAAAAAA8QAAAAAAAABlAAAAAAAAAJQ="
+                  },
+                  "reports": [
+                    {
+                      "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                      "in_before_resolve": true,
+                      "raw_reports": [
+                        {
+                          "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                        }
+                      ]
+                    }
+                  ]
                 }
               }
             }
@@ -1006,6 +1429,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryPendingRequestsResponse"
+                },
+                "example": {
+                  "request_ids": []
                 }
               }
             }
@@ -1048,6 +1474,9 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryIsReporterResponse"
+                },
+                "example": {
+                  "is_reporter": true
                 }
               }
             }
@@ -1099,6 +1528,13 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryRequestVerificationResponse"
+                },
+                "example": {
+                  "chain_id": "odin-testnet-havi-1",
+                  "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "request_id": "1",
+                  "external_id": "1",
+                  "data_source_id": "1"
                 }
               }
             }
@@ -1189,6 +1625,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oracle.v1.QueryValidatorResponse"
+                },
+                "example": {
+                  "status": {
+                    "is_active": true,
+                    "since": "2022-04-30T18:39:45.473490929Z"
+                  }
                 }
               }
             }
@@ -1230,7 +1672,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/telemetry.QueryTopBalancesResponse"
-                }
+                },
+                "example": [
+                  {
+                    "address": "odin10tdtpkn2yylmz4lnduqjz5ezwz5cp8cqxhljnu",
+                    "coins": [
+                      {
+                        "denom": "loki",
+                        "amount": "1000000"
+                      }
+                    ]
+                  },
+                  {
+                    "address": "odin1af7asqllm92xrxeamn4dk0y3ux7u66y0jg9mch",
+                    "coins": [
+                      {
+                        "denom": "loki",
+                        "amount": "199000000"
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -1320,7 +1782,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/telemetry.QueryTopValidatorsResponse"
-                }
+                },
+                "example": [
+                  {
+                    "validator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                    "blocks_count": "12640",
+                    "stake_percentage": "26.165906133599085384"
+                  },
+                  {
+                    "validator_address": "odinvaloper1xvzq479t52cdv57d3j6293macxfakjphchj8pc",
+                    "blocks_count": "11118",
+                    "stake_percentage": "24.515774109603973677"
+                  }
+                ]
               }
             }
           }
@@ -1420,6 +1894,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/telemetry.QueryValidatorBlocksResponse"
+                },
+                "example": {
+                  "blocks": [
+                    {
+                      "height": "2",
+                      "time": "2022-05-25T16:33:49.061Z",
+                      "txs_count": "5",
+                      "reward": [
+                        {
+                          "denom": "loki",
+                          "amount": "2500"
+                        }
+                      ]
+                    }
+                  ]
                 }
               }
             }
@@ -1509,6 +1998,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/telemetry.QueryValidatorByConsAddrResponse"
+                },
+                "example": {
+                  "operator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "consensus_pubkey": {
+                    "type": "tendermint/PubKeySecp256k1",
+                    "value": "A1urSdYlpXog8AXPrVOrp0ozMppKq6nxWt92fvXacVmf"
+                  },
+                  "status": 3,
+                  "tokens": "461290946",
+                  "delegator_shares": "461290946.000000000000000000",
+                  "description": {
+                    "moniker": "validator1",
+                    "details": "odin validator"
+                  },
+                  "unbonding_time": "1970-01-01T00:00:00Z",
+                  "commission": {
+                    "commission_rates": {
+                      "rate": "0.100000000000000000",
+                      "max_rate": "0.200000000000000000",
+                      "max_change_rate": "0.010000000000000000"
+                    },
+                    "update_time": "2021-12-09T12:00:00.075067653Z"
+                  },
+                  "min_self_delegation": "1"
                 }
               }
             }
@@ -1550,6 +2063,172 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/telemetry.QueryExtendedValidatorsResponse"
+                },
+                "example": {
+                  "validators": [
+                    {
+                      "operator_address": "odinvaloper1xvzq479t52cdv57d3j6293macxfakjphchj8pc",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "Ase5YRhn5OawYEHrh19b6nQML/s5cswBqMe1pXZv3T0t"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "432200000",
+                      "delegator_shares": "432200000.000000000000000000",
+                      "description": {
+                        "moniker": "validator2",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper103dy45q2kkseam578ff8m5chc94sumfsqm8x8e",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A5Jhx2WoY1z2ojR00hvWq7sbeYwiY5d8PN8ao37QnyWz"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "425135384",
+                      "delegator_shares": "425135384.000000000000000000",
+                      "description": {
+                        "moniker": "validator3",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper1n2v6762eefhcks340ws3rrg6788arnx7lcnrux",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A8Fqh0EmjxsLSchd71p8+5o3/TFpku8bOOrVoN1Wz4Tn"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "444320245",
+                      "delegator_shares": "444320245.000000000000000000",
+                      "description": {
+                        "moniker": "validator4",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1urSdYlpXog8AXPrVOrp0ozMppKq6nxWt92fvXacVmf"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "461290946",
+                      "delegator_shares": "461290946.000000000000000000",
+                      "description": {
+                        "moniker": "validator1",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    }
+                  ],
+                  "balances": [
+                    {
+                      "address": "odin1xvzq479t52cdv57d3j6293macxfakjph42xegv",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99594000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin103dy45q2kkseam578ff8m5chc94sumfsdxncwd",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99990000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin1n2v6762eefhcks340ws3rrg6788arnx7j98a4j",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99990000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "1001782211877"
+                        },
+                        {
+                          "denom": "minigeo",
+                          "amount": "229753052"
+                        }
+                      ]
+                    }
+                  ],
+                  "pagination": {
+                    "next_key": null,
+                    "total": "4"
+                  }
                 }
               }
             }
