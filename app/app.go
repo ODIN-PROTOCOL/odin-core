@@ -9,6 +9,9 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
+	gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
@@ -105,6 +108,7 @@ import (
 	bandante "github.com/ODIN-PROTOCOL/odin-core/x/oracle/ante"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
 
 	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -150,6 +154,8 @@ var (
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
+		gravity.AppModuleBasic{},
+		bech32ibc.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -161,6 +167,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -206,6 +213,7 @@ type OdinApp struct {
 	TelemetryKeeper  telemetrykeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
+	GravityKeeper    *gravitykeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -271,7 +279,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey,
+		feegrant.StoreKey, gravitytypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -356,6 +364,20 @@ func NewOdinApp(
 
 		return fromVM, nil
 	})
+
+	gravityKeeper := gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		app.BankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+		&app.TransferKeeper,
+		&bech32IbcKeeper,
+	)
+	app.GravityKeeper = &gravityKeeper
 
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
@@ -766,6 +788,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(coinswaptypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(transfertypes.ModuleName)
+	paramsKeeper.Subspace(gravitytypes.ModuleName)
 
 	return paramsKeeper
 }
