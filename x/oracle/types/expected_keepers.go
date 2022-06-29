@@ -6,9 +6,9 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	connectiontypes "github.com/cosmos/ibc-go/v2/modules/core/03-connection/types"
-	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
-	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
+	connectiontypes "github.com/cosmos/ibc-go/v3/modules/core/03-connection/types"
+	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
 )
 
 // AccountKeeper defines the expected account keeper.

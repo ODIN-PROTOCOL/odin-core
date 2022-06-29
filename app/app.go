@@ -15,10 +15,10 @@ import (
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	"github.com/cosmos/ibc-go/v2/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
-	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
+	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client/cli"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -95,11 +95,11 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibc "github.com/cosmos/ibc-go/v2/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v2/modules/core/02-client"
-	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
+	ibc "github.com/cosmos/ibc-go/v3/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
+	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
 
 	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 
@@ -368,11 +368,15 @@ func NewOdinApp(
 		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
+	// TODO add ics4Wrapper types.ICS4Wrapper after app.IBCKeeper.ChannelKeeper
+	//  (ICS4Wrapper should be the IBC Channel Keeper unless ICS 20 is being connected to a middleware application)
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper,
+		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
+	// TODO change NewAppModule to NewIBCModule?
+	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
@@ -410,10 +414,12 @@ func NewOdinApp(
 	app.TelemetryKeeper = telemetrykeeper.NewKeeper(appCodec, encodingConfig.TxConfig, app.BankKeeper, app.StakingKeeper, app.DistrKeeper)
 
 	oracleModule := oracle.NewAppModule(app.OracleKeeper)
+	// TODO change NewAppModule to NewIBCModule?
+	//  oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC) // DONE
 	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 

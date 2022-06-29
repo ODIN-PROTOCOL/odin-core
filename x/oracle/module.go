@@ -3,7 +3,7 @@ package oracle
 import (
 	"context"
 	"encoding/json"
-	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
+	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
 	"math"
 	"math/rand"
 
@@ -19,9 +19,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
+	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
+	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"

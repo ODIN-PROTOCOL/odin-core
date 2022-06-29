@@ -8,7 +8,7 @@ require (
 	github.com/confio/ics23/go v0.7.0
 	github.com/cosmos/cosmos-sdk v0.45.5
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v2 v2.0.2
+	github.com/cosmos/ibc-go/v3 v3.1.0
 	github.com/ethereum/go-ethereum v1.10.14
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-gorp/gorp v2.2.0+incompatible
