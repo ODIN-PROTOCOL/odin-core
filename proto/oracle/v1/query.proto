@@ -90,12 +90,12 @@ service Query {
   // RequestPrice queries the latest price on standard price reference oracle script.
   rpc RequestPrice(QueryRequestPriceRequest)
       returns (QueryRequestPriceResponse) {
-    option (google.api.http).post = "/oracle/request_prices";
+    option (google.api.http).get = "/oracle/request_prices";
   }
 
   rpc DataProvidersPool(QueryDataProvidersPoolRequest)
       returns (QueryDataProvidersPoolResponse) {
-    option (google.api.http).post = "/oracle/data_providers_pool";
+    option (google.api.http).get = "/oracle/data_providers_pool";
   }
 
   rpc RequestReports(QueryRequestReportsRequest)
