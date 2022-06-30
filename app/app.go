@@ -9,19 +9,16 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
-	gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	"github.com/cosmos/ibc-go/v2/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
-	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
+	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client/cli"
 	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"io"
@@ -100,11 +97,11 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibc "github.com/cosmos/ibc-go/v2/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v2/modules/core/02-client"
-	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
+	ibc "github.com/cosmos/ibc-go/v3/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
+	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
 
 	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 
@@ -112,7 +109,6 @@ import (
 	bandante "github.com/ODIN-PROTOCOL/odin-core/x/oracle/ante"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
 
 	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -158,8 +154,6 @@ var (
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
-		gravity.AppModuleBasic{},
-		bech32ibc.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -171,7 +165,6 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -209,6 +202,7 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	// TODO ICAHostKeeper    icahostkeeper.Keeper
 	UpgradeKeeper    upgradekeeper.Keeper
 	EvidenceKeeper   evidencekeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
@@ -224,6 +218,7 @@ type OdinApp struct {
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
+	// TODO ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -313,6 +308,7 @@ func NewOdinApp(
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
+	// TODO scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -380,6 +376,7 @@ func NewOdinApp(
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
+  transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
 	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
@@ -400,7 +397,22 @@ func NewOdinApp(
 		&bech32IbcKeeper,
 	)
 	app.GravityKeeper = &gravityKeeper
+  
+  	
 
+	/* TODO
+	app.ICAHostKeeper = icahostkeeper.NewKeeper(
+		appCodec, keys[icahosttypes.StoreKey],
+		app.GetSubspace(icahosttypes.SubModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		scopedICAHostKeeper,
+		app.MsgServiceRouter(),
+	)
+	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
+	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
+	*/
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
 	)
@@ -441,11 +453,12 @@ func NewOdinApp(
 	app.TelemetryKeeper = telemetrykeeper.NewKeeper(appCodec, encodingConfig.TxConfig, app.BankKeeper, app.StakingKeeper, app.DistrKeeper)
 
 	oracleModule := oracle.NewAppModule(app.OracleKeeper)
+	oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC) // DONE
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)     // DONE
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
