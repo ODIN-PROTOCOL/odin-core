@@ -19,6 +19,8 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client/cli"
+	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -201,14 +203,16 @@ type OdinApp struct {
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	// TODO ICAHostKeeper    icahostkeeper.Keeper
-	UpgradeKeeper   upgradekeeper.Keeper
-	EvidenceKeeper  evidencekeeper.Keeper
-	OracleKeeper    oraclekeeper.Keeper
-	CoinswapKeeper  coinswapkeeper.Keeper
-	AuctionKeeper   auctionkeeper.Keeper
-	TelemetryKeeper telemetrykeeper.Keeper
-	FeeGrantKeeper  feegrantkeeper.Keeper
-	TransferKeeper  ibctransferkeeper.Keeper
+	UpgradeKeeper    upgradekeeper.Keeper
+	EvidenceKeeper   evidencekeeper.Keeper
+	OracleKeeper     oraclekeeper.Keeper
+	CoinswapKeeper   coinswapkeeper.Keeper
+	AuctionKeeper    auctionkeeper.Keeper
+	TelemetryKeeper  telemetrykeeper.Keeper
+	FeeGrantKeeper   feegrantkeeper.Keeper
+	TransferKeeper   ibctransferkeeper.Keeper
+	GravityKeeper    *gravitykeeper.Keeper
+	Bech32IbcKeeper  *bech32ibckeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -275,7 +279,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey,
+		feegrant.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -362,21 +366,39 @@ func NewOdinApp(
 		return fromVM, nil
 	})
 
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
-	)
-
 	// create IBC Keeper
 	app.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper,
+		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
-	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
+  transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
+
+	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+		app.TransferKeeper,
+	)
+	app.Bech32IbcKeeper = &bech32IbcKeeper
+
+	gravityKeeper := gravitykeeper.NewKeeper(
+		keys[gravitytypes.StoreKey],
+		app.GetSubspace(gravitytypes.ModuleName),
+		appCodec,
+		app.BankKeeper,
+		&stakingKeeper,
+		&app.SlashingKeeper,
+		&app.DistrKeeper,
+		&app.AccountKeeper,
+		&app.TransferKeeper,
+		&bech32IbcKeeper,
+	)
+	app.GravityKeeper = &gravityKeeper
+  
+  	
 
 	/* TODO
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
@@ -391,6 +413,9 @@ func NewOdinApp(
 	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
 	*/
+	app.StakingKeeper = *stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
+	)
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
@@ -793,6 +818,8 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(coinswaptypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(transfertypes.ModuleName)
+	paramsKeeper.Subspace(gravitytypes.ModuleName)
+	paramsKeeper.Subspace(bech32ibctypes.ModuleName)
 
 	return paramsKeeper
 }
