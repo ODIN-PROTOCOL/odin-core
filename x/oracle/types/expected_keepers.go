@@ -67,3 +67,8 @@ type ConnectionKeeper interface {
 type PortKeeper interface {
 	BindPort(ctx sdk.Context, portID string) *capabilitytypes.Capability
 }
+
+// ICS4Wrapper defines the expected ICS4Wrapper for middleware
+type ICS4Wrapper interface {
+	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
+}

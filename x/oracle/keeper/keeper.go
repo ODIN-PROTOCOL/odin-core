@@ -24,6 +24,7 @@ type Keeper struct {
 	paramstore       paramtypes.Subspace
 	owasmVM          *owasm.Vm
 	// TODO add ics4Wrapper?
+	ics4Wrapper   oracletypes.ICS4Wrapper
 	authKeeper    oracletypes.AccountKeeper
 	bankKeeper    oracletypes.BankKeeper
 	distrKeeper   oracletypes.DistrKeeper

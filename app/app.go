@@ -200,19 +200,21 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	UpgradeKeeper    upgradekeeper.Keeper
-	EvidenceKeeper   evidencekeeper.Keeper
-	OracleKeeper     oraclekeeper.Keeper
-	CoinswapKeeper   coinswapkeeper.Keeper
-	AuctionKeeper    auctionkeeper.Keeper
-	TelemetryKeeper  telemetrykeeper.Keeper
-	FeeGrantKeeper   feegrantkeeper.Keeper
-	TransferKeeper   ibctransferkeeper.Keeper
+	// TODO ICAHostKeeper    icahostkeeper.Keeper
+	UpgradeKeeper   upgradekeeper.Keeper
+	EvidenceKeeper  evidencekeeper.Keeper
+	OracleKeeper    oraclekeeper.Keeper
+	CoinswapKeeper  coinswapkeeper.Keeper
+	AuctionKeeper   auctionkeeper.Keeper
+	TelemetryKeeper telemetrykeeper.Keeper
+	FeeGrantKeeper  feegrantkeeper.Keeper
+	TransferKeeper  ibctransferkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
+	// TODO ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -302,6 +304,7 @@ func NewOdinApp(
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
+	// TODO scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -368,15 +371,26 @@ func NewOdinApp(
 		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
-	// TODO add ics4Wrapper types.ICS4Wrapper after app.IBCKeeper.ChannelKeeper
-	//  (ICS4Wrapper should be the IBC Channel Keeper unless ICS 20 is being connected to a middleware application)
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
-	// TODO change NewAppModule to NewIBCModule?
 	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
+
+	/* TODO
+	app.ICAHostKeeper = icahostkeeper.NewKeeper(
+		appCodec, keys[icahosttypes.StoreKey],
+		app.GetSubspace(icahosttypes.SubModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		scopedICAHostKeeper,
+		app.MsgServiceRouter(),
+	)
+	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
+	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
+	*/
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
@@ -414,13 +428,12 @@ func NewOdinApp(
 	app.TelemetryKeeper = telemetrykeeper.NewKeeper(appCodec, encodingConfig.TxConfig, app.BankKeeper, app.StakingKeeper, app.DistrKeeper)
 
 	oracleModule := oracle.NewAppModule(app.OracleKeeper)
-	// TODO change NewAppModule to NewIBCModule?
-	//  oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
+	oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC) // DONE
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)     // DONE
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
