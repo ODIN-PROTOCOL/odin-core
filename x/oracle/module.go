@@ -205,7 +205,6 @@ func ValidateOracleChannelParams(
 	order channeltypes.Order,
 	portID string,
 	channelID string,
-	// FIXME version string,
 ) error {
 	// NOTE: for escrow address security only 2^32 channels are allowed to be created
 	// Issue: https://github.com/cosmos/cosmos-sdk/issues/7737
@@ -226,9 +225,6 @@ func ValidateOracleChannelParams(
 		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid port: %s, expected %s", portID, boundPort)
 	}
 
-	//if version != oracletypes.Version { FIXME
-	//	return sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
-	//}
 	return nil
 }
 
@@ -259,6 +255,10 @@ func (am IBCModule) OnChanOpenInit(
 		return err
 	}
 
+	if version != oracletypes.Version {
+		return sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
+	}
+
 	// Claim channel capability passed back by IBC module
 	if err := am.keeper.ClaimCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)); err != nil {
 		return err
@@ -276,7 +276,6 @@ func (am IBCModule) OnChanOpenTry(
 	channelID string,
 	chanCap *capabilitytypes.Capability,
 	counterparty channeltypes.Counterparty,
-	// FIXME version,
 	counterpartyVersion string,
 ) (string, error) {
 	if err := ValidateOracleChannelParams(ctx, am.keeper, order, portID, channelID); err != nil {
