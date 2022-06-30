@@ -13,6 +13,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
 	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
@@ -608,10 +609,30 @@ func NewOdinApp(
 		*/
 	})
 
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	}
+
+	if upgradeInfo.Name == "v0.5.6" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{icahosttypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
+	if loadLatest {
+		if err := app.LoadLatestVersion(); err != nil {
+			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
+		}
+	}
+
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
-	// TODO ? app.ScopedICAHostKeeper = scopedICAHostKeeper
+	// app.ScopedICAHostKeeper = scopedICAHostKeeper
 
 	return app
 }
