@@ -42,6 +42,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+require github.com/osmosis-labs/bech32-ibc v0.3.0-rc1
+
 require (
 	filippo.io/edwards25519 v1.0.0-beta.2 // indirect
 	github.com/99designs/keyring v1.1.6 // indirect

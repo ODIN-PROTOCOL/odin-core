@@ -40,6 +40,8 @@ import (
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
 
+	gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -203,16 +205,16 @@ type OdinApp struct {
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	// TODO ICAHostKeeper    icahostkeeper.Keeper
-	UpgradeKeeper    upgradekeeper.Keeper
-	EvidenceKeeper   evidencekeeper.Keeper
-	OracleKeeper     oraclekeeper.Keeper
-	CoinswapKeeper   coinswapkeeper.Keeper
-	AuctionKeeper    auctionkeeper.Keeper
-	TelemetryKeeper  telemetrykeeper.Keeper
-	FeeGrantKeeper   feegrantkeeper.Keeper
-	TransferKeeper   ibctransferkeeper.Keeper
-	GravityKeeper    *gravitykeeper.Keeper
-	Bech32IbcKeeper  *bech32ibckeeper.Keeper
+	UpgradeKeeper   upgradekeeper.Keeper
+	EvidenceKeeper  evidencekeeper.Keeper
+	OracleKeeper    oraclekeeper.Keeper
+	CoinswapKeeper  coinswapkeeper.Keeper
+	AuctionKeeper   auctionkeeper.Keeper
+	TelemetryKeeper telemetrykeeper.Keeper
+	FeeGrantKeeper  feegrantkeeper.Keeper
+	TransferKeeper  ibctransferkeeper.Keeper
+	GravityKeeper   *gravitykeeper.Keeper
+	Bech32IbcKeeper *bech32ibckeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -372,11 +374,11 @@ func NewOdinApp(
 	)
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper,
+		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
-  transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
+	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
 	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
@@ -397,8 +399,6 @@ func NewOdinApp(
 		&bech32IbcKeeper,
 	)
 	app.GravityKeeper = &gravityKeeper
-  
-  	
 
 	/* TODO
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
