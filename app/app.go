@@ -1,7 +1,6 @@
 package odin
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
@@ -15,6 +14,10 @@ import (
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
+	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
+	icahost "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host"
+	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
 	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
@@ -95,6 +98,8 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	icahostkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/types"
 	ibc "github.com/cosmos/ibc-go/v3/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
 	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
@@ -200,21 +205,21 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	// TODO ICAHostKeeper    icahostkeeper.Keeper
-	UpgradeKeeper   upgradekeeper.Keeper
-	EvidenceKeeper  evidencekeeper.Keeper
-	OracleKeeper    oraclekeeper.Keeper
-	CoinswapKeeper  coinswapkeeper.Keeper
-	AuctionKeeper   auctionkeeper.Keeper
-	TelemetryKeeper telemetrykeeper.Keeper
-	FeeGrantKeeper  feegrantkeeper.Keeper
-	TransferKeeper  ibctransferkeeper.Keeper
+	ICAHostKeeper    icahostkeeper.Keeper
+	UpgradeKeeper    upgradekeeper.Keeper
+	EvidenceKeeper   evidencekeeper.Keeper
+	OracleKeeper     oraclekeeper.Keeper
+	CoinswapKeeper   coinswapkeeper.Keeper
+	AuctionKeeper    auctionkeeper.Keeper
+	TelemetryKeeper  telemetrykeeper.Keeper
+	FeeGrantKeeper   feegrantkeeper.Keeper
+	TransferKeeper   ibctransferkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
-	// TODO ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
+	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -304,7 +309,7 @@ func NewOdinApp(
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
-	// TODO scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
+	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -340,28 +345,6 @@ func NewOdinApp(
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
-	app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		var pz odinminttypes.Params
-		for _, pair := range pz.ParamSetPairs() {
-			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
-				pz.AllowedMinter = make([]string, 0)
-			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
-				pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
-			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
-				pz.MaxAllowedMintVolume = sdk.Coins{}
-			} else {
-				app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
-			}
-		}
-		app.MintKeeper.SetParams(ctx, pz)
-
-		minter := app.MintKeeper.GetMinter(ctx)
-		minter.CurrentMintVolume = sdk.Coins{}
-		app.MintKeeper.SetMinter(ctx, minter)
-
-		return fromVM, nil
-	})
-
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
 	)
@@ -378,7 +361,6 @@ func NewOdinApp(
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
-	/* TODO
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
 		appCodec, keys[icahosttypes.StoreKey],
 		app.GetSubspace(icahosttypes.SubModuleName),
@@ -390,7 +372,6 @@ func NewOdinApp(
 	)
 	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
-	*/
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
@@ -432,8 +413,9 @@ func NewOdinApp(
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC) // DONE
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)     // DONE
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
+	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
@@ -475,6 +457,7 @@ func NewOdinApp(
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
+		icaModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
@@ -560,9 +543,73 @@ func NewOdinApp(
 		}
 	}
 
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
+		// create ICS27 Controller submodule params
+		controllerParams := icacontrollertypes.Params{}
+		// create ICS27 Host submodule params
+		hostParams := icahosttypes.Params{
+			HostEnabled: true,
+			AllowMessages: []string{
+				"/cosmos.authz.v1beta1.MsgExec",
+				"/cosmos.authz.v1beta1.MsgGrant",
+				"/cosmos.authz.v1beta1.MsgRevoke",
+				"/cosmos.bank.v1beta1.MsgSend",
+				"/cosmos.bank.v1beta1.MsgMultiSend",
+				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+				"/cosmos.gov.v1beta1.MsgVoteWeighted",
+				"/cosmos.gov.v1beta1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgDeposit",
+				"/cosmos.gov.v1beta1.MsgVote",
+				"/cosmos.staking.v1beta1.MsgEditValidator",
+				"/cosmos.staking.v1beta1.MsgDelegate",
+				"/cosmos.staking.v1beta1.MsgUndelegate",
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+				"/cosmos.staking.v1beta1.MsgCreateValidator",
+				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+				"/ibc.applications.transfer.v1.MsgTransfer",
+			},
+		}
+
+		ctx.Logger().Info("start to init interchainaccount module...")
+		// initialize ICS27 module
+		icaModule.InitModule(ctx, controllerParams, hostParams)
+		ctx.Logger().Info("start to run module migrations...")
+
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+
+		/*
+		   var pz odinminttypes.Params
+		   for _, pair := range pz.ParamSetPairs() {
+		      if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
+		         pz.AllowedMinter = make([]string, 0)
+		      } else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
+		         pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
+		      } else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
+		         pz.MaxAllowedMintVolume = sdk.Coins{}
+		      } else {
+		         app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
+		      }
+		   }
+		   app.MintKeeper.SetParams(ctx, pz)
+
+		   minter := app.MintKeeper.GetMinter(ctx)
+		   minter.CurrentMintVolume = sdk.Coins{}
+		   app.MintKeeper.SetMinter(ctx, minter)
+
+		   return fromVM, nil
+		*/
+	})
+
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
+	// TODO ? app.ScopedICAHostKeeper = scopedICAHostKeeper
 
 	return app
 }
