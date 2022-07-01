@@ -218,16 +218,16 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	UpgradeKeeper   upgradekeeper.Keeper
-	EvidenceKeeper  evidencekeeper.Keeper
-	OracleKeeper    oraclekeeper.Keeper
-	CoinswapKeeper  coinswapkeeper.Keeper
-	AuctionKeeper   auctionkeeper.Keeper
-	TelemetryKeeper telemetrykeeper.Keeper
-	FeeGrantKeeper  feegrantkeeper.Keeper
-	TransferKeeper  ibctransferkeeper.Keeper
-	GravityKeeper   *gravitykeeper.Keeper
-	Bech32IbcKeeper *bech32ibckeeper.Keeper
+	UpgradeKeeper    upgradekeeper.Keeper
+	EvidenceKeeper   evidencekeeper.Keeper
+	OracleKeeper     oraclekeeper.Keeper
+	CoinswapKeeper   coinswapkeeper.Keeper
+	AuctionKeeper    auctionkeeper.Keeper
+	TelemetryKeeper  telemetrykeeper.Keeper
+	FeeGrantKeeper   feegrantkeeper.Keeper
+	TransferKeeper   ibctransferkeeper.Keeper
+	GravityKeeper    *gravitykeeper.Keeper
+	Bech32IbcKeeper  *bech32ibckeeper.Keeper
 	ICAHostKeeper    icahostkeeper.Keeper
 
 	// make scoped keepers public for test purposes
@@ -384,7 +384,7 @@ func NewOdinApp(
 
 	// create IBC Keeper
 	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
+		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), stakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
@@ -414,6 +414,10 @@ func NewOdinApp(
 	)
 	app.GravityKeeper = &gravityKeeper
 
+	app.StakingKeeper = *stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(), app.GravityKeeper.Hooks()),
+	)
+
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
 		appCodec, keys[icahosttypes.StoreKey],
 		app.GetSubspace(icahosttypes.SubModuleName),
@@ -425,10 +429,6 @@ func NewOdinApp(
 	)
 	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
-
-	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(), app.GravityKeeper.Hooks()),
-	)
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
