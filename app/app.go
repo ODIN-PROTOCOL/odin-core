@@ -1,6 +1,7 @@
 package odin
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
@@ -348,6 +349,28 @@ func NewOdinApp(
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		var pz odinminttypes.Params
+		for _, pair := range pz.ParamSetPairs() {
+			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
+				pz.AllowedMinter = make([]string, 0)
+			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
+				pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
+			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
+				pz.MaxAllowedMintVolume = sdk.Coins{}
+			} else {
+				app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
+			}
+		}
+		app.MintKeeper.SetParams(ctx, pz)
+
+		minter := app.MintKeeper.GetMinter(ctx)
+		minter.CurrentMintVolume = sdk.Coins{}
+		app.MintKeeper.SetMinter(ctx, minter)
+
+		return fromVM, nil
+	})
+
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
 	)
@@ -585,28 +608,6 @@ func NewOdinApp(
 		ctx.Logger().Info("start to run module migrations...")
 
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-
-		/*
-		   var pz odinminttypes.Params
-		   for _, pair := range pz.ParamSetPairs() {
-		      if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
-		         pz.AllowedMinter = make([]string, 0)
-		      } else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
-		         pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
-		      } else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
-		         pz.MaxAllowedMintVolume = sdk.Coins{}
-		      } else {
-		         app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
-		      }
-		   }
-		   app.MintKeeper.SetParams(ctx, pz)
-
-		   minter := app.MintKeeper.GetMinter(ctx)
-		   minter.CurrentMintVolume = sdk.Coins{}
-		   app.MintKeeper.SetMinter(ctx, minter)
-
-		   return fromVM, nil
-		*/
 	})
 
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
