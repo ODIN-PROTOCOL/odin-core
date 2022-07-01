@@ -13,11 +13,17 @@ import (
 	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	"github.com/cosmos/ibc-go/v2/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v2/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
-	ibcclientclient "github.com/cosmos/ibc-go/v2/modules/core/02-client/client/cli"
+	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
+	icahost "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host"
+	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
+	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client/cli"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -54,6 +60,7 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
+	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -93,11 +100,13 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibc "github.com/cosmos/ibc-go/v2/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v2/modules/core/02-client"
-	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v2/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v2/modules/core/keeper"
+	icahostkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/types"
+	ibc "github.com/cosmos/ibc-go/v3/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
+	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
 
 	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 
@@ -150,6 +159,7 @@ var (
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
+		ica.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -161,6 +171,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
+		icatypes.ModuleName:            nil,
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -198,6 +209,7 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	ICAHostKeeper    icahostkeeper.Keeper
 	UpgradeKeeper    upgradekeeper.Keeper
 	EvidenceKeeper   evidencekeeper.Keeper
 	OracleKeeper     oraclekeeper.Keeper
@@ -211,6 +223,7 @@ type OdinApp struct {
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
+	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -271,7 +284,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey,
+		feegrant.StoreKey, icahosttypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -300,6 +313,7 @@ func NewOdinApp(
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
+	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -367,10 +381,23 @@ func NewOdinApp(
 	)
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper,
+		appCodec, keys[transfertypes.StoreKey], app.GetSubspace(transfertypes.ModuleName), app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper, app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
+	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
+
+	app.ICAHostKeeper = icahostkeeper.NewKeeper(
+		appCodec, keys[icahosttypes.StoreKey],
+		app.GetSubspace(icahosttypes.SubModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		scopedICAHostKeeper,
+		app.MsgServiceRouter(),
+	)
+	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
+	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
 
 	// register the proposal types.
 	govRouter := govtypes.NewRouter()
@@ -408,11 +435,13 @@ func NewOdinApp(
 	app.TelemetryKeeper = telemetrykeeper.NewKeeper(appCodec, encodingConfig.TxConfig, app.BankKeeper, app.StakingKeeper, app.DistrKeeper)
 
 	oracleModule := oracle.NewAppModule(app.OracleKeeper)
+	oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(transfertypes.ModuleName, transferModule)
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModule)
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
+	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
@@ -454,25 +483,32 @@ func NewOdinApp(
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
+		icaModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
 	// over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(
 		upgradetypes.ModuleName, capabilitytypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName, distrtypes.ModuleName,
-		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
-		ibchost.ModuleName,
+		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName,
+		feegrant.ModuleName, paramstypes.ModuleName, vestingtypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
+		govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, transfertypes.ModuleName, telemetrytypes.ModuleName,
+		coinswaptypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
-		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, oracletypes.ModuleName,
+		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, oracletypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
+		govtypes.ModuleName, capabilitytypes.ModuleName, telemetrytypes.ModuleName, coinswaptypes.ModuleName, transfertypes.ModuleName,
+		paramstypes.ModuleName, vestingtypes.ModuleName, evidencetypes.ModuleName, distrtypes.ModuleName, auctiontypes.ModuleName,
+		feegrant.ModuleName, slashingtypes.ModuleName, genutiltypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName, odinminttypes.ModuleName, upgradetypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
 	app.mm.SetOrderInitGenesis(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName,
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName,
-		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName, transfertypes.ModuleName,
-		feegrant.ModuleName,
+		ibchost.ModuleName, icatypes.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName,
+		transfertypes.ModuleName, feegrant.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
+		telemetrytypes.ModuleName,
 	)
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
@@ -533,9 +569,65 @@ func NewOdinApp(
 		}
 	}
 
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
+		// create ICS27 Controller submodule params
+		controllerParams := icacontrollertypes.Params{}
+		// create ICS27 Host submodule params
+		hostParams := icahosttypes.Params{
+			HostEnabled: true,
+			AllowMessages: []string{
+				"/cosmos.authz.v1beta1.MsgExec",
+				"/cosmos.authz.v1beta1.MsgGrant",
+				"/cosmos.authz.v1beta1.MsgRevoke",
+				"/cosmos.bank.v1beta1.MsgSend",
+				"/cosmos.bank.v1beta1.MsgMultiSend",
+				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+				"/cosmos.gov.v1beta1.MsgVoteWeighted",
+				"/cosmos.gov.v1beta1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgDeposit",
+				"/cosmos.gov.v1beta1.MsgVote",
+				"/cosmos.staking.v1beta1.MsgEditValidator",
+				"/cosmos.staking.v1beta1.MsgDelegate",
+				"/cosmos.staking.v1beta1.MsgUndelegate",
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+				"/cosmos.staking.v1beta1.MsgCreateValidator",
+				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+				"/ibc.applications.transfer.v1.MsgTransfer",
+			},
+		}
+
+		ctx.Logger().Info("start to init interchainaccount module...")
+		// initialize ICS27 module
+		icaModule.InitModule(ctx, controllerParams, hostParams)
+		ctx.Logger().Info("start to run module migrations...")
+
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	}
+
+	if upgradeInfo.Name == "v0.5.6" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{icahosttypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
+	app.ScopedICAHostKeeper = scopedICAHostKeeper
 
 	return app
 }
@@ -766,6 +858,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(coinswaptypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(transfertypes.ModuleName)
+	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 
 	return paramsKeeper
 }

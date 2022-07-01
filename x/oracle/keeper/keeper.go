@@ -7,7 +7,7 @@ import (
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
+	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -23,14 +23,14 @@ type Keeper struct {
 	feeCollectorName string
 	paramstore       paramtypes.Subspace
 	owasmVM          *owasm.Vm
-
-	authKeeper    oracletypes.AccountKeeper
-	bankKeeper    oracletypes.BankKeeper
-	distrKeeper   oracletypes.DistrKeeper
-	stakingKeeper oracletypes.StakingKeeper
-	channelKeeper oracletypes.ChannelKeeper
-	portKeeper    oracletypes.PortKeeper
-	scopedKeeper  capabilitykeeper.ScopedKeeper
+	ics4Wrapper      oracletypes.ICS4Wrapper
+	authKeeper       oracletypes.AccountKeeper
+	bankKeeper       oracletypes.BankKeeper
+	distrKeeper      oracletypes.DistrKeeper
+	stakingKeeper    oracletypes.StakingKeeper
+	channelKeeper    oracletypes.ChannelKeeper
+	portKeeper       oracletypes.PortKeeper
+	scopedKeeper     capabilitykeeper.ScopedKeeper
 }
 
 // NewKeeper creates a new oracle Keeper instance.

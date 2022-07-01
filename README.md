@@ -38,7 +38,7 @@ You can find the latest binaries on our [releases](https://github.com/ODIN-PROTO
 
 ### Building from source
 
-To install OdinChain's daemon `odind`, you need to have [Go](https://golang.org/) (version 1.15.0 or later)
+To install OdinChain's daemon `odind`, you need to have [Go](https://golang.org/) (version 1.18.0 or later)
 and [gcc](https://gcc.gnu.org/) installed on our machine. Navigate to the Golang
 project [download page](https://golang.org/dl/) and gcc [install page](https://gcc.gnu.org/install/), respectively for
 install and setup instructions.
