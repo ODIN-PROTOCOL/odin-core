@@ -15,7 +15,12 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
+	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
+	icahost "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host"
+	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
 	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
 	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
@@ -101,6 +106,8 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	icahostkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/types"
 	ibc "github.com/cosmos/ibc-go/v3/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
 	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
@@ -160,6 +167,7 @@ var (
 		feegrantmodule.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
+		ica.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -172,6 +180,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
 		gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		icatypes.ModuleName:            nil,
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -209,7 +218,6 @@ type OdinApp struct {
 	CrisisKeeper     crisiskeeper.Keeper
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	// TODO ICAHostKeeper    icahostkeeper.Keeper
 	UpgradeKeeper   upgradekeeper.Keeper
 	EvidenceKeeper  evidencekeeper.Keeper
 	OracleKeeper    oraclekeeper.Keeper
@@ -220,12 +228,13 @@ type OdinApp struct {
 	TransferKeeper  ibctransferkeeper.Keeper
 	GravityKeeper   *gravitykeeper.Keeper
 	Bech32IbcKeeper *bech32ibckeeper.Keeper
+	ICAHostKeeper    icahostkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
-	// TODO ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
+	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	// Module manager.
 	mm *module.Manager
@@ -286,7 +295,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey,
+		feegrant.StoreKey, icahosttypes.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -315,7 +324,7 @@ func NewOdinApp(
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(transfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
-	// TODO scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
+	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -405,7 +414,6 @@ func NewOdinApp(
 	)
 	app.GravityKeeper = &gravityKeeper
 
-	/* TODO
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
 		appCodec, keys[icahosttypes.StoreKey],
 		app.GetSubspace(icahosttypes.SubModuleName),
@@ -417,7 +425,7 @@ func NewOdinApp(
 	)
 	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
-	*/
+
 	app.StakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(), app.GravityKeeper.Hooks()),
 	)
@@ -464,8 +472,9 @@ func NewOdinApp(
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC) // DONE
-	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)     // DONE
+	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
+	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
+	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
@@ -509,13 +518,14 @@ func NewOdinApp(
 		transferModule,
 		gravity.NewAppModule(gravityKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper),
+		icaModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
 	// over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
 	app.mm.SetOrderBeginBlockers(
 		upgradetypes.ModuleName, capabilitytypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName, distrtypes.ModuleName,
-		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName, ibchost.ModuleName,
+		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName,
 		feegrant.ModuleName, paramstypes.ModuleName, vestingtypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
 		govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, transfertypes.ModuleName, telemetrytypes.ModuleName,
 		coinswaptypes.ModuleName, gravitytypes.ModuleName, bech32ibctypes.ModuleName,
@@ -524,7 +534,7 @@ func NewOdinApp(
 		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, oracletypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
 		govtypes.ModuleName, capabilitytypes.ModuleName, telemetrytypes.ModuleName, coinswaptypes.ModuleName, transfertypes.ModuleName,
 		paramstypes.ModuleName, vestingtypes.ModuleName, evidencetypes.ModuleName, distrtypes.ModuleName, auctiontypes.ModuleName,
-		feegrant.ModuleName, slashingtypes.ModuleName, genutiltypes.ModuleName, ibchost.ModuleName, odinminttypes.ModuleName, upgradetypes.ModuleName,
+		feegrant.ModuleName, slashingtypes.ModuleName, genutiltypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName, odinminttypes.ModuleName, upgradetypes.ModuleName,
 		gravitytypes.ModuleName, bech32ibctypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -532,7 +542,7 @@ func NewOdinApp(
 	app.mm.SetOrderInitGenesis(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, odinminttypes.ModuleName, oracletypes.ModuleName,
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName,
-		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName,
+		ibchost.ModuleName, icatypes.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName,
 		transfertypes.ModuleName, feegrant.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		telemetrytypes.ModuleName, gravitytypes.ModuleName, bech32ibctypes.ModuleName,
 	)
@@ -595,9 +605,65 @@ func NewOdinApp(
 		}
 	}
 
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
+		// create ICS27 Controller submodule params
+		controllerParams := icacontrollertypes.Params{}
+		// create ICS27 Host submodule params
+		hostParams := icahosttypes.Params{
+			HostEnabled: true,
+			AllowMessages: []string{
+				"/cosmos.authz.v1beta1.MsgExec",
+				"/cosmos.authz.v1beta1.MsgGrant",
+				"/cosmos.authz.v1beta1.MsgRevoke",
+				"/cosmos.bank.v1beta1.MsgSend",
+				"/cosmos.bank.v1beta1.MsgMultiSend",
+				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+				"/cosmos.gov.v1beta1.MsgVoteWeighted",
+				"/cosmos.gov.v1beta1.MsgSubmitProposal",
+				"/cosmos.gov.v1beta1.MsgDeposit",
+				"/cosmos.gov.v1beta1.MsgVote",
+				"/cosmos.staking.v1beta1.MsgEditValidator",
+				"/cosmos.staking.v1beta1.MsgDelegate",
+				"/cosmos.staking.v1beta1.MsgUndelegate",
+				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+				"/cosmos.staking.v1beta1.MsgCreateValidator",
+				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+				"/ibc.applications.transfer.v1.MsgTransfer",
+			},
+		}
+
+		ctx.Logger().Info("start to init interchainaccount module...")
+		// initialize ICS27 module
+		icaModule.InitModule(ctx, controllerParams, hostParams)
+		ctx.Logger().Info("start to run module migrations...")
+
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	}
+
+	if upgradeInfo.Name == "v0.5.6" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		storeUpgrades := storetypes.StoreUpgrades{
+			Added: []string{icahosttypes.StoreKey},
+		}
+
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
+	app.ScopedICAHostKeeper = scopedICAHostKeeper
 
 	return app
 }
@@ -828,6 +894,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(coinswaptypes.ModuleName)
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(transfertypes.ModuleName)
+	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(bech32ibctypes.ModuleName)
 
