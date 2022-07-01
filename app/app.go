@@ -626,7 +626,7 @@ func NewOdinApp(
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
-	// app.ScopedICAHostKeeper = scopedICAHostKeeper
+	app.ScopedICAHostKeeper = scopedICAHostKeeper
 
 	return app
 }
