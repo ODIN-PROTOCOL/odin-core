@@ -492,6 +492,9 @@ func NewOdinApp(
 		skipGenesisInvariants = opt
 	}
 
+	bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
+	gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
+
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 	app.mm = module.NewManager(
@@ -516,8 +519,8 @@ func NewOdinApp(
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
-		gravity.NewAppModule(gravityKeeper, app.BankKeeper),
-		bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper),
+		gravityModule,
+		bech32Module,
 		icaModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
@@ -599,10 +602,12 @@ func NewOdinApp(
 	app.SetAnteHandler(anteHandler)
 	app.SetEndBlocker(app.EndBlocker)
 
-	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6-x.1", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
 		// create ICS27 Controller submodule params
-		controllerParams := icacontrollertypes.Params{}
+		controllerParams := icacontrollertypes.Params{
+			ControllerEnabled: true,
+		}
 		// create ICS27 Host submodule params
 		hostParams := icahosttypes.Params{
 			HostEnabled: true,
@@ -637,6 +642,14 @@ func NewOdinApp(
 		icaModule.InitModule(ctx, controllerParams, hostParams)
 		ctx.Logger().Info("start to run module migrations...")
 
+		bech32Module.InitGenesis(ctx, appCodec, appCodec.MustMarshal(&bech32ibctypes.GenesisState{
+			NativeHRP:     "odin",
+			HrpIBCRecords: []bech32ibctypes.HrpIbcRecord{},
+		}))
+
+		app.mm.OrderMigrations = make([]string, 0)
+		app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
+
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
@@ -645,7 +658,7 @@ func NewOdinApp(
 		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
 	}
 
-	if upgradeInfo.Name == "v0.5.6" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	if upgradeInfo.Name == "v0.5.6-x.1" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{icahosttypes.StoreKey},
 		}
