@@ -598,12 +598,6 @@ func NewOdinApp(
 	}
 	app.SetAnteHandler(anteHandler)
 	app.SetEndBlocker(app.EndBlocker)
-	if loadLatest {
-		err := app.LoadLatestVersion()
-		if err != nil {
-			tmos.Exit(err.Error())
-		}
-	}
 
 	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
@@ -658,6 +652,13 @@ func NewOdinApp(
 
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
+	if loadLatest {
+		err := app.LoadLatestVersion()
+		if err != nil {
+			tmos.Exit(err.Error())
+		}
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
