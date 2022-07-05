@@ -184,7 +184,7 @@ func (b InternalBridgeValidators) GetPowers() []uint64 {
 // ValidateBasic performs stateless checks
 func (b InternalBridgeValidators) ValidateBasic() error {
 	if len(b) == 0 {
-		return ErrEmpty
+		return nil
 	}
 	for i := range b {
 		if err := b[i].ValidateBasic(); err != nil {
@@ -203,6 +203,9 @@ func (b InternalBridgeValidators) ValidateBasic() error {
 
 // NewValset returns a new valset
 func NewValset(nonce, height uint64, members InternalBridgeValidators, rewardAmount sdk.Int, rewardToken EthAddress) (*Valset, error) {
+	if members == nil {
+		return &Valset{}, nil
+	}
 	if err := members.ValidateBasic(); err != nil {
 		return nil, sdkerrors.Wrap(err, "invalid members")
 	}
