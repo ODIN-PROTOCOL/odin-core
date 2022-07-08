@@ -537,6 +537,7 @@ func NewOdinApp(
 
 	bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
 	gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
+	wasmModule := wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
@@ -565,7 +566,7 @@ func NewOdinApp(
 		gravityModule,
 		bech32Module,
 		icaModule,
-		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+		wasmModule,
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
@@ -652,7 +653,7 @@ func NewOdinApp(
 	app.SetAnteHandler(anteHandler)
 	app.SetEndBlocker(app.EndBlocker)
 
-	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6-x.3", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	app.UpgradeKeeper.SetUpgradeHandler("v0.5.6-x.4", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
 		// create ICS27 Controller submodule params
 		controllerParams := icacontrollertypes.Params{
@@ -699,6 +700,7 @@ func NewOdinApp(
 
 		app.mm.OrderMigrations = make([]string, 0)
 		app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
+		app.mm.OrderMigrations = append(app.mm.OrderMigrations, wasm.ModuleName)
 
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
