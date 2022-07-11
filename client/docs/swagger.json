@@ -1,0 +1,3702 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ODIN",
+    "description": "ODIN is a decentralized system designed to build a data oracle network (DON) based on an open protocol for interaction between participants and a sustainable economy. In addition to organizing the data oracle network, ODIN involves building a decentralized peer-to-peer data sharing and trading ecosystem. The use cases of ODIN are mainly focused on user generated data apps, Non-fungible tokens, Decentralized Finance applications and others.",
+    "version": "0.5.5"
+  },
+  "tags": [
+    {
+      "name": "Auction",
+      "description": "Auction"
+    },
+    {
+      "name": "Coinswap",
+      "description": "Coinswap"
+    },
+    {
+      "name": "Mint",
+      "description": "Mint"
+    },
+    {
+      "name": "Oracle",
+      "description": "Oracle"
+    },
+    {
+      "name": "Telemetry",
+      "description": "Telemetry"
+    }
+  ],
+  "paths": {
+    "/auction/params": {
+      "get": {
+        "operationId": "AuctionParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auction.QueryParamsResponse"
+                },
+                "example": {
+                  "auction_start_threshold": [
+                    {
+                      "denom": "loki",
+                      "amount": "10000000000"
+                    }
+                  ],
+                  "exchange_rates": [
+                    {
+                      "from": "minigeo",
+                      "to": "loki",
+                      "rate_multiplier": "0.100000000000000000"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auction"
+        ]
+      }
+    },
+    "/auction/status": {
+      "get": {
+        "operationId": "AuctionStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auction.QueryAuctionStatusResponse"
+                },
+                "example": true
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auction"
+        ]
+      }
+    },
+    "/coinswap/params": {
+      "get": {
+        "operationId": "CoinswapParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/coinswap.QueryParamsResponse"
+                },
+                "example": {
+                  "exchange_rates": [
+                    {
+                      "from": "loki",
+                      "to": "odin",
+                      "rate_multiplier": "0.000001000000000000"
+                    },
+                    {
+                      "from": "odin",
+                      "to": "loki",
+                      "rate_multiplier": "1000000.000000000000000000"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Coinswap"
+        ]
+      }
+    },
+    "/coinswap/rate/{from}/{to}": {
+      "get": {
+        "summary": "Counts queries the number of data sources, oracle scripts, and requests.",
+        "operationId": "Rate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/coinswap.QueryRateResponse"
+                },
+                "example": {
+                  "rate": "1000000.000000000000000000",
+                  "initial_rate": "1.000000000000000000"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request error response. To solve the error, check that the denoms are entered correctly. They must be two versions (little and large) of the same coin. For example, loki and odin.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/grpc.gateway.runtime.Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "from",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Coinswap"
+        ]
+      }
+    },
+    "/mint/annual_provisions": {
+      "get": {
+        "summary": "Inflation returns current annual provisions.",
+        "operationId": "AnnualProvisions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryAnnualProvisionsResponse"
+                },
+                "example": {
+                  "annual_provisions": "189801421997.621310592231083057"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/current_mint_volume": {
+      "get": {
+        "summary": "CurrentMintVolume returns current minted coins volume.",
+        "operationId": "CurrentMintVolume",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryCurrentMintVolumeResponse"
+                },
+                "example": {
+                  "current_mint_volume": [
+                    {
+                      "denom": "loki",
+                      "amount": "100500"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/integration_addresses/{network_name}": {
+      "get": {
+        "summary": "Inflation returns integration address.",
+        "operationId": "IntegrationAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryIntegrationAddressResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "network_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/parameters": {
+      "get": {
+        "summary": "Inflation returns current inflation.",
+        "operationId": "Inflation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryInflationResponse"
+                },
+                "example": {
+                  "inflation": "0.134813177627161211"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/params": {
+      "get": {
+        "summary": "Params returns the total set of minting parameters.",
+        "operationId": "MintParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryParamsResponse"
+                },
+                "example": {
+                  "params": {
+                    "mint_denom": "loki",
+                    "inflation_rate_change": "0.130000000000000000",
+                    "inflation_max": "0.200000000000000000",
+                    "inflation_min": "0.070000000000000000",
+                    "goal_bonded": "0.670000000000000000",
+                    "blocks_per_year": "10519200",
+                    "max_withdrawal_per_time": [
+                      {
+                        "denom": "loki",
+                        "amount": "100000000000"
+                      }
+                    ],
+                    "integration_addresses": {
+                      "bsc": "0xa19Df1199CeEfd7831576f1D055E454364337633",
+                      "eth": "0xa19Df1199CeEfd7831576f1D055E454364337634"
+                    },
+                    "mint_air": true,
+                    "eligible_accounts_pool": [
+                      "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "odin1xvzq479t52cdv57d3j6293macxfakjph42xegv"
+                    ],
+                    "max_allowed_mint_volume": [],
+                    "allowed_mint_denoms": [],
+                    "allowed_minter": []
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/mint/treasury_pool": {
+      "get": {
+        "summary": "Inflation returns current treasury pool.",
+        "operationId": "TreasuryPool",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mint.QueryTreasuryPoolResponse"
+                },
+                "example": {
+                  "treasury_pool": [
+                    {
+                      "denom": "loki",
+                      "amount": "100000000000"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1020000"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Mint"
+        ]
+      }
+    },
+    "/oracle/active_validators": {
+      "get": {
+        "summary": "ActiveValidators queries all active oracle validators.",
+        "operationId": "ActiveValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryActiveValidatorsResponse"
+                },
+                "example": {
+                  "address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "power": "461290946"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/counts": {
+      "get": {
+        "summary": "Counts queries the number of data sources, oracle scripts, and requests.",
+        "operationId": "Counts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryCountsResponse"
+                },
+                "example": {
+                  "data_source_count": "4",
+                  "oracle_script_count": "3",
+                  "request_count": "26"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data/{data_hash}": {
+      "get": {
+        "summary": "Data queries the data source or oracle script script for given file hash.",
+        "operationId": "Data",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataResponse"
+                },
+                "example": {
+                  "data": "#!/usr/bin/env python3\nimport requests\nimport sys\n\nURL = \"https://qrng.anu.edu.au/API/jsonI.php?length={length}&type=uint8\"\nHEADERS = {\"Content-Type\": \"application/json\"}\n\n\ndef main(length):\n    url = URL.format(length=length)\n    r = requests.post(url, headers=HEADERS)\n    r.raise_for_status()\n\n    pxs = r.json()\n\n    res = [str(i) for i in pxs['data']]\n\n    return \" \".join(res)\n\n\nif __name__ == \"__main__\":\n    try:\n        print(main(sys.argv[1]))\n    except Exception as e:\n        print(e, file=sys.stderr)\n        sys.exit(1)}"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data_provider_accumulated_reward/{data_provider_address}": {
+      "get": {
+        "summary": "DataProviderAccumulatedReward queries oracle info of reporter rewards for given reporter address.",
+        "operationId": "DataProviderAccumulatedReward",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataProviderAccumulatedRewardResponse"
+                },
+                "example": {
+                  "accumulated_reward": [
+                    {
+                      "denom": "string",
+                      "amount": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odin prefix.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataProviderAccumulatedRewardResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_provider_address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data_provider_reward": {
+      "get": {
+        "operationId": "DataProviderReward",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataProviderRewardResponse"
+                },
+                "example": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1"
+                    }
+                ]
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data_providers_pool": {
+      "post": {
+        "operationId": "DataProvidersPool",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataProvidersPoolResponse"
+                },
+                "example": {
+                  "pool": [
+                    {
+                      "denom": "loki",
+                      "amount": "1000000000"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data_sources": {
+      "get": {
+        "summary": "DataSources queries data sources info.",
+        "operationId": "DataSources",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataSourcesResponse"
+                },
+                "example": [
+                  {
+                    "id": "1",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Random numbers",
+                    "filename": "8590975b33eba0ca4c293abae3859435b596226046ab5548665bfcb6125a1973",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "2",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Osmosis pools info",
+                    "filename": "d2c57251a60577916a7eec00086e909709d03e789616fd025daa178244d1a5f2",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "3",
+                    "owner": "odin1qkcew3z8amynvzpwcw0vla63elns0g98ueslfm",
+                    "name": "_)_)_)_)_)_)",
+                    "description": "_)__)_)_)_)_))",
+                    "filename": "f4885d7dfd17e274f03e7419d6e96af4e5fabcc248af7bbd2829b72d7c389ca1",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "4",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "TWAP from Osmosis",
+                    "filename": "f88bdd83ba15da95735a1a4d7db4acffa50b59ac04759a08a0cb7df577024f07",
+                    "fee": [
+                      {
+                        "denom": "loki",
+                        "amount": "1000000"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/data_sources/{data_source_id}": {
+      "get": {
+        "summary": "DataSource queries data source info for given data source id.",
+        "operationId": "DataSource",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataSourceResponse"
+                },
+                "example": {
+                  "id": "1",
+                  "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "name": "Random numbers",
+                  "filename": "8590975b33eba0ca4c293abae3859435b596226046ab5548665bfcb6125a1973",
+                  "fee": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A bad request response. To solve the error, try to input different (lesser) number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryDataSourceResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/oracle_scripts": {
+      "get": {
+        "summary": "OracleScripts queries all oracle scripts with pagination.",
+        "operationId": "OracleScripts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryOracleScriptsResponse"
+                },
+                "example": [
+                  {
+                    "id": "1",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Random numbers",
+                    "description": "Generate random numbers",
+                    "filename": "5b6cf5a37ebbb1346a30d8c6372b7b94fdeee50eef662db7d315ac5a369b201b",
+                    "schema": "{length:i64}/{numbers:[i64]}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
+                  },
+                  {
+                    "id": "2",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "Osmosis pools info",
+                    "filename": "ed2cdcaa573a936d2005fd05a4d579aa511704e45c9544e387760341dc6c82f6",
+                    "schema": "{base_symbol:string,quote_symbol:string}/{pools:[{pool_id:u64,price:string,liquidity:string,liquidity_atom:string}]}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmPTQQo987ivosWD7ibXijuADm5ggL7G4vhhnZuzgSDC2c"
+                  },
+                  {
+                    "id": "3",
+                    "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "name": "TWAP from Osmosis",
+                    "filename": "4da8c3201e47a55daacfdec2a41b00be33cab98ae37fbc7c051d0e66017bb3b0",
+                    "schema": "{from:string, to:string, range:u64}/{twap:string}",
+                    "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/oracle_scripts/{oracle_script_id}": {
+      "get": {
+        "summary": "OracleScript queries oracle script info for given oracle script id.",
+        "operationId": "OracleScript",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryOracleScriptResponse"
+                },
+                "example": {
+                  "id": "1",
+                  "owner": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "name": "Random numbers",
+                  "description": "Generate random numbers",
+                  "filename": "5b6cf5a37ebbb1346a30d8c6372b7b94fdeee50eef662db7d315ac5a369b201b",
+                  "schema": "{length:i64}/{numbers:[i64]}",
+                  "source_code_url": "https://ipfs.io/ipfs/QmXcbGLM8UjrX4bKFjckvuQ5w1raLYp45xyQpVxbk84mqv"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A bad request response. To solve the error, try to input different (lesser) number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryOracleScriptResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "oracle_script_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/params": {
+      "get": {
+        "summary": "Params queries the oracle parameters.",
+        "operationId": "OracleParams",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryParamsResponse"
+                },
+                "example": {
+                  "max_raw_request_count": "12",
+                  "max_ask_count": "16",
+                  "expiration_block_count": "100",
+                  "base_owasm_gas": "150000",
+                  "per_validator_request_gas": "30000",
+                  "sampling_try_count": "3",
+                  "oracle_reward_percentage": "70",
+                  "inactive_penalty_duration": "600000000000",
+                  "max_data_size": "1024",
+                  "max_calldata_size": "1024",
+                  "data_provider_reward_per_byte": [
+                    {
+                      "denom": "loki",
+                      "amount": "1"
+                    },
+                    {
+                      "denom": "minigeo",
+                      "amount": "1"
+                    }
+                  ],
+                  "data_provider_reward_threshold": {
+                    "amount": [
+                      {
+                        "denom": "loki",
+                        "amount": "200000000000"
+                      },
+                      {
+                        "denom": "minigeo",
+                        "amount": "200000000000"
+                      }
+                    ],
+                    "blocks": "28820"
+                  },
+                  "reward_decreasing_fraction": "0.200000000000000000",
+                  "data_requester_fee_denoms": [
+                    "loki",
+                    "minigeo"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/reporters/{validator_address}": {
+      "get": {
+        "summary": "Reporters queries all reporters of a given validator address.",
+        "operationId": "Reporters",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryReportersResponse"
+                },
+                "example": [
+                  "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                  "odin10tdtpkn2yylmz4lnduqjz5ezwz5cp8cqxhljnu"
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryReportersResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/request_prices": {
+      "post": {
+        "summary": "RequestPrice queries the latest price on standard price reference oracle script.",
+        "operationId": "RequestPrice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestPriceResponse"
+                },
+                "example": {
+                  "oracle_script_id": "0",
+                  "calldata": null,
+                  "ask_count": "0",
+                  "min_count": "0"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/request_reports/{request_id}": {
+      "get": {
+        "operationId": "RequestReports",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestReportsResponse"
+                },
+                "example": [
+                  {
+                    "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                    "in_before_resolve": true,
+                    "raw_reports": [
+                      {
+                        "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/request_search": {
+      "get": {
+        "summary": "RequestSearch queries the latest request that match the given input.",
+        "operationId": "RequestSearch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestSearchResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "oracle_script_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "calldata",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "ask_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "min_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/requests": {
+      "get": {
+        "summary": "Requests queries all requests with pagination.",
+        "operationId": "Requests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestsResponse"
+                },
+                "example": [
+                  {
+                    "request": {
+                      "id": "1",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAg=",
+                      "requested_validators": [
+                        "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                      ],
+                      "min_count": "1",
+                      "request_height": "315",
+                      "request_time": "1651344012",
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "raw_requests": [
+                        {
+                          "data_source_id": "1",
+                          "calldata": "OA=="
+                        }
+                      ],
+                      "execute_gas": "200000"
+                    },
+                    "result": {
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAg=",
+                      "ask_count": "1",
+                      "min_count": "1",
+                      "request_id": "1",
+                      "ans_count": "1",
+                      "request_time": "1651344012",
+                      "resolve_time": "1651344028",
+                      "resolve_status": 1,
+                      "result": "AAAACAAAAAAAAAB9AAAAAAAAAIsAAAAAAAAAyQAAAAAAAABzAAAAAAAAAC0AAAAAAAAA8QAAAAAAAABlAAAAAAAAAJQ="
+                    },
+                    "reports": [
+                      {
+                        "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                        "in_before_resolve": true,
+                        "raw_reports": [
+                          {
+                            "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "request": {
+                      "id": "2",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAE=",
+                      "requested_validators": [
+                        "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                      ],
+                      "min_count": "1",
+                      "request_height": "29173",
+                      "request_time": "1651498278",
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "raw_requests": [
+                        {
+                          "data_source_id": "1",
+                          "calldata": "MQ=="
+                        }
+                      ],
+                      "execute_gas": "200000"
+                    },
+                    "result": {
+                      "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "oracle_script_id": "1",
+                      "calldata": "AAAAAAAAAAE=",
+                      "ask_count": "1",
+                      "min_count": "1",
+                      "request_id": "2",
+                      "ans_count": "1",
+                      "request_time": "1651498278",
+                      "resolve_time": "1651498294",
+                      "resolve_status": 1,
+                      "result": "AAAAAQAAAAAAAADC"
+                    },
+                    "reports": [
+                      {
+                        "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                        "in_before_resolve": true,
+                        "raw_reports": [
+                          {
+                            "data": "MTk0Cg=="
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/requests/{request_id}": {
+      "get": {
+        "summary": "Request queries request info for given request id.",
+        "operationId": "Request",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestResponse"
+                },
+                "example": {
+                  "request": {
+                    "id": "1",
+                    "oracle_script_id": "1",
+                    "calldata": "AAAAAAAAAAg=",
+                    "requested_validators": [
+                      "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx"
+                    ],
+                    "min_count": "1",
+                    "request_height": "315",
+                    "request_time": "1651344012",
+                    "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "raw_requests": [
+                      {
+                        "data_source_id": "1",
+                        "calldata": "OA=="
+                      }
+                    ],
+                    "execute_gas": "200000"
+                  },
+                  "result": {
+                    "client_id": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                    "oracle_script_id": "1",
+                    "calldata": "AAAAAAAAAAg=",
+                    "ask_count": "1",
+                    "min_count": "1",
+                    "request_id": "1",
+                    "ans_count": "1",
+                    "request_time": "1651344012",
+                    "resolve_time": "1651344028",
+                    "resolve_status": 1,
+                    "result": "AAAACAAAAAAAAAB9AAAAAAAAAIsAAAAAAAAAyQAAAAAAAABzAAAAAAAAAC0AAAAAAAAA8QAAAAAAAABlAAAAAAAAAJQ="
+                  },
+                  "reports": [
+                    {
+                      "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                      "in_before_resolve": true,
+                      "raw_reports": [
+                        {
+                          "data": "MTI1IDEzOSAyMDEgMTE1IDQ1IDI0MSAxMDEgMTQ4Cg=="
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A bad request response.  To solve the error, try to input different (lesser) number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "int64"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/v1/pending_requests/{validator_address}": {
+      "get": {
+        "summary": "PendingRequests queries list of pending request IDs assigned to given validator.",
+        "operationId": "PendingRequests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryPendingRequestsResponse"
+                },
+                "example": {
+                  "request_ids": []
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryPendingRequestsResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "description": "ValidatorAddress is address of a validator",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/v1/reporter/{validator_address}/{reporter_address}": {
+      "get": {
+        "summary": "IsReporter queries grant of account on this validator.",
+        "operationId": "IsReporter",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryIsReporterResponse"
+                },
+                "example": {
+                  "is_reporter": true
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request response. To solve the error, check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryIsReporterResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "description": "ValidatorAddress is a validator address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reporter_address",
+            "description": "ReporterAddress is a candidate account",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/v1/verify_request": {
+      "get": {
+        "summary": "RequestVerification verifies a request to make sure that all information that will be used to report the data is valid",
+        "operationId": "RequestVerification",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestVerificationResponse"
+                },
+                "example": {
+                  "chain_id": "odin-testnet-havi-1",
+                  "validator": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "request_id": "1",
+                  "external_id": "1",
+                  "data_source_id": "1"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request response.  To solve the error, check that the chain ID is entered correctly. Chain ID is available upon request https://node.odin-freya-website.odinprotocol.io/a/status?. Also check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryRequestVerificationResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chain_id",
+            "description": "ChainID is the chain ID to identify which chain ID is used for the\nverification.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "validator",
+            "description": "Validator is a validator address.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "request_id",
+            "description": "RequestID is oracle request ID.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "external_id",
+            "description": "ExternalID is an oracle's external ID.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "reporter",
+            "description": "Reporter is an bech32-encoded public key of the reporter authorized by the\nvalidator.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signature",
+            "description": "Signature is a signature signed by the reporter using reporter's private\nkey.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/oracle/validators/{validator_address}": {
+      "get": {
+        "summary": "Validator queries oracle info of validator for given validator address.",
+        "operationId": "Validator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryValidatorResponse"
+                },
+                "example": {
+                  "status": {
+                    "is_active": true,
+                    "since": "2022-04-30T18:39:45.473490929Z"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "A bad request error response. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oracle.v1.QueryValidatorResponse.BadRequest"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Oracle"
+        ]
+      }
+    },
+    "/telemetry/top_balances": {
+      "get": {
+        "summary": "TopBalances returns all the system balances for specific denom.",
+        "operationId": "TopBalances",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/telemetry.QueryTopBalancesResponse"
+                },
+                "example": [
+                  {
+                    "address": "odin10tdtpkn2yylmz4lnduqjz5ezwz5cp8cqxhljnu",
+                    "coins": [
+                      {
+                        "denom": "loki",
+                        "amount": "1000000"
+                      }
+                    ]
+                  },
+                  {
+                    "address": "odin1af7asqllm92xrxeamn4dk0y3ux7u66y0jg9mch",
+                    "coins": [
+                      {
+                        "denom": "loki",
+                        "amount": "199000000"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "denom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/top_validators": {
+      "get": {
+        "summary": "TopValidators returns validators blocks and stake percentage.",
+        "operationId": "TopValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/telemetry.QueryTopValidatorsResponse"
+                },
+                "example": [
+                  {
+                    "validator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                    "blocks_count": "12640",
+                    "stake_percentage": "26.165906133599085384"
+                  },
+                  {
+                    "validator_address": "odinvaloper1xvzq479t52cdv57d3j6293macxfakjphchj8pc",
+                    "blocks_count": "11118",
+                    "stake_percentage": "24.515774109603973677"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validator_blocks": {
+      "get": {
+        "summary": "ValidatorBlocks returns validator approved blocks.",
+        "operationId": "ValidatorBlocks",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/telemetry.QueryValidatorBlocksResponse"
+                },
+                "example": {
+                  "blocks": [
+                    {
+                      "height": "2",
+                      "time": "2022-05-25T16:33:49.061Z",
+                      "txs_count": "5",
+                      "reward": [
+                        {
+                          "denom": "loki",
+                          "amount": "2500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "desc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validator_by_cons_addr/{consensus_address}": {
+      "get": {
+        "operationId": "ValidatorByConsAddr",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/telemetry.QueryValidatorByConsAddrResponse"
+                },
+                "example": {
+                  "operator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                  "consensus_pubkey": {
+                    "type": "tendermint/PubKeySecp256k1",
+                    "value": "A1urSdYlpXog8AXPrVOrp0ozMppKq6nxWt92fvXacVmf"
+                  },
+                  "status": 3,
+                  "tokens": "461290946",
+                  "delegator_shares": "461290946.000000000000000000",
+                  "description": {
+                    "moniker": "validator1",
+                    "details": "odin validator"
+                  },
+                  "unbonding_time": "1970-01-01T00:00:00Z",
+                  "commission": {
+                    "commission_rates": {
+                      "rate": "0.100000000000000000",
+                      "max_rate": "0.200000000000000000",
+                      "max_change_rate": "0.010000000000000000"
+                    },
+                    "update_time": "2021-12-09T12:00:00.075067653Z"
+                  },
+                  "min_self_delegation": "1"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response. To solve the error, check that the address is entered correctly. The address must follow the hex format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/grpc.gateway.runtime.Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "consensus_address",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    },
+    "/telemetry/validators_balances": {
+      "get": {
+        "summary": "ExtendedValidators returns validators balances.",
+        "operationId": "ExtendedValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/telemetry.QueryExtendedValidatorsResponse"
+                },
+                "example": {
+                  "validators": [
+                    {
+                      "operator_address": "odinvaloper1xvzq479t52cdv57d3j6293macxfakjphchj8pc",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "Ase5YRhn5OawYEHrh19b6nQML/s5cswBqMe1pXZv3T0t"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "432200000",
+                      "delegator_shares": "432200000.000000000000000000",
+                      "description": {
+                        "moniker": "validator2",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper103dy45q2kkseam578ff8m5chc94sumfsqm8x8e",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A5Jhx2WoY1z2ojR00hvWq7sbeYwiY5d8PN8ao37QnyWz"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "425135384",
+                      "delegator_shares": "425135384.000000000000000000",
+                      "description": {
+                        "moniker": "validator3",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper1n2v6762eefhcks340ws3rrg6788arnx7lcnrux",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A8Fqh0EmjxsLSchd71p8+5o3/TFpku8bOOrVoN1Wz4Tn"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "444320245",
+                      "delegator_shares": "444320245.000000000000000000",
+                      "description": {
+                        "moniker": "validator4",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    },
+                    {
+                      "operator_address": "odinvaloper1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgav3rjx",
+                      "consensus_pubkey": {
+                        "@type": "/cosmos.crypto.secp256k1.PubKey",
+                        "key": "A1urSdYlpXog8AXPrVOrp0ozMppKq6nxWt92fvXacVmf"
+                      },
+                      "jailed": false,
+                      "status": "BOND_STATUS_BONDED",
+                      "tokens": "461290946",
+                      "delegator_shares": "461290946.000000000000000000",
+                      "description": {
+                        "moniker": "validator1",
+                        "identity": "",
+                        "website": "",
+                        "security_contact": "",
+                        "details": "odin validator"
+                      },
+                      "unbonding_height": "0",
+                      "unbonding_time": "1970-01-01T00:00:00Z",
+                      "commission": {
+                        "commission_rates": {
+                          "rate": "0.100000000000000000",
+                          "max_rate": "0.200000000000000000",
+                          "max_change_rate": "0.010000000000000000"
+                        },
+                        "update_time": "2021-12-09T12:00:00.075067653Z"
+                      },
+                      "min_self_delegation": "1"
+                    }
+                  ],
+                  "balances": [
+                    {
+                      "address": "odin1xvzq479t52cdv57d3j6293macxfakjph42xegv",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99594000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin103dy45q2kkseam578ff8m5chc94sumfsdxncwd",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99990000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin1n2v6762eefhcks340ws3rrg6788arnx7j98a4j",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "99990000000"
+                        }
+                      ]
+                    },
+                    {
+                      "address": "odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj",
+                      "coins": [
+                        {
+                          "denom": "loki",
+                          "amount": "1001782211877"
+                        },
+                        {
+                          "denom": "minigeo",
+                          "amount": "229753052"
+                        }
+                      ]
+                    }
+                  ],
+                  "pagination": {
+                    "next_key": null,
+                    "total": "4"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "format": "boolean"
+            }
+          }
+        ],
+        "tags": [
+          "Telemetry"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://node.odin-freya-website.odinprotocol.io/a/api"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "auction.AuctionStatus": {
+        "type": "object",
+        "properties": {
+          "pending": {
+            "type": "boolean",
+            "format": "boolean",
+            "title": "Pending is the status of the auction (active or not)"
+          }
+        }
+      },
+      "auction.Params": {
+        "type": "object",
+        "properties": {
+          "auction_start_threshold": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "title": "AuctionStartThreshold is the threshold at which the auction starts"
+          },
+          "exchange_rates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/coinswap.Exchange"
+            },
+            "title": "ExchangeRate is a rate for buying coins throw the auction"
+          }
+        },
+        "description": "Params is the data structure that keeps the parameters of the auction module."
+      },
+      "auction.QueryAuctionStatusResponse": {
+        "type": "object",
+        "properties": {
+          "auction_status": {
+            "$ref": "#/components/schemas/auction.AuctionStatus"
+          }
+        },
+        "description": "QueryAuctionStatusResponse is response type for the Query/Status RPC method."
+      },
+      "auction.QueryParamsResponse": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/auction.Params"
+          }
+        },
+        "description": "QueryCountsResponse is response type for the Query/Params RPC method."
+      },
+      "coinswap.Exchange": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "rate_multiplier": {
+            "type": "string"
+          }
+        }
+      },
+      "cosmos.base.v1beta1.Coin": {
+        "type": "object",
+        "properties": {
+          "denom": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+      },
+      "google.protobuf.Any": {
+        "type": "object",
+        "properties": {
+          "type_url": {
+            "type": "string",
+            "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+          },
+          "value": {
+            "type": "string",
+            "format": "byte",
+            "description": "Must be a valid serialized protocol buffer of the above specified type."
+          }
+        },
+        "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := &pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": ,\n      \"lastName\": \n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+      },
+      "grpc.gateway.runtime.Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/google.protobuf.Any"
+            }
+          }
+        }
+      },
+      "coinswap.Params": {
+        "type": "object",
+        "properties": {
+          "exchange_rates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/coinswap.Exchange"
+            }
+          }
+        }
+      },
+      "coinswap.QueryParamsResponse": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/coinswap.Params"
+          }
+        },
+        "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+      },
+      "coinswap.QueryRateResponse": {
+        "type": "object",
+        "properties": {
+          "rate": {
+            "type": "string"
+          },
+          "initial_rate": {
+            "type": "string"
+          }
+        },
+        "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+      },
+      "mint.Params": {
+        "type": "object",
+        "properties": {
+          "mint_denom": {
+            "type": "string",
+            "title": "type of coin to mint"
+          },
+          "inflation_rate_change": {
+            "type": "string",
+            "title": "maximum annual change in inflation rate"
+          },
+          "inflation_max": {
+            "type": "string",
+            "title": "maximum inflation rate"
+          },
+          "inflation_min": {
+            "type": "string",
+            "title": "minimum inflation rate"
+          },
+          "goal_bonded": {
+            "type": "string",
+            "title": "goal of percent bonded atoms"
+          },
+          "blocks_per_year": {
+            "type": "string",
+            "format": "uint64",
+            "title": "expected blocks per year"
+          },
+          "max_withdrawal_per_time": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "title": "max amount to withdraw per time"
+          },
+          "integration_addresses": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "map with smart contracts addresses"
+          },
+          "mint_air": {
+            "type": "boolean",
+            "format": "boolean",
+            "title": "flag if minting from air"
+          },
+          "eligible_accounts_pool": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "eligible to withdraw accounts"
+          },
+          "max_allowed_mint_volume": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "title": "max allowed mint volume"
+          },
+          "allowed_mint_denoms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "allowed mint denoms"
+          },
+          "allowed_minter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "allowed minter"
+          }
+        },
+        "description": "Params holds parameters for the mint module."
+      },
+      "mint.QueryAnnualProvisionsResponse": {
+        "type": "object",
+        "properties": {
+          "annual_provisions": {
+            "type": "string"
+          }
+        },
+        "description": "QueryAnnualProvisionsResponse is response type for the\nQuery/QueryAnnualProvisions RPC method."
+      },
+      "mint.QueryCurrentMintVolumeResponse": {
+        "type": "object",
+        "properties": {
+          "current_mint_volume": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "QueryCurrentMintVolumeResponse is response type for the Query/QueryCurrentMintVolume\nRPC method."
+      },
+      "mint.QueryInflationResponse": {
+        "type": "object",
+        "properties": {
+          "inflation": {
+            "type": "string"
+          }
+        },
+        "description": "QueryInflationResponse is response type for the Query/QueryInflation RPC\nmethod."
+      },
+      "mint.QueryIntegrationAddressResponse": {
+        "type": "object",
+        "properties": {
+          "integration_address": {
+            "type": "string"
+          }
+        },
+        "description": "QueryIntegrationAddressResponse is response type for the\nQuery/QueryEthIntegrationAddress RPC method."
+      },
+      "mint.QueryParamsResponse": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/mint.Params"
+          }
+        },
+        "description": "QueryParamsResponse is response type for the Query/QueryParams RPC\nmethod."
+      },
+      "mint.QueryTreasuryPoolResponse": {
+        "type": "object",
+        "properties": {
+          "treasury_pool": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "QueryTreasuryPoolResponse is response type for the Query/QueryTreasuryPool\nRPC method."
+      },
+      "cosmos.base.query.v1beta1.PageRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "format": "byte",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set."
+          },
+          "offset": {
+            "type": "string",
+            "format": "uint64",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set."
+          },
+          "limit": {
+            "type": "string",
+            "format": "uint64",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app."
+          },
+          "count_total": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set."
+          },
+          "reverse": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43"
+          }
+        },
+        "description": "message SomeRequest {\n         Foo some_parameter = 1;\n         PageRequest pagination = 2;\n }",
+        "title": "PageRequest is to be embedded in gRPC request messages for efficient\npagination. Ex:"
+      },
+      "cosmos.base.query.v1beta1.PageResponse": {
+        "type": "object",
+        "properties": {
+          "next_key": {
+            "type": "string",
+            "format": "byte",
+            "description": "next_key is the key to be passed to PageRequest.key to\nquery the next page most efficiently. It will be empty if\nthere are no more results."
+          },
+          "total": {
+            "type": "string",
+            "format": "uint64",
+            "title": "total is total number of results available if PageRequest.count_total\nwas set, its value is undefined otherwise"
+          }
+        },
+        "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
+      },
+      "cosmos.base.v1beta1.Balance": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "address is the address of the balance holder."
+          },
+          "coins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "description": "coins defines the different coins this balance holds."
+          }
+        }
+      },
+      "cosmos.base.v1beta1.BondStatus": {
+        "type": "string",
+        "enum": [
+          "BOND_STATUS_UNSPECIFIED",
+          "BOND_STATUS_UNBONDED",
+          "BOND_STATUS_UNBONDING",
+          "BOND_STATUS_BONDED"
+        ],
+        "default": "BOND_STATUS_UNSPECIFIED",
+        "description": "BondStatus is the status of a validator.\n\n - BOND_STATUS_UNSPECIFIED: UNSPECIFIED defines an invalid validator status.\n - BOND_STATUS_UNBONDED: UNBONDED defines a validator that is not bonded.\n - BOND_STATUS_UNBONDING: UNBONDING defines a validator that is unbonding.\n - BOND_STATUS_BONDED: BONDED defines a validator that is bonded."
+      },
+      "cosmos.base.v1beta1.Commission": {
+        "type": "object",
+        "properties": {
+          "commission_rates": {
+            "$ref": "#/components/schemas/cosmos.base.v1beta1.CommissionRates"
+          },
+          "update_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "update_time is the last time the commission rate was changed."
+          }
+        },
+        "description": "Commission defines commission parameters for a given validator."
+      },
+      "cosmos.base.v1beta1.CommissionRates": {
+        "type": "object",
+        "properties": {
+          "rate": {
+            "type": "string",
+            "description": "rate is the commission rate charged to delegators, as a fraction."
+          },
+          "max_rate": {
+            "type": "string",
+            "description": "max_rate defines the maximum commission rate which validator can ever charge, as a fraction."
+          },
+          "max_change_rate": {
+            "type": "string",
+            "description": "max_change_rate defines the maximum daily increase of the validator commission, as a fraction."
+          }
+        },
+        "description": "CommissionRates defines the initial commission rates to be used for creating\na validator."
+      },
+      "cosmos.base.v1beta1.Description": {
+        "type": "object",
+        "properties": {
+          "moniker": {
+            "type": "string",
+            "description": "moniker defines a human-readable name for the validator."
+          },
+          "identity": {
+            "type": "string",
+            "description": "identity defines an optional identity signature (ex. UPort or Keybase)."
+          },
+          "website": {
+            "type": "string",
+            "description": "website defines an optional website link."
+          },
+          "security_contact": {
+            "type": "string",
+            "description": "security_contact defines an optional email for security contact."
+          },
+          "details": {
+            "type": "string",
+            "description": "details define other optional details."
+          }
+        },
+        "description": "Description defines a validator description."
+      },
+      "cosmos.base.v1beta1.Validator": {
+        "type": "object",
+        "properties": {
+          "operator_address": {
+            "type": "string",
+            "description": "operator_address defines the address of the validator's operator; bech encoded in JSON."
+          },
+          "consensus_pubkey": {
+            "$ref": "#/components/schemas/google.protobuf.Any"
+          },
+          "jailed": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "jailed defined whether the validator has been jailed from bonded status or not."
+          },
+          "status": {
+            "$ref": "#/components/schemas/cosmos.base.v1beta1.BondStatus"
+          },
+          "tokens": {
+            "type": "string",
+            "description": "tokens define the delegated tokens (incl. self-delegation)."
+          },
+          "delegator_shares": {
+            "type": "string",
+            "description": "delegator_shares defines total shares issued to a validator's delegators."
+          },
+          "description": {
+            "$ref": "#/components/schemas/cosmos.base.v1beta1.Description"
+          },
+          "unbonding_height": {
+            "type": "string",
+            "format": "int64",
+            "description": "unbonding_height defines, if unbonding, the height at which this validator has begun unbonding."
+          },
+          "unbonding_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "unbonding_time defines, if unbonding, the min time for the validator to complete unbonding."
+          },
+          "commission": {
+            "$ref": "#/components/schemas/cosmos.base.v1beta1.Commission"
+          },
+          "min_self_delegation": {
+            "type": "string",
+            "description": "min_self_delegation is the validator's self declared minimum self delegation."
+          }
+        },
+        "description": "Validator defines a validator, together with the total amount of the\nValidator's bond shares and their exchange rate to coins. Slashing results in\na decrease in the exchange rate, allowing correct calculation of future\nundelegations without iterating over delegators. When coins are delegated to\nthis validator, the validator is credited with a delegation whose number of\nbond shares is based on the amount of coins delegated divided by the current\nexchange rate. Voting power can be calculated as total bonded shares\nmultiplied by exchange rate."
+      },
+      "oracle.v1.DataSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "fee": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "DataSource is the data structure for storing data sources in the storage."
+      },
+      "oracle.v1.IBCSource": {
+        "type": "object",
+        "properties": {
+          "source_channel": {
+            "type": "string",
+            "title": "SourceChannel"
+          },
+          "source_port": {
+            "type": "string",
+            "title": "SourcePort"
+          }
+        },
+        "title": "IBCSource"
+      },
+      "oracle.v1.OracleScript": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string"
+          },
+          "source_code_url": {
+            "type": "string"
+          }
+        },
+        "description": "OracleScript is the data structure for storing oracle scripts in the storage."
+      },
+      "oracle.v1.Params": {
+        "type": "object",
+        "properties": {
+          "max_raw_request_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "MaxRawRequestCount is the maximum number of data source raw requests a\nrequest can make."
+          },
+          "max_ask_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "MaxAskCount is the maximum number of validators a request can target."
+          },
+          "expiration_block_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "ExpirationBlockCount is the number of blocks a request stays valid before\nit gets expired due to insufficient reports."
+          },
+          "base_owasm_gas": {
+            "type": "string",
+            "format": "uint64",
+            "description": "BaseOwasmGas is the base amount of Cosmos-SDK gas charged for owasm\nexecution."
+          },
+          "per_validator_request_gas": {
+            "type": "string",
+            "format": "uint64",
+            "description": "PerValidatorRequestGas is the amount of Cosmos-SDK gas charged per\nrequested validator."
+          },
+          "sampling_try_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "SamplingTryCount the number of validator sampling tries to pick the highest\nvoting power subset of validators to perform an oracle task."
+          },
+          "oracle_reward_percentage": {
+            "type": "string",
+            "format": "uint64",
+            "description": "OracleRewardPercentage is the percentage of block rewards allocated to\nactive oracle validators."
+          },
+          "inactive_penalty_duration": {
+            "type": "string",
+            "format": "uint64",
+            "description": "InactivePenaltyDuration is the duration period where a validator cannot\nactivate back after missing an oracle report."
+          },
+          "max_data_size": {
+            "type": "string",
+            "format": "uint64",
+            "title": "MaxDataSize is the maximum number of bytes that can be present in the\nreport as the result"
+          },
+          "max_calldata_size": {
+            "type": "string",
+            "format": "uint64",
+            "title": "MaxCalldataSize is the maximum number of bytes that can be present in the\ncalldata"
+          },
+          "data_provider_reward_per_byte": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "title": "DataProviderRewardPerByte is the amount of tokens, user gets for the byte of data provided"
+          },
+          "data_provider_reward_threshold": {
+            "$ref": "#/components/schemas/oracle.v1.RewardThreshold"
+          },
+          "reward_decreasing_fraction": {
+            "type": "string",
+            "format": "byte",
+            "title": "RewardDecreasingFraction is the percentage by which the cost of data per byte is reduced when the limit is reached"
+          },
+          "data_requester_fee_denoms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Denominations that can be used for withdrawing fee from data requesters"
+          }
+        },
+        "description": "Params is the data structure that keeps the parameters of the oracle module."
+      },
+      "oracle.v1.QueryActiveValidatorsResponse": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "description": "QueryActiveValidatorsResponse is response type for the Query/ActiveValidators RPC method."
+      },
+      "oracle.v1.QueryCountsResponse": {
+        "type": "object",
+        "properties": {
+          "data_source_count": {
+            "type": "string",
+            "format": "int64"
+          },
+          "oracle_script_count": {
+            "type": "string",
+            "format": "int64"
+          },
+          "request_count": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+      },
+      "oracle.v1.QueryDataProviderAccumulatedRewardResponse": {
+        "type": "object",
+        "properties": {
+          "accumulated_reward": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "QueryDataProviderAccumulatedRewardResponse is response type for the Query/DataProviderAccumulatedReward RPC method."
+      },
+      "oracle.v1.QueryDataProviderRewardResponse": {
+        "type": "object",
+        "properties": {
+          "reward_per_byte": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "QueryDataProviderRewardResponse is response type for the Query/DataProviderReward RPC method."
+      },
+      "oracle.v1.QueryDataProvidersPoolResponse": {
+        "type": "object",
+        "properties": {
+          "pool": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method."
+      },
+      "oracle.v1.QueryDataResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "description": "QueryDataResponse is response type for the Query/Data RPC method."
+      },
+      "oracle.v1.QueryDataSourceResponse": {
+        "type": "object",
+        "properties": {
+          "data_source": {
+            "$ref": "#/components/schemas/oracle.v1.DataSource"
+          }
+        },
+        "description": "QueryDataSourceResponse is response type for the Query/DataSource RPC method."
+      },
+      "oracle.v1.QueryDataSourcesResponse": {
+        "type": "object",
+        "properties": {
+          "data_sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.DataSource"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryDataSourcesResponse is response type for the Query/DataSources RPC method."
+      },
+      "oracle.v1.QueryIsReporterResponse": {
+        "type": "object",
+        "properties": {
+          "is_reporter": {
+            "type": "boolean",
+            "format": "boolean",
+            "title": "IsReporter is true if this account has been granted by validator"
+          }
+        },
+        "description": "QueryIsReporterResponse is response type for the Query/Reporter RPC method."
+      },
+      "oracle.v1.QueryOracleScriptResponse": {
+        "type": "object",
+        "properties": {
+          "oracle_script": {
+            "$ref": "#/components/schemas/oracle.v1.OracleScript"
+          }
+        },
+        "description": "QueryOracleScriptResponse is response type for the Query/OracleScript RPC method."
+      },
+      "oracle.v1.QueryOracleScriptsResponse": {
+        "type": "object",
+        "properties": {
+          "oracle_scripts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.OracleScript"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC method."
+      },
+      "oracle.v1.QueryParamsResponse": {
+        "type": "object",
+        "properties": {
+          "params": {
+            "$ref": "#/components/schemas/oracle.v1.Params"
+          }
+        },
+        "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+      },
+      "oracle.v1.QueryPendingRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "request_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "int64"
+            },
+            "title": "RequestIDs is a list of pending request IDs assigned to the given validator"
+          }
+        },
+        "description": "QueryPendingRequestResponse is response type for the Query/PendingRequests RPC method."
+      },
+      "oracle.v1.QueryReportersResponse": {
+        "type": "object",
+        "properties": {
+          "reporter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "QueryReportersResponse is response type for the Query/Reporters RPC method."
+      },
+      "oracle.v1.QueryRequestPriceResponse": {
+        "type": "object",
+        "properties": {
+          "oracle_script_id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "calldata": {
+            "type": "string",
+            "format": "byte"
+          },
+          "ask_count": {
+            "type": "string",
+            "format": "int64"
+          },
+          "min_count": {
+            "type": "string",
+            "format": "int64"
+          }
+        },
+        "description": "QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method."
+      },
+      "oracle.v1.QueryRequestReportsResponse": {
+        "type": "object",
+        "properties": {
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.Report"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryRequestReportsResponse is response type for the Query/RequestReports RPC method."
+      },
+      "oracle.v1.QueryRequestResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/oracle.v1.Request"
+          },
+          "result": {
+            "$ref": "#/components/schemas/oracle.v1.Result"
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.Report"
+            },
+            "title": "Reports is list of result data as raw reports that are fulfilled by\nassigned validators"
+          }
+        },
+        "description": "QueryRequestResponse is response type for the Query/Request RPC method."
+      },
+      "oracle.v1.QueryRequestResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "400"
+          },
+          "result": {
+            "type": "string",
+            "example": "id: 999: request not found"
+          }
+        },
+        "description": "QueryRequestResponse is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
+      },
+      "oracle.v1.QueryReportersResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "400"
+          },
+          "result": {
+            "type": "string",
+            "example": "decoding bech32 failed: invalid checksum (expected 3xsq2g got wvumwr)"
+          }
+        },
+        "description": "QueryReportersResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
+      },
+      "oracle.v1.QueryDataSourceResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "400"
+          },
+          "result": {
+            "type": "string",
+            "example": "id: 10: data source not found"
+          }
+        },
+        "description": "QueryDataSourceResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
+      },
+      "oracle.v1.QueryOracleScriptResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "400"
+          },
+          "result": {
+            "type": "string",
+            "example": "id: 10: oracle script not found"
+          }
+        },
+        "description": "QueryOracleScriptResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, try to input different (lesser) number."
+      },
+      "oracle.v1.QueryDataProviderAccumulatedRewardResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "3"
+          },
+          "message": {
+            "type": "string",
+            "example": "decoding bech32 failed: invalid checksum (expected c9sd90 got gs39am): invalid request"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "description": "QueryDataProviderAccumulatedRewardResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odin prefix."
+      },
+      "oracle.v1.QueryPendingRequestsResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "3"
+          },
+          "message": {
+            "type": "string",
+            "example": "rpc error: code = InvalidArgument desc = unable to parse given validator address: decoding bech32 failed: invalid checksum (expected yvjhfz got gav3rj): invalid request"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "description": "QueryPendingRequestsResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
+      },
+      "oracle.v1.QueryIsReporterResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "3"
+          },
+          "message": {
+            "type": "string",
+            "example": "decoding bech32 failed: invalid checksum (expected c9sd90 got gs39am): invalid request"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "description": "QueryRequestResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the validator and reporter addresses are entered correctly. The addresses must follow the bech32 format and have the odinvaloper prefix for validator and odin prefix for reporter."
+      },
+      "oracle.v1.QueryRequestVerificationResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "3"
+          },
+          "message": {
+            "type": "string",
+            "example": "rpc error: code = FailedPrecondition desc = provided chain ID does not match the validator's chain ID; expected odin-testnet-havi-1, got : invalid request"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "description": "QueryRequestVerificationResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the chain ID is entered correctly. Chain ID is available upon request :26657/status?."
+      },
+      "oracle.v1.QueryValidatorResponse.BadRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "3"
+          },
+          "message": {
+            "type": "string",
+            "example": "decoding bech32 failed: invalid checksum (expected yvjhfz got gav3rj): invalid request"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "description": "QueryValidatorResponse.BadRequest is response type for the Query/Request RPC method. To solve the error, check that the address is entered correctly. The address must follow the bech32 format and have the odinvaloper prefix."
+      },
+      "oracle.v1.QueryRequestSearchResponse": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/oracle.v1.Request"
+          },
+          "result": {
+            "$ref": "#/components/schemas/oracle.v1.Result"
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.Report"
+            }
+          }
+        },
+        "description": "QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method."
+      },
+      "oracle.v1.QueryRequestVerificationResponse": {
+        "type": "object",
+        "properties": {
+          "chain_id": {
+            "type": "string",
+            "title": "ChainID is the targeted chain ID"
+          },
+          "validator": {
+            "type": "string",
+            "title": "Validator is the targeted validator address"
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uint64",
+            "title": "RequestID is the ID of targeted request"
+          },
+          "external_id": {
+            "type": "string",
+            "format": "uint64",
+            "title": "ExternalID is the ID of targeted oracle's external data source"
+          },
+          "data_source_id": {
+            "type": "string",
+            "format": "uint64",
+            "title": "DataSourceID is the ID of a data source that relates to the targeted\nexternal ID"
+          }
+        },
+        "title": "QueryRequestVerificationResponse is response type for the\nQuery/RequestVerification RPC"
+      },
+      "oracle.v1.QueryRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.RequestResult"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryRequestsResponse is response type for the Query/Requests RPC method."
+      },
+      "oracle.v1.QueryValidatorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/oracle.v1.ValidatorStatus"
+          }
+        },
+        "description": "QueryValidatorResponse is response type for the Query/Validator RPC method."
+      },
+      "oracle.v1.RawReport": {
+        "type": "object",
+        "properties": {
+          "external_id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "exit_code": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "data": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "description": "RawRequest is the data structure for storing raw reporter in the storage."
+      },
+      "oracle.v1.RawRequest": {
+        "type": "object",
+        "properties": {
+          "external_id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "data_source_id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "calldata": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "description": "RawRequest is the data structure for storing raw requests in the storage."
+      },
+      "oracle.v1.Report": {
+        "type": "object",
+        "properties": {
+          "validator": {
+            "type": "string"
+          },
+          "in_before_resolve": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "raw_reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.RawReport"
+            }
+          }
+        },
+        "description": "Report is the data structure for storing reports in the storage."
+      },
+      "oracle.v1.Request": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "oracle_script_id": {
+            "type": "string",
+            "format": "int64"
+          },
+          "calldata": {
+            "type": "string",
+            "format": "byte"
+          },
+          "requested_validators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "min_count": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "request_height": {
+            "type": "string",
+            "format": "int64"
+          },
+          "request_time": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "raw_requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.RawRequest"
+            }
+          },
+          "ibc_source": {
+            "$ref": "#/components/schemas/oracle.v1.IBCSource"
+          },
+          "execute_gas": {
+            "type": "string",
+            "format": "uint64"
+          }
+        },
+        "description": "Request is the data structure for storing requests in the storage."
+      },
+      "oracle.v1.RequestResult": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/oracle.v1.Request"
+          },
+          "result": {
+            "$ref": "#/components/schemas/oracle.v1.Result"
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oracle.v1.Report"
+            }
+          }
+        }
+      },
+      "oracle.v1.ResolveStatus": {
+        "type": "string",
+        "enum": [
+          "RESOLVE_STATUS_OPEN_UNSPECIFIED",
+          "RESOLVE_STATUS_SUCCESS",
+          "RESOLVE_STATUS_FAILURE",
+          "RESOLVE_STATUS_EXPIRED"
+        ],
+        "default": "RESOLVE_STATUS_OPEN_UNSPECIFIED",
+        "description": "ResolveStatus encodes the status of an oracle request.\n\n - RESOLVE_STATUS_OPEN_UNSPECIFIED: Open - the request is not yet resolved.\n - RESOLVE_STATUS_SUCCESS: Success - the request has been resolved successfully with no errors.\n - RESOLVE_STATUS_FAILURE: Failure - an error occured during the request's resolve call.\n - RESOLVE_STATUS_EXPIRED: Expired - the request does not get enough reports from validator within the\ntimeframe."
+      },
+      "oracle.v1.Result": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "ClientID is the unique identifier of this oracle request, as specified by\nthe client. This same unique ID will be sent back to the requester with the\noracle response."
+          },
+          "oracle_script_id": {
+            "type": "string",
+            "format": "int64",
+            "description": "OracleScriptID is the unique identifier of the oracle script to be\nexecuted."
+          },
+          "calldata": {
+            "type": "string",
+            "format": "byte",
+            "description": "Calldata is the calldata bytes available for oracle executor to read."
+          },
+          "ask_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "AskCount is the number of validators that are requested to respond to this\noracle request. Higher value means more security, at a higher gas cost."
+          },
+          "min_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "MinCount is the minimum number of validators necessary for the request to\nproceed to the execution phase. Higher value means more security, at the\ncost of liveness."
+          },
+          "request_id": {
+            "type": "string",
+            "format": "int64",
+            "description": "RequestID is BandChain's unique identifier for this oracle request."
+          },
+          "ans_count": {
+            "type": "string",
+            "format": "uint64",
+            "description": "AnsCount is the number of validators among to the asked validators that\nactually responded to this oracle request prior to this oracle request\nbeing resolved."
+          },
+          "request_time": {
+            "type": "string",
+            "format": "int64",
+            "description": "RequestTime is the UNIX epoch time at which the request was sent to\nBandChain."
+          },
+          "resolve_time": {
+            "type": "string",
+            "format": "int64",
+            "description": "ResolveTime is the UNIX epoch time at which the request was resolved to the\nfinal result."
+          },
+          "resolve_status": {
+            "$ref": "#/components/schemas/oracle.v1.ResolveStatus"
+          },
+          "result": {
+            "type": "string",
+            "format": "byte",
+            "description": "Result is the final aggregated value only available if status if OK."
+          }
+        },
+        "title": "Result encodes a result of request and store in chain"
+      },
+      "oracle.v1.RewardThreshold": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            },
+            "title": "Amount is the maximum amount of tokens that can be paid for data"
+          },
+          "blocks": {
+            "type": "string",
+            "format": "uint64",
+            "title": "Blocks is the number of blocks during which the sum of the reward should not exceed total_reward_amount"
+          }
+        },
+        "title": "RewardThreshold"
+      },
+      "oracle.v1.ValidatorStatus": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "ValidatorStatus maintains whether a validator is an active oracle provider."
+      },
+      "telemetry.QueryExtendedValidatorsResponse": {
+        "type": "object",
+        "properties": {
+          "validators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Validator"
+            }
+          },
+          "balances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Balance"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        }
+      },
+      "telemetry.QueryTopBalancesResponse": {
+        "type": "object",
+        "properties": {
+          "balances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Balance"
+            },
+            "title": "map transactionsCount = 1;"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryTopBalancesResponse is response type for the Query/TopBalances RPC method."
+      },
+      "telemetry.QueryTopValidatorsResponse": {
+        "type": "object",
+        "properties": {
+          "top_validators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/telemetry.ValidatorBlockStats"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryTopValidatorsResponse is response type for the Query/TopValidators RPC method."
+      },
+      "telemetry.QueryValidatorBlocksResponse": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/telemetry.ValidatorBlock"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/cosmos.base.query.v1beta1.PageResponse"
+          }
+        },
+        "description": "QueryValidatorBlocksResponse is response type for the Query/ValidatorBlocks RPC method."
+      },
+      "telemetry.QueryValidatorByConsAddrResponse": {
+        "type": "object",
+        "properties": {
+          "validator": {
+            "$ref": "#/components/schemas/cosmos.base.v1beta1.Validator"
+          }
+        }
+      },
+      "telemetry.ValidatorBlock": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "txs_count": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "reward": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/cosmos.base.v1beta1.Coin"
+            }
+          }
+        },
+        "description": "ValidatorBlock represents block approved by validator."
+      },
+      "telemetry.ValidatorBlockStats": {
+        "type": "object",
+        "properties": {
+          "validator_address": {
+            "type": "string"
+          },
+          "blocks_count": {
+            "type": "string",
+            "format": "uint64"
+          },
+          "stake_percentage": {
+            "type": "string"
+          }
+        },
+        "description": "ValidatorBlockStats represents validators blocks and stake percentage."
+      }
+    }
+  }
+}
