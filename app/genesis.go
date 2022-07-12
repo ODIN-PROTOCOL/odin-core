@@ -2,10 +2,17 @@ package odin
 
 import (
 	"encoding/json"
+	"github.com/CosmWasm/wasmd/x/wasm"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
+	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"time"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -86,5 +93,9 @@ func NewDefaultGenesisState() GenesisState {
 		coinswaptypes.ModuleName:   coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
+		icatypes.ModuleName:        ica.AppModuleBasic{}.DefaultGenesis(cdc),
+		bech32ibctypes.ModuleName:  bech32ibc.AppModuleBasic{}.DefaultGenesis(cdc),
+		gravitytypes.ModuleName:    gravity.AppModuleBasic{}.DefaultGenesis(cdc),
+		wasm.ModuleName:            wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
