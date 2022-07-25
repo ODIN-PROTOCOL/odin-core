@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	owasm "github.com/bandprotocol/go-owasm/api"
+
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
 	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -124,12 +127,10 @@ import (
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 
+	"github.com/CosmWasm/wasmd/x/wasm"
 	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
 	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
-	owasm "github.com/bandprotocol/go-owasm/api"
-
-	"github.com/CosmWasm/wasmd/x/wasm"
 )
 
 const (
@@ -518,6 +519,7 @@ func NewOdinApp(
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
 	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
+	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.
@@ -685,7 +687,19 @@ func NewOdinApp(
 				"/cosmos.staking.v1beta1.MsgCreateValidator",
 				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
 				"/ibc.applications.transfer.v1.MsgTransfer",
+				sdk.MsgTypeURL(&wasmtypes.MsgStoreCode{}),
+				sdk.MsgTypeURL(&wasmtypes.MsgInstantiateContract{}),
+				sdk.MsgTypeURL(&wasmtypes.MsgExecuteContract{}),
 			},
+		}
+
+		if manager := app.SnapshotManager(); manager != nil {
+			err = manager.RegisterExtensions(
+				wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+			)
+			if err != nil {
+				panic("failed to register snapshot extension: " + err.Error())
+			}
 		}
 
 		ctx.Logger().Info("start to init interchainaccount module...")
