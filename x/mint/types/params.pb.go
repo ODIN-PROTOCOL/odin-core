@@ -50,7 +50,7 @@ type Params struct {
 	// max allowed mint volume
 	MaxAllowedMintVolume github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,11,rep,name=max_allowed_mint_volume,json=maxAllowedMintVolume,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"max_allowed_mint_volume" yaml:"max_allowed_mint_volume"`
 	// allowed mint denoms
-	AllowedMintDenoms []*AllowedDenom `protobuf:"bytes,12,rep,name=allowed_mint_denoms,json=allowedMintDenoms,proto3" json:"allowed_mint_denoms,omitempty" yaml:"allowed_mint_denoms"`
+	AllowedMintDenoms []AllowedDenom `protobuf:"bytes,12,rep,name=allowed_mint_denoms,json=allowedMintDenoms,proto3" json:"allowed_mint_denoms,omitempty" yaml:"allowed_mint_denoms"`
 	// allowed minter
 	AllowedMinter []string `protobuf:"bytes,13,rep,name=allowed_minter,json=allowedMinter,proto3" json:"allowed_minter,omitempty" yaml:"allowed_minter"`
 }
@@ -136,7 +136,7 @@ func (m *Params) GetMaxAllowedMintVolume() github_com_cosmos_cosmos_sdk_types.Co
 	return nil
 }
 
-func (m *Params) GetAllowedMintDenoms() []*AllowedDenom {
+func (m *Params) GetAllowedMintDenoms() []AllowedDenom {
 	if m != nil {
 		return m.AllowedMintDenoms
 	}
@@ -1036,7 +1036,7 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AllowedMintDenoms = append(m.AllowedMintDenoms, &AllowedDenom{})
+			m.AllowedMintDenoms = append(m.AllowedMintDenoms, AllowedDenom{})
 			if err := m.AllowedMintDenoms[len(m.AllowedMintDenoms)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}

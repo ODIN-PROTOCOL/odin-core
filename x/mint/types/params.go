@@ -39,7 +39,7 @@ func NewParams(
 	integrationAddresses map[string]string,
 	eligibleAccountsPool []string,
 	maxAllowedMintVolume sdk.Coins,
-	allowedMintDenoms []*AllowedDenom,
+	allowedMintDenoms []AllowedDenom,
 	AllowedMinter []string,
 
 ) Params {
@@ -75,7 +75,7 @@ func DefaultParams() Params {
 		MaxWithdrawalPerTime: sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
 		EligibleAccountsPool: []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
 		MaxAllowedMintVolume: sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))},
-		AllowedMintDenoms:    []*AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}},
+		AllowedMintDenoms:    []AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}},
 		AllowedMinter:        []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
 	}
 }
@@ -318,7 +318,7 @@ func validateMaxAllowedMintVolume(i interface{}) error {
 }
 
 func validateAllowedMintDenoms(i interface{}) error {
-	_, ok := i.([]*AllowedDenom)
+	_, ok := i.([]AllowedDenom)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
