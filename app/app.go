@@ -366,7 +366,7 @@ func NewOdinApp(
 			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
 				pz.AllowedMinter = make([]string, 0)
 			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
-				pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
+				pz.AllowedMintDenoms = make([]odinminttypes.AllowedDenom, 0)
 			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
 				pz.MaxAllowedMintVolume = sdk.Coins{}
 			} else {
