@@ -23,7 +23,7 @@ import (
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	me "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	owasm "github.com/bandprotocol/go-owasm/api"
+	owasm "github.com/slandymani/go-owasm/api"
 )
 
 const (
