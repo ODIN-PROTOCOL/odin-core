@@ -5,7 +5,7 @@
 
 </p>
 
-<p align="center">OdinChain - Decentralized Data Delivery Network<br/><br/>
+<p align="center">OdinChain - Decentralized Data Delivery Network.<br/><br/>
 
 <a href="https://pkg.go.dev/badge/github.com/ODIN-PROTOCOL/odin-core">
     <img src="https://pkg.go.dev/badge/github.com/ODIN-PROTOCOL/odin-core">
