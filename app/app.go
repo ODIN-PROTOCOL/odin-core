@@ -693,15 +693,6 @@ func NewOdinApp(
 			},
 		}
 
-		if manager := app.SnapshotManager(); manager != nil {
-			err = manager.RegisterExtensions(
-				wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
-			)
-			if err != nil {
-				panic("failed to register snapshot extension: " + err.Error())
-			}
-		}
-
 		ctx.Logger().Info("start to init interchainaccount module...")
 		// initialize ICS27 module
 		icaModule.InitModule(ctx, controllerParams, hostParams)
@@ -724,13 +715,22 @@ func NewOdinApp(
 		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
 	}
 
-	if upgradeInfo.Name == "v0.5.6-x.4" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	if upgradeInfo.Name == "v0.5.6-x.5" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{icahosttypes.StoreKey, wasm.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey},
 		}
 
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	}
+
+	if manager := app.SnapshotManager(); manager != nil {
+		err = manager.RegisterExtensions(
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+		)
+		if err != nil {
+			panic("failed to register snapshot extension: " + err.Error())
+		}
 	}
 
 	if loadLatest {
