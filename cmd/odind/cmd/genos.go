@@ -17,7 +17,7 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/bandprotocol/go-owasm/api"
+	"github.com/slandymani/go-owasm/api"
 )
 
 // AddGenesisOracleScriptCmd returns add-oracle-script cobra Command.

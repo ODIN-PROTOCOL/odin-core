@@ -121,7 +121,7 @@ func (s GenesisState) ValidateBasic() error {
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:             DefaultParams(),
-		GravityNonces:      GravityNonces{},
+		GravityNonces:      DefaultGravityNonces(),
 		Valsets:            []Valset{},
 		ValsetConfirms:     []MsgValsetConfirm{},
 		Batches:            []OutgoingTxBatch{},
@@ -156,6 +156,18 @@ func DefaultParams() *Params {
 		ValsetReward:                 sdk.Coin{Denom: "", Amount: sdk.ZeroInt()},
 		BridgeActive:                 true,
 		EthereumBlacklist:            []string{},
+	}
+}
+
+func DefaultGravityNonces() GravityNonces {
+	return GravityNonces{
+		LatestValsetNonce:         0,
+		LastObservedNonce:         0,
+		LastSlashedValsetNonce:    0,
+		LastSlashedBatchBlock:     0,
+		LastSlashedLogicCallBlock: 0,
+		LastTxPoolId:              0,
+		LastBatchId:               0,
 	}
 }
 

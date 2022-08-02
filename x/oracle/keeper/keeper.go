@@ -13,7 +13,7 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	owasm "github.com/bandprotocol/go-owasm/api"
+	owasm "github.com/slandymani/go-owasm/api"
 )
 
 type Keeper struct {
