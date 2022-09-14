@@ -12,6 +12,8 @@ DEB_LIB_DIR ?= /usr/lib
 ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
 endif
+build_tags += $(BUILD_TAGS)
+build_tags := $(strip $(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=odind \
