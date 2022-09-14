@@ -8,7 +8,7 @@ DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bu
 
 DEB_BIN_DIR ?= /usr/local/bin
 DEB_LIB_DIR ?= /usr/lib
-
+build_tags = ""
 ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
 endif
