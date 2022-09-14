@@ -15,11 +15,16 @@ endif
 build_tags += $(BUILD_TAGS)
 build_tags := $(strip $(build_tags))
 
+whitespace :=
+whitespace += $(whitespace)
+comma := ,
+build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
+
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
 	-X github.com/cosmos/cosmos-sdk/version.ServerName=odind \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags)"
+	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
