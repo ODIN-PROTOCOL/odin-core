@@ -26,6 +26,10 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
 
+
+ldflags += $(LDFLAGS)
+ldflags := $(strip $(ldflags))
+
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
 
 all: install
