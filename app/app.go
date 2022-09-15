@@ -748,8 +748,7 @@ func NewOdinApp(
 
 	if upgradeInfo.Name == "v0.6.1" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
-			//TODO: `StoreKey` instead of `ModuleName`
-			Added: []string{authz.ModuleName},
+			Added: []string{authzkeeper.StoreKey},
 		}
 
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
