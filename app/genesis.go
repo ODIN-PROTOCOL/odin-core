@@ -9,6 +9,8 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
+	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
 	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
 	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
@@ -89,6 +91,7 @@ func NewDefaultGenesisState() GenesisState {
 		ibchost.ModuleName:         ibc.AppModuleBasic{}.DefaultGenesis(cdc),
 		upgradetypes.ModuleName:    upgrade.AppModuleBasic{}.DefaultGenesis(cdc),
 		evidencetypes.ModuleName:   evidence.AppModuleBasic{}.DefaultGenesis(cdc),
+		authz.ModuleName:           authzmodule.AppModuleBasic{}.DefaultGenesis(cdc),
 		oracletypes.ModuleName:     cdc.MustMarshalJSON(oracleGenesis),
 		coinswaptypes.ModuleName:   coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
