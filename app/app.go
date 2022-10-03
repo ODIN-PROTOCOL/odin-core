@@ -730,7 +730,7 @@ func NewOdinApp(
 
 			consensusParams := app.GetConsensusParams(ctx)
 			consensusParams.Block.MaxGas = 100000000
-			consensusParams.Block.MaxBytes = 22020096
+			consensusParams.Block.MaxBytes = 5020096
 			app.StoreConsensusParams(ctx, consensusParams)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
