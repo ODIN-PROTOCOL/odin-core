@@ -723,10 +723,15 @@ func NewOdinApp(
 	})
 
 	app.UpgradeKeeper.SetUpgradeHandler(
-		"v0.6.1",
+		"v0.6.2",
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			app.mm.OrderMigrations = make([]string, 0)
 			app.mm.OrderMigrations = append(app.mm.OrderMigrations, authz.ModuleName)
+
+			consensusParams := app.GetConsensusParams(ctx)
+			consensusParams.Block.MaxGas = 100000000
+			consensusParams.Block.MaxBytes = 22020096
+			app.StoreConsensusParams(ctx, consensusParams)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
@@ -746,7 +751,7 @@ func NewOdinApp(
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
 
-	if upgradeInfo.Name == "v0.6.1" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	if upgradeInfo.Name == "v0.6.2" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		storeUpgrades := storetypes.StoreUpgrades{
 			Added: []string{authzkeeper.StoreKey},
 		}
