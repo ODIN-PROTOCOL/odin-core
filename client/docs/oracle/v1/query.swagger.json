@@ -1,0 +1,1602 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "oracle/v1/query.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/oracle/active_validators": {
+      "get": {
+        "summary": "ActiveValidators queries all active oracle validators.",
+        "operationId": "ActiveValidators",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryActiveValidatorsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/counts": {
+      "get": {
+        "summary": "Counts queries the number of data sources, oracle scripts, and requests.",
+        "operationId": "Counts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryCountsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data/{data_hash}": {
+      "get": {
+        "summary": "Data queries the data source or oracle script script for given file hash.",
+        "operationId": "Data",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_hash",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data_provider_accumulated_reward/{data_provider_address}": {
+      "get": {
+        "summary": "DataProviderAccumulatedReward queries oracle info of reporter rewards for given reporter address.",
+        "operationId": "DataProviderAccumulatedReward",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataProviderAccumulatedRewardResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_provider_address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data_provider_reward": {
+      "get": {
+        "operationId": "DataProviderReward",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataProviderRewardResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data_providers_pool": {
+      "post": {
+        "operationId": "DataProvidersPool",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataProvidersPoolResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data_sources": {
+      "get": {
+        "summary": "DataSources queries data sources info.",
+        "operationId": "DataSources",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataSourcesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/data_sources/{data_source_id}": {
+      "get": {
+        "summary": "DataSource queries data source info for given data source id.",
+        "operationId": "DataSource",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryDataSourceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "data_source_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/oracle_scripts": {
+      "get": {
+        "summary": "OracleScripts queries all oracle scripts with pagination.",
+        "operationId": "OracleScripts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryOracleScriptsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/oracle_scripts/{oracle_script_id}": {
+      "get": {
+        "summary": "OracleScript queries oracle script info for given oracle script id.",
+        "operationId": "OracleScript",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryOracleScriptResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "oracle_script_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/params": {
+      "get": {
+        "summary": "Params queries the oracle parameters.",
+        "operationId": "Params",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryParamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/reporters/{validator_address}": {
+      "get": {
+        "summary": "Reporters queries all reporters of a given validator address.",
+        "operationId": "Reporters",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryReportersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/request_prices": {
+      "post": {
+        "summary": "RequestPrice queries the latest price on standard price reference oracle script.",
+        "operationId": "RequestPrice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestPriceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/request_reports/{request_id}": {
+      "get": {
+        "operationId": "RequestReports",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestReportsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/request_search": {
+      "get": {
+        "summary": "RequestSearch queries the latest request that match the given input.",
+        "operationId": "RequestSearch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestSearchResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "oracle_script_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "calldata",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "ask_count",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "min_count",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/requests": {
+      "get": {
+        "summary": "Requests queries all requests with pagination.",
+        "operationId": "Requests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pagination.key",
+            "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "pagination.offset",
+            "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.limit",
+            "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "pagination.count_total",
+            "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "pagination.reverse",
+            "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/requests/{request_id}": {
+      "get": {
+        "summary": "Request queries request info for given request id.",
+        "operationId": "Request",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/v1/pending_requests/{validator_address}": {
+      "get": {
+        "summary": "PendingRequests queries list of pending request IDs assigned to given validator.",
+        "operationId": "PendingRequests",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryPendingRequestsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "description": "ValidatorAddress is address of a validator",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/v1/reporter/{validator_address}/{reporter_address}": {
+      "get": {
+        "summary": "IsReporter queries grant of account on this validator.",
+        "operationId": "IsReporter",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryIsReporterResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "description": "ValidatorAddress is a validator address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "reporter_address",
+            "description": "ReporterAddress is a candidate account",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/v1/verify_request": {
+      "get": {
+        "summary": "RequestVerification verifies a request to make sure that\nall information that will be used to report the data is valid",
+        "operationId": "RequestVerification",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryRequestVerificationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "chain_id",
+            "description": "ChainID is the chain ID to identify which chain ID is used for the\nverification.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "validator",
+            "description": "Validator is a validator address.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "request_id",
+            "description": "RequestID is oracle request ID.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "external_id",
+            "description": "ExternalID is an oracle's external ID.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "reporter",
+            "description": "Reporter is an bech32-encoded public key of the reporter authorized by the\nvalidator.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "signature",
+            "description": "Signature is a signature signed by the reporter using reporter's private\nkey.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    },
+    "/oracle/validators/{validator_address}": {
+      "get": {
+        "summary": "Validator queries oracle info of validator for given validator address.",
+        "operationId": "Validator",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/oracle.v1.QueryValidatorResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "validator_address",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Query"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "cosmos.base.query.v1beta1.PageRequest": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "format": "byte",
+          "description": "key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set."
+        },
+        "offset": {
+          "type": "string",
+          "format": "uint64",
+          "description": "offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set."
+        },
+        "limit": {
+          "type": "string",
+          "format": "uint64",
+          "description": "limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app."
+        },
+        "count_total": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set."
+        },
+        "reverse": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": "reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43"
+        }
+      },
+      "description": "message SomeRequest {\n         Foo some_parameter = 1;\n         PageRequest pagination = 2;\n }",
+      "title": "PageRequest is to be embedded in gRPC request messages for efficient\npagination. Ex:"
+    },
+    "cosmos.base.query.v1beta1.PageResponse": {
+      "type": "object",
+      "properties": {
+        "next_key": {
+          "type": "string",
+          "format": "byte",
+          "description": "next_key is the key to be passed to PageRequest.key to\nquery the next page most efficiently. It will be empty if\nthere are no more results."
+        },
+        "total": {
+          "type": "string",
+          "format": "uint64",
+          "title": "total is total number of results available if PageRequest.count_total\nwas set, its value is undefined otherwise"
+        }
+      },
+      "description": "PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }"
+    },
+    "cosmos.base.v1beta1.Coin": {
+      "type": "object",
+      "properties": {
+        "denom": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "description": "Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto."
+    },
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        },
+        "value": {
+          "type": "string",
+          "format": "byte",
+          "description": "Must be a valid serialized protocol buffer of the above specified type."
+        }
+      },
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := \u0026pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "grpc.gateway.runtime.Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
+    "oracle.v1.DataSource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "fee": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "DataSource is the data structure for storing data sources in the storage."
+    },
+    "oracle.v1.IBCSource": {
+      "type": "object",
+      "properties": {
+        "source_channel": {
+          "type": "string",
+          "title": "SourceChannel"
+        },
+        "source_port": {
+          "type": "string",
+          "title": "SourcePort"
+        }
+      },
+      "title": "IBCSource"
+    },
+    "oracle.v1.OracleScript": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "source_code_url": {
+          "type": "string"
+        }
+      },
+      "description": "OracleScript is the data structure for storing oracle scripts in the storage."
+    },
+    "oracle.v1.Params": {
+      "type": "object",
+      "properties": {
+        "max_raw_request_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "MaxRawRequestCount is the maximum number of data source raw requests a\nrequest can make."
+        },
+        "max_ask_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "MaxAskCount is the maximum number of validators a request can target."
+        },
+        "expiration_block_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "ExpirationBlockCount is the number of blocks a request stays valid before\nit gets expired due to insufficient reports."
+        },
+        "base_owasm_gas": {
+          "type": "string",
+          "format": "uint64",
+          "description": "BaseOwasmGas is the base amount of Cosmos-SDK gas charged for owasm\nexecution."
+        },
+        "per_validator_request_gas": {
+          "type": "string",
+          "format": "uint64",
+          "description": "PerValidatorRequestGas is the amount of Cosmos-SDK gas charged per\nrequested validator."
+        },
+        "sampling_try_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "SamplingTryCount the number of validator sampling tries to pick the highest\nvoting power subset of validators to perform an oracle task."
+        },
+        "oracle_reward_percentage": {
+          "type": "string",
+          "format": "uint64",
+          "description": "OracleRewardPercentage is the percentage of block rewards allocated to\nactive oracle validators."
+        },
+        "inactive_penalty_duration": {
+          "type": "string",
+          "format": "uint64",
+          "description": "InactivePenaltyDuration is the duration period where a validator cannot\nactivate back after missing an oracle report."
+        },
+        "max_data_size": {
+          "type": "string",
+          "format": "uint64",
+          "title": "MaxDataSize is the maximum number of bytes that can be present in the\nreport as the result"
+        },
+        "max_calldata_size": {
+          "type": "string",
+          "format": "uint64",
+          "title": "MaxCalldataSize is the maximum number of bytes that can be present in the\ncalldata"
+        },
+        "data_provider_reward_per_byte": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "title": "DataProviderRewardPerByte is the amount of tokens, user gets for the byte of data provided"
+        },
+        "data_provider_reward_threshold": {
+          "$ref": "#/definitions/oracle.v1.RewardThreshold",
+          "title": "DataProviderRewardThreshold is the maximum amount of tokens that can be paid for data per time"
+        },
+        "reward_decreasing_fraction": {
+          "type": "string",
+          "format": "byte",
+          "title": "RewardDecreasingFraction is the percentage by which the cost of data per byte is reduced when the limit is reached"
+        },
+        "data_requester_fee_denoms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Denominations that can be used for withdrawing fee from data requesters"
+        }
+      },
+      "description": "Params is the data structure that keeps the parameters of the oracle module."
+    },
+    "oracle.v1.QueryActiveValidatorsResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "QueryActiveValidatorsResponse is response type for the Query/ActiveValidators RPC method."
+    },
+    "oracle.v1.QueryCountsResponse": {
+      "type": "object",
+      "properties": {
+        "data_source_count": {
+          "type": "string",
+          "format": "int64"
+        },
+        "oracle_script_count": {
+          "type": "string",
+          "format": "int64"
+        },
+        "request_count": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "QueryCountsResponse is response type for the Query/Count RPC method."
+    },
+    "oracle.v1.QueryDataProviderAccumulatedRewardResponse": {
+      "type": "object",
+      "properties": {
+        "accumulated_reward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryDataProviderAccumulatedRewardResponse is response type for the Query/DataProviderAccumulatedReward RPC method."
+    },
+    "oracle.v1.QueryDataProviderRewardResponse": {
+      "type": "object",
+      "properties": {
+        "reward_per_byte": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryDataProviderRewardResponse is response type for the Query/DataProviderReward RPC method."
+    },
+    "oracle.v1.QueryDataProvidersPoolResponse": {
+      "type": "object",
+      "properties": {
+        "pool": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          }
+        }
+      },
+      "description": "QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method."
+    },
+    "oracle.v1.QueryDataResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "QueryDataResponse is response type for the Query/Data RPC method."
+    },
+    "oracle.v1.QueryDataSourceResponse": {
+      "type": "object",
+      "properties": {
+        "data_source": {
+          "$ref": "#/definitions/oracle.v1.DataSource"
+        }
+      },
+      "description": "QueryDataSourceResponse is response type for the Query/DataSource RPC method."
+    },
+    "oracle.v1.QueryDataSourcesResponse": {
+      "type": "object",
+      "properties": {
+        "data_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.DataSource"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryDataSourcesResponse is response type for the Query/DataSources RPC method."
+    },
+    "oracle.v1.QueryIsReporterResponse": {
+      "type": "object",
+      "properties": {
+        "is_reporter": {
+          "type": "boolean",
+          "format": "boolean",
+          "title": "IsReporter is true if this account has been granted by validator"
+        }
+      },
+      "description": "QueryIsReporterResponse is response type for the Query/Reporter RPC method."
+    },
+    "oracle.v1.QueryOracleScriptResponse": {
+      "type": "object",
+      "properties": {
+        "oracle_script": {
+          "$ref": "#/definitions/oracle.v1.OracleScript"
+        }
+      },
+      "description": "QueryOracleScriptResponse is response type for the Query/OracleScript RPC method."
+    },
+    "oracle.v1.QueryOracleScriptsResponse": {
+      "type": "object",
+      "properties": {
+        "oracle_scripts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.OracleScript"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC method."
+    },
+    "oracle.v1.QueryParamsResponse": {
+      "type": "object",
+      "properties": {
+        "params": {
+          "$ref": "#/definitions/oracle.v1.Params",
+          "description": "pagination defines an optional pagination for the request."
+        }
+      },
+      "description": "QueryParamsResponse is response type for the Query/Params RPC method."
+    },
+    "oracle.v1.QueryPendingRequestsResponse": {
+      "type": "object",
+      "properties": {
+        "request_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "int64"
+          },
+          "title": "RequestIDs is a list of pending request IDs assigned to the given validator"
+        }
+      },
+      "description": "QueryPendingRequestResponse is response type for the Query/PendingRequests RPC method."
+    },
+    "oracle.v1.QueryReportersResponse": {
+      "type": "object",
+      "properties": {
+        "reporter": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "QueryReportersResponse is response type for the Query/Reporters RPC method."
+    },
+    "oracle.v1.QueryRequestPriceResponse": {
+      "type": "object",
+      "properties": {
+        "oracle_script_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte"
+        },
+        "ask_count": {
+          "type": "string",
+          "format": "int64"
+        },
+        "min_count": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "description": "QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method."
+    },
+    "oracle.v1.QueryRequestReportsResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryRequestReportsResponse is response type for the Query/RequestReports RPC method."
+    },
+    "oracle.v1.QueryRequestResponse": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/oracle.v1.Request",
+          "title": "Request is an oracle request"
+        },
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result",
+          "title": "Result is a final form of result data"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          },
+          "title": "Reports is list of result data as raw reports that are fulfilled by\nassigned validators"
+        }
+      },
+      "description": "QueryRequestResponse is response type for the Query/Request RPC method."
+    },
+    "oracle.v1.QueryRequestSearchResponse": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/oracle.v1.Request"
+        },
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          }
+        }
+      },
+      "description": "QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method."
+    },
+    "oracle.v1.QueryRequestVerificationResponse": {
+      "type": "object",
+      "properties": {
+        "chain_id": {
+          "type": "string",
+          "title": "ChainID is the targeted chain ID"
+        },
+        "validator": {
+          "type": "string",
+          "title": "Validator is the targeted validator address"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "RequestID is the ID of targeted request"
+        },
+        "external_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "ExternalID is the ID of targeted oracle's external data source"
+        },
+        "data_source_id": {
+          "type": "string",
+          "format": "uint64",
+          "title": "DataSourceID is the ID of a data source that relates to the targeted\nexternal ID"
+        }
+      },
+      "title": "QueryRequestVerificationResponse is response type for the\nQuery/RequestVerification RPC"
+    },
+    "oracle.v1.QueryRequestsResponse": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.RequestResult"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/cosmos.base.query.v1beta1.PageResponse"
+        }
+      },
+      "description": "QueryRequestsResponse is response type for the Query/Requests RPC method."
+    },
+    "oracle.v1.QueryValidatorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/oracle.v1.ValidatorStatus"
+        }
+      },
+      "description": "QueryValidatorResponse is response type for the Query/Validator RPC method."
+    },
+    "oracle.v1.RawReport": {
+      "type": "object",
+      "properties": {
+        "external_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "exit_code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "RawRequest is the data structure for storing raw reporter in the storage."
+    },
+    "oracle.v1.RawRequest": {
+      "type": "object",
+      "properties": {
+        "external_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "data_source_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "RawRequest is the data structure for storing raw requests in the storage."
+    },
+    "oracle.v1.Report": {
+      "type": "object",
+      "properties": {
+        "validator": {
+          "type": "string"
+        },
+        "in_before_resolve": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "raw_reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.RawReport"
+          }
+        }
+      },
+      "description": "Report is the data structure for storing reports in the storage."
+    },
+    "oracle.v1.Request": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "oracle_script_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte"
+        },
+        "requested_validators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "min_count": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "request_height": {
+          "type": "string",
+          "format": "int64"
+        },
+        "request_time": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "raw_requests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.RawRequest"
+          }
+        },
+        "ibc_source": {
+          "$ref": "#/definitions/oracle.v1.IBCSource"
+        },
+        "execute_gas": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "description": "Request is the data structure for storing requests in the storage."
+    },
+    "oracle.v1.RequestResult": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/oracle.v1.Request"
+        },
+        "result": {
+          "$ref": "#/definitions/oracle.v1.Result"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/oracle.v1.Report"
+          }
+        }
+      }
+    },
+    "oracle.v1.ResolveStatus": {
+      "type": "string",
+      "enum": [
+        "RESOLVE_STATUS_OPEN_UNSPECIFIED",
+        "RESOLVE_STATUS_SUCCESS",
+        "RESOLVE_STATUS_FAILURE",
+        "RESOLVE_STATUS_EXPIRED"
+      ],
+      "default": "RESOLVE_STATUS_OPEN_UNSPECIFIED",
+      "description": "ResolveStatus encodes the status of an oracle request.\n\n - RESOLVE_STATUS_OPEN_UNSPECIFIED: Open - the request is not yet resolved.\n - RESOLVE_STATUS_SUCCESS: Success - the request has been resolved successfully with no errors.\n - RESOLVE_STATUS_FAILURE: Failure - an error occured during the request's resolve call.\n - RESOLVE_STATUS_EXPIRED: Expired - the request does not get enough reports from validator within the\ntimeframe."
+    },
+    "oracle.v1.Result": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "description": "ClientID is the unique identifier of this oracle request, as specified by\nthe client. This same unique ID will be sent back to the requester with the\noracle response."
+        },
+        "oracle_script_id": {
+          "type": "string",
+          "format": "int64",
+          "description": "OracleScriptID is the unique identifier of the oracle script to be\nexecuted."
+        },
+        "calldata": {
+          "type": "string",
+          "format": "byte",
+          "description": "Calldata is the calldata bytes available for oracle executor to read."
+        },
+        "ask_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "AskCount is the number of validators that are requested to respond to this\noracle request. Higher value means more security, at a higher gas cost."
+        },
+        "min_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "MinCount is the minimum number of validators necessary for the request to\nproceed to the execution phase. Higher value means more security, at the\ncost of liveness."
+        },
+        "request_id": {
+          "type": "string",
+          "format": "int64",
+          "description": "RequestID is BandChain's unique identifier for this oracle request."
+        },
+        "ans_count": {
+          "type": "string",
+          "format": "uint64",
+          "description": "AnsCount is the number of validators among to the asked validators that\nactually responded to this oracle request prior to this oracle request\nbeing resolved."
+        },
+        "request_time": {
+          "type": "string",
+          "format": "int64",
+          "description": "RequestTime is the UNIX epoch time at which the request was sent to\nBandChain."
+        },
+        "resolve_time": {
+          "type": "string",
+          "format": "int64",
+          "description": "ResolveTime is the UNIX epoch time at which the request was resolved to the\nfinal result."
+        },
+        "resolve_status": {
+          "$ref": "#/definitions/oracle.v1.ResolveStatus",
+          "description": "ResolveStatus is the status of this oracle request, which can be OK,\nFAILURE, or EXPIRED."
+        },
+        "result": {
+          "type": "string",
+          "format": "byte",
+          "description": "Result is the final aggregated value only available if status if OK."
+        }
+      },
+      "title": "Result encodes a result of request and store in chain"
+    },
+    "oracle.v1.RewardThreshold": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cosmos.base.v1beta1.Coin"
+          },
+          "title": "Amount is the maximum amount of tokens that can be paid for data"
+        },
+        "blocks": {
+          "type": "string",
+          "format": "uint64",
+          "title": "Blocks is the number of blocks during which the sum of the reward should not exceed total_reward_amount"
+        }
+      },
+      "title": "RewardThreshold"
+    },
+    "oracle.v1.ValidatorStatus": {
+      "type": "object",
+      "properties": {
+        "is_active": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "ValidatorStatus maintains whether a validator is an active oracle provider."
+    }
+  }
+}
