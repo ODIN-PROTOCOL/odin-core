@@ -3,6 +3,8 @@ package odin
 import (
 	"bytes"
 	"fmt"
+	"strconv"
+
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
@@ -14,32 +16,34 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	owasm "github.com/slandymani/go-owasm/api"
+
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
-	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
-	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
-	icacontrollertypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/controller/types"
-	icahost "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host"
-	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
-	"github.com/cosmos/ibc-go/v3/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibcclientclient "github.com/cosmos/ibc-go/v3/modules/core/02-client/client/cli"
-	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
-	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/spf13/cast"
 	"io"
 	stdlog "log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
+	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	"github.com/althea-net/bech32-ibc/x/bech32ibc"
+	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
+	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/controller/types"
+	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
+	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
+	"github.com/cosmos/ibc-go/v4/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibcclientclient "github.com/cosmos/ibc-go/v4/modules/core/02-client/client/cli"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/spf13/cast"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -115,13 +119,13 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	icahostkeeper "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/keeper"
-	icahosttypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/host/types"
-	ibc "github.com/cosmos/ibc-go/v3/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v3/modules/core/02-client"
-	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
+	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/types"
+	ibc "github.com/cosmos/ibc-go/v4/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v4/modules/core/02-client"
+	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	bandante "github.com/ODIN-PROTOCOL/odin-core/x/oracle/ante"
@@ -273,6 +277,14 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, ".odin")
+}
+
+type MyAppVersionGetter struct {
+	App *OdinApp
+}
+
+func (m MyAppVersionGetter) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
+	return strconv.FormatUint((m.App.BaseApp.AppVersion()), 10), true
 }
 
 // SetBech32AddressPrefixesAndBip44CoinType sets the global Bech32 prefixes and HD wallet coin type.
@@ -524,12 +536,15 @@ func NewOdinApp(
 	oracleModule := oracle.NewAppModule(app.OracleKeeper)
 	oracleModuleIBC := oracle.NewIBCModule(app.OracleKeeper)
 
+	appVersionGetter := MyAppVersionGetter{App: app}
+
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
 	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
-	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
+	//ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
+	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, appVersionGetter))
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router.

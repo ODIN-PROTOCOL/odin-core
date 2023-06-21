@@ -3,9 +3,11 @@ package oracle
 import (
 	"context"
 	"encoding/json"
-	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
+	"errors"
 	"math"
 	"math/rand"
+
+	ibcexported "github.com/cosmos/ibc-go/v4/modules/core/exported"
 
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -19,9 +21,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
+	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
+	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
@@ -250,21 +252,21 @@ func (am IBCModule) OnChanOpenInit(
 	chanCap *capabilitytypes.Capability,
 	counterparty channeltypes.Counterparty,
 	version string,
-) error {
+) (string, error) {
 	if err := ValidateOracleChannelParams(ctx, am.keeper, order, portID, channelID); err != nil {
-		return err
+		return "", err
 	}
 
 	if version != oracletypes.Version {
-		return sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
+		return "", sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
 	}
 
 	// Claim channel capability passed back by IBC module
 	if err := am.keeper.ClaimCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "", nil
 }
 
 // OnChanOpenTry implements the IBCModule interface
@@ -352,12 +354,12 @@ func (am IBCModule) OnRecvPacket(
 	var data oracletypes.OracleRequestPacketData
 	if err := oracletypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
 		// TODO: Ack with non-deterministic error break consensus?
-		return channeltypes.NewErrorAcknowledgement("cannot unmarshal oracle request packet data")
+		return channeltypes.NewErrorAcknowledgement(errors.New("cannot unmarshal oracle request packet data"))
 	}
 
 	id, err := am.keeper.OnRecvPacket(ctx, packet, data, relayer)
 	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(err.Error())
+		return channeltypes.NewErrorAcknowledgement(errors.New(err.Error()))
 	}
 	return channeltypes.NewResultAcknowledgement(oracletypes.ModuleCdc.MustMarshalJSON(oracletypes.NewOracleRequestPacketAcknowledgement(id)))
 }

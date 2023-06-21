@@ -3,13 +3,14 @@ package keeper
 import (
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
+
 	gravityparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	"testing"
-	"time"
+	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -62,12 +63,12 @@ import (
 	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
 	dbm "github.com/tendermint/tm-db"
 
-	ibctransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibckeeper "github.com/cosmos/ibc-go/v3/modules/core/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
 
-	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
