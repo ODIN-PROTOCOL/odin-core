@@ -3,10 +3,9 @@ package keeper
 import (
 	"fmt"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 func initBridgeDataFromGenesis(ctx sdk.Context, k Keeper, data types.GenesisState) {

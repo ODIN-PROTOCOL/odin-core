@@ -6,14 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestBatches(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -303,7 +302,7 @@ func TestBatches(t *testing.T) {
 
 // tests that batches work with large token amounts, mostly a duplicate of the above
 // tests but using much bigger numbers
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestBatchesFullCoins(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -514,7 +513,7 @@ func TestBatchesFullCoins(t *testing.T) {
 
 // TestManyBatches handles test cases around batch execution, specifically executing multiple batches
 // out of sequential order, which is exactly what happens on the
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestManyBatches(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -613,7 +612,7 @@ func TestManyBatches(t *testing.T) {
 	}
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestPoolTxRefund(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -689,7 +688,7 @@ func TestPoolTxRefund(t *testing.T) {
 	require.Equal(t, sdk.NewInt(104), balances.AmountOf(myDenom))
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestBatchesNotCreatedWhenBridgePaused(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -766,7 +765,7 @@ func TestBatchesNotCreatedWhenBridgePaused(t *testing.T) {
 	require.NotNil(t, gotFirstBatch)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 // test that tokens on the blacklist do not enter batches
 func TestEthereumBlacklistBatches(t *testing.T) {
 	input := CreateTestEnv(t)

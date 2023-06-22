@@ -3,13 +3,12 @@ package gravity
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Have the validators put in a erc20<>denom relation with ERC20DeployedEvent

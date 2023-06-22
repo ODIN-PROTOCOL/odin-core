@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"testing"
+
 	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	legacy "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
-	"testing"
 )
 
 func Test_FromBech32(t *testing.T) {

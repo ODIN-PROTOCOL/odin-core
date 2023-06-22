@@ -3,10 +3,10 @@ package proof
 import (
 	"context"
 	"encoding/json"
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"net/http"
 	"strconv"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"

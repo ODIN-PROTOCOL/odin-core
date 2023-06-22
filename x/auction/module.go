@@ -3,6 +3,7 @@ package auction
 import (
 	"context"
 	"encoding/json"
+
 	auctioncli "github.com/ODIN-PROTOCOL/odin-core/x/auction/client/cli"
 	auctionrest "github.com/ODIN-PROTOCOL/odin-core/x/auction/client/rest"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"

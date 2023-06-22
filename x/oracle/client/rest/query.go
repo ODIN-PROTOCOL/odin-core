@@ -2,6 +2,9 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	hookscommon "github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	hookprice "github.com/ODIN-PROTOCOL/odin-core/hooks/price"
 	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
@@ -10,8 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-	"net/http"
-	"strconv"
 )
 
 func getParamsHandler(clientCtx client.Context) http.HandlerFunc {

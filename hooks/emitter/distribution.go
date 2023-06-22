@@ -1,10 +1,9 @@
 package emitter
 
 import (
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 func (h *Hook) getCurrentRewardAndCurrentRatio(ctx sdk.Context, addr sdk.ValAddress) (string, string) {

@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	gethcommon "github.com/ethereum/go-ethereum/common"
-
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,9 +18,8 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/tendermint/tendermint/libs/log"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // Check that our expected keeper types are implemented

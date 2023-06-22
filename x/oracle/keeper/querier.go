@@ -1,6 +1,8 @@
 package oraclekeeper
 
 import (
+	"strconv"
+
 	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -8,7 +10,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"strconv"
 )
 
 // NewQuerier is the module level router for state queries.

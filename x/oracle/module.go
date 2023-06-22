@@ -7,12 +7,10 @@ import (
 	"math"
 	"math/rand"
 
-	ibcexported "github.com/cosmos/ibc-go/v4/modules/core/exported"
-
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-
+	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
+	oraclerest "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/rest"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -24,12 +22,11 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
 	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+	ibcexported "github.com/cosmos/ibc-go/v4/modules/core/exported"
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
-	oraclerest "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/rest"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

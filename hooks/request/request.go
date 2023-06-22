@@ -3,23 +3,20 @@ package request
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"strings"
-
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/go-gorp/gorp"
-
-	// DB driver
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
-
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/go-gorp/gorp"
+	// DB driver
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // Hook inherits from Odin app hook to save latest request into SQL database.

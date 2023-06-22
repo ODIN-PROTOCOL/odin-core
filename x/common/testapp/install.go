@@ -2,6 +2,8 @@ package testapp
 
 import (
 	"encoding/json"
+	"io/ioutil"
+
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +14,6 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	"io/ioutil"
 )
 
 const (

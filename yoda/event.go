@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type rawRequest struct {

@@ -5,6 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/emitter"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/request"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
@@ -27,11 +31,6 @@ import (
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
-
-	odin "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/ODIN-PROTOCOL/odin-core/app/params"
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/emitter"
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/request"
 )
 
 const (

@@ -3,6 +3,7 @@ package coinswap
 import (
 	"context"
 	"encoding/json"
+
 	coinswapcli "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/client/cli"
 	coinswaprest "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/client/rest"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"

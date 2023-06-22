@@ -1,6 +1,9 @@
 package keeper
 
 import (
+	"sort"
+	"time"
+
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -12,8 +15,6 @@ import (
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"sort"
-	"time"
 )
 
 type Keeper struct {

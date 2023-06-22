@@ -4,12 +4,11 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // 1 cosmos gas is equal to 7 owasm gas

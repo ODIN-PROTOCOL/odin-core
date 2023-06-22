@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 const OutgoingTxBatchSize = 100
 
 // BuildOutgoingTXBatch starts the following process chain:
-// - find bridged denominator for given voucher type
-// - determine if an unexecuted batch is already waiting for this token type, if so confirm the new batch would
-//   have a higher total fees. If not exit without creating a batch
-// - select available transactions from the outgoing transaction pool sorted by fee desc
-// - persist an outgoing batch object with an incrementing ID = nonce
-// - emit an event
+//   - find bridged denominator for given voucher type
+//   - determine if an unexecuted batch is already waiting for this token type, if so confirm the new batch would
+//     have a higher total fees. If not exit without creating a batch
+//   - select available transactions from the outgoing transaction pool sorted by fee desc
+//   - persist an outgoing batch object with an incrementing ID = nonce
+//   - emit an event
 func (k Keeper) BuildOutgoingTXBatch(
 	ctx sdk.Context,
 	contract types.EthAddress,

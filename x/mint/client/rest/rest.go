@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	networkNameTag	= "networkNameTag"
+	networkNameTag = "networkNameTag"
 )
 
 // RegisterRoutes registers minting module REST handlers on the provided router.

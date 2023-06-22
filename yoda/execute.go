@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -15,9 +17,6 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
-
-	app "github.com/ODIN-PROTOCOL/odin-core/app"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

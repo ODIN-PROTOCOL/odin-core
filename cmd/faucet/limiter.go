@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -12,7 +14,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	httpclient "github.com/tendermint/tendermint/rpc/client/http"
-	"time"
 )
 
 const (

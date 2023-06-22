@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+
 	band "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"

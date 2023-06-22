@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	clienttypes "github.com/cosmos/ibc-go/v4/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
-
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasResult checks if the result of this request ID exists in the storage.

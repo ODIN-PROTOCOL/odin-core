@@ -1,10 +1,9 @@
 package emitter
 
 import (
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 var (

@@ -2,6 +2,7 @@ package testapp
 
 import (
 	"encoding/json"
+
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"

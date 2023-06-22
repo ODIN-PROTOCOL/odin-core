@@ -3,13 +3,11 @@ package keeper
 import (
 	"time"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 /////////////////////////////

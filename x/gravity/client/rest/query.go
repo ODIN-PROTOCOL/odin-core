@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 func getValsetRequestHandler(cliCtx client.Context, storeName string) http.HandlerFunc {

@@ -2,11 +2,12 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {

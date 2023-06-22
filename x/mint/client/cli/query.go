@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"

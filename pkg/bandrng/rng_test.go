@@ -3,9 +3,8 @@ package bandrng_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRngRandom(t *testing.T) {

@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
+
 	telemetrycli "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/cli"
 	telemetryrest "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/rest"
 	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"

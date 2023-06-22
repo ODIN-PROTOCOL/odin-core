@@ -1,9 +1,10 @@
 package main
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"sync"
 	"time"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // LimitStore defines the interface for the store of faucet limits.

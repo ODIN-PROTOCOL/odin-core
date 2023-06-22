@@ -6,11 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // Check that distKeeper implements the expected type

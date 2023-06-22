@@ -5,11 +5,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // Tests that the pool is populated with the created transactions before any batch is created

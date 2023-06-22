@@ -4,11 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	"strings"
 	"time"
 
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -16,6 +21,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -23,13 +29,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	tmjson "github.com/tendermint/tendermint/libs/json"
-
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/ODIN-PROTOCOL/odin-core/app/params"
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Hook uses Kafka functionality to act as an event producer for all events in the blockchains.

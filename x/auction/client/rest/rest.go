@@ -2,6 +2,7 @@ package rest
 
 import (
 	"fmt"
+
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/gorilla/mux"

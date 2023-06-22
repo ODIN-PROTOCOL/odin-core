@@ -6,10 +6,9 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // AddToOutgoingPool creates a transaction and adds it to the pool, returns the id of the unbatched transaction

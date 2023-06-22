@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
 	mintcli "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
 	mintrest "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/rest"
@@ -21,7 +23,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"math/rand"
 )
 
 var (

@@ -2,6 +2,7 @@ package testapp
 
 import (
 	"encoding/json"
+
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

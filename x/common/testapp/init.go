@@ -1,9 +1,10 @@
 package testapp
 
 import (
+	"math/rand"
+
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"math/rand"
 )
 
 const (

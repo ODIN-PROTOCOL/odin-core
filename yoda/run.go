@@ -7,6 +7,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
@@ -14,11 +17,6 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	httpclient "github.com/tendermint/tendermint/rpc/client/http"
 	tmtypes "github.com/tendermint/tendermint/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 )
 
 const (

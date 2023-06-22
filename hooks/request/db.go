@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/hex"
+
 	sq "github.com/Masterminds/squirrel"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )

@@ -8,11 +8,10 @@ import (
 	oracleclientcommon "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/version"
-
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 )
 

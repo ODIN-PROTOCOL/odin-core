@@ -5,12 +5,11 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // TODO-JT: carefully look at atomicity of this function

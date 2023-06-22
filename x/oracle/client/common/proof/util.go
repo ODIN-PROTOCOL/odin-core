@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
-	gogotypes "github.com/gogo/protobuf/types"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 	"reflect"
 	"time"
+
+	gogotypes "github.com/gogo/protobuf/types"
+	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 )
 
 // Copied from https://github.com/tendermint/tendermint/blob/master/types/encoding_helper.go
@@ -51,9 +52,9 @@ func cdcEncode(item interface{}) []byte {
 
 // Go lacks a simple and safe way to see if something is a typed nil.
 // See:
-//  - https://dave.cheney.net/2017/08/09/typed-nils-in-go-2
-//  - https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
-//  - https://github.com/golang/go/issues/21538
+//   - https://dave.cheney.net/2017/08/09/typed-nils-in-go-2
+//   - https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
+//   - https://github.com/golang/go/issues/21538
 func isTypedNil(o interface{}) bool {
 	rv := reflect.ValueOf(o)
 	switch rv.Kind() {

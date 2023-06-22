@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 const (

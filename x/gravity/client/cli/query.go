@@ -3,13 +3,11 @@ package cli
 import (
 	"strconv"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/spf13/cobra"
-
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	"github.com/spf13/cobra"
 )
 
 func GetQueryCmd() *cobra.Command {

@@ -3,12 +3,11 @@ package oraclekeeper
 import (
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // valWithPower is an internal type to track validator with voting power inside of AllocateTokens.

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/client/rest"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -17,12 +17,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/client/cli"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/client/rest"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // type check to ensure the interface is properly implemented

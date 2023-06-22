@@ -4,18 +4,17 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/kyokomi/emoji"
-
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/kyokomi/emoji"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

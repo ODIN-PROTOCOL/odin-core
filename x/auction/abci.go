@@ -1,10 +1,9 @@
 package auction
 
 import (
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 )
 
 // handleBeginBlock re-calculates and saves the rolling seed value based on block hashes.
