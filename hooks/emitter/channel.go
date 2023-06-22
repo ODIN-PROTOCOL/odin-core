@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
-	"github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )

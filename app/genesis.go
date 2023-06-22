@@ -2,6 +2,8 @@ package odin
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/CosmWasm/wasmd/x/wasm"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
@@ -9,13 +11,12 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	"github.com/althea-net/bech32-ibc/x/bech32ibc"
+	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
-	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
-	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	"time"
+	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,9 +36,9 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibctypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v3/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
+	ibctypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v4/modules/core"
+	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
