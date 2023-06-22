@@ -3,13 +3,15 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/bank/types"
+	"github.com/tendermint/tendermint/libs/log"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/bank/types"
 )
 
 // WrappedBankKeeper encapsulates the underlying bank keeper and overrides

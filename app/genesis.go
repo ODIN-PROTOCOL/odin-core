@@ -5,16 +5,14 @@ import (
 	"time"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/althea-net/bech32-ibc/x/bech32ibc"
 	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v4/modules/core"
+	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
@@ -34,11 +32,15 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
-	ibctypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v4/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GenesisState defines a type alias for the Odin genesis application state.

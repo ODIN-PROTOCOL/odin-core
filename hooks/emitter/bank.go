@@ -1,8 +1,9 @@
 package emitter
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 // handleMsgSend implements emitter handler for MsgSend.

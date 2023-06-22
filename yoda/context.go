@@ -5,12 +5,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
 
 type FeeEstimationData struct {

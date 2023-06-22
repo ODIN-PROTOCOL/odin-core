@@ -3,10 +3,12 @@ package keeper
 import (
 	"context"
 
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 type Querier struct {

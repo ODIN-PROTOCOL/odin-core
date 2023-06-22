@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -17,15 +19,17 @@ import (
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
-	gethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // Check that our expected keeper types are implemented
-var _ types.StakingKeeper = (*stakingkeeper.Keeper)(nil)
-var _ types.SlashingKeeper = (*slashingkeeper.Keeper)(nil)
-var _ types.DistributionKeeper = (*distrkeeper.Keeper)(nil)
+var (
+	_ types.StakingKeeper      = (*stakingkeeper.Keeper)(nil)
+	_ types.SlashingKeeper     = (*slashingkeeper.Keeper)(nil)
+	_ types.DistributionKeeper = (*distrkeeper.Keeper)(nil)
+)
 
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
@@ -307,7 +311,6 @@ func (k Keeper) HasLastSlashedLogicCallBlock(ctx sdk.Context) bool {
 
 // SetLastSlashedLogicCallBlock sets the latest slashed logic call block height
 func (k Keeper) SetLastSlashedLogicCallBlock(ctx sdk.Context, blockHeight uint64) {
-
 	if k.HasLastSlashedLogicCallBlock(ctx) && k.GetLastSlashedLogicCallBlock(ctx) > blockHeight {
 		panic("Attempted to decrement LastSlashedBatchBlock")
 	}

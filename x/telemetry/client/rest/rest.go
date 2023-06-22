@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	"github.com/gorilla/mux"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
+
+	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {

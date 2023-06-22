@@ -6,13 +6,15 @@ import (
 	"path"
 	"path/filepath"
 
-	app "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

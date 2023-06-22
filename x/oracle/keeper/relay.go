@@ -1,9 +1,11 @@
 package oraclekeeper
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func (k Keeper) OnRecvPacket(

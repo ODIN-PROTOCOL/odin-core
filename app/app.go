@@ -14,32 +14,35 @@ import (
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
-	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
-	v7 "github.com/ODIN-PROTOCOL/odin-core/app/upgrade/v7"
-	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
-	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	//gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
-	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
-	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
-	bandante "github.com/ODIN-PROTOCOL/odin-core/x/oracle/ante"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
-	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	"github.com/althea-net/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
+	icacontrollertypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/controller/types"
+	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
+	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
+	"github.com/cosmos/ibc-go/v4/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v4/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v4/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v4/modules/core/02-client/client/cli"
+	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rakyll/statik/fs"
+	owasm "github.com/slandymani/go-owasm/api"
+	"github.com/spf13/cast"
+	abci "github.com/tendermint/tendermint/abci/types"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	"github.com/tendermint/tendermint/libs/log"
+	tmos "github.com/tendermint/tendermint/libs/os"
+	dbm "github.com/tendermint/tm-db"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -106,31 +109,30 @@ import (
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
-	icacontrollertypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/controller/types"
-	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
-	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
-	icahosttypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
-	"github.com/cosmos/ibc-go/v4/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v4/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v4/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v4/modules/core/02-client/client/cli"
-	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
-	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/rakyll/statik/fs"
-	owasm "github.com/slandymani/go-owasm/api"
-	"github.com/spf13/cast"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	"github.com/tendermint/tendermint/libs/log"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	dbm "github.com/tendermint/tm-db"
+
+	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
+	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
+	v7 "github.com/ODIN-PROTOCOL/odin-core/app/upgrade/v7"
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
+	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	//gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
+	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
+	bandante "github.com/ODIN-PROTOCOL/odin-core/x/oracle/ante"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/telemetry"
+	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 const (
@@ -172,7 +174,7 @@ var (
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
-		//gravity.AppModuleBasic{},
+		// gravity.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		wasm.AppModuleBasic{},
@@ -187,7 +189,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		//gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
+		// gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName: nil,
 		wasm.ModuleName:     {authtypes.Burner},
 	}
@@ -236,7 +238,7 @@ type OdinApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
-	//GravityKeeper    *gravitykeeper.Keeper
+	// GravityKeeper    *gravitykeeper.Keeper
 	Bech32IbcKeeper *bech32ibckeeper.Keeper
 	ICAHostKeeper   icahostkeeper.Keeper
 	WasmKeeper      wasm.Keeper
@@ -299,7 +301,6 @@ func NewOdinApp(
 	homePath string, invCheckPeriod uint, encodingConfig odinappparams.EncodingConfig, appOpts servertypes.AppOptions,
 	disableFeelessReports bool, owasmCacheSize uint32, baseAppOptions ...func(*baseapp.BaseApp),
 ) *OdinApp {
-
 	appCodec := encodingConfig.Marshaler
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
@@ -500,7 +501,7 @@ func NewOdinApp(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		//AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(*app.GravityKeeper)).
+		// AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(*app.GravityKeeper)).
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(*app.Bech32IbcKeeper)).
 		AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasm.EnableAllProposals))
 
@@ -541,7 +542,7 @@ func NewOdinApp(
 	ibcRouter.AddRoute(transfertypes.ModuleName, transferModuleIBC)
 	ibcRouter.AddRoute(oracletypes.ModuleName, oracleModuleIBC)
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule)
-	//ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
+	// ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
 	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, appVersionGetter))
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -554,14 +555,14 @@ func NewOdinApp(
 	/****  Module Options ****/
 
 	/****  Module Options ****/
-	var skipGenesisInvariants = false
+	skipGenesisInvariants := false
 	opt := appOpts.Get(crisis.FlagSkipGenesisInvariants)
 	if opt, ok := opt.(bool); ok {
 		skipGenesisInvariants = opt
 	}
 
 	bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
-	//gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
+	// gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
 	wasmModule := wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
@@ -589,7 +590,7 @@ func NewOdinApp(
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
-		//gravityModule,
+		// gravityModule,
 		bech32Module,
 		icaModule,
 		wasmModule,
@@ -729,7 +730,7 @@ func NewOdinApp(
 		})
 
 		app.mm.OrderMigrations = make([]string, 0)
-		//app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
+		// app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
 		app.mm.OrderMigrations = append(app.mm.OrderMigrations, wasm.ModuleName)
 
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)

@@ -3,11 +3,13 @@ package testapp
 import (
 	"encoding/json"
 
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/cosmos/cosmos-sdk/codec"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 type TestAppBuilder interface {

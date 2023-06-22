@@ -42,9 +42,7 @@ func NewParams(
 	maxAllowedMintVolume sdk.Coins,
 	allowedMintDenoms []*AllowedDenom,
 	AllowedMinter []string,
-
 ) Params {
-
 	return Params{
 		MintDenom:            mintDenom,
 		InflationRateChange:  inflationRateChange,

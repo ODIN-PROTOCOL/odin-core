@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -15,7 +15,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/spf13/cobra"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 func GetTxCmd(storeKey string) *cobra.Command {

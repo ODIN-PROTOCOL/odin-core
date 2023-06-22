@@ -1,9 +1,10 @@
 package oraclekeeper
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GetOracleAccount returns the oracle ModuleAccount

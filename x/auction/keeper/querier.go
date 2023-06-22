@@ -1,12 +1,14 @@
 package keeper
 
 import (
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	abci "github.com/tendermint/tendermint/abci/types"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 )
 
 func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {

@@ -30,8 +30,10 @@ var WasmExtra2 []byte = wat2wasm([]byte(`
 	(memory $memory (export "memory") 17))
 `))
 
-var WasmExtra1FileName string
-var WasmExtra2FileName string
+var (
+	WasmExtra1FileName string
+	WasmExtra2FileName string
+)
 
 func init() {
 	wasm1CompiledHash := sha256.Sum256(compile(WasmExtra1))

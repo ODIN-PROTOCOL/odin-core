@@ -1,10 +1,12 @@
 package emitter
 
 import (
+	"github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
 )
 
 // handleMsgRequestData implements emitter handler for MsgRequestData.

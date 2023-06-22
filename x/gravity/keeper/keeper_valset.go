@@ -6,10 +6,11 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 /////////////////////////////

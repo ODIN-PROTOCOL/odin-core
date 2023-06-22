@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
-	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 )
 
 func EmptyOrDefault(val, defVal string) string {

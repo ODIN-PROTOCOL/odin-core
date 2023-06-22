@@ -3,10 +3,11 @@ package gravity
 import (
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // NewHandler returns a handler for "Gravity" type messages.

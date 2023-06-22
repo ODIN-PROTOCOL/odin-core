@@ -3,10 +3,11 @@ package keeper
 import (
 	"strings"
 
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 // ExchangeDenom exchanges given amount

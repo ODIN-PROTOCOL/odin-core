@@ -3,11 +3,13 @@ package testapp
 import (
 	"encoding/json"
 
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 func CreateAppCustomValidators(accountsCount int, powers ...int) (*odinapp.OdinApp, sdk.Context, TestAppBuilder) {

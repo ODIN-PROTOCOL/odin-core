@@ -1,11 +1,12 @@
 package gravity
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // EndBlocker is called at the end of every block

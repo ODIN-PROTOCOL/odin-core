@@ -4,11 +4,12 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // 1 cosmos gas is equal to 7 owasm gas
@@ -96,7 +97,7 @@ func (k Keeper) PrepareRequest(
 	// Preparation complete! It's time to collect raw request ids.
 	req.RawRequests = env.GetRawRequests()
 	// TODO compare Oracle fee implementation
-	//fee := k.GetDataRequesterBasicFeeParam(ctx)
+	// fee := k.GetDataRequesterBasicFeeParam(ctx)
 
 	//err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, feePayer, types.ModuleName, sdk.NewCoins(fee.Value()))
 	//if err != nil {

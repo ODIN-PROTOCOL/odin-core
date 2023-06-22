@@ -7,13 +7,11 @@ import (
 	"strings"
 	"time"
 
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/ODIN-PROTOCOL/odin-core/app/params"
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
-	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/segmentio/kafka-go"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/tmhash"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -25,10 +23,14 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/segmentio/kafka-go"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/tmhash"
-	tmjson "github.com/tendermint/tendermint/libs/json"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Hook uses Kafka functionality to act as an event producer for all events in the blockchains.
@@ -319,7 +321,7 @@ func (h *Hook) AfterDeliverTx(ctx sdk.Context, req abci.RequestDeliverTx, res ab
 	messages := []map[string]interface{}{}
 
 	for idx, msg := range tx.GetMsgs() {
-		var extra = make(common.JsDict)
+		extra := make(common.JsDict)
 		if res.IsOK() {
 			h.handleMsg(ctx, txHash, msg, logs[idx], extra)
 		}
@@ -363,7 +365,8 @@ func (h *Hook) AfterEndBlock(ctx sdk.Context, req abci.RequestEndBlock, res abci
 			Value: common.JsDict{
 				"address": acc,
 				"balance": h.bankKeeper.GetAllBalances(ctx, acc).String(),
-			}})
+			},
+		})
 	}
 
 	h.msgs = append(modifiedMsgs, h.msgs[1:]...)

@@ -5,18 +5,19 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 func (k Keeper) CheckBadSignatureEvidence(
 	ctx sdk.Context,
-	msg *types.MsgSubmitBadSignatureEvidence) error {
+	msg *types.MsgSubmitBadSignatureEvidence,
+) error {
 	var subject types.EthereumSigned
 
 	err := k.cdc.UnpackAny(msg.Subject, &subject)
-
 	if err != nil {
 		return sdkerrors.Wrap(types.ErrInvalid, fmt.Sprintf("Invalid Any encoded evidence %s", err))
 	}

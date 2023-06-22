@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gin-gonic/gin"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (

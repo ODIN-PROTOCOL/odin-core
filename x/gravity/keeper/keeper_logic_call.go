@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 /////////////////////////////
@@ -142,7 +143,8 @@ func (k Keeper) DeleteLogicCallConfirm(
 	ctx sdk.Context,
 	invalidationID []byte,
 	invalidationNonce uint64,
-	val sdk.AccAddress) {
+	val sdk.AccAddress,
+) {
 	ctx.KVStore(k.storeKey).Delete(types.GetLogicConfirmKey(invalidationID, invalidationNonce, val))
 }
 
@@ -151,7 +153,8 @@ func (k Keeper) IterateLogicConfirmByInvalidationIDAndNonce(
 	ctx sdk.Context,
 	invalidationID []byte,
 	invalidationNonce uint64,
-	cb func([]byte, *types.MsgConfirmLogicCall) bool) {
+	cb func([]byte, *types.MsgConfirmLogicCall) bool,
+) {
 	store := ctx.KVStore(k.storeKey)
 	prefix := types.GetLogicConfirmNonceInvalidationIdPrefix(invalidationID, invalidationNonce)
 	iter := store.Iterator(prefixRange([]byte(prefix)))

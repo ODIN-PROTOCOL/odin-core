@@ -3,12 +3,13 @@ package v7
 import (
 	"fmt"
 
-	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 )
 
 const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
@@ -73,14 +74,13 @@ func mintAndSendCoins(
 	addr sdk.AccAddress,
 	coins sdk.Coins,
 ) error {
-
-	//mint coins
+	// mint coins
 	err := mintkeeper.MintCoins(ctx, coins)
 	if err != nil {
 		return err
 	}
 
-	//send coins to new address
+	// send coins to new address
 	err = bankkeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins)
 	if err != nil {
 		return err
@@ -104,7 +104,6 @@ func burnCoins(
 					return err
 				}
 			}
-
 		}
 	}
 	return nil
@@ -120,7 +119,7 @@ func CreateUpgradeHandler(mm module.Manager, configurator module.Configurator, b
 		ctx.Logger().Info("getting all account balances")
 		totalCoins := sumBalances(ctx, bankkeeper, addresses)
 
-		//Getting accound address of new address
+		// Getting accound address of new address
 		newAddr, err := sdk.AccAddressFromBech32(newAddress)
 		if err != nil {
 			panic(fmt.Sprintf("account address is not valid bech32: %s", newAddr))

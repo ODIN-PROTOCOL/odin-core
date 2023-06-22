@@ -3,8 +3,9 @@ package keeper
 import (
 	"context"
 
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 type Querier struct {

@@ -1,9 +1,10 @@
 package emitter
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func parseBytes(b []byte) []byte {

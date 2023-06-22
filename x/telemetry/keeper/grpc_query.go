@@ -3,12 +3,14 @@ package keeper
 import (
 	"context"
 
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 var _ telemetrytypes.QueryServer = Keeper{}
@@ -31,7 +33,6 @@ func (k Keeper) TopBalances(
 	c context.Context,
 	request *telemetrytypes.QueryTopBalancesRequest,
 ) (*telemetrytypes.QueryTopBalancesResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(c)
 	balances, total := k.GetPaginatedBalances(ctx, request.GetDenom(), request.GetDesc(), request.Pagination)
 	// TODO: optimize or remove
@@ -40,7 +41,7 @@ func (k Keeper) TopBalances(
 	//	return nil, sdkerrors.Wrap(err, "failed to get accounts txs")
 	//}
 	return &telemetrytypes.QueryTopBalancesResponse{
-		//TransactionsCount: txsCount,
+		// TransactionsCount: txsCount,
 		Balances: balances,
 		Pagination: &query.PageResponse{
 			Total: total,
@@ -52,7 +53,6 @@ func (k Keeper) AvgBlockSize(
 	_ context.Context,
 	request *telemetrytypes.QueryAvgBlockSizeRequest,
 ) (*telemetrytypes.QueryAvgBlockSizeResponse, error) {
-
 	blockSizePerDay, err := k.GetAvgBlockSizePerDay(request.GetStartDate(), request.GetEndDate())
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get average block size per day")
@@ -67,7 +67,6 @@ func (k Keeper) AvgBlockTime(
 	_ context.Context,
 	request *telemetrytypes.QueryAvgBlockTimeRequest,
 ) (*telemetrytypes.QueryAvgBlockTimeResponse, error) {
-
 	blockTimePerDay, err := k.GetAvgBlockTimePerDay(request.GetStartDate(), request.GetEndDate())
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get average block time per day")
@@ -82,7 +81,6 @@ func (k Keeper) AvgTxFee(
 	c context.Context,
 	request *telemetrytypes.QueryAvgTxFeeRequest,
 ) (*telemetrytypes.QueryAvgTxFeeResponse, error) {
-
 	avgTxFee, err := k.GetAvgTxFeePerDay(request.GetStartDate(), request.GetEndDate())
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get average tx fee per day")
@@ -97,7 +95,6 @@ func (k Keeper) TxVolume(
 	c context.Context,
 	request *telemetrytypes.QueryTxVolumeRequest,
 ) (*telemetrytypes.QueryTxVolumeResponse, error) {
-
 	txVolume, err := k.GetTxVolumePerDay(request.GetStartDate(), request.GetEndDate())
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to get tx volume")
@@ -112,7 +109,6 @@ func (k Keeper) ExtendedValidators(
 	c context.Context,
 	request *telemetrytypes.QueryExtendedValidatorsRequest,
 ) (*telemetrytypes.QueryExtendedValidatorsResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(c)
 	validatorsResp, err := k.stakingQuerier.Validators(c, ExtendedValidatorsRequestToValidatorsRequest(request))
 	if err != nil {
@@ -131,7 +127,6 @@ func (k Keeper) ValidatorBlocks(
 	c context.Context,
 	request *telemetrytypes.QueryValidatorBlocksRequest,
 ) (*telemetrytypes.QueryValidatorBlocksResponse, error) {
-
 	if request.ValidatorAddress == "" {
 		return nil, status.Error(codes.InvalidArgument, "address cannot be empty")
 	}
@@ -164,7 +159,6 @@ func (k Keeper) TopValidators(
 	c context.Context,
 	request *telemetrytypes.QueryTopValidatorsRequest,
 ) (*telemetrytypes.QueryTopValidatorsResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(c)
 	topValidators, total, err := k.GetTopValidatorsByBlocks(
 		ctx,

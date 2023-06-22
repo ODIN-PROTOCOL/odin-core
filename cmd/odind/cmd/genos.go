@@ -6,17 +6,19 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/slandymani/go-owasm/api"
+	"github.com/spf13/cobra"
+	"github.com/tendermint/tendermint/libs/cli"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/slandymani/go-owasm/api"
-	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
+
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // AddGenesisOracleScriptCmd returns add-oracle-script cobra Command.

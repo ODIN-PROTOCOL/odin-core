@@ -1,8 +1,9 @@
 package common
 
 import (
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func QueryResultError(err error) abci.ResponseQuery {

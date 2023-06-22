@@ -1,8 +1,9 @@
 package oraclekeeper
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // ContainsVal returns whether the given slice of validators contains the target validator.

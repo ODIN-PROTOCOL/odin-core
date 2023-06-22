@@ -6,16 +6,18 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/spf13/cobra"
+	"github.com/tendermint/tendermint/libs/cli"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
+
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (
@@ -78,7 +80,6 @@ func AddGenesisDataSourceCmd(defaultNodeHome string) *cobra.Command {
 			))
 
 			oracleGenStateBz, err := cdc.MarshalJSON(oracleGenState)
-
 			if err != nil {
 				return fmt.Errorf("failed to marshal auth genesis state: %w", err)
 			}
