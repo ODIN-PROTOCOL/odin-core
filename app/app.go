@@ -7,6 +7,7 @@ import (
 
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	v7 "github.com/ODIN-PROTOCOL/odin-core/app/upgrade/v7"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
@@ -15,7 +16,6 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
-	v7 "github.com/monopauli/odin-core/app/upgrade/v7"
 	owasm "github.com/slandymani/go-owasm/api"
 
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
@@ -808,8 +808,8 @@ func NewOdinApp(
 
 // RegisterUpgradeHandlers returns upgrade handlers
 func (app *OdinApp) RegisterUpgradeHandlers(cfg module.Configurator) {
-	bankBaseKeeper := app.BankKeeper.Keeper
-	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(app.mm, cfg, &app.StakingKeeper, &bankBaseKeeper))
+	bankBaseKeeper := app.MintKeeper
+	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(*app.mm, cfg, &app.BankKeeper, bankBaseKeeper))
 }
 
 // MakeCodecs constructs the *std.Codec and *codec.LegacyAmino instances used by

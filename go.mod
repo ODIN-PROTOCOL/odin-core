@@ -189,5 +189,7 @@ replace github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.2
 
 replace github.com/cosmos/ibc-go/v3 => github.com/cosmos/ibc-go/v4 v4.3.1
 
+replace github.com/ODIN-PROTOCOL/odin-core => github.com/monopauli/odin-core v0.7.0
+
 //replace github.com/althea-net/bech32-ibc v0.6.0 => github.com/althea-net/bech32-ibc v0.4.4
 //replace github.com/althea-net/bech32-ibc v0.3.0-rc1 => github.com/althea-net/bech32-ibc v0.4.4
