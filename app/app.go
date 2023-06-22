@@ -15,7 +15,7 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
-	v7 "github.com/monopauli/odin-core/app/upgrade"
+	v7 "github.com/monopauli/odin-core/app/upgrade/v7"
 	owasm "github.com/slandymani/go-owasm/api"
 
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
