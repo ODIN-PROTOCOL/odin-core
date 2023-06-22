@@ -14,7 +14,6 @@ import (
 const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
 
 func getBalance(ctx sdk.Context, bankkeeper bankkeeper.Keeper, addr sdk.AccAddress) sdk.Coins {
-	//fmt.Println(bankkeeper.GetAllBalances(ctx, addr))
 	return bankkeeper.GetAllBalances(ctx, addr)
 }
 
@@ -108,9 +107,10 @@ func burnCoins(
 
 		}
 	}
+	return nil
 }
 
-func CreateUpgradeHandler(bankkeeper bankkeeper.Keeper, mintkeeper mintkeeper.Keeper) upgradetypes.UpgradeHandler {
+func CreateUpgradeHandler(mm module.Manager, configurator module.Configurator, bankkeeper bankkeeper.Keeper, mintkeeper mintkeeper.Keeper) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running upgrade handler")
 
@@ -132,6 +132,10 @@ func CreateUpgradeHandler(bankkeeper bankkeeper.Keeper, mintkeeper mintkeeper.Ke
 		ctx.Logger().Info("Burning coins from old addresses")
 		burnCoins(ctx, bankkeeper, addresses)
 
-		return newVm, err
+		newVM, err := mm.RunMigrations(ctx, configurator, vm)
+		if err != nil {
+			return newVM, err
+		}
+		return newVM, err
 	}
 }

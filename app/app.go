@@ -15,6 +15,7 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
+	v7 "github.com/monopauli/odin-core/app/upgrade"
 	owasm "github.com/slandymani/go-owasm/api"
 
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
@@ -393,6 +394,9 @@ func NewOdinApp(
 	)
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
+
+	// upgrade handlers
+	cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 
 	app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		var pz odinminttypes.Params
@@ -775,6 +779,8 @@ func NewOdinApp(
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	}
 
+	app.RegisterUpgradeHandlers(cfg)
+
 	if manager := app.SnapshotManager(); manager != nil {
 		err = manager.RegisterExtensions(
 			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
@@ -798,6 +804,12 @@ func NewOdinApp(
 	app.ScopedWasmKeeper = scopedWasmKeeper
 
 	return app
+}
+
+// RegisterUpgradeHandlers returns upgrade handlers
+func (app *OdinApp) RegisterUpgradeHandlers(cfg module.Configurator) {
+	bankBaseKeeper := app.BankKeeper.Keeper
+	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(app.mm, cfg, &app.StakingKeeper, &bankBaseKeeper))
 }
 
 // MakeCodecs constructs the *std.Codec and *codec.LegacyAmino instances used by
