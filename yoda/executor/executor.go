@@ -53,7 +53,6 @@ func NewExecutor(executor string) (exec Executor, err error) {
 		"BAND_REPORTER":    "test-reporter",
 		"BAND_SIGNATURE":   "test-signature",
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to run test program: %s", err.Error())
 	}

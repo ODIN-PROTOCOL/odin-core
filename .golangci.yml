@@ -1,0 +1,54 @@
+run:
+  tests: false
+#   # timeout for analysis, e.g. 30s, 5m, default is 1m
+#   timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - depguard
+    - dogsled
+    # - errcheck
+    - goconst
+    # - gocritic
+    - gofumpt
+    - gci
+    # - gosec
+    # - gosimple
+    - govet
+    # - ineffassign
+    - misspell
+    - nakedret
+    # - staticcheck
+    # - revive
+    # - stylecheck
+    - typecheck
+    # - unconvert
+    # - unused
+    - misspell
+
+issues:
+  exclude-rules:
+    - text: 'Use of weak random number generator'
+      linters:
+        - gosec
+    - text: 'comment on exported var'
+      linters:
+        - golint
+
+linters-settings:
+  gci:
+    custom-order: true
+    sections:
+      - standard # Standard section: captures all standard packages.
+      - default # Default section: contains all imports that could not be matched to another section type.
+      - prefix(cosmossdk.io)
+      - prefix(github.com/cosmos/cosmos-sdk)
+      - prefix(github.com/ODIN-PROTOCOL/odin-core)
+
+  dogsled:
+    max-blank-identifiers: 3
+  maligned:
+    # print struct with more effective memory layout or not, false by default
+    suggest-new: true

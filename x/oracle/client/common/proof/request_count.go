@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"net/http"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	gogotypes "github.com/gogo/protobuf/types"
 	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
+
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type JsonRequestsCountProof struct {

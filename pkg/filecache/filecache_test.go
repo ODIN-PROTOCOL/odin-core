@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAddFile(t *testing.T) {

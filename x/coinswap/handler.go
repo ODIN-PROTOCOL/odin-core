@@ -1,10 +1,11 @@
 package coinswap
 
 import (
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 func NewHandler(k coinswapkeeper.Keeper) sdk.Handler {

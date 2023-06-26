@@ -6,11 +6,18 @@ import (
 	"testing"
 	"time"
 
-	gravityparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
-	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
 	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
+	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/require"
+	"github.com/tendermint/tendermint/libs/log"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
+	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -31,6 +38,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/capability"
+	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
@@ -56,46 +64,36 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-	gethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
-	dbm "github.com/tendermint/tm-db"
+	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
+	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
-
-	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-
+	gravityparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
-const Bech32MainPrefix = "odin"
-const Bip44CoinType = 118
+const (
+	Bech32MainPrefix = "odin"
+	Bip44CoinType    = 118
+)
 
-var (
-	// ModuleBasics is a mock module basic manager for testing
-	ModuleBasics = module.NewBasicManager(
-		auth.AppModuleBasic{},
-		genutil.AppModuleBasic{},
-		bank.AppModuleBasic{},
-		capability.AppModuleBasic{},
-		staking.AppModuleBasic{},
-		mint.AppModuleBasic{},
-		distribution.AppModuleBasic{},
-		gov.NewAppModuleBasic(
-			paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
-		),
-		params.AppModuleBasic{},
-		crisis.AppModuleBasic{},
-		slashing.AppModuleBasic{},
-		upgrade.AppModuleBasic{},
-		evidence.AppModuleBasic{},
-		vesting.AppModuleBasic{},
-	)
+// ModuleBasics is a mock module basic manager for testing
+var ModuleBasics = module.NewBasicManager(
+	auth.AppModuleBasic{},
+	genutil.AppModuleBasic{},
+	bank.AppModuleBasic{},
+	capability.AppModuleBasic{},
+	staking.AppModuleBasic{},
+	mint.AppModuleBasic{},
+	distribution.AppModuleBasic{},
+	gov.NewAppModuleBasic(
+		paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
+	),
+	params.AppModuleBasic{},
+	crisis.AppModuleBasic{},
+	slashing.AppModuleBasic{},
+	upgrade.AppModuleBasic{},
+	evidence.AppModuleBasic{},
+	vesting.AppModuleBasic{},
 )
 
 var (
@@ -715,7 +713,7 @@ func getSubspace(k paramskeeper.Keeper, moduleName string) paramstypes.Subspace 
 
 // MakeTestCodec creates a legacy amino codec for testing
 func MakeTestCodec() *codec.LegacyAmino {
-	var cdc = codec.NewLegacyAmino()
+	cdc := codec.NewLegacyAmino()
 	auth.AppModuleBasic{}.RegisterLegacyAminoCodec(cdc)
 	bank.AppModuleBasic{}.RegisterLegacyAminoCodec(cdc)
 	staking.AppModuleBasic{}.RegisterLegacyAminoCodec(cdc)

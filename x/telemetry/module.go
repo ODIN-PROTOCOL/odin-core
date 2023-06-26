@@ -3,19 +3,22 @@ package telemetry
 import (
 	"context"
 	"encoding/json"
-	telemetrycli "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/cli"
-	telemetryrest "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/rest"
-	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-	abci "github.com/tendermint/tendermint/abci/types"
+
+	telemetrycli "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/cli"
+	telemetryrest "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/client/rest"
+	telemetrykeeper "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/keeper"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 var (

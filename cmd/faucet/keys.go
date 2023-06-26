@@ -3,12 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	band "github.com/ODIN-PROTOCOL/odin-core/app"
+
+	"github.com/cosmos/go-bip39"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/go-bip39"
-	"github.com/spf13/cobra"
+
+	band "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

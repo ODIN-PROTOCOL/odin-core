@@ -3,10 +3,13 @@ package cli
 import (
 	"context"
 	"fmt"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/spf13/cobra"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // GetQueryCmd returns the cli query commands for the minting module.
@@ -138,7 +141,6 @@ func GetCmdQueryIntegrationAddress() *cobra.Command {
 			res, err := queryClient.IntegrationAddress(context.Background(), &minttypes.QueryIntegrationAddressRequest{
 				NetworkName: args[0],
 			})
-
 			if err != nil {
 				return err
 			}

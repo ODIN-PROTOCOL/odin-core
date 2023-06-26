@@ -2,17 +2,20 @@ package testapp
 
 import (
 	"encoding/json"
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"io/ioutil"
+
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	"io/ioutil"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (

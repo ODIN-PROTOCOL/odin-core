@@ -5,10 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/cosmos/go-bip39"
+	"github.com/spf13/cobra"
+	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/tendermint/tendermint/libs/cli"
+	tmos "github.com/tendermint/tendermint/libs/os"
+	tmrand "github.com/tendermint/tendermint/libs/rand"
+	"github.com/tendermint/tendermint/privval"
+	"github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -16,14 +25,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-	"github.com/cosmos/go-bip39"
-	"github.com/spf13/cobra"
-	cfg "github.com/tendermint/tendermint/config"
-	"github.com/tendermint/tendermint/libs/cli"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	"github.com/tendermint/tendermint/privval"
-	"github.com/tendermint/tendermint/types"
 )
 
 const (

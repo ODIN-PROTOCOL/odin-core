@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"strings"
 )
 
 // Parameter store keys
@@ -41,9 +42,7 @@ func NewParams(
 	maxAllowedMintVolume sdk.Coins,
 	allowedMintDenoms []*AllowedDenom,
 	AllowedMinter []string,
-
 ) Params {
-
 	return Params{
 		MintDenom:            mintDenom,
 		InflationRateChange:  inflationRateChange,

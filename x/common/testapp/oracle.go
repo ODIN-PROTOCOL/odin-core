@@ -2,9 +2,10 @@ package testapp
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"path/filepath"
 )
 
 func getGenesisDataSources(homePath string) []oracletypes.DataSource {

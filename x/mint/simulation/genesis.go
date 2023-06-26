@@ -3,13 +3,15 @@ package simulation
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"math/rand"
 
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // Simulation parameter constants

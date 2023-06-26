@@ -2,9 +2,11 @@ package types
 
 import (
 	"fmt"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 const (
@@ -19,9 +21,7 @@ var (
 	KeyExchangeRates         = []byte("ExchangeRates")
 )
 
-var (
-	DefaultAuctionStartThreshold = sdk.NewCoins(sdk.NewInt64Coin(DefaultThresholdDenom, 100000000000000))
-)
+var DefaultAuctionStartThreshold = sdk.NewCoins(sdk.NewInt64Coin(DefaultThresholdDenom, 100000000000000))
 
 // ParamKeyTable param table for auction module.
 func ParamKeyTable() paramstypes.KeyTable {

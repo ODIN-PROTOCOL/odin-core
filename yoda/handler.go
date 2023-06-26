@@ -4,10 +4,11 @@ import (
 	"encoding/hex"
 	"strconv"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -134,7 +135,6 @@ func handleRequestLog(c *Context, l *Logger, log sdk.ABCIMessageLog) {
 }
 
 func handlePendingRequest(c *Context, l *Logger, id oracletypes.RequestID) {
-
 	req, err := GetRequest(c, l, id)
 	if err != nil {
 		l.Error(":skull: Failed to get request with error: %s", c, err.Error())

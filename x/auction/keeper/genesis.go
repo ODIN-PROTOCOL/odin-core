@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 // InitGenesis new mint genesis

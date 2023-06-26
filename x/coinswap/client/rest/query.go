@@ -2,11 +2,14 @@ package rest
 
 import (
 	"fmt"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"net/http"
+
+	"github.com/gorilla/mux"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
-	"net/http"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 func getParamsHandler(clientCtx client.Context) http.HandlerFunc {

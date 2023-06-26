@@ -7,11 +7,12 @@ import (
 	"sort"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 //////////////////////////////////////
@@ -221,7 +222,6 @@ func NewValset(nonce, height uint64, members InternalBridgeValidators, rewardAmo
 
 // GetCheckpoint returns the checkpoint
 func (v Valset) GetCheckpoint(gravityIDstring string) []byte {
-
 	// error case here should not occur outside of testing since the above is a constant
 	contractAbi, abiErr := abi.JSON(strings.NewReader(ValsetCheckpointABIJSON))
 	if abiErr != nil {

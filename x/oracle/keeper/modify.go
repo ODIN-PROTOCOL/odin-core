@@ -1,8 +1,9 @@
 package oraclekeeper
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // modify returns new value if it is not `DoNotModify`. Returns old value otherwise

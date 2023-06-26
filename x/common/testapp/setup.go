@@ -2,28 +2,29 @@ package testapp
 
 import (
 	"encoding/json"
-	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/cli"
 	"io/ioutil"
 	"math/rand"
 	"time"
+
+	owasm "github.com/slandymani/go-owasm/api"
+	"github.com/spf13/viper"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/cli"
+	"github.com/tendermint/tendermint/libs/log"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	dbm "github.com/tendermint/tm-db"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
 
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	me "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	owasm "github.com/slandymani/go-owasm/api"
 )
 
 const (
@@ -234,7 +235,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 // params[0] - activate;
 // params[1] - fund pools;
 // Deprecated
-//  - use TestAppBuilder instead
+//   - use TestAppBuilder instead
 func CreateTestInput(params ...bool) (*odinapp.OdinApp, sdk.Context, me.Keeper) {
 	app := NewSimApp("ODINCHAIN", log.NewNopLogger())
 	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})

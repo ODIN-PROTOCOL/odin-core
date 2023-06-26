@@ -3,10 +3,11 @@ package mint
 import (
 	"time"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // BeginBlocker mints new tokens for the previous block.

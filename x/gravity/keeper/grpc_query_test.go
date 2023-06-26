@@ -2,9 +2,9 @@ package keeper_test
 
 import (
 	gocontext "context"
-	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"testing"
 
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"

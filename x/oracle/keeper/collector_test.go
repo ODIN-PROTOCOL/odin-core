@@ -1,11 +1,12 @@
 package oraclekeeper_test
 
 import (
+	"testing"
+
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestCollectReward(t *testing.T) {

@@ -1,10 +1,11 @@
 package mint
 
 import (
-	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // NewHandler creates the msg handler of this module, as required by Cosmos-SDK standard.

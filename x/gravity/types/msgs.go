@@ -4,12 +4,13 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/tendermint/tendermint/crypto/tmhash"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/tendermint/tendermint/crypto/tmhash"
 )
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 var (
 	_ sdk.Msg = &MsgSetOrchestratorAddress{}
 	_ sdk.Msg = &MsgValsetConfirm{}
@@ -313,7 +314,7 @@ type EthereumClaim interface {
 	ClaimHash() ([]byte, error)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 var (
 	_ EthereumClaim = &MsgSendToCosmosClaim{}
 	_ EthereumClaim = &MsgBatchSendToEthClaim{}

@@ -4,9 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChooseOneOne(t *testing.T) {

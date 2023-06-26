@@ -4,13 +4,15 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	v1 "github.com/ODIN-PROTOCOL/odin-core/x/gravity/migrations/v1"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	ethcmn "github.com/ethereum/go-ethereum/common"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ethcmn "github.com/ethereum/go-ethereum/common"
+
+	v1 "github.com/ODIN-PROTOCOL/odin-core/x/gravity/migrations/v1"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // MigrateStore performs in-place store migrations from v1 to v2. The migration
