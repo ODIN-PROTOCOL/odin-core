@@ -9,6 +9,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -19,13 +21,19 @@ const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
 
 func getBalance(ctx sdk.Context, sk stakingkeeper.Keeper, ak keeper.AccountKeeper, bk bankkeeper.Keeper, addr sdk.AccAddress) (sdk.Coins, error) {
 
+	//Get all delegator delegations for address
+	delegations, _ := getDelegations(ctx, sk, addr)
+
+	for _, delegation := range delegations {
+
+	}
+
 	account := ak.GetAccount(ctx, addr)
 
 	vestingAccount, ok := account.(*vestingtypes.ContinuousVestingAccount)
 	if !ok {
 		return bk.GetAllBalances(ctx, addr), nil
 	} else {
-		delegations, _ := getDelegations(ctx, sk, addr)
 		return vestingAccount.GetVestingCoins(ctx.BlockTime()), nil
 	}
 
@@ -41,7 +49,21 @@ func getDelegations(
 	return delegations, nil
 }
 
-func claimRewards()
+func Undelegate(
+	ctx sdk.Context,
+	distrkeeper distributionkeeper.Keeper,
+	delegation stakingtypes.Delegation,
+	bankkeeper bankkeeper.SendKeeper,
+) error {
+	//Get delegator and validator addresses from the delegation
+	delegatorAddr := addrToAccAddr(delegation.DelegatorAddress)
+	validatorAddr := addrToValAddr(delegation.ValidatorAddress)
+
+	
+	msg := distributiontypes.NewMsgWithdrawDelegatorReward(delegatorAddr, validatorAddr)
+	bankkeeper.
+
+}
 
 func getAddresses() []sdk.AccAddress {
 	var addresses [15]string
@@ -75,15 +97,32 @@ func getAddresses() []sdk.AccAddress {
 	return accAddresses
 }
 
+func addrToAccAddr(address string) sdk.AccAddress {
+	accAddr, err := sdk.AccAddressFromBech32(address)
+	if err != nil {
+		panic(fmt.Sprintf("account address is not valid bech32: %s", accAddr))
+	}
+	return accAddr
+}
+
+func addrToValAddr(address string) sdk.ValAddress {
+	valAddr, err := sdk.ValAddressFromBech32(address)
+	if err != nil {
+		panic(fmt.Sprintf("account address is not valid bech32: %s", valAddr))
+	}
+	return valAddr
+}
+
 func sumBalances(
 	ctx sdk.Context,
+	stakingkeeper stakingkeeper.Keeper,
 	accountkeeper keeper.AccountKeeper,
 	bankkeeper bankkeeper.Keeper,
 	addresses []sdk.AccAddress,
 ) sdk.Coins {
 	totalCoins := sdk.NewCoins()
 	for _, addr := range addresses {
-		balance, _ := getBalance(ctx, accountkeeper, bankkeeper, addr)
+		balance, _ := getBalance(ctx, stakingkeeper, accountkeeper, bankkeeper, addr)
 
 		for _, coin := range balance {
 			totalCoins = totalCoins.Add(coin)
