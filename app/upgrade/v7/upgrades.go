@@ -6,35 +6,61 @@ import (
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
 const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
 
-func getBalance(ctx sdk.Context, bankkeeper bankkeeper.Keeper, addr sdk.AccAddress) sdk.Coins {
-	return bankkeeper.GetAllBalances(ctx, addr)
+func getBalance(ctx sdk.Context, sk stakingkeeper.Keeper, ak keeper.AccountKeeper, bk bankkeeper.Keeper, addr sdk.AccAddress) (sdk.Coins, error) {
+
+	account := ak.GetAccount(ctx, addr)
+
+	vestingAccount, ok := account.(*vestingtypes.ContinuousVestingAccount)
+	if !ok {
+		return bk.GetAllBalances(ctx, addr), nil
+	} else {
+		delegations, _ := getDelegations(ctx, sk, addr)
+		return vestingAccount.GetVestingCoins(ctx.BlockTime()), nil
+	}
+
+	//return bk.GetAllBalances(ctx, addr)
 }
+
+func getDelegations(
+	ctx sdk.Context,
+	stakingKeeper stakingkeeper.Keeper,
+	delegatorAddr sdk.AccAddress,
+) ([]stakingtypes.Delegation, error) {
+	delegations := stakingKeeper.GetAllDelegatorDelegations(ctx, delegatorAddr)
+	return delegations, nil
+}
+
+func claimRewards()
 
 func getAddresses() []sdk.AccAddress {
 	var addresses [15]string
 
-	addresses[0] = "odin13jgurnd72ftvy79tjtl3s8e6xvsuupwreft506"
-	addresses[1] = "odin1lqk7gsq40dskpcukavkwuh7t73cnh9tjfgqxkp"
-	addresses[2] = "odin1qerev5feaft35fp2n3ept7fdsheud52z0gzne0"
-	addresses[3] = "odin14p9vgtynfy394hmz0tcrrs78e4whj5z6kmp09v"
-	addresses[4] = "odin122qmr2s3583msah5fk5jwc7557v30kn0pj50sd"
-	addresses[5] = "odin1vmfekljy9haqgyzsfvyn85xa8xdd8wcum33cf4"
-	addresses[6] = "odin1vu0kf5ztrscm9fvc0gg3nqdfj7rfr6sc2u9r0v"
-	addresses[7] = "odin1r532h9h54eaylxg49ll6vlr8epcl687s2x9ln7"
-	addresses[8] = "odin1nvzkd37yqhw9pn9eljf3mvrneug3hr0r3xyc62"
-	addresses[9] = "odin16hxrt4scaly02caaskhe0984rzl0fj490c853y"
-	addresses[10] = "odin1n2apxttn8f3uzrrzrpgkrxascwdhcwh3uyejxe"
-	addresses[11] = "odin1sm56gxdlwd32dzcps6uzprudvawuqg6mv83eq9"
-	addresses[12] = "odin1n8gwpl4s75qhhvtlmlp5y5946acjnlutv4krud"
-	addresses[13] = "odin1qe8v4nx9l06x4m3cy3wk7al6h4ww7js5rgpgp0"
-	addresses[14] = "odin1vu0kf5ztrscm9fvc0gg3nqdfj7rfr6sc2u9r0v"
+	addresses[0] = "odin13jgurnd72ftvy79tjtl3s8e6xvsuupwreft506"  //continuous vesting account
+	addresses[1] = "odin1lqk7gsq40dskpcukavkwuh7t73cnh9tjfgqxkp"  //base account
+	addresses[2] = "odin1qerev5feaft35fp2n3ept7fdsheud52z0gzne0"  //base account
+	addresses[3] = "odin14p9vgtynfy394hmz0tcrrs78e4whj5z6kmp09v"  //continuous vesting account
+	addresses[4] = "odin122qmr2s3583msah5fk5jwc7557v30kn0pj50sd"  //continuous vesting account
+	addresses[5] = "odin1vmfekljy9haqgyzsfvyn85xa8xdd8wcum33cf4"  //base account
+	addresses[6] = "odin1vu0kf5ztrscm9fvc0gg3nqdfj7rfr6sc2u9r0v"  //continuous vesting account
+	addresses[7] = "odin1r532h9h54eaylxg49ll6vlr8epcl687s2x9ln7"  //continuous vesting account
+	addresses[8] = "odin1nvzkd37yqhw9pn9eljf3mvrneug3hr0r3xyc62"  //continuous vesting account
+	addresses[9] = "odin16hxrt4scaly02caaskhe0984rzl0fj490c853y"  //continuous vesting account
+	addresses[10] = "odin1n2apxttn8f3uzrrzrpgkrxascwdhcwh3uyejxe" //continuous vesting account
+	addresses[11] = "odin1sm56gxdlwd32dzcps6uzprudvawuqg6mv83eq9" //continuous vesting account
+	addresses[12] = "odin1n8gwpl4s75qhhvtlmlp5y5946acjnlutv4krud" //continuous vesting account
+	addresses[13] = "odin1qe8v4nx9l06x4m3cy3wk7al6h4ww7js5rgpgp0" //continuous vesting account
+	addresses[14] = "odin1vu0kf5ztrscm9fvc0gg3nqdfj7rfr6sc2u9r0v" //continuous vesting account
 
 	var accAddresses []sdk.AccAddress
 
@@ -51,12 +77,13 @@ func getAddresses() []sdk.AccAddress {
 
 func sumBalances(
 	ctx sdk.Context,
+	accountkeeper keeper.AccountKeeper,
 	bankkeeper bankkeeper.Keeper,
 	addresses []sdk.AccAddress,
 ) sdk.Coins {
 	totalCoins := sdk.NewCoins()
 	for _, addr := range addresses {
-		balance := getBalance(ctx, bankkeeper, addr)
+		balance, _ := getBalance(ctx, accountkeeper, bankkeeper, addr)
 
 		for _, coin := range balance {
 			totalCoins = totalCoins.Add(coin)
@@ -104,7 +131,6 @@ func burnCoins(
 					return err
 				}
 			}
-
 		}
 	}
 	return nil
