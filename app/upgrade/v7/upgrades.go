@@ -9,9 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
@@ -19,49 +16,65 @@ import (
 
 const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
 
-func getBalance(ctx sdk.Context, sk stakingkeeper.Keeper, ak keeper.AccountKeeper, bk bankkeeper.Keeper, addr sdk.AccAddress) (sdk.Coins, error) {
+func getBalance(
+	ctx sdk.Context,
+	sk stakingkeeper.Keeper,
+	ak keeper.AccountKeeper,
+	bk bankkeeper.Keeper,
+	addr sdk.AccAddress,
+) (sdk.Coins, error) {
 
 	//Get all delegator delegations for address
-	delegations, _ := getDelegations(ctx, sk, addr)
+	delegations := getDelegations(ctx, sk, addr)
 
 	for _, delegation := range delegations {
-
+		undelegate(ctx, sk, delegation, bk)
 	}
 
 	account := ak.GetAccount(ctx, addr)
 
-	vestingAccount, ok := account.(*vestingtypes.ContinuousVestingAccount)
+	vestingAccount, ok := account.(*vestingtypes.BaseVestingAccount)
 	if !ok {
 		return bk.GetAllBalances(ctx, addr), nil
 	} else {
-		return vestingAccount.GetVestingCoins(ctx.BlockTime()), nil
+		//If the account is a vesting account, create a copy of the account
+		//and vest all coins with the current block header time
+		newVestingAcc := vestingtypes.NewContinuousVestingAccountRaw(vestingAccount, ctx.BlockHeader().Time.Unix())
+		ak.SetAccount(ctx, newVestingAcc)
+		return newVestingAcc.GetVestedCoins(ctx.BlockTime()), nil
 	}
-
-	//return bk.GetAllBalances(ctx, addr)
 }
 
 func getDelegations(
 	ctx sdk.Context,
 	stakingKeeper stakingkeeper.Keeper,
 	delegatorAddr sdk.AccAddress,
-) ([]stakingtypes.Delegation, error) {
+) []stakingtypes.Delegation {
+
 	delegations := stakingKeeper.GetAllDelegatorDelegations(ctx, delegatorAddr)
-	return delegations, nil
+
+	return delegations
 }
 
-func Undelegate(
+func undelegate(
 	ctx sdk.Context,
-	distrkeeper distributionkeeper.Keeper,
+	stakingkeeper stakingkeeper.Keeper,
 	delegation stakingtypes.Delegation,
 	bankkeeper bankkeeper.SendKeeper,
-) error {
+) {
 	//Get delegator and validator addresses from the delegation
 	delegatorAddr := addrToAccAddr(delegation.DelegatorAddress)
 	validatorAddr := addrToValAddr(delegation.ValidatorAddress)
 
-	
-	msg := distributiontypes.NewMsgWithdrawDelegatorReward(delegatorAddr, validatorAddr)
-	bankkeeper.
+	//Get the amount of coins to undelegate from the delegation
+	amount := sdk.NewCoin("stake", delegation.Shares.RoundInt())
+
+	completionTime, err := stakingkeeper.Undelegate(ctx, delegatorAddr, validatorAddr, amount.Amount.ToDec())
+	if err != nil {
+		panic(fmt.Sprintf("Could not undelegate: %s, %s", delegation.DelegatorAddress, delegation.ValidatorAddress))
+	}
+
+	ctx.Logger().Info("Undelegation will be completet at: ", completionTime)
 
 }
 
@@ -113,41 +126,35 @@ func addrToValAddr(address string) sdk.ValAddress {
 	return valAddr
 }
 
-func sumBalances(
+// func sumBalances(
+// 	ctx sdk.Context,
+// 	stakingkeeper stakingkeeper.Keeper,
+// 	accountkeeper keeper.AccountKeeper,
+// 	bankkeeper bankkeeper.Keeper,
+// 	addresses []sdk.AccAddress,
+// ) sdk.Coins {
+// 	totalCoins := sdk.NewCoins()
+// 	for _, addr := range addresses {
+// 		balance, _ := getBalance(ctx, stakingkeeper, accountkeeper, bankkeeper, addr)
+
+// 		for _, coin := range balance {
+// 			totalCoins = totalCoins.Add(coin)
+// 		}
+
+// 	}
+// 	return totalCoins
+// }
+
+func sendCoins(
 	ctx sdk.Context,
-	stakingkeeper stakingkeeper.Keeper,
-	accountkeeper keeper.AccountKeeper,
 	bankkeeper bankkeeper.Keeper,
-	addresses []sdk.AccAddress,
-) sdk.Coins {
-	totalCoins := sdk.NewCoins()
-	for _, addr := range addresses {
-		balance, _ := getBalance(ctx, stakingkeeper, accountkeeper, bankkeeper, addr)
-
-		for _, coin := range balance {
-			totalCoins = totalCoins.Add(coin)
-		}
-
-	}
-	return totalCoins
-}
-
-func mintAndSendCoins(
-	ctx sdk.Context,
-	bankkeeper bankkeeper.Keeper,
-	mintkeeper mintkeeper.Keeper,
-	addr sdk.AccAddress,
+	fromAddr sdk.AccAddress,
+	toAddr sdk.AccAddress,
 	coins sdk.Coins,
 ) error {
 
-	//mint coins
-	err := mintkeeper.MintCoins(ctx, coins)
-	if err != nil {
-		return err
-	}
-
 	//send coins to new address
-	err = bankkeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins)
+	err := bankkeeper.SendCoins(ctx, fromAddr, toAddr, coins)
 	if err != nil {
 		return err
 	}
@@ -155,47 +162,51 @@ func mintAndSendCoins(
 	return nil
 }
 
-func burnCoins(
-	ctx sdk.Context,
+// func burnCoins(
+// 	ctx sdk.Context,
+// 	accountkeeper keeper.AccountKeeper,
+// 	bankkeeper bankkeeper.Keeper,
+// 	address sdk.AccAddress,
+// 	coins sdk.Coins,
+// ) error {
+
+// 	//acc := accountkeeper.GetAccount(ctx, address)
+
+// 	if err := bankkeeper.BurnCoins(ctx, "module_name", coins); err != nil {
+// 		panic(fmt.Sprintf("Failed to burn coins on account: %s", address))
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func CreateUpgradeHandler(
+	mm module.Manager,
+	configurator module.Configurator,
+	stakingkeeper stakingkeeper.Keeper,
+	accountkeeper keeper.AccountKeeper,
 	bankkeeper bankkeeper.Keeper,
-	addresses []sdk.AccAddress,
-) error {
-	for _, addr := range addresses {
-		balance := getBalance(ctx, bankkeeper, addr)
-
-		for _, coin := range balance {
-			if !coin.Amount.IsZero() {
-				err := bankkeeper.BurnCoins(ctx, minttypes.ModuleName, balance)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func CreateUpgradeHandler(mm module.Manager, configurator module.Configurator, bankkeeper bankkeeper.Keeper, mintkeeper mintkeeper.Keeper) upgradetypes.UpgradeHandler {
+	mintkeeper mintkeeper.Keeper,
+) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running upgrade handler")
 
 		ctx.Logger().Info("getting all addresses")
 		addresses := getAddresses()
 
-		ctx.Logger().Info("getting all account balances")
-		totalCoins := sumBalances(ctx, bankkeeper, addresses)
+		// ctx.Logger().Info("getting all account balances")
+		// totalCoins := sumBalances(ctx, stakingkeeper, accountkeeper, bankkeeper, addresses)
 
-		//Getting accound address of new address
-		newAddr, err := sdk.AccAddressFromBech32(newAddress)
-		if err != nil {
-			panic(fmt.Sprintf("account address is not valid bech32: %s", newAddr))
+		//Getting account address of new address
+		newAddr := addrToAccAddr(newAddress)
+
+		ctx.Logger().Info("sending coins from addresses to new address")
+		for _, address := range addresses {
+			balance, err := getBalance(ctx, stakingkeeper, accountkeeper, bankkeeper, address)
+			if err != nil {
+				sendCoins(ctx, bankkeeper, address, newAddr, balance)
+			}
+
 		}
-
-		ctx.Logger().Info("minting new coins and sending them to new address")
-		mintAndSendCoins(ctx, bankkeeper, mintkeeper, newAddr, totalCoins)
-
-		ctx.Logger().Info("Burning coins from old addresses")
-		burnCoins(ctx, bankkeeper, addresses)
 
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {

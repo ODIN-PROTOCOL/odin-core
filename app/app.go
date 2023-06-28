@@ -808,8 +808,7 @@ func NewOdinApp(
 
 // RegisterUpgradeHandlers returns upgrade handlers
 func (app *OdinApp) RegisterUpgradeHandlers(cfg module.Configurator) {
-	bankBaseKeeper := app.MintKeeper
-	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(*app.mm, cfg, &app.BankKeeper, bankBaseKeeper))
+	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(*app.mm, cfg, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MintKeeper))
 }
 
 // MakeCodecs constructs the *std.Codec and *codec.LegacyAmino instances used by
