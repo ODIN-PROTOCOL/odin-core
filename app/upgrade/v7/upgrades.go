@@ -151,15 +151,13 @@ func sendCoins(
 	fromAddr sdk.AccAddress,
 	toAddr sdk.AccAddress,
 	coins sdk.Coins,
-) error {
+) {
 
 	//send coins to new address
 	err := bankkeeper.SendCoins(ctx, fromAddr, toAddr, coins)
 	if err != nil {
 		panic(fmt.Sprintf("Could not send coins from: %s, to: %s, error: %s", fromAddr, toAddr, err))
 	}
-
-	return nil
 }
 
 // func burnCoins(
@@ -203,8 +201,9 @@ func CreateUpgradeHandler(
 		for _, address := range addresses {
 			balance, err := getBalance(ctx, stakingkeeper, accountkeeper, bankkeeper, address)
 			if err != nil {
-				sendCoins(ctx, bankkeeper, address, newAddr, balance)
+				panic(fmt.Sprintf("Could not get balance of address: %s", address))
 			}
+			sendCoins(ctx, bankkeeper, address, newAddr, balance)
 
 		}
 
