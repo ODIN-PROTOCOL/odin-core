@@ -2,11 +2,14 @@ package rest
 
 import (
 	"fmt"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"net/http"
+
+	"github.com/gorilla/mux"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
-	"net/http"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 func registerQueryRoutes(clientCtx client.Context, r *mux.Router) {
@@ -113,7 +116,6 @@ func queryIntegrationAddressHandlerFn(clientCtx client.Context) http.HandlerFunc
 			minttypes.QueryIntegrationAddresses,
 			vars[networkNameTag],
 		))
-
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

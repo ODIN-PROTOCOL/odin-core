@@ -1,14 +1,15 @@
 package emitter
 
 import (
+	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"

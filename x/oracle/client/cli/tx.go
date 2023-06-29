@@ -2,17 +2,19 @@ package cli
 
 import (
 	"fmt"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	"io/ioutil"
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/spf13/cobra"
+
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

@@ -1,14 +1,16 @@
 package keeper
 
 import (
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 )
 
 func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {

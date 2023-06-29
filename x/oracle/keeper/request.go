@@ -2,17 +2,18 @@ package oraclekeeper
 
 import (
 	"fmt"
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	"github.com/cosmos/cosmos-sdk/types/query"
+	"time"
+
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
 
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 

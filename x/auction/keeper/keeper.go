@@ -2,13 +2,16 @@ package keeper
 
 import (
 	"fmt"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/tendermint/tendermint/libs/log"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 type Keeper struct {

@@ -122,7 +122,6 @@ package main
 // )
 
 func main() {
-
 	// 	cmd := &cobra.Command{
 	// 		Use:   "(--rpc-uri [rpc-uri]) (--contract-address [contract-address]) (--node-uri [node-uri]) (--priv-key [priv-key]) (--gas-price [gas-price]) (--poll-interval [poll-interval])",
 	// 		Short: "Periodically update validator set to the destination EVM blockchain",

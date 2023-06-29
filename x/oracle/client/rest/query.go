@@ -2,16 +2,19 @@ package rest
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+
 	hookscommon "github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	hookprice "github.com/ODIN-PROTOCOL/odin-core/hooks/price"
 	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
 	oracleclientcommon "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
-	"net/http"
-	"strconv"
 )
 
 func getParamsHandler(clientCtx client.Context) http.HandlerFunc {

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 )
 
 var (

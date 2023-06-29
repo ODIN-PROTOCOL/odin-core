@@ -1,10 +1,11 @@
 package oraclekeeper
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type feeCollector struct {

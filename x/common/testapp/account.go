@@ -1,10 +1,12 @@
 package testapp
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"math/rand"
+
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"math/rand"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Account is a data structure to store key of test account.

@@ -172,7 +172,6 @@ func InitGenesis(ctx sdk.Context, k Keeper, data types.GenesisState) {
 			panic("Invalid Cosmos originated denom for valset reward")
 		}
 	}
-
 }
 
 func hasDuplicates(d []types.MsgSetOrchestratorAddress) bool {

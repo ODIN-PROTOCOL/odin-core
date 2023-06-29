@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
@@ -58,7 +59,6 @@ func batchByNonceHandler(cliCtx client.Context, storeName string) http.HandlerFu
 // USED BY RUST
 func lastBatchesHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		res, height, err := cliCtx.Query(fmt.Sprintf("custom/%s/lastBatches", storeName))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

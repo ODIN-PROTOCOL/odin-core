@@ -2,10 +2,12 @@ package rest
 
 import (
 	"fmt"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"net/http"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 func getParamsHandler(clientCtx client.Context) http.HandlerFunc {

@@ -4,10 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 )
 
 func mustDecodeString(hexstr string) []byte {

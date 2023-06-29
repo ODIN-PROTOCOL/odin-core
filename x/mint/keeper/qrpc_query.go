@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 var _ minttypes.QueryServer = Keeper{}

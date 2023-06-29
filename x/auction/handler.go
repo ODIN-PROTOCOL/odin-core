@@ -1,10 +1,11 @@
 package auction
 
 import (
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 func NewHandler(k auctionkeeper.Keeper) sdk.Handler {

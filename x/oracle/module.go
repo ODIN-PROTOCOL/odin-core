@@ -7,11 +7,14 @@ import (
 	"math"
 	"math/rand"
 
+	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
+	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v4/modules/core/exported"
-
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -21,10 +24,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
 	oraclerest "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/rest"
@@ -137,7 +136,6 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-
 	oracletypes.RegisterMsgServer(cfg.MsgServer(), oraclekeeper.NewMsgServerImpl(am.keeper))
 	oracletypes.RegisterQueryServer(cfg.QueryServer(), oraclekeeper.Querier{Keeper: am.keeper})
 }
@@ -188,7 +186,7 @@ func (AppModule) RandomizedParams(r *rand.Rand) []simtypes.ParamChange {
 
 // RegisterStoreDecoder registers a decoder for transfer module's oracletypes
 func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	//sdr[oracletypes.StoreKey] = simulation.NewDecodeStore(am.keeperoraclekeeper)
+	// sdr[oracletypes.StoreKey] = simulation.NewDecodeStore(am.keeperoraclekeeper)
 }
 
 // WeightedOperations returns the all the transfer module operations with their respective weights.
@@ -350,7 +348,6 @@ func (am IBCModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-
 	var data oracletypes.OracleRequestPacketData
 	if err := oracletypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
 		// TODO: Ack with non-deterministic error break consensus?

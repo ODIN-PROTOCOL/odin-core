@@ -97,7 +97,7 @@ func (k Keeper) PrepareRequest(
 	// Preparation complete! It's time to collect raw request ids.
 	req.RawRequests = env.GetRawRequests()
 	// TODO compare Oracle fee implementation
-	//fee := k.GetDataRequesterBasicFeeParam(ctx)
+	// fee := k.GetDataRequesterBasicFeeParam(ctx)
 
 	//err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, feePayer, types.ModuleName, sdk.NewCoins(fee.Value()))
 	//if err != nil {

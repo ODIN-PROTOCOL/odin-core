@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 )
 
 // UInt64FromBytes create uint from binary big endian representation

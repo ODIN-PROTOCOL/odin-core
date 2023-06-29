@@ -2,9 +2,11 @@ package keeper
 
 import (
 	"context"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 type msgServer struct {

@@ -2,6 +2,8 @@ package oracle_test
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -11,7 +13,6 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"testing"
 )
 
 func fromHex(hexStr string) []byte {

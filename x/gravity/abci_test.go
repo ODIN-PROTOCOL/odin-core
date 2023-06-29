@@ -5,18 +5,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValsetCreationIfNotAvailable(t *testing.T) {
@@ -478,7 +477,7 @@ func TestValsetSetting(t *testing.T) {
 	require.True(t, len(valsets) == 1)
 }
 
-/// Test batch timeout
+// / Test batch timeout
 func TestBatchTimeout(t *testing.T) {
 	input, ctx := keeper.SetupFiveValChain(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()

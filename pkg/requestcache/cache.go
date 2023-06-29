@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/peterbourgon/diskv"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type Cache struct {

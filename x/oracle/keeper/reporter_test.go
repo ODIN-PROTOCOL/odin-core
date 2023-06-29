@@ -3,9 +3,8 @@ package oraclekeeper_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCheckSelfReporter(t *testing.T) {

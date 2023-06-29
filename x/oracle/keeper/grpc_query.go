@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Querier is used as Keeper will have duplicate methods if used directly, and gRPC names take precedence over keeper
@@ -25,7 +28,8 @@ func (k Querier) Counts(c context.Context, req *oracletypes.QueryCountsRequest) 
 	return &oracletypes.QueryCountsResponse{
 			DataSourceCount:   k.GetDataSourceCount(ctx),
 			OracleScriptCount: k.GetOracleScriptCount(ctx),
-			RequestCount:      k.GetRequestCount(ctx)},
+			RequestCount:      k.GetRequestCount(ctx),
+		},
 		nil
 }
 
@@ -232,7 +236,6 @@ func (k Querier) Params(c context.Context, req *oracletypes.QueryParamsRequest) 
 // TODO: drop or change
 // RequestSearch queries the latest request that matches the given input.
 func (k Querier) RequestSearch(c context.Context, req *oracletypes.QueryRequestSearchRequest) (*oracletypes.QueryRequestSearchResponse, error) {
-
 	// TODO: revisit, maybe find another way
 	//var clientCtx client.Context
 	//rawClientCtx := c.Value(client.ClientContextKey)

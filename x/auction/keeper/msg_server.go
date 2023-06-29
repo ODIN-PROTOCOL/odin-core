@@ -3,9 +3,11 @@ package keeper
 import (
 	"context"
 	"fmt"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 var _ auctiontypes.MsgServer = msgServer{}
@@ -18,7 +20,6 @@ func (m msgServer) BuyCoins(
 	goCtx context.Context,
 	msg *auctiontypes.MsgBuyCoins,
 ) (*auctiontypes.MsgBuyCoinsResponse, error) {
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	auctionStatus := m.GetAuctionStatus(ctx)
 	if !auctionStatus.Pending {

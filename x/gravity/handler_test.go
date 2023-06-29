@@ -7,15 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestHandleMsgSendToEth(t *testing.T) {
 	var (
 		userCosmosAddr, _                = sdk.AccAddressFromBech32("odin10e7tx3lsjl5yaw0sqxlaeg98ghm2k90e6g47x8")
@@ -96,7 +95,7 @@ func TestHandleMsgSendToEth(t *testing.T) {
 
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestMsgSendToCosmosClaim(t *testing.T) {
 	var (
 		myCosmosAddr, _ = sdk.AccAddressFromBech32("odin10e7tx3lsjl5yaw0sqxlaeg98ghm2k90e6g47x8")
@@ -199,7 +198,7 @@ func TestMsgSendToCosmosClaim(t *testing.T) {
 	assert.Equal(t, sdk.Coins{sdk.NewCoin("gravity0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e", amountB)}, balance)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestEthereumBlacklist(t *testing.T) {
 	var (
 		myCosmosAddr, _ = sdk.AccAddressFromBech32("odin10e7tx3lsjl5yaw0sqxlaeg98ghm2k90e6g47x8")
@@ -395,7 +394,7 @@ func TestMsgSendToCosmosOverflow(t *testing.T) {
 	fmt.Println("END>>>>")
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestMsgSendToCosmosClaimSpreadVotes(t *testing.T) {
 	var (
 		myCosmosAddr, _ = sdk.AccAddressFromBech32("odin10e7tx3lsjl5yaw0sqxlaeg98ghm2k90e6g47x8")
@@ -541,7 +540,7 @@ func TestMsgSendToCosmosForeignPrefixedAddress(t *testing.T) {
 	require.Equal(t, nativeBals, sdk.NewCoins(sdk.NewCoin(erc20Denom, expectedDoubleBalance)))
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestMsgSetOrchestratorAddresses(t *testing.T) {
 	var (
 		ethAddress, _                 = types.NewEthAddress("0xb462864E395d88d6bc7C5dd5F3F5eb4cc2599255")
