@@ -156,7 +156,7 @@ func sendCoins(
 	//send coins to new address
 	err := bankkeeper.SendCoins(ctx, fromAddr, toAddr, coins)
 	if err != nil {
-		return err
+		panic(fmt.Sprintf("Could not send coins from: %s, to: %s, error: %s", fromAddr, toAddr, err))
 	}
 
 	return nil
