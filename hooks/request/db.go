@@ -2,7 +2,9 @@ package request
 
 import (
 	"encoding/hex"
+
 	sq "github.com/Masterminds/squirrel"
+
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -34,7 +36,6 @@ func (h *Hook) insertRequest(requestID oracletypes.RequestID, oracleScriptID ora
 }
 
 func (h *Hook) getMultiRequestID(requestSearchRequest oracletypes.QueryRequestSearchRequest, limit int64) oracletypes.QueryRequestIDs {
-
 	requestsSql := sq.Select("*").From(requestsTable)
 	conditionsSql := make([]sq.Sqlizer, 0, 4)
 	if requestSearchRequest.OracleScriptId != 0 {

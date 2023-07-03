@@ -3,8 +3,9 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 // TODO: Add any future invariants here

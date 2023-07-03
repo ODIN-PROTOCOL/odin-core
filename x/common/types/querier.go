@@ -2,9 +2,10 @@ package types
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"net/http"
 )
 
 // QueryResult wraps querier result with HTTP status to return to application.

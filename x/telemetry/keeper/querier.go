@@ -1,15 +1,17 @@
 package keeper
 
 import (
-	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+
+	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 func NewQuerier(keeper Keeper, cdc *codec.LegacyAmino) sdk.Querier {
@@ -80,7 +82,7 @@ func queryExtendedValidators(
 		return nil, sdkerrors.Wrap(err, "failed to unmarshal query pagination params")
 	}
 
-	var total = 0
+	total := 0
 	if params.GetCountTotal() {
 		total = len(k.stakingQuerier.GetValidators(ctx, k.stakingQuerier.MaxValidators(ctx)))
 	}

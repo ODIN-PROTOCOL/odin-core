@@ -4,11 +4,13 @@ import (
 	"testing"
 	"time"
 
-	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	"github.com/stretchr/testify/require"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/stretchr/testify/require"
+
+	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
 )
 
 // ParseTime is a helper function to parse from number to time.Time with UTC locale.

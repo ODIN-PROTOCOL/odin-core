@@ -8,14 +8,16 @@ import (
 
 // MultiStoreProof stores a compact of other Cosmos-SDK modules' storage hash in multistore to
 // compute (in combination with oracle store hash) Tendermint's application state hash at a given block.
-//                         ________________[AppHash]_______________
-//                        /                                        \
-//             _______[I10]______                          _______[I11]________
-//            /                  \                        /                    \
-//       __[I6]__             __[I7]__                __[I8]__              __[I9]__
-//      /         \          /         \            /          \           /         \
-//    [I0]       [I1]     [I2]        [I3]        [I4]        [I5]       [C]         [D]
-//   /   \      /   \    /    \      /    \      /    \      /    \
+//
+//	                      ________________[AppHash]_______________
+//	                     /                                        \
+//	          _______[I10]______                          _______[I11]________
+//	         /                  \                        /                    \
+//	    __[I6]__             __[I7]__                __[I8]__              __[I9]__
+//	   /         \          /         \            /          \           /         \
+//	 [I0]       [I1]     [I2]        [I3]        [I4]        [I5]       [C]         [D]
+//	/   \      /   \    /    \      /    \      /    \      /    \
+//
 // [0]   [1]  [2]   [3] [4]   [5]  [6]    [7]  [8]    [9]  [A]    [B]
 // [0] - auth   [1] - bank     [2] - capability  [3] - dist    [4] - evidence
 // [5] - gov    [6] - ibchost  [7] - ibctransfer [8] - mint    [9] - oracle

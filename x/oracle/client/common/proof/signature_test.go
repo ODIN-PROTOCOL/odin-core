@@ -13,37 +13,37 @@ import (
 )
 
 /*
-commit := types.Commit{
-	Height: 1,
-	Round:  0,
-	BlockID: types.BlockID{
-		Hash: hexToBytes("442E3E690F13C2EEBDBFC3DBF80B2373CBBCFA2C12CF17FB9A22A17552A5BF2B"),
-		PartSetHeader: types.PartSetHeader{
-			Total: 1,
-			Hash:  hexToBytes("B9F8E456397FF911BDC55D91B0DBEEDFB59711A87C4223DEB5217C93B9CA60FE"),
+	commit := types.Commit{
+		Height: 1,
+		Round:  0,
+		BlockID: types.BlockID{
+			Hash: hexToBytes("442E3E690F13C2EEBDBFC3DBF80B2373CBBCFA2C12CF17FB9A22A17552A5BF2B"),
+			PartSetHeader: types.PartSetHeader{
+				Total: 1,
+				Hash:  hexToBytes("B9F8E456397FF911BDC55D91B0DBEEDFB59711A87C4223DEB5217C93B9CA60FE"),
+			},
 		},
-	},
-	Signatures: []types.CommitSig{
-		{
-			BlockIDFlag:      2,
-			ValidatorAddress: hexToBytes("F0C23921727D869745C4F9703CF33996B1D2B715"),
-			Timestamp:        parseTime("2021-06-03T11:05:37.834259369Z"),
-			Signature:        base64ToBytes("PqaRaT+IuvAlUqQm+HgTpeDbgUytz4Laxh9ZJOeM7ZtuOrzc2YPoml95KD+rx7TDM1YCc4DM4TjnjxICvrBW0g=="),
+		Signatures: []types.CommitSig{
+			{
+				BlockIDFlag:      2,
+				ValidatorAddress: hexToBytes("F0C23921727D869745C4F9703CF33996B1D2B715"),
+				Timestamp:        parseTime("2021-06-03T11:05:37.834259369Z"),
+				Signature:        base64ToBytes("PqaRaT+IuvAlUqQm+HgTpeDbgUytz4Laxh9ZJOeM7ZtuOrzc2YPoml95KD+rx7TDM1YCc4DM4TjnjxICvrBW0g=="),
+			},
+			{
+				BlockIDFlag:      2,
+				ValidatorAddress: hexToBytes("BDB6A0728C8DFE2124536F16F2BA428FE767A8F9"),
+				Timestamp:        parseTime("2021-06-03T11:05:37.856577545Z"),
+				Signature:        base64ToBytes("x8PIR8F4d1BdC9lACchSQdSNsvQ8ZDHAik0eIaO/Jf9UFhomQHjXYmamikU8IFVpAfUhKpGpxqYqRZMek0n8XQ=="),
+			},
+			{
+				BlockIDFlag:      2,
+				ValidatorAddress: hexToBytes("F23391B5DBF982E37FB7DADEA64AAE21CAE4C172"),
+				Timestamp:        parseTime("2021-06-03T11:05:37.834252296Z"),
+				Signature:        base64ToBytes("db7HnsXg0RG5SpR4hshq+qHLhZZdnyxl+nZCm2SOhHEI1kJbG1vWObtkGmZu6lk4IT+znXfPJHC2dZeanYMTfg=="),
+			},
 		},
-		{
-			BlockIDFlag:      2,
-			ValidatorAddress: hexToBytes("BDB6A0728C8DFE2124536F16F2BA428FE767A8F9"),
-			Timestamp:        parseTime("2021-06-03T11:05:37.856577545Z"),
-			Signature:        base64ToBytes("x8PIR8F4d1BdC9lACchSQdSNsvQ8ZDHAik0eIaO/Jf9UFhomQHjXYmamikU8IFVpAfUhKpGpxqYqRZMek0n8XQ=="),
-		},
-		{
-			BlockIDFlag:      2,
-			ValidatorAddress: hexToBytes("F23391B5DBF982E37FB7DADEA64AAE21CAE4C172"),
-			Timestamp:        parseTime("2021-06-03T11:05:37.834252296Z"),
-			Signature:        base64ToBytes("db7HnsXg0RG5SpR4hshq+qHLhZZdnyxl+nZCm2SOhHEI1kJbG1vWObtkGmZu6lk4IT+znXfPJHC2dZeanYMTfg=="),
-		},
-	},
-}
+	}
 */
 func TestGetSignaturesAndPrefix(t *testing.T) {
 	header := types.Header{

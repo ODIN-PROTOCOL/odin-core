@@ -3,9 +3,10 @@ package ante
 import (
 	"fmt"
 
+	lru "github.com/hashicorp/golang-lru"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	lru "github.com/hashicorp/golang-lru"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"

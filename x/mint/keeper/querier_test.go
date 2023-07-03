@@ -1,17 +1,14 @@
 package keeper_test
 
 import (
-	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-
-	"github.com/stretchr/testify/require"
-
+	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 

@@ -1,7 +1,11 @@
 package main
 
 import (
-	odin "github.com/ODIN-PROTOCOL/odin-core/app"
+	"time"
+
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	httpclient "github.com/tendermint/tendermint/rpc/client/http"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -10,9 +14,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
-	httpclient "github.com/tendermint/tendermint/rpc/client/http"
-	"time"
+
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (

@@ -7,13 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 )
 
 func TestQueryValsetConfirm(t *testing.T) {
@@ -84,7 +83,7 @@ func TestQueryValsetConfirm(t *testing.T) {
 	}
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestAllValsetConfirmsBynonce(t *testing.T) {
 	input := CreateTestEnv(t)
 	addrs := []string{
@@ -151,7 +150,7 @@ func TestAllValsetConfirmsBynonce(t *testing.T) {
 }
 
 // TODO: Check failure modes
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestLastValsetRequests(t *testing.T) {
 	val1 := types.Valset{
 		Nonce:        6,
@@ -310,7 +309,7 @@ func TestLastValsetRequests(t *testing.T) {
 	}
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 // TODO: check that it doesn't accidently return a valset that HAS been signed
 // Right now it is basically just testing that any valset comes back
 func TestPendingValsetRequests(t *testing.T) {
@@ -480,7 +479,7 @@ func TestPendingValsetRequests(t *testing.T) {
 	}
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 // TODO: check that it actually returns a batch that has NOT been signed, not just any batch
 func TestLastPendingBatchRequest(t *testing.T) {
 
@@ -546,7 +545,7 @@ func TestLastPendingBatchRequest(t *testing.T) {
 	}
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func createTestBatch(t *testing.T, input TestInput, maxTxElements uint) {
 	var (
 		mySender            = bytes.Repeat([]byte{1}, 20)
@@ -596,7 +595,7 @@ func createTestBatch(t *testing.T, input TestInput, maxTxElements uint) {
 	// 1 and 4 should be unbatched
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryAllBatchConfirms(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -637,7 +636,7 @@ func TestQueryAllBatchConfirms(t *testing.T) {
 	assert.Equal(t, &expectedRes, batchConfirms, "json is equal")
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryLogicCalls(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -699,7 +698,7 @@ func TestQueryLogicCalls(t *testing.T) {
 	require.NoError(t, err)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryLogicCallsConfirms(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -762,7 +761,7 @@ func TestQueryLogicCallsConfirms(t *testing.T) {
 	assert.Equal(t, len(res), 1)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 // TODO: test that it gets the correct batch, not just any batch.
 // Check with multiple nonces and tokenContracts
 func TestQueryBatch(t *testing.T) {
@@ -822,7 +821,7 @@ func TestQueryBatch(t *testing.T) {
 	assert.Equal(t, &expectedRes, batch, batch)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestLastBatchesRequest(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()
@@ -925,7 +924,7 @@ func TestLastBatchesRequest(t *testing.T) {
 	assert.Equal(t, &expectedRes, lastBatches, "json is equal")
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 // tests setting and querying eth address and orchestrator addresses
 func TestQueryCurrentValset(t *testing.T) {
 	var (
@@ -969,7 +968,7 @@ func TestQueryCurrentValset(t *testing.T) {
 	assert.Equal(t, expectedValset, currentValset)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryERC20ToDenom(t *testing.T) {
 	var (
 		erc20, err = types.NewEthAddress("0xb462864E395d88d6bc7C5dd5F3F5eb4cc2599255")
@@ -994,7 +993,7 @@ func TestQueryERC20ToDenom(t *testing.T) {
 	assert.Equal(t, &response, queriedDenom)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryDenomToERC20(t *testing.T) {
 	var (
 		erc20, err = types.NewEthAddress("0xb462864E395d88d6bc7C5dd5F3F5eb4cc2599255")
@@ -1019,7 +1018,7 @@ func TestQueryDenomToERC20(t *testing.T) {
 	assert.Equal(t, &response, queriedERC20)
 }
 
-//nolint: exhaustivestruct
+// nolint: exhaustivestruct
 func TestQueryPendingSendToEth(t *testing.T) {
 	input := CreateTestEnv(t)
 	defer func() { input.Context.Logger().Info("Asserting invariants at test end"); input.AssertInvariants() }()

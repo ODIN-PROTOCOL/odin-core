@@ -1,13 +1,14 @@
 package oraclekeeper_test
 
 import (
+	"testing"
+
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	commontypes "github.com/ODIN-PROTOCOL/odin-core/x/common/types"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"testing"
 )
 
 // TODO: fix test

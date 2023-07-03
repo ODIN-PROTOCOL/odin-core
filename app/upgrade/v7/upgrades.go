@@ -3,7 +3,6 @@ package v7
 import (
 	"fmt"
 
-	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -12,9 +11,9 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-)
 
-const newAddress = "odin17zhnwfs7rh78kz628l2mxjt0u6456rznjxyu6f"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+)
 
 func getBalance(
 	ctx sdk.Context,
@@ -169,15 +168,14 @@ func sendCoins(
 	fromAddr sdk.AccAddress,
 	toAddr sdk.AccAddress,
 	coins sdk.Coins,
-) error {
+) {
 
 	//send coins to new address
 	err := bankkeeper.SendCoins(ctx, fromAddr, toAddr, coins)
+
 	if err != nil {
 		panic(fmt.Sprintf("Could not send coins from: %s, to: %s, error: %s", fromAddr, toAddr, err))
 	}
-
-	return nil
 }
 
 // func burnCoins(
@@ -205,6 +203,7 @@ func CreateUpgradeHandler(
 	bankkeeper bankkeeper.Keeper,
 	mintkeeper mintkeeper.Keeper,
 ) upgradetypes.UpgradeHandler {
+
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running upgrade handler")
 

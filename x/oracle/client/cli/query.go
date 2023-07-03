@@ -5,15 +5,16 @@ import (
 	"strconv"
 	"strings"
 
-	oracleclientcommon "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/spf13/cobra"
+
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/cosmos/cosmos-sdk/version"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/spf13/cobra"
+	oracleclientcommon "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/common"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GetQueryCmd returns the cli query commands for this module.

@@ -2,19 +2,19 @@ package oraclekeeper_test
 
 import (
 	"encoding/hex"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/query"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetRandomValidatorsSuccessActivateAll(t *testing.T) {

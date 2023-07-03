@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -14,16 +16,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-var (
-	// Proto codec for encoding/decoding proto message
-	cdc = app.MakeEncodingConfig().Marshaler
-)
+// Proto codec for encoding/decoding proto message
+var cdc = app.MakeEncodingConfig().Marshaler
 
 func signAndBroadcast(
 	c *Context, key keyring.Info, msgs []sdk.Msg, gasLimit uint64, memo string,

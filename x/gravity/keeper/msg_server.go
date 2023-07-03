@@ -78,7 +78,6 @@ func (k msgServer) SetOrchestratorAddress(c context.Context, msg *types.MsgSetOr
 	)
 
 	return &types.MsgSetOrchestratorAddressResponse{}, nil
-
 }
 
 // ValsetConfirm handles MsgValsetConfirm
