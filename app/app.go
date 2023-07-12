@@ -3,6 +3,7 @@ package odin
 import (
 	"bytes"
 	"fmt"
+
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
 	"io"
 	stdlog "log"
@@ -13,12 +14,10 @@ import (
 
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/althea-net/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
 	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
-	icacontrollertypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/controller/types"
 	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
 	icahosttypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/types"
@@ -53,7 +52,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
@@ -121,6 +119,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+
 	//gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
@@ -681,98 +680,98 @@ func NewOdinApp(
 	app.SetAnteHandler(anteHandler)
 	app.SetEndBlocker(app.EndBlocker)
 
-	app.UpgradeKeeper.SetUpgradeHandler("v0.6.0", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
-		// create ICS27 Controller submodule params
-		controllerParams := icacontrollertypes.Params{
-			ControllerEnabled: true,
-		}
-		// create ICS27 Host submodule params
-		hostParams := icahosttypes.Params{
-			HostEnabled: true,
-			AllowMessages: []string{
-				"/cosmos.authz.v1beta1.MsgExec",
-				"/cosmos.authz.v1beta1.MsgGrant",
-				"/cosmos.authz.v1beta1.MsgRevoke",
-				"/cosmos.bank.v1beta1.MsgSend",
-				"/cosmos.bank.v1beta1.MsgMultiSend",
-				"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
-				"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
-				"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
-				"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
-				"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
-				"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
-				"/cosmos.gov.v1beta1.MsgVoteWeighted",
-				"/cosmos.gov.v1beta1.MsgSubmitProposal",
-				"/cosmos.gov.v1beta1.MsgDeposit",
-				"/cosmos.gov.v1beta1.MsgVote",
-				"/cosmos.staking.v1beta1.MsgEditValidator",
-				"/cosmos.staking.v1beta1.MsgDelegate",
-				"/cosmos.staking.v1beta1.MsgUndelegate",
-				"/cosmos.staking.v1beta1.MsgBeginRedelegate",
-				"/cosmos.staking.v1beta1.MsgCreateValidator",
-				"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
-				"/ibc.applications.transfer.v1.MsgTransfer",
-				sdk.MsgTypeURL(&wasmtypes.MsgStoreCode{}),
-				sdk.MsgTypeURL(&wasmtypes.MsgInstantiateContract{}),
-				sdk.MsgTypeURL(&wasmtypes.MsgExecuteContract{}),
-			},
-		}
+	// app.UpgradeKeeper.SetUpgradeHandler("v0.6.0", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	// 	fromVM[icatypes.ModuleName] = icaModule.ConsensusVersion()
+	// 	// create ICS27 Controller submodule params
+	// 	controllerParams := icacontrollertypes.Params{
+	// 		ControllerEnabled: true,
+	// 	}
+	// 	// create ICS27 Host submodule params
+	// 	hostParams := icahosttypes.Params{
+	// 		HostEnabled: true,
+	// 		AllowMessages: []string{
+	// 			"/cosmos.authz.v1beta1.MsgExec",
+	// 			"/cosmos.authz.v1beta1.MsgGrant",
+	// 			"/cosmos.authz.v1beta1.MsgRevoke",
+	// 			"/cosmos.bank.v1beta1.MsgSend",
+	// 			"/cosmos.bank.v1beta1.MsgMultiSend",
+	// 			"/cosmos.distribution.v1beta1.MsgSetWithdrawAddress",
+	// 			"/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission",
+	// 			"/cosmos.distribution.v1beta1.MsgFundCommunityPool",
+	// 			"/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward",
+	// 			"/cosmos.feegrant.v1beta1.MsgGrantAllowance",
+	// 			"/cosmos.feegrant.v1beta1.MsgRevokeAllowance",
+	// 			"/cosmos.gov.v1beta1.MsgVoteWeighted",
+	// 			"/cosmos.gov.v1beta1.MsgSubmitProposal",
+	// 			"/cosmos.gov.v1beta1.MsgDeposit",
+	// 			"/cosmos.gov.v1beta1.MsgVote",
+	// 			"/cosmos.staking.v1beta1.MsgEditValidator",
+	// 			"/cosmos.staking.v1beta1.MsgDelegate",
+	// 			"/cosmos.staking.v1beta1.MsgUndelegate",
+	// 			"/cosmos.staking.v1beta1.MsgBeginRedelegate",
+	// 			"/cosmos.staking.v1beta1.MsgCreateValidator",
+	// 			"/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+	// 			"/ibc.applications.transfer.v1.MsgTransfer",
+	// 			sdk.MsgTypeURL(&wasmtypes.MsgStoreCode{}),
+	// 			sdk.MsgTypeURL(&wasmtypes.MsgInstantiateContract{}),
+	// 			sdk.MsgTypeURL(&wasmtypes.MsgExecuteContract{}),
+	// 		},
+	// 	}
 
-		ctx.Logger().Info("start to init interchainaccount module...")
-		// initialize ICS27 module
-		icaModule.InitModule(ctx, controllerParams, hostParams)
-		ctx.Logger().Info("start to run module migrations...")
+	// 	ctx.Logger().Info("start to init interchainaccount module...")
+	// 	// initialize ICS27 module
+	// 	icaModule.InitModule(ctx, controllerParams, hostParams)
+	// 	ctx.Logger().Info("start to run module migrations...")
 
-		bech32ibc.InitGenesis(ctx, *app.Bech32IbcKeeper, bech32ibctypes.GenesisState{
-			NativeHRP:     "odin",
-			HrpIBCRecords: []bech32ibctypes.HrpIbcRecord{},
-		})
+	// 	bech32ibc.InitGenesis(ctx, *app.Bech32IbcKeeper, bech32ibctypes.GenesisState{
+	// 		NativeHRP:     "odin",
+	// 		HrpIBCRecords: []bech32ibctypes.HrpIbcRecord{},
+	// 	})
 
-		app.mm.OrderMigrations = make([]string, 0)
-		// app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
-		app.mm.OrderMigrations = append(app.mm.OrderMigrations, wasm.ModuleName)
+	// 	app.mm.OrderMigrations = make([]string, 0)
+	// 	// app.mm.OrderMigrations = append(app.mm.OrderMigrations, gravitytypes.ModuleName)
+	// 	app.mm.OrderMigrations = append(app.mm.OrderMigrations, wasm.ModuleName)
 
-		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-	})
+	// 	return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	// })
 
-	app.UpgradeKeeper.SetUpgradeHandler(
-		"v0.6.2",
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			app.mm.OrderMigrations = make([]string, 0)
-			app.mm.OrderMigrations = append(app.mm.OrderMigrations, authz.ModuleName)
+	// app.UpgradeKeeper.SetUpgradeHandler(
+	// 	"v0.6.2",
+	// 	func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	// 		app.mm.OrderMigrations = make([]string, 0)
+	// 		app.mm.OrderMigrations = append(app.mm.OrderMigrations, authz.ModuleName)
 
-			consensusParams := app.GetConsensusParams(ctx)
-			consensusParams.Block.MaxGas = 100000000
-			consensusParams.Block.MaxBytes = 5020096
-			app.StoreConsensusParams(ctx, consensusParams)
+	// 		consensusParams := app.GetConsensusParams(ctx)
+	// 		consensusParams.Block.MaxGas = 100000000
+	// 		consensusParams.Block.MaxBytes = 5020096
+	// 		app.StoreConsensusParams(ctx, consensusParams)
 
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		},
-	)
+	// 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	// 	},
+	// )
 
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
-	}
+	// upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	// if err != nil {
+	// 	panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
+	// }
 
-	if upgradeInfo.Name == "v0.6.0" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{icahosttypes.StoreKey, wasm.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey},
-		}
+	// if upgradeInfo.Name == "v0.6.0" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	// 	storeUpgrades := storetypes.StoreUpgrades{
+	// 		Added: []string{icahosttypes.StoreKey, wasm.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey},
+	// 	}
 
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
+	// 	// configure store loader that checks if version == upgradeHeight and applies store upgrades
+	// 	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	// }
 
-	if upgradeInfo.Name == "v0.6.2" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{authzkeeper.StoreKey},
-		}
+	// if upgradeInfo.Name == "v0.6.2" && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	// 	storeUpgrades := storetypes.StoreUpgrades{
+	// 		Added: []string{authzkeeper.StoreKey},
+	// 	}
 
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
+	// 	// configure store loader that checks if version == upgradeHeight and applies store upgrades
+	// 	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
+	// }
 
 	app.RegisterUpgradeHandlers(cfg)
 
