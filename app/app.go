@@ -1,7 +1,6 @@
 package odin
 
 import (
-	"bytes"
 	"fmt"
 
 	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
@@ -390,29 +389,29 @@ func NewOdinApp(
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
 	// upgrade handlers
-	cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	//cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 
-	app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		var pz odinminttypes.Params
-		for _, pair := range pz.ParamSetPairs() {
-			if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
-				pz.AllowedMinter = make([]string, 0)
-			} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
-				pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
-			} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
-				pz.MaxAllowedMintVolume = sdk.Coins{}
-			} else {
-				app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
-			}
-		}
-		app.MintKeeper.SetParams(ctx, pz)
+	// app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	// 	var pz odinminttypes.Params
+	// 	for _, pair := range pz.ParamSetPairs() {
+	// 		if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMinter) {
+	// 			pz.AllowedMinter = make([]string, 0)
+	// 		} else if bytes.Equal(pair.Key, odinminttypes.KeyAllowedMintDenoms) {
+	// 			pz.AllowedMintDenoms = make([]*odinminttypes.AllowedDenom, 0)
+	// 		} else if bytes.Equal(pair.Key, odinminttypes.KeyMaxAllowedMintVolume) {
+	// 			pz.MaxAllowedMintVolume = sdk.Coins{}
+	// 		} else {
+	// 			app.GetSubspace(odinminttypes.ModuleName).Get(ctx, pair.Key, pair.Value)
+	// 		}
+	// 	}
+	// 	app.MintKeeper.SetParams(ctx, pz)
 
-		minter := app.MintKeeper.GetMinter(ctx)
-		minter.CurrentMintVolume = sdk.Coins{}
-		app.MintKeeper.SetMinter(ctx, minter)
+	// 	minter := app.MintKeeper.GetMinter(ctx)
+	// 	minter.CurrentMintVolume = sdk.Coins{}
+	// 	app.MintKeeper.SetMinter(ctx, minter)
 
-		return fromVM, nil
-	})
+	// 	return fromVM, nil
+	// })
 
 	// create IBC Keeper
 	app.IBCKeeper = ibckeeper.NewKeeper(
@@ -773,7 +772,7 @@ func NewOdinApp(
 	// 	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	// }
 
-	app.RegisterUpgradeHandlers(cfg)
+	//app.RegisterUpgradeHandlers(cfg)
 
 	if manager := app.SnapshotManager(); manager != nil {
 		err = manager.RegisterExtensions(
