@@ -389,7 +389,7 @@ func NewOdinApp(
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(skipUpgradeHeights, keys[upgradetypes.StoreKey], appCodec, homePath, app.BaseApp)
 
 	// upgrade handlers
-	//cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
+	cfg := module.NewConfigurator(appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 
 	// app.UpgradeKeeper.SetUpgradeHandler("v0.5.5", func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 	// 	var pz odinminttypes.Params
@@ -772,7 +772,7 @@ func NewOdinApp(
 	// 	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	// }
 
-	//app.RegisterUpgradeHandlers(cfg)
+	app.RegisterUpgradeHandlers(cfg)
 
 	if manager := app.SnapshotManager(); manager != nil {
 		err = manager.RegisterExtensions(
