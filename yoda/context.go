@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"

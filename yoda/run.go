@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/github.com/cometbft/cometbft/libs/log"
-	httpclient "github.com/github.com/cometbft/cometbft/rpc/client/http"
-	tmtypes "github.com/github.com/cometbft/cometbft/types"
+	"github.com/cometbft/cometbft/libs/log"
+	httpclient "github.com/cometbft/cometbft/rpc/client/http"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 

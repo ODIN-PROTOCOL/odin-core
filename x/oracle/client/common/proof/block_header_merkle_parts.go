@@ -1,10 +1,10 @@
 package proof
 
 import (
+	"github.com/cometbft/cometbft/crypto/merkle"
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	"github.com/cometbft/cometbft/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/github.com/cometbft/cometbft/crypto/merkle"
-	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
-	"github.com/github.com/cometbft/cometbft/types"
 )
 
 // BlockHeaderMerkleParts stores a group of hashes using for computing Tendermint's block
@@ -71,7 +71,7 @@ func (bp *BlockHeaderMerkleParts) encodeToEthFormat() BlockHeaderMerklePartsEthe
 
 // GetBlockHeaderMerkleParts converts Tendermint block header struct into BlockHeaderMerkleParts for gas-optimized proof verification.
 func GetBlockHeaderMerkleParts(block *types.Header) BlockHeaderMerkleParts {
-	// based on https://github.com/github.com/cometbft/cometbft/blob/master/types/block.go#L448
+	// based on https://github.com/cometbft/cometbft/blob/master/types/block.go#L448
 	hbz, err := block.Version.Marshal()
 	if err != nil {
 		panic(err)

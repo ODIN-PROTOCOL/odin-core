@@ -6,9 +6,9 @@ import (
 
 	// bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 
-	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
+	"github.com/cometbft/cometbft/libs/log"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	gethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/github.com/cometbft/cometbft/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

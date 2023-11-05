@@ -38,7 +38,7 @@ require (
 	google.golang.org/grpc v1.56.2
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
-	
+
 	// github.com/tendermint/tendermint v0.34.27
 	github.com/cometbft/cometbft-db v0.6.7
 	github.com/cometbft/cometbft v0.34.27
@@ -186,4 +186,5 @@ replace (
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
+	github.com/ODIN-PROTOCOL/odin-core => github.com/ODIN-PROTOCOL/odin-core/tree/v047-dep-update v0.7.1
 )

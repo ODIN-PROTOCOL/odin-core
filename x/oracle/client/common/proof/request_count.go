@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
-	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
 	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/cosmos/cosmos-sdk/client"

@@ -9,11 +9,11 @@ import (
 	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
 	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
 
-	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
-	ibctypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v6/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
+	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"

@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

@@ -1,7 +1,7 @@
 package common
 
 import (
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

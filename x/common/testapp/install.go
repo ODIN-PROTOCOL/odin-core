@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/github.com/cometbft/cometbft/libs/cli"
-	"github.com/github.com/cometbft/cometbft/libs/log"
-	tmproto "github.com/github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/spf13/viper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

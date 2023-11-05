@@ -7,11 +7,11 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
 	"github.com/stretchr/testify/require"
 )
 

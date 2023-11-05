@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
-	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
-	tmjson "github.com/github.com/cometbft/cometbft/libs/json"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/segmentio/kafka-go"
 
 	"github.com/cosmos/cosmos-sdk/codec"

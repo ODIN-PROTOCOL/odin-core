@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	"github.com/cometbft/cometbft/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
-	"github.com/github.com/cometbft/cometbft/types"
 	"github.com/stretchr/testify/require"
 )
 

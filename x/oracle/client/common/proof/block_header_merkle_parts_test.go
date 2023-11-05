@@ -3,9 +3,9 @@ package proof
 import (
 	"testing"
 
-	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
-	tmversion "github.com/github.com/cometbft/cometbft/proto/tendermint/version"
-	"github.com/github.com/cometbft/cometbft/types"
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	tmversion "github.com/cometbft/cometbft/proto/tendermint/version"
+	"github.com/cometbft/cometbft/types"
 	"github.com/stretchr/testify/require"
 )
 

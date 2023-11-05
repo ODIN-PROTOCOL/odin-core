@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
-	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/testutil/rest"

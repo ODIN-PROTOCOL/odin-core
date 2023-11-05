@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 	"github.com/stretchr/testify/require"
 )
 

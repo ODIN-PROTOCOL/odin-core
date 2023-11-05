@@ -1,7 +1,7 @@
 package oracle
 
 import (
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 

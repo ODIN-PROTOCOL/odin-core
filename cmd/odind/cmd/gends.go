@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"

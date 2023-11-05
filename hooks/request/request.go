@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-gorp/gorp"
 	// DB driver
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"

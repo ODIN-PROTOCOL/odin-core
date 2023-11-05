@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

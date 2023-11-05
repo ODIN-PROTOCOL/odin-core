@@ -16,9 +16,9 @@ package main
 // 	crypto "github.com/ethereum/go-ethereum/crypto"
 // 	"github.com/ethereum/go-ethereum/ethclient"
 // 	"github.com/spf13/cobra"
-// 	"github.com/github.com/cometbft/cometbft/crypto/secp256k1"
-// 	"github.com/github.com/cometbft/cometbft/libs/log"
-// 	rpchttp "github.com/github.com/cometbft/cometbft/rpc/client/http"
+// 	"github.com/cometbft/cometbft/crypto/secp256k1"
+// 	"github.com/cometbft/cometbft/libs/log"
+// 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 // )
 
 // var (

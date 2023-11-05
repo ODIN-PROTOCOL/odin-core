@@ -7,11 +7,11 @@ import (
 	"reflect"
 	"time"
 
-	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
 	gogotypes "github.com/gogo/protobuf/types"
 )
 
-// Copied from https://github.com/github.com/cometbft/cometbft/blob/master/types/encoding_helper.go
+// Copied from https://github.com/cometbft/cometbft/blob/master/types/encoding_helper.go
 func cdcEncode(item interface{}) []byte {
 	if item != nil && !isTypedNil(item) && !isEmpty(item) {
 		switch item := item.(type) {

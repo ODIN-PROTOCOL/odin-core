@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/github.com/cometbft/cometbft/crypto/secp256k1"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

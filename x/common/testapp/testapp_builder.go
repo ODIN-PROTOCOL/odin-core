@@ -3,9 +3,9 @@ package testapp
 import (
 	"encoding/json"
 
-	dbm "github.com/github.com/cometbft/cometbft-db"
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
-	"github.com/github.com/cometbft/cometbft/libs/log"
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 

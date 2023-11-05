@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"strconv"
 
-	abci "github.com/github.com/cometbft/cometbft/abci/types"
-	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"

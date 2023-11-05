@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/slandymani/go-owasm/api"
 	"github.com/spf13/cobra"
 
