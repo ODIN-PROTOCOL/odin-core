@@ -35,7 +35,7 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130
-	google.golang.org/grpc v1.56.2
+	google.golang.org/grpc v1.59.0
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 
@@ -182,7 +182,7 @@ require (
 
 
 replace (
-	google.golang.org/grpc => google.golang.org/grpc v1.33.2
+	google.golang.org/grpc => google.golang.org/grpc v1.59.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
