@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"time"
 
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v4/modules/core/02-client/types"
+	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	ibcclienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
@@ -186,11 +186,11 @@ func (k Keeper) ProcessNextPendingIbcAutoForward(ctx sdk.Context) (stop bool, er
 	portId := k.ibcTransferKeeper.GetPort(ctx)
 
 	// This local gravity user receives the coins if the ibc transaction fails
-	var fallback sdk.AccAddress
-	fallback, err = types.IBCAddressFromBech32(forward.ForeignReceiver)
-	if err != nil {
-		panic(fmt.Sprintf("Invalid ForeignReceiver found in Pending IBC Auto-Forward queue: %s [[%+v]]", err.Error(), forward))
-	}
+	// var fallback sdk.AccAddress
+	// fallback, err = types.IBCAddressFromBech32(forward.ForeignReceiver)
+	// if err != nil {
+	// 	panic(fmt.Sprintf("Invalid ForeignReceiver found in Pending IBC Auto-Forward queue: %s [[%+v]]", err.Error(), forward))
+	// }
 
 	coins := sdk.NewCoins(*forward.Token)
 	err = k.BankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, fallback, coins)

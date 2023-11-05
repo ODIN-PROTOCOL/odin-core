@@ -5,8 +5,8 @@ import (
 
 	ics23 "github.com/confio/ics23/go"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/github.com/cometbft/cometbft/crypto/tmhash"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/tmhash"
 )
 
 /*

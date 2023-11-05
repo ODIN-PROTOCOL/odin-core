@@ -1,8 +1,8 @@
 package emitter
 
 import (
-	channeltypes "github.com/cosmos/ibc-go/v4/modules/core/04-channel/types"
-	abci "github.com/tendermint/tendermint/abci/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	abci "github.com/github.com/cometbft/cometbft/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

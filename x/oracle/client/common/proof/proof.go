@@ -8,7 +8,7 @@ import (
 
 	ics23 "github.com/confio/ics23/go"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"

@@ -3,7 +3,7 @@ package proof
 import (
 	ics23 "github.com/confio/ics23/go"
 	"github.com/ethereum/go-ethereum/common"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
+	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
 )
 
 // MultiStoreProof stores a compact of other Cosmos-SDK modules' storage hash in multistore to

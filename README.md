@@ -196,7 +196,7 @@ odind tx staking create-validator \
     --from <your-wallet-name> \
     --min-self-delegation 1 \
     --moniker <your-moniker> \
-    --pubkey $(odind tendermint show-validator) \
+    --pubkey $(odind cometbft show-validator) \
     --chain-id odin-testnet-havi-1
 ```
 

@@ -1,11 +1,11 @@
 package oracle
 
 import (
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/github.com/cometbft/cometbft/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 

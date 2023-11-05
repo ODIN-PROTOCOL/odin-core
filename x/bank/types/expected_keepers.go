@@ -1,27 +1,29 @@
 package types
 
 import (
-	// minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // AccountKeeper defines the account contract that must be fulfilled when
 // creating a x/bank keeper.
 type AccountKeeper interface {
-	GetModuleAccount(ctx sdk.Context, moduleName string) authtypes.ModuleAccountI
-}
+	NewAccount(sdk.Context, types.AccountI) types.AccountI
+	NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddress) types.AccountI
 
-// DistributionKeeper defines the distribution contract that must be fulfilled when
-// creating a x/bank keeper.
-type DistributionKeeper interface {
-	GetFeePool(sdk.Context) disttypes.FeePool
-	SetFeePool(sdk.Context, disttypes.FeePool)
-}
+	GetAccount(ctx sdk.Context, addr sdk.AccAddress) types.AccountI
+	GetAllAccounts(ctx sdk.Context) []types.AccountI
+	HasAccount(ctx sdk.Context, addr sdk.AccAddress) bool
+	SetAccount(ctx sdk.Context, acc types.AccountI)
 
-type MintKeeper interface {
-	GetParams(sdk.Context) minttypes.Params
+	IterateAccounts(ctx sdk.Context, process func(types.AccountI) bool)
+
+	ValidatePermissions(macc types.ModuleAccountI) error
+
+	GetModuleAddress(moduleName string) sdk.AccAddress
+	GetModuleAddressAndPermissions(moduleName string) (addr sdk.AccAddress, permissions []string)
+	GetModuleAccountAndPermissions(ctx sdk.Context, moduleName string) (types.ModuleAccountI, []string)
+	GetModuleAccount(ctx sdk.Context, moduleName string) types.ModuleAccountI
+	SetModuleAccount(ctx sdk.Context, macc types.ModuleAccountI)
+	GetModulePermissions() map[string]types.PermissionsForAddress
 }

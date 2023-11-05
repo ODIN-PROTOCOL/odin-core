@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"sort"
 
-	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	// bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+
+	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
 	gethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/github.com/cometbft/cometbft/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -45,7 +46,7 @@ type Keeper struct {
 	DistKeeper        *distrkeeper.Keeper
 	accountKeeper     *authkeeper.AccountKeeper
 	ibcTransferKeeper *ibctransferkeeper.Keeper
-	bech32IbcKeeper   *bech32ibckeeper.Keeper
+	// bech32IbcKeeper   *bech32ibckeeper.Keeper
 
 	AttestationHandler interface {
 		Handle(sdk.Context, types.Attestation, types.EthereumClaim) error
@@ -72,9 +73,9 @@ func (k Keeper) ValidateMembers() {
 	if k.ibcTransferKeeper == nil {
 		panic("Nil ibcTransferKeeper!")
 	}
-	if k.bech32IbcKeeper == nil {
-		panic("Nil bech32IbcKeeper!")
-	}
+	// if k.bech32IbcKeeper == nil {
+	// 	panic("Nil bech32IbcKeeper!")
+	// }
 }
 
 // NewKeeper returns a new instance of the gravity keeper
@@ -88,7 +89,7 @@ func NewKeeper(
 	distKeeper *distrkeeper.Keeper,
 	accKeeper *authkeeper.AccountKeeper,
 	ibcTransferKeeper *ibctransferkeeper.Keeper,
-	bech32IbcKeeper *bech32ibckeeper.Keeper,
+	// bech32IbcKeeper *bech32ibckeeper.Keeper,
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
@@ -99,14 +100,14 @@ func NewKeeper(
 		storeKey:   storeKey,
 		paramSpace: paramSpace,
 
-		cdc:                cdc,
-		BankKeeper:         bankKeeper,
-		StakingKeeper:      stakingKeeper,
-		SlashingKeeper:     slashingKeeper,
-		DistKeeper:         distKeeper,
-		accountKeeper:      accKeeper,
-		ibcTransferKeeper:  ibcTransferKeeper,
-		bech32IbcKeeper:    bech32IbcKeeper,
+		cdc:               cdc,
+		BankKeeper:        bankKeeper,
+		StakingKeeper:     stakingKeeper,
+		SlashingKeeper:    slashingKeeper,
+		DistKeeper:        distKeeper,
+		accountKeeper:     accKeeper,
+		ibcTransferKeeper: ibcTransferKeeper,
+		//bech32IbcKeeper:    bech32IbcKeeper,
 		AttestationHandler: nil,
 	}
 	attestationHandler := AttestationHandler{keeper: &k}

@@ -18,7 +18,7 @@ package cmd
 // 	v039 "github.com/cosmos/cosmos-sdk/x/genutil/legacy/v0_39"
 // 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 // 	"github.com/spf13/cobra"
-// 	tmtypes "github.com/tendermint/tendermint/types"
+// 	tmtypes "github.com/github.com/cometbft/cometbft/types"
 // )
 
 // const (

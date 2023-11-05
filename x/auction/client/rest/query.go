@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )

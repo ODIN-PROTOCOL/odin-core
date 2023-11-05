@@ -7,11 +7,11 @@ import (
 
 	"github.com/go-gorp/gorp"
 	// DB driver
+	abci "github.com/github.com/cometbft/cometbft/abci/types"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

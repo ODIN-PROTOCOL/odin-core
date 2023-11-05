@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	tmbytes "github.com/github.com/cometbft/cometbft/libs/bytes"
+	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
 	gogotypes "github.com/gogo/protobuf/types"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )

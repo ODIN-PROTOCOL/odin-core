@@ -6,18 +6,19 @@ import (
 	"testing"
 	"time"
 
-	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
+	// bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+
+	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	dbm "github.com/github.com/cometbft/cometbft-db"
+	"github.com/github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/github.com/cometbft/cometbft/proto/tendermint/types"
+	tmversion "github.com/github.com/cometbft/cometbft/proto/tendermint/version"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmversion "github.com/tendermint/tendermint/proto/tendermint/version"
-	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -417,7 +418,7 @@ func CreateTestEnv(t *testing.T) TestInput {
 	keyUpgrade := sdk.NewKVStoreKey(upgradetypes.StoreKey)
 	keyIbc := sdk.NewKVStoreKey(ibchost.StoreKey)
 	keyIbcTransfer := sdk.NewKVStoreKey(ibctransfertypes.StoreKey)
-	keyBech32Ibc := sdk.NewKVStoreKey(bech32ibctypes.StoreKey)
+	//keyBech32Ibc := sdk.NewKVStoreKey(bech32ibctypes.StoreKey)
 
 	// Initialize memory database and mount stores on it
 	db := dbm.NewMemDB()
@@ -435,7 +436,7 @@ func CreateTestEnv(t *testing.T) TestInput {
 	ms.MountStoreWithDB(keyUpgrade, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyIbc, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyIbcTransfer, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keyBech32Ibc, sdk.StoreTypeIAVL, db)
+	//ms.MountStoreWithDB(keyBech32Ibc, sdk.StoreTypeIAVL, db)
 	err := ms.LoadLatestVersion()
 	require.Nil(t, err)
 
@@ -479,7 +480,7 @@ func CreateTestEnv(t *testing.T) TestInput {
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
-	paramsKeeper.Subspace(bech32ibctypes.ModuleName)
+	//paramsKeeper.Subspace(bech32ibctypes.ModuleName)
 
 	// this is also used to initialize module accounts for all the map keys
 	maccPerms := map[string][]string{
@@ -617,18 +618,18 @@ func CreateTestEnv(t *testing.T) TestInput {
 		accountKeeper, bankKeeper, scopedTransferKeeper,
 	)
 
-	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
-		ibcKeeper.ChannelKeeper, marshaler, keyBech32Ibc,
-		ibcTransferKeeper,
-	)
+	// bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+	// 	ibcKeeper.ChannelKeeper, marshaler, keyBech32Ibc,
+	// 	ibcTransferKeeper,
+	// )
 	// Set the native prefix to the "gravity" value we like in module/config/config.go
-	err = bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
-	if err != nil {
-		panic("Test Env Creation failure, could not set native hrp")
-	}
+	// err = bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
+	// if err != nil {
+	// 	panic("Test Env Creation failure, could not set native hrp")
+	// }
 
 	k := NewKeeper(gravityKey, getSubspace(paramsKeeper, types.DefaultParamspace), marshaler, &bankKeeper,
-		&stakingKeeper, &slashingKeeper, &distKeeper, &accountKeeper, &ibcTransferKeeper, &bech32IbcKeeper)
+		&stakingKeeper, &slashingKeeper, &distKeeper, &accountKeeper, &ibcTransferKeeper)
 
 	stakingKeeper = *stakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(

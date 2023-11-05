@@ -4,27 +4,30 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/kv"
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
+
+	"github.com/cosmos/cosmos-sdk/types/kv"
+	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	"github.com/cosmos/cosmos-sdk/x/mint/simulation"
+	"github.com/cosmos/cosmos-sdk/x/mint/types"
 )
 
 func TestDecodeStore(t *testing.T) {
-	cdc := simapp.MakeTestEncodingConfig()
-	dec := simulation.NewDecodeStore(cdc.Marshaler)
+	encCfg := moduletestutil.MakeTestEncodingConfig(mint.AppModuleBasic{})
 
-	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
+	dec := simulation.NewDecodeStore(encCfg.Codec)
+
+	minter := types.NewMinter(math.LegacyOneDec(), math.LegacyNewDec(15))
 
 	kvPairs := kv.Pairs{
 		Pairs: []kv.Pair{
-			{Key: minttypes.MinterKey, Value: cdc.Marshaler.MustMarshal(&minter)},
+			{Key: types.MinterKey, Value: encCfg.Codec.MustMarshal(&minter)},
 			{Key: []byte{0x99}, Value: []byte{0x99}},
 		},
 	}
-	testCases := []struct {
+	tests := []struct {
 		name        string
 		expectedLog string
 	}{
@@ -32,11 +35,11 @@ func TestDecodeStore(t *testing.T) {
 		{"other", ""},
 	}
 
-	for i, tc := range testCases {
-		i, tt := i, tc
+	for i, tt := range tests {
+		i, tt := i, tt
 		t.Run(tt.name, func(t *testing.T) {
 			switch i {
-			case len(testCases) - 1:
+			case len(tests) - 1:
 				require.Panics(t, func() { dec(kvPairs.Pairs[i], kvPairs.Pairs[i]) }, tt.name)
 			default:
 				require.Equal(t, tt.expectedLog, dec(kvPairs.Pairs[i], kvPairs.Pairs[i]), tt.name)

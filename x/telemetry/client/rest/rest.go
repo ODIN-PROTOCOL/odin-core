@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
 	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"

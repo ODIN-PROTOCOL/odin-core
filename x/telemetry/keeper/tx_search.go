@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"github.com/tendermint/tendermint/rpc/core"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	"github.com/github.com/cometbft/cometbft/rpc/core"
+	coretypes "github.com/github.com/cometbft/cometbft/rpc/core/types"
+	rpctypes "github.com/github.com/cometbft/cometbft/rpc/jsonrpc/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

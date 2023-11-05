@@ -6,17 +6,16 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/kv"
-
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/cosmos/cosmos-sdk/x/mint/types"
 )
 
-// NewDecodeStore returns a decoder function closure that umarshals the KVPair's
+// NewDecodeStore returns a decoder function closure that unmarshals the KVPair's
 // Value to the corresponding mint type.
 func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 	return func(kvA, kvB kv.Pair) string {
 		switch {
-		case bytes.Equal(kvA.Key, minttypes.MinterKey):
-			var minterA, minterB minttypes.Minter
+		case bytes.Equal(kvA.Key, types.MinterKey):
+			var minterA, minterB types.Minter
 			cdc.MustUnmarshal(kvA.Value, &minterA)
 			cdc.MustUnmarshal(kvB.Value, &minterB)
 			return fmt.Sprintf("%v\n%v", minterA, minterB)

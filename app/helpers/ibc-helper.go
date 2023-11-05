@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/testutil/rest"
 	govrest "github.com/cosmos/cosmos-sdk/x/gov/client/rest"
 )
 

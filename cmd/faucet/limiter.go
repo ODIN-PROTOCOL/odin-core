@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
-	httpclient "github.com/tendermint/tendermint/rpc/client/http"
+	rpcclient "github.com/github.com/cometbft/cometbft/rpc/client"
+	httpclient "github.com/github.com/cometbft/cometbft/rpc/client/http"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"

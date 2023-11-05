@@ -3,8 +3,8 @@ package odin
 import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmTypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	ibcante "github.com/cosmos/ibc-go/v4/modules/core/ante"
-	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
+	ibcante "github.com/cosmos/ibc-go/v6/modules/core/ante"
+	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

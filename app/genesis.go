@@ -5,13 +5,15 @@ import (
 	"time"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	"github.com/althea-net/bech32-ibc/x/bech32ibc"
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
-	ibctypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v4/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+
+	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
+	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+
+	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v6/modules/core"
+	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -98,8 +100,8 @@ func NewDefaultGenesisState() GenesisState {
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
 		icatypes.ModuleName:        ica.AppModuleBasic{}.DefaultGenesis(cdc),
-		bech32ibctypes.ModuleName:  bech32ibc.AppModuleBasic{}.DefaultGenesis(cdc),
-		gravitytypes.ModuleName:    gravity.AppModuleBasic{}.DefaultGenesis(cdc),
-		wasm.ModuleName:            wasm.AppModuleBasic{}.DefaultGenesis(cdc),
+		// bech32ibctypes.ModuleName:  bech32ibc.AppModuleBasic{}.DefaultGenesis(cdc),
+		gravitytypes.ModuleName: gravity.AppModuleBasic{}.DefaultGenesis(cdc),
+		wasm.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }

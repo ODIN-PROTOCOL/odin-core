@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
 	hookscommon "github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	hookprice "github.com/ODIN-PROTOCOL/odin-core/hooks/price"

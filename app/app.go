@@ -13,33 +13,35 @@ import (
 
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	"github.com/althea-net/bech32-ibc/x/bech32ibc"
-	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
-	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
-	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
-	icahosttypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/types"
-	"github.com/cosmos/ibc-go/v4/modules/apps/transfer"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
-	transfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v4/modules/core"
-	ibcclient "github.com/cosmos/ibc-go/v4/modules/core/02-client"
-	ibcclientclient "github.com/cosmos/ibc-go/v4/modules/core/02-client/client/cli"
-	porttypes "github.com/cosmos/ibc-go/v4/modules/core/05-port/types"
-	ibchost "github.com/cosmos/ibc-go/v4/modules/core/24-host"
-	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
+
+	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
+	// bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
+	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+
+	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
+	icahost "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host"
+	icahostkeeper "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/keeper"
+	icahosttypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
+	"github.com/cosmos/ibc-go/v6/modules/apps/transfer"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
+	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v6/modules/core"
+	ibcclient "github.com/cosmos/ibc-go/v6/modules/core/02-client"
+	ibcclientclient "github.com/cosmos/ibc-go/v6/modules/core/02-client/client/cli"
+	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
+	ibckeeper "github.com/cosmos/ibc-go/v6/modules/core/keeper"
+	dbm "github.com/github.com/cometbft/cometbft-db"
+	abci "github.com/github.com/cometbft/cometbft/abci/types"
+	tmjson "github.com/github.com/cometbft/cometbft/libs/json"
+	"github.com/github.com/cometbft/cometbft/libs/log"
+	tmos "github.com/github.com/cometbft/cometbft/libs/os"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rakyll/statik/fs"
 	owasm "github.com/slandymani/go-owasm/api"
 	"github.com/spf13/cast"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	"github.com/tendermint/tendermint/libs/log"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -47,16 +49,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
+
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
@@ -198,7 +200,7 @@ var (
 )
 
 var (
-	_ simapp.App              = (*OdinApp)(nil)
+	_ runtime.AppI            = (*OdinApp)(nil)
 	_ servertypes.Application = (*OdinApp)(nil)
 )
 
@@ -237,9 +239,9 @@ type OdinApp struct {
 	AuthzKeeper      authzkeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
 	// GravityKeeper    *gravitykeeper.Keeper
-	Bech32IbcKeeper *bech32ibckeeper.Keeper
-	ICAHostKeeper   icahostkeeper.Keeper
-	WasmKeeper      wasm.Keeper
+	// Bech32IbcKeeper *bech32ibckeeper.Keeper
+	ICAHostKeeper icahostkeeper.Keeper
+	WasmKeeper    wasm.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -425,11 +427,11 @@ func NewOdinApp(
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
-	bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
-		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.TransferKeeper,
-	)
-	app.Bech32IbcKeeper = &bech32IbcKeeper
+	// bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
+	// 	app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
+	// 	app.TransferKeeper,
+	// )
+	// app.Bech32IbcKeeper = &bech32IbcKeeper
 
 	/*gravityKeeper := gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -500,7 +502,7 @@ func NewOdinApp(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		// AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(*app.GravityKeeper)).
-		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(*app.Bech32IbcKeeper)).
+		// AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(*app.Bech32IbcKeeper)).
 		AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasm.EnableAllProposals))
 
 	app.GovKeeper = govkeeper.NewKeeper(
@@ -559,7 +561,7 @@ func NewOdinApp(
 		skipGenesisInvariants = opt
 	}
 
-	bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
+	//bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
 	// gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
 	wasmModule := wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper)
 
@@ -966,11 +968,9 @@ func (app *OdinApp) SimulationManager() *module.SimulationManager {
 func (app *OdinApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	rpc.RegisterRoutes(clientCtx, apiSvr.Router)
-	// Register legacy tx routes.
-	authrest.RegisterTxRoutes(clientCtx, apiSvr.Router)
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
-	// Register new tendermint queries routes from grpc-gateway.
+	// Register new cometbft queries routes from grpc-gateway.
 	tmservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// Register legacy and grpc-gateway routes for all modules.
