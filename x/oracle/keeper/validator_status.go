@@ -5,8 +5,9 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	distr "x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	distr "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"

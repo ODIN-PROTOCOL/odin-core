@@ -5,13 +5,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"x/distribution"
+	"x/distribution/exported"
+	v3 "x/distribution/migrations/v3"
+	"x/distribution/types"
+
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/distribution/exported"
-	v3 "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v3"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 type mockSubspace struct {

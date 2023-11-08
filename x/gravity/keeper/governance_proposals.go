@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	disttypes "x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"

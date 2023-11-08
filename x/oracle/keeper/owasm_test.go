@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	distrtypes "x/distribution/types"
+
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -13,7 +15,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
 )
 

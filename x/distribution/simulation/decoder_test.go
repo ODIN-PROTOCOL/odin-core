@@ -6,15 +6,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"x/distribution/simulation"
+	"x/distribution/testutil"
+	"x/distribution/types"
+
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
-	"github.com/cosmos/cosmos-sdk/x/distribution/simulation"
-	"github.com/cosmos/cosmos-sdk/x/distribution/testutil"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 var (

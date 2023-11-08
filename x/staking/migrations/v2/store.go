@@ -1,12 +1,13 @@
 package v2
 
 import (
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	v2distribution "x/distribution/migrations/v2"
+
+	"cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 	v1auth "github.com/cosmos/cosmos-sdk/x/auth/migrations/v1"
-	v2distribution "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v2"
 	v1 "github.com/cosmos/cosmos-sdk/x/staking/migrations/v1"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 )

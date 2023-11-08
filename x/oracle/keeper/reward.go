@@ -1,8 +1,9 @@
 package oraclekeeper
 
 import (
+	distrtypes "x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )

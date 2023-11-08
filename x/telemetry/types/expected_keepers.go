@@ -1,8 +1,9 @@
 package types
 
 import (
+	distrtypes "x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // DistrKeeper defines the expected distribution keeper.

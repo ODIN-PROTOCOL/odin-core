@@ -1,14 +1,15 @@
 package v047
 
 import (
+	v1distr "x/distribution/migrations/v1"
+	v3distr "x/distribution/migrations/v3"
+	distrtypes "x/distribution/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	v1auth "github.com/cosmos/cosmos-sdk/x/auth/migrations/v1"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankv4 "github.com/cosmos/cosmos-sdk/x/bank/migrations/v4"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	v1distr "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v1"
-	v3distr "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v3"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 	v4gov "github.com/cosmos/cosmos-sdk/x/gov/migrations/v4"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
