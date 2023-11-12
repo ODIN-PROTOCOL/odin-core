@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"cosmossdk.io/store/prefix"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"

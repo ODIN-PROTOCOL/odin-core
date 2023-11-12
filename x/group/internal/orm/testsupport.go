@@ -3,10 +3,10 @@ package orm
 import (
 	"fmt"
 
-	"cosmossdk.io/store"
-	"cosmossdk.io/store/gaskv"
-	storetypes "cosmossdk.io/store/types"
 	dbm "github.com/cometbft/cometbft-db"
+	"github.com/cosmos/cosmos-sdk/store"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 

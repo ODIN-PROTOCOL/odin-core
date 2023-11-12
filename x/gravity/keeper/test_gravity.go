@@ -26,7 +26,7 @@ package keeper
 
 // 	"github.com/cosmos/cosmos-sdk/x/distribution"
 
-// 	"cosmossdk.io/store"
+// 	"github.com/cosmos/cosmos-sdk/store"
 // 	"github.com/cosmos/cosmos-sdk/baseapp"
 // 	"github.com/cosmos/cosmos-sdk/codec"
 // 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
