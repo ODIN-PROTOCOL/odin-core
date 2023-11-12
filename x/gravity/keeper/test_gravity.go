@@ -20,10 +20,11 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 
-	"x/distribution"
-	distrclient "x/distribution/client"
-	distrkeeper "x/distribution/keeper"
-	distrtypes "x/distribution/types"
+	distrclient "github.com/ODIN-PROTOCOL/odin-core/x/distribution/client"
+	distrkeeper "github.com/ODIN-PROTOCOL/odin-core/x/distribution/keeper"
+	distrtypes "github.com/ODIN-PROTOCOL/odin-core/x/distribution/types"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution"
 
 	"cosmossdk.io/store"
 	"github.com/cosmos/cosmos-sdk/baseapp"

@@ -1,4 +1,4 @@
-// package proof
+package proof
 
 // import (
 // 	"context"

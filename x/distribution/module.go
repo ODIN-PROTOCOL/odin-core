@@ -13,11 +13,11 @@ import (
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/depinject"
 
-	"x/distribution/client/cli"
-	"x/distribution/exported"
-	"x/distribution/keeper"
-	"x/distribution/simulation"
-	"x/distribution/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution/exported"
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution/simulation"
+	"github.com/ODIN-PROTOCOL/odin-core/x/distribution/types"
 
 	sdkclient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"

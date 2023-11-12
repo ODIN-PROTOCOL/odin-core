@@ -2,8 +2,6 @@ package odin
 
 import (
 	"fmt"
-
-	//"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
 	"io"
 	stdlog "log"
 	"net/http"
@@ -13,6 +11,8 @@ import (
 
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+
+	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
 
 	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
 	// bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
@@ -59,10 +59,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 
-	distr "x/distribution"
-	distrclient "x/distribution/client"
-	distrkeeper "x/distribution/keeper"
-	distrtypes "x/distribution/types"
+	distr "github.com/ODIN-PROTOCOL/odin-core/x/distribution"
+	distrclient "github.com/ODIN-PROTOCOL/odin-core/x/distribution/client"
+	distrkeeper "github.com/ODIN-PROTOCOL/odin-core/x/distribution/keeper"
+	distrtypes "github.com/ODIN-PROTOCOL/odin-core/x/distribution/types"
 
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
@@ -122,7 +122,6 @@ import (
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 
-	//gravitykeeper "github.com/ODIN-PROTOCOL/odin-core/x/gravity/keeper"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
@@ -176,7 +175,7 @@ var (
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
 		// gravity.AppModuleBasic{},
-		bech32ibc.AppModuleBasic{},
+		// bech32ibc.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 	)
@@ -314,10 +313,10 @@ func NewOdinApp(
 	keys := sdk.NewKVStoreKeys(
 		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
 		odinminttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
-		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey,
+		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, icahosttypes.StoreKey, gravitytypes.StoreKey, bech32ibctypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, icahosttypes.StoreKey, gravitytypes.StoreKey,
 		wasm.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -502,8 +501,6 @@ func NewOdinApp(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		// AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(*app.GravityKeeper)).
-		// AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(*app.Bech32IbcKeeper)).
 		AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasm.EnableAllProposals))
 
 	app.GovKeeper = govkeeper.NewKeeper(
@@ -592,7 +589,6 @@ func NewOdinApp(
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
 		// gravityModule,
-		bech32Module,
 		icaModule,
 		wasmModule,
 	)
