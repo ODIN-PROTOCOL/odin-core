@@ -12,9 +12,10 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/suite"
 
-	"x/distribution/client/cli"
-	distrclitestutil "x/distribution/client/testutil"
-	distrtestutil "x/distribution/testutil"
+	distrclitestutil "github.com/cosmos/cosmos-sdk/x/distribution/client/testutil"
+	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
+
+	"github.com/cosmos/cosmos-sdk/x/distribution/client/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"

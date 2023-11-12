@@ -12,7 +12,7 @@ import (
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/segmentio/kafka-go"
 
-	distrkeeper "x/distribution/keeper"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	distrkeeper "x/distribution/keeper"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

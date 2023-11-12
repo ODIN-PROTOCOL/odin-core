@@ -3,7 +3,7 @@ package keeper
 import (
 	"testing"
 
-	disttypes "x/distribution/types"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"

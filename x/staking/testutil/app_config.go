@@ -13,7 +13,7 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/slashing"
 	_ "github.com/cosmos/cosmos-sdk/x/staking"
 
-	distrtypes "x/distribution/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"cosmossdk.io/core/appconfig"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"

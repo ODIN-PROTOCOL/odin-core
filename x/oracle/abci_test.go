@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	distrtypes "x/distribution/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"

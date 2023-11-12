@@ -1,7 +1,7 @@
 package v2
 
 import (
-	v2distribution "x/distribution/migrations/v2"
+	v2distribution "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v2"
 
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"

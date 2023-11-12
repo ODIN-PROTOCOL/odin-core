@@ -59,10 +59,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 
-	distr "github.com/ODIN-PROTOCOL/odin-core/x/distribution"
-	distrclient "github.com/ODIN-PROTOCOL/odin-core/x/distribution/client"
-	distrkeeper "github.com/ODIN-PROTOCOL/odin-core/x/distribution/keeper"
-	distrtypes "github.com/ODIN-PROTOCOL/odin-core/x/distribution/types"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+
+	distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client/cli"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"

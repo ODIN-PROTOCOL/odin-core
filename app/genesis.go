@@ -15,7 +15,7 @@ import (
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
-	distrtypes "x/distribution/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"

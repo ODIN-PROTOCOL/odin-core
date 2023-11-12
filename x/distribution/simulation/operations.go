@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	"x/distribution/keeper"
-	"x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"

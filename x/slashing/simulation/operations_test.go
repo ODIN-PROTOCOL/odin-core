@@ -13,8 +13,8 @@ import (
 
 	"cosmossdk.io/math"
 
-	distributionkeeper "x/distribution/keeper"
-	distrtypes "x/distribution/types"
+	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

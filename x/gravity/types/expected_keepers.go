@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"

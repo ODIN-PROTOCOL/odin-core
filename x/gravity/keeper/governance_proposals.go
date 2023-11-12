@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	disttypes "x/distribution/types"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

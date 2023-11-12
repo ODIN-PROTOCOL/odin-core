@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	distrtypes "x/distribution/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"

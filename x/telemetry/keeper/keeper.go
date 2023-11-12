@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	distrkeeper "x/distribution/keeper"
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"

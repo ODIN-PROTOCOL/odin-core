@@ -1,7 +1,7 @@
 package emitter
 
 import (
-	"x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 

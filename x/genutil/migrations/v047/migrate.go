@@ -1,9 +1,9 @@
 package v047
 
 import (
-	v1distr "x/distribution/migrations/v1"
-	v3distr "x/distribution/migrations/v3"
-	distrtypes "x/distribution/types"
+	v1distr "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v1"
+	v3distr "github.com/cosmos/cosmos-sdk/x/distribution/migrations/v3"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	v1auth "github.com/cosmos/cosmos-sdk/x/auth/migrations/v1"

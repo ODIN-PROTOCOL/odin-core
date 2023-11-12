@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	distrcli "x/distribution/client/cli"
+	distrcli "github.com/cosmos/cosmos-sdk/x/distribution/client/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 )

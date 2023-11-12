@@ -8,8 +8,6 @@ require (
 	github.com/CosmWasm/wasmd v0.44.0
 	github.com/Masterminds/squirrel v1.5.2
 	github.com/cometbft/cometbft v0.38.0
-
-	// github.com/tendermint/tendermint v0.34.27
 	github.com/cometbft/cometbft-db v0.8.0
 	github.com/confio/ics23/go v0.9.0
 	github.com/cosmos/cosmos-sdk v0.47.5
@@ -223,9 +221,9 @@ require (
 )
 
 replace (
-	github.com/ODIN-PROTOCOL/odin-core => github.com/ODIN-PROTOCOL/odin-core/tree/v047-dep-update v0.7.1
+	github.com/ODIN-PROTOCOL/odin-core => github.com/ODIN-PROTOCOL/odin-core/tree/v047-dep-update v0.7.2
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
+	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.37.2
 	google.golang.org/grpc => google.golang.org/grpc v1.59.0
 )

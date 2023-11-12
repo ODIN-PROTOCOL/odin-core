@@ -1,8 +1,9 @@
 package v3
 
 import (
-	"x/distribution/exported"
-	"x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+
+	"github.com/cosmos/cosmos-sdk/x/distribution/exported"
 
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
