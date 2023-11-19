@@ -123,7 +123,6 @@ import (
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	odinmint "github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	odinmintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	odinminttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -175,8 +174,6 @@ var (
 		telemetry.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		feegrantmodule.AppModuleBasic{},
-		// gravity.AppModuleBasic{},
-		// bech32ibc.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 	)
@@ -190,9 +187,8 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		transfertypes.ModuleName:       {authtypes.Minter, authtypes.Burner},
-		// gravitytypes.ModuleName:        {authtypes.Minter, authtypes.Burner},
-		icatypes.ModuleName: nil,
-		wasm.ModuleName:     {authtypes.Burner},
+		icatypes.ModuleName:            nil,
+		wasm.ModuleName:                {authtypes.Burner},
 	}
 	// module accounts that are allowed to receive tokens.
 	allowedReceivingModAcc = map[string]bool{
@@ -239,8 +235,6 @@ type OdinApp struct {
 	FeeGrantKeeper   feegrantkeeper.Keeper
 	AuthzKeeper      authzkeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
-	// GravityKeeper    *gravitykeeper.Keeper
-	// Bech32IbcKeeper *bech32ibckeeper.Keeper
 	ICAHostKeeper icahostkeeper.Keeper
 	WasmKeeper    wasm.Keeper
 
@@ -317,8 +311,7 @@ func NewOdinApp(
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
 		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, icahosttypes.StoreKey, gravitytypes.StoreKey,
-		wasm.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey, icahosttypes.StoreKey, wasm.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -428,28 +421,8 @@ func NewOdinApp(
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 	transferModuleIBC := transfer.NewIBCModule(app.TransferKeeper)
 
-	// bech32IbcKeeper := *bech32ibckeeper.NewKeeper(
-	// 	app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-	// 	app.TransferKeeper,
-	// )
-	// app.Bech32IbcKeeper = &bech32IbcKeeper
-
-	/*gravityKeeper := gravitykeeper.NewKeeper(
-		keys[gravitytypes.StoreKey],
-		app.GetSubspace(gravitytypes.ModuleName),
-		appCodec,
-		app.BankKeeper,
-		&stakingKeeper,
-		&app.SlashingKeeper,
-		&app.DistrKeeper,
-		&app.AccountKeeper,
-		&app.TransferKeeper,
-		&bech32IbcKeeper,
-	)
-	app.GravityKeeper = &gravityKeeper
-	*/
 	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()), //, app.GravityKeeper.Hooks()),
+		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks())
 	)
 
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
@@ -560,8 +533,6 @@ func NewOdinApp(
 		skipGenesisInvariants = opt
 	}
 
-	//bech32Module := bech32ibc.NewAppModule(appCodec, *app.Bech32IbcKeeper)
-	// gravityModule := gravity.NewAppModule(gravityKeeper, app.BankKeeper)
 	wasmModule := wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
@@ -589,7 +560,6 @@ func NewOdinApp(
 		auction.NewAppModule(app.AuctionKeeper),
 		telemetry.NewAppModule(app.TelemetryKeeper),
 		transferModule,
-		// gravityModule,
 		icaModule,
 		wasmModule,
 	)
@@ -601,14 +571,14 @@ func NewOdinApp(
 		auctiontypes.ModuleName, slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName,
 		authz.ModuleName, feegrant.ModuleName, paramstypes.ModuleName, vestingtypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
 		govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, transfertypes.ModuleName, telemetrytypes.ModuleName,
-		coinswaptypes.ModuleName /*gravitytypes.ModuleName,*/, bech32ibctypes.ModuleName, wasm.ModuleName,
+		coinswaptypes.ModuleName, wasm.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName, govtypes.ModuleName, stakingtypes.ModuleName, oracletypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName,
 		govtypes.ModuleName, capabilitytypes.ModuleName, telemetrytypes.ModuleName, coinswaptypes.ModuleName, transfertypes.ModuleName,
 		paramstypes.ModuleName, vestingtypes.ModuleName, evidencetypes.ModuleName, distrtypes.ModuleName, auctiontypes.ModuleName,
 		authz.ModuleName, feegrant.ModuleName, slashingtypes.ModuleName, genutiltypes.ModuleName, ibchost.ModuleName, icatypes.ModuleName, odinminttypes.ModuleName, upgradetypes.ModuleName,
-		/*gravitytypes.ModuleName, */ bech32ibctypes.ModuleName, wasm.ModuleName,
+		wasm.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -617,7 +587,7 @@ func NewOdinApp(
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName,
 		ibchost.ModuleName, icatypes.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, coinswaptypes.ModuleName, auctiontypes.ModuleName,
 		transfertypes.ModuleName, authz.ModuleName, feegrant.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		telemetrytypes.ModuleName /*gravitytypes.ModuleName, */, bech32ibctypes.ModuleName, wasm.ModuleName, icatypes.ModuleName,
+		telemetrytypes.ModuleName, wasm.ModuleName, icatypes.ModuleName,
 	)
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
@@ -1029,8 +999,6 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	paramsKeeper.Subspace(transfertypes.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(gravitytypes.ModuleName)
-	paramsKeeper.Subspace(bech32ibctypes.ModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
 
 	return paramsKeeper
