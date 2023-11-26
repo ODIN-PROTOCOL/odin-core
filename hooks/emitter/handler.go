@@ -6,14 +6,14 @@ import (
 
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func parseEvents(events sdk.StringEvents) common.EvMap {
@@ -72,11 +72,11 @@ func (h *Hook) handleMsg(ctx sdk.Context, txHash []byte, msg sdk.Msg, log sdk.AB
 		h.handleMsgWithdrawValidatorCommission(ctx, msg, evMap, extra)
 	case *slashingtypes.MsgUnjail:
 		h.handleMsgUnjail(ctx, msg)
-	case *govtypes.MsgSubmitProposal:
+	case *govv1.MsgSubmitProposal:
 		h.handleMsgSubmitProposal(ctx, txHash, msg, evMap)
-	case *govtypes.MsgVote:
+	case *govv1.MsgVote:
 		h.handleMsgVote(txHash, msg)
-	case *govtypes.MsgDeposit:
+	case *govv1.MsgDeposit:
 		h.handleMsgDeposit(ctx, txHash, msg)
 	case *channeltypes.MsgRecvPacket:
 		h.handleMsgRecvPacket(ctx, txHash, msg, evMap, extra)

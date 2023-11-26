@@ -22,6 +22,7 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -186,21 +187,18 @@ func (h *Hook) AfterInitChain(ctx sdk.Context, req abci.RequestInitChain, res ab
 	}
 
 	// Gov module
-	var govState govtypes.GenesisState
+	var govState govv1.GenesisState
 	h.cdc.MustUnmarshalJSON(genesisState[govtypes.ModuleName], &govState)
 	for _, proposal := range govState.Proposals {
-		content := proposal.GetContent()
 		h.Write("NEW_PROPOSAL", common.JsDict{
-			"id":               proposal.ProposalId,
+			"id":               proposal.Id,
 			"proposer":         nil,
-			"type":             proposal.ProposalType(),
-			"title":            content.GetTitle(),
-			"description":      content.GetDescription(),
-			"proposal_route":   content.ProposalRoute(),
+			"title":            proposal.Title,
+			"description":      proposal.Summary,
 			"status":           int(proposal.Status),
 			"submit_time":      proposal.SubmitTime.UnixNano(),
 			"deposit_end_time": proposal.DepositEndTime.UnixNano(),
-			"total_deposit":    proposal.TotalDeposit.String(),
+			"total_deposit":    proposal.TotalDeposit[len(proposal.TotalDeposit)-1].String(),
 			"voting_time":      proposal.VotingStartTime.UnixNano(),
 			"voting_end_time":  proposal.VotingEndTime.UnixNano(),
 		})
@@ -209,15 +207,25 @@ func (h *Hook) AfterInitChain(ctx sdk.Context, req abci.RequestInitChain, res ab
 		h.Write("SET_DEPOSIT", common.JsDict{
 			"proposal_id": deposit.ProposalId,
 			"depositor":   deposit.Depositor,
-			"amount":      deposit.Amount.String(),
+			"amount":      deposit.Amount[len(deposit.Amount)-1].String(),
 			"tx_hash":     nil,
 		})
 	}
+
 	for _, vote := range govState.Votes {
+
+		var answers []common.JsDict
+		for _, voteOption := range vote.Options {
+			answers = append(answers, common.JsDict{
+				"answer": voteOption.Option,
+				"weight": voteOption.Weight,
+			})
+		}
+
 		h.Write("SET_VOTE", common.JsDict{
 			"proposal_id": vote.ProposalId,
 			"voter":       vote.Voter,
-			"answer":      int(vote.Option),
+			"answers":     answers,
 			"tx_hash":     nil,
 		})
 	}
