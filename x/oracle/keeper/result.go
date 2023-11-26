@@ -6,7 +6,6 @@ import (
 	"time"
 
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,6 +13,10 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+)
+
+const (
+	packetExpireTime = int64(10 * time.Minute)
 )
 
 // HasResult checks if the result of this request ID exists in the storage.
@@ -103,19 +106,17 @@ func (k Keeper) SaveResult(
 	if r.IBCSource != nil {
 		sourceChannel := r.IBCSource.SourceChannel
 		sourcePort := r.IBCSource.SourcePort
-		sourceChannelEnd, found := k.channelKeeper.GetChannel(ctx, sourcePort, sourceChannel)
-		if !found {
-			panic(fmt.Sprintf("Cannot find channel on port ID (%s) channel ID (%s)", sourcePort, sourceChannel))
-		}
-		destinationPort := sourceChannelEnd.Counterparty.PortId
-		destinationChannel := sourceChannelEnd.Counterparty.ChannelId
-		sequence, found := k.channelKeeper.GetNextSequenceSend(
-			ctx, sourcePort, sourceChannel,
-		)
-		if !found {
-			panic(fmt.Sprintf("Cannot get sequence number on source port: %s, source channel: %s", sourcePort, sourceChannel))
-		}
 		channelCap, ok := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(sourcePort, sourceChannel))
+
+		// if !found {
+		// 	panic(fmt.Sprintf("Cannot find channel on port ID (%s) channel ID (%s)", sourcePort, sourceChannel))
+		// }
+
+		// if !found {
+		// 	panic(fmt.Sprintf("Cannot get sequence number on source port: %s, source channel: %s", sourcePort, sourceChannel))
+		// }
+		// channelCap, ok := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(sourcePort, sourceChannel))
+
 		if !ok {
 			panic("Module does not own channel capability")
 		}
@@ -124,18 +125,19 @@ func (k Keeper) SaveResult(
 			r.ClientID, id, reportCount, int64(r.RequestTime), ctx.BlockTime().Unix(), status, result,
 		)
 
-		packet := channeltypes.NewPacket(
-			packetData.GetBytes(),
-			sequence,
-			sourcePort,
-			sourceChannel,
-			destinationPort,
-			destinationChannel,
-			clienttypes.NewHeight(0, 0),
-			uint64(ctx.BlockTime().UnixNano()+int64(10*time.Minute)), // TODO: Find what time out will be used on response packet
-		)
+		// packet := channeltypes.NewPacket(
+		// 	packetData.GetBytes(),
+		// 	sequence,
+		// 	sourcePort,
+		// 	sourceChannel,
+		// 	destinationPort,
+		// 	destinationChannel,
+		// 	clienttypes.NewHeight(0, 0),
+		// 	uint64(ctx.BlockTime().UnixNano()+int64(10*time.Minute)), // TODO: Find what time out will be used on response packet
+		// )
 
-		if err := k.channelKeeper.SendPacket(ctx, channelCap, packet); err != nil {
+		if _, err := k.channelKeeper.SendPacket(ctx, channelCap, sourcePort,
+			sourceChannel, clienttypes.NewHeight(0, 0), uint64(ctx.BlockTime().UnixNano()+packetExpireTime), packetData.GetBytes()); err != nil {
 			panic(err)
 		}
 	}

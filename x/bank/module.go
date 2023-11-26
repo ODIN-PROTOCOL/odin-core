@@ -4,6 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/bank/exported"
 	"github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 )
@@ -22,16 +23,18 @@ type AppModuleBasic struct {
 // AppModule implements an application module for the bank module.
 type AppModule struct {
 	bank.AppModule
-	keeper        keeper.Keeper
-	accountKeeper types.AccountKeeper
+	keeper         keeper.Keeper
+	accountKeeper  types.AccountKeeper
+	legacySubspace exported.Subspace
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, accountKeeper types.AccountKeeper) AppModule {
+func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, accountKeeper types.AccountKeeper, subspace exported.Subspace) AppModule {
 	return AppModule{
-		AppModule:     bank.NewAppModule(cdc, keeper, accountKeeper),
-		keeper:        keeper,
-		accountKeeper: accountKeeper,
+		AppModule:      bank.NewAppModule(cdc, keeper, accountKeeper, subspace),
+		keeper:         keeper,
+		accountKeeper:  accountKeeper,
+		legacySubspace: subspace,
 	}
 }
 
@@ -39,8 +42,4 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, accountKeeper types.Acc
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
-
-	// TODO: Unused bank migration
-	// m := keeper.NewMigrator(am.keeper.(keeper.BaseKeeper))
-	// cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2)
 }

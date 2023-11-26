@@ -18,6 +18,8 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	channelkeeper "github.com/cosmos/ibc-go/v7/modules/core/04-channel/keeper"
+	portkeeper "github.com/cosmos/ibc-go/v7/modules/core/05-port/keeper"
 )
 
 type Keeper struct {
@@ -32,8 +34,8 @@ type Keeper struct {
 	bankKeeper       oracletypes.BankKeeper
 	distrKeeper      oracletypes.DistrKeeper
 	stakingKeeper    oracletypes.StakingKeeper
-	channelKeeper    oracletypes.ChannelKeeper
-	portKeeper       oracletypes.PortKeeper
+	channelKeeper    channelkeeper.Keeper
+	portKeeper       portkeeper.Keeper
 	scopedKeeper     capabilitykeeper.ScopedKeeper
 }
 
@@ -48,8 +50,8 @@ func NewKeeper(
 	bankKeeper oracletypes.BankKeeper,
 	stakingKeeper oracletypes.StakingKeeper,
 	distrKeeper oracletypes.DistrKeeper,
-	channelKeeper oracletypes.ChannelKeeper,
-	portKeeper oracletypes.PortKeeper,
+	channelKeeper channelkeeper.Keeper,
+	portKeeper portkeeper.Keeper,
 	scopeKeeper capabilitykeeper.ScopedKeeper,
 	owasmVM *owasm.Vm,
 ) Keeper {

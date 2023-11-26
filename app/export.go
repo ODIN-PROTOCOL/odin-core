@@ -15,7 +15,8 @@ import (
 
 // ExportAppStateAndValidators export the state of odin for a genesis file
 func (app *OdinApp) ExportAppStateAndValidators(
-	forZeroHeight bool, jailAllowedAddrs []string,
+	forZeroHeight bool, jailAllowedAddrs []string, modulesToExport []string,
+
 ) (servertypes.ExportedApp, error) {
 	// as if they could withdraw from the start of the next block
 	ctx := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
@@ -28,7 +29,9 @@ func (app *OdinApp) ExportAppStateAndValidators(
 		app.prepForZeroHeightGenesis(ctx, jailAllowedAddrs)
 	}
 
-	genState := app.mm.ExportGenesis(ctx, app.appCodec)
+	// genState := app.mm.ExportGenesis(ctx, app.appCodec)
+	genState := app.mm.ExportGenesisForModules(ctx, app.appCodec, modulesToExport)
+
 	// TODO drop json.* everywhere for cdc.Marshal
 	appState, err := json.MarshalIndent(genState, "", "  ")
 	if err != nil {

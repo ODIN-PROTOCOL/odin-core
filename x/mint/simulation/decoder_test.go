@@ -4,23 +4,22 @@ import (
 	"fmt"
 	"testing"
 
-	"cosmossdk.io/simapp"
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
+	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeStore(t *testing.T) {
-	cdc := simapp.MakeTestEncodingConfig()
-	dec := simulation.NewDecodeStore(cdc.Marshaler)
+	testconfig := moduletestutil.MakeTestEncodingConfig()
+	cdc := testconfig.Codec
 
 	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))
 
 	kvPairs := kv.Pairs{
 		Pairs: []kv.Pair{
-			{Key: minttypes.MinterKey, Value: cdc.Marshaler.MustMarshal(&minter)},
+			{Key: minttypes.MinterKey, Value: cdc.MustMarshal(&minter)},
 			{Key: []byte{0x99}, Value: []byte{0x99}},
 		},
 	}
