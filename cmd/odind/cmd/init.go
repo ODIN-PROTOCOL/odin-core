@@ -168,9 +168,9 @@ func InitCmd(customAppState map[string]json.RawMessage, defaultNodeHome string) 
 			genDoc.ConsensusParams = types.DefaultConsensusParams()
 			// TODO: Revisit max block size
 			// genDoc.ConsensusParams.Block.MaxBytes = 1000000 // 1M bytes
-			genDoc.ConsensusParams.Block.MaxGas = 40000000 // 40M gas
-			genDoc.ConsensusParams.Block.TimeIotaMs = 1000 // 1 second
-			genDoc.ConsensusParams.Validator.PubKeyTypes = []string{types.ABCIPubKeyTypeSecp256k1}
+			genDoc.ConsensusParams.Block.MaxGas = 40000000  // 40M gas
+			genDoc.ConsensusParams.Block.MaxBytes = 3000000 // 3M bytes
+			genDoc.ConsensusParams.Validator.PubKeyTypes = []string{types.ABCIPubKeyTypeSecp256k1, types.ABCIPubKeyTypeEd25519}
 
 			if _, err := os.Stat(genFile); err != nil {
 				if !os.IsNotExist(err) {

@@ -32,7 +32,7 @@ func AddGenesisDataSourceCmd(defaultNodeHome string) *cobra.Command {
 		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
-			depCdc := clientCtx.JSONCodec
+			depCdc := clientCtx.Codec
 			cdc := depCdc.(codec.Codec)
 
 			serverCtx := server.GetServerContextFromCmd(cmd)

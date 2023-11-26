@@ -60,7 +60,7 @@ type Hook struct {
 // NewHook creates an emitter hook instance that will be added in Odin App.
 func NewHook(
 	cdc codec.Codec, legecyAmino *codec.LegacyAmino, encodingConfig params.EncodingConfig, accountKeeper authkeeper.AccountKeeper, bankKeeper bankkeeper.Keeper,
-	stakingKeeper stakingkeeper.Keeper, mintKeeper mintkeeper.Keeper, distrKeeper distrkeeper.Keeper, govKeeper govkeeper.Keeper,
+	stakingKeeper *stakingkeeper.Keeper, mintKeeper mintkeeper.Keeper, distrKeeper distrkeeper.Keeper, govKeeper govkeeper.Keeper,
 	oracleKeeper oraclekeeper.Keeper, kafkaURI string, emitStartState bool,
 ) *Hook {
 	paths := strings.SplitN(kafkaURI, "@", 2)
@@ -77,7 +77,7 @@ func NewHook(
 		}),
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,
-		stakingKeeper:  stakingKeeper,
+		stakingKeeper:  *stakingKeeper,
 		mintKeeper:     mintKeeper,
 		distrKeeper:    distrKeeper,
 		govKeeper:      govKeeper,
