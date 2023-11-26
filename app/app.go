@@ -113,7 +113,6 @@ import (
 
 	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
 	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
-	v7 "github.com/ODIN-PROTOCOL/odin-core/app/upgrade/v7"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
@@ -742,7 +741,6 @@ func NewOdinApp(
 	// 	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
 	// }
 
-	app.RegisterUpgradeHandlers(cfg)
 
 	if manager := app.SnapshotManager(); manager != nil {
 		err = manager.RegisterExtensions(
@@ -771,7 +769,8 @@ func NewOdinApp(
 
 // RegisterUpgradeHandlers returns upgrade handlers
 func (app *OdinApp) RegisterUpgradeHandlers(cfg module.Configurator) {
-	app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(*app.mm, cfg, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MintKeeper))
+	// Don't need upgrade handlers as of now
+	//app.UpgradeKeeper.SetUpgradeHandler(v7.UpgradeName, v7.CreateUpgradeHandler(*app.mm, cfg, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MintKeeper))
 }
 
 // MakeCodecs constructs the *std.Codec and *codec.LegacyAmino instances used by

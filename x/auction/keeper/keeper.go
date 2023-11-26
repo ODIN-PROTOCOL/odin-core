@@ -6,6 +6,7 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -15,7 +16,7 @@ import (
 )
 
 type Keeper struct {
-	storeKey       sdk.StoreKey
+	storeKey       storetypes.StoreKey
 	cdc            codec.BinaryCodec
 	paramstore     paramstypes.Subspace
 	oracleKeeper   auctiontypes.OracleKeeper
@@ -24,7 +25,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	subspace paramstypes.Subspace,
 	ok auctiontypes.OracleKeeper,
 	ck auctiontypes.CoinswapKeeper,

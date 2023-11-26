@@ -7,6 +7,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
@@ -14,7 +15,7 @@ import (
 )
 
 type Keeper struct {
-	storeKey     sdk.StoreKey
+	storeKey     storetypes.StoreKey
 	cdc          codec.BinaryCodec
 	paramstore   paramstypes.Subspace
 	bankKeeper   coinswaptypes.BankKeeper
@@ -24,7 +25,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	subspace paramstypes.Subspace,
 	bk coinswaptypes.BankKeeper,
 	dk coinswaptypes.DistrKeeper,
