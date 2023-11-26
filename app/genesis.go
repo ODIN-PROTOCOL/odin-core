@@ -13,7 +13,7 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
 	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
@@ -42,6 +42,7 @@ import (
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 // GenesisState defines a type alias for the Odin genesis application state.
@@ -56,7 +57,7 @@ func NewDefaultGenesisState() GenesisState {
 	stakingGenesis := stakingtypes.DefaultGenesisState()
 	distrGenesis := distrtypes.DefaultGenesisState()
 	mintGenesis := minttypes.DefaultGenesisState()
-	govGenesis := govtypes.DefaultGenesisState()
+	govGenesis := govv1.DefaultGenesisState()
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
 	oracleGenesis := oracletypes.DefaultGenesisState()
@@ -71,7 +72,9 @@ func NewDefaultGenesisState() GenesisState {
 	mintGenesis.Params.MintDenom = denom
 	mintGenesis.Params.MintAir = true
 
-	govGenesis.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)))
+	govGenesis.Params.MinDeposit = sdk.NewCoins(
+		sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)),
+	)
 	crisisGenesis.ConstantFee = sdk.NewCoin(denom, sdk.TokensFromConsensusPower(10000, sdk.DefaultPowerReduction))
 	slashingGenesis.Params.SignedBlocksWindow = 30000                         // approximately 1 day
 	slashingGenesis.Params.MinSignedPerWindow = sdk.NewDecWithPrec(5, 2)      // 5%
@@ -91,7 +94,7 @@ func NewDefaultGenesisState() GenesisState {
 		govtypes.ModuleName:        cdc.MustMarshalJSON(govGenesis),
 		crisistypes.ModuleName:     cdc.MustMarshalJSON(crisisGenesis),
 		slashingtypes.ModuleName:   cdc.MustMarshalJSON(slashingGenesis),
-		ibchost.ModuleName:         ibc.AppModuleBasic{}.DefaultGenesis(cdc),
+		ibcexported.ModuleName:     ibc.AppModuleBasic{}.DefaultGenesis(cdc),
 		upgradetypes.ModuleName:    upgrade.AppModuleBasic{}.DefaultGenesis(cdc),
 		evidencetypes.ModuleName:   evidence.AppModuleBasic{}.DefaultGenesis(cdc),
 		authz.ModuleName:           authzmodule.AppModuleBasic{}.DefaultGenesis(cdc),
