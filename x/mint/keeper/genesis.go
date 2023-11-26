@@ -1,24 +1,46 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/mint/types"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // InitGenesis new mint genesis
-func (keeper Keeper) InitGenesis(ctx sdk.Context, ak types.AccountKeeper, data *types.GenesisState) {
+func InitGenesis(ctx sdk.Context, keeper Keeper, data *minttypes.GenesisState) {
 	keeper.SetMinter(ctx, data.Minter)
+	keeper.SetParams(ctx, data.Params)
 
-	if err := keeper.SetParams(ctx, data.Params); err != nil {
-		panic(err)
+	moduleAcc := keeper.GetMintAccount(ctx)
+	if moduleAcc == nil {
+		panic(fmt.Sprintf("%s module account has not been set", minttypes.ModuleName))
 	}
 
-	ak.GetModuleAccount(ctx, types.ModuleName)
+	balances := keeper.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
+	if balances.IsZero() {
+		addr, err := sdk.AccAddressFromBech32(data.ModuleCoinsAccount)
+		if err != nil {
+			panic(err)
+		}
+
+		if err := keeper.bankKeeper.SendCoins(ctx, addr, moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
+			panic(err)
+		}
+
+		keeper.SetMintModuleCoinsAccount(ctx, addr)
+		keeper.authKeeper.SetModuleAccount(ctx, moduleAcc)
+	}
+
+	keeper.SetMintPool(ctx, data.MintPool)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func (keeper Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
+func ExportGenesis(ctx sdk.Context, keeper Keeper) *minttypes.GenesisState {
 	minter := keeper.GetMinter(ctx)
 	params := keeper.GetParams(ctx)
-	return types.NewGenesisState(minter, params)
+	mintPool := keeper.GetMintPool(ctx)
+	mintModuleCoinsAccount := keeper.GetMintModuleCoinsAccount(ctx)
+	return minttypes.NewGenesisState(minter, params, mintPool, mintModuleCoinsAccount)
 }

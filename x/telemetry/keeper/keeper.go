@@ -31,7 +31,7 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	txCfg client.TxConfig,
 	bk bankkeeper.ViewKeeper,
-	sk stakingkeeper.Keeper,
+	sk *stakingkeeper.Keeper,
 	dk distrkeeper.Keeper,
 ) Keeper {
 	return Keeper{

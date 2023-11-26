@@ -5,6 +5,7 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 
+	errortypes "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -62,14 +63,14 @@ func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk
 	// Create the account if it doesn't yet exist.
 	acc := k.accountKeeper.GetModuleAccount(ctx, moduleName)
 	if acc == nil {
-		panic(sdkerrors.Wrapf(
+		panic(errortypes.Wrapf(
 			sdkerrors.ErrUnknownAddress,
 			"module account %s does not exist", moduleName,
 		))
 	}
 
 	if !acc.HasPermission(authtypes.Burner) {
-		panic(sdkerrors.Wrapf(
+		panic(errortypes.Wrapf(
 			sdkerrors.ErrUnauthorized,
 			"module account %s does not have permissions to burn tokens",
 			moduleName,
@@ -101,17 +102,17 @@ func (k WrappedBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk
 	}
 	acc := k.accountKeeper.GetModuleAccount(ctx, moduleName)
 	if acc == nil {
-		panic(sdkerrors.Wrapf(sdkerrors.ErrUnknownAddress, "module account %s does not exist", moduleName))
+		panic(errortypes.Wrapf(sdkerrors.ErrUnknownAddress, "module account %s does not exist", moduleName))
 	}
 
 	if !acc.HasPermission(authtypes.Minter) {
-		panic(sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "module account %s does not have permissions to mint tokens", moduleName))
+		panic(errortypes.Wrapf(sdkerrors.ErrUnauthorized, "module account %s does not have permissions to mint tokens", moduleName))
 	}
 
 	logger := k.Logger(ctx)
 	err := k.SendCoinsFromModuleToModule(ctx, distrtypes.ModuleName, moduleName, amt)
 	if err != nil {
-		err = sdkerrors.Wrap(err, fmt.Sprintf("failed to mint %s from %s module account", amt.String(), moduleName))
+		err = errortypes.Wrap(err, fmt.Sprintf("failed to mint %s from %s module account", amt.String(), moduleName))
 		logger.Error(err.Error())
 		return err
 	}
