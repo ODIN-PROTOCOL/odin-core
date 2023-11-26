@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"cosmossdk.io/simapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
 	"github.com/stretchr/testify/require"
