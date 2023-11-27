@@ -486,17 +486,17 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "params"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Inflation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "parameters"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Inflation_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "parameters"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AnnualProvisions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "annual_provisions"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_AnnualProvisions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "annual_provisions"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_IntegrationAddress_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"mint", "integration_addresses", "network_name"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_IntegrationAddress_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"mint", "integration_addresses", "network_name"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "treasury_pool"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TreasuryPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "treasury_pool"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_CurrentMintVolume_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "current_mint_volume"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_CurrentMintVolume_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"mint", "current_mint_volume"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

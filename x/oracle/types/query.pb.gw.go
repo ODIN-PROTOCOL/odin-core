@@ -1873,47 +1873,47 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Counts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "counts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Counts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "counts"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Data_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data", "data_hash"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Data_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data", "data_hash"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DataSource_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data_sources", "data_source_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_DataSource_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data_sources", "data_source_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DataSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_sources"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_DataSources_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_sources"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_OracleScript_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "oracle_scripts", "oracle_script_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_OracleScript_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "oracle_scripts", "oracle_script_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_OracleScripts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "oracle_scripts"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_OracleScripts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "oracle_scripts"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Request_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "requests", "request_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Request_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "requests", "request_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Requests_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "requests"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Requests_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "requests"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Validator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "validators", "validator_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Validator_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "validators", "validator_address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_IsReporter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"oracle", "v1", "reporter", "validator_address", "reporter_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_IsReporter_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"oracle", "v1", "reporter", "validator_address", "reporter_address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Reporters_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "reporters", "validator_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Reporters_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "reporters", "validator_address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ActiveValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "active_validators"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ActiveValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "active_validators"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "params"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_RequestSearch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "request_search"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_RequestSearch_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "request_search"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_RequestPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "request_prices"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_RequestPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "request_prices"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DataProvidersPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_providers_pool"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_DataProvidersPool_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_providers_pool"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_RequestReports_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "request_reports", "request_id"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_RequestReports_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "request_reports", "request_id"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DataProviderReward_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_provider_reward"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_DataProviderReward_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"oracle", "data_provider_reward"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_PendingRequests_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"oracle", "v1", "pending_requests", "validator_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_PendingRequests_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"oracle", "v1", "pending_requests", "validator_address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_RequestVerification_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"oracle", "v1", "verify_request"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_RequestVerification_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"oracle", "v1", "verify_request"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DataProviderAccumulatedReward_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data_provider_accumulated_reward", "data_provider_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_DataProviderAccumulatedReward_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"oracle", "data_provider_accumulated_reward", "data_provider_address"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

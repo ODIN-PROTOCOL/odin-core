@@ -76,14 +76,10 @@ message QueryAnnualProvisionsResponse {
 
 // QueryIntegrationAddressRequest is request type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressRequest {
-  string network_name = 1;
-}
+message QueryIntegrationAddressRequest { string network_name = 1; }
 // QueryIntegrationAddressResponse is response type for the
 // Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressResponse {
-  string integration_address = 1;
-}
+message QueryIntegrationAddressResponse { string integration_address = 1; }
 
 // QueryTreasuryPoolRequest is request type for the Query/QueryTreasuryPool RPC
 // method.
@@ -97,15 +93,14 @@ message QueryTreasuryPoolResponse {
   ];
 }
 
-// QueryCurrentMintVolumeRequest is request type for the Query/QueryCurrentMintVolume RPC
-// method.
+// QueryCurrentMintVolumeRequest is request type for the
+// Query/QueryCurrentMintVolume RPC method.
 message QueryCurrentMintVolumeRequest {}
-// QueryCurrentMintVolumeResponse is response type for the Query/QueryCurrentMintVolume
-// RPC method.
+// QueryCurrentMintVolumeResponse is response type for the
+// Query/QueryCurrentMintVolume RPC method.
 message QueryCurrentMintVolumeResponse {
   repeated cosmos.base.v1beta1.Coin current_mint_volume = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable) = false
   ];
 }
-

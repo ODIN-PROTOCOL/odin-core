@@ -388,6 +388,7 @@ func (k Querier) RequestVerification(
 		req.ChainId, validator,
 		oracletypes.RequestID(req.RequestId),
 		oracletypes.ExternalID(req.ExternalId),
+		oracletypes.DataSourceID(req.DataSourceId),
 	)
 	signByte := requestVerificationContent.GetSignBytes()
 	if !reporterPubKey.VerifySignature(signByte, req.Signature) {

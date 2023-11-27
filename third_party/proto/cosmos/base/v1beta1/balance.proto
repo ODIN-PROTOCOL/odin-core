@@ -16,6 +16,8 @@ message Balance {
   string address = 1;
 
   // coins defines the different coins this balance holds.
-  repeated cosmos.base.v1beta1.Coin coins = 2
-  [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin coins = 2 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable) = false
+  ];
 }

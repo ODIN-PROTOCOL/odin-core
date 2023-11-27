@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/cometbft/cometbft/libs/log"
@@ -69,7 +68,7 @@ func runImpl(c *Context, l *Logger) error {
 	l.Info(":mag: Found %d pending requests", len(pendingRequests.RequestIDs))
 	for _, id := range pendingRequests.RequestIDs {
 		c.pendingRequests[oracletypes.RequestID(id)] = true
-		go handlePendingRequest(c, l.With("rid", id), oracletypes.RequestID(id))
+		go handleRequest(c, l.With("rid", id), oracletypes.RequestID(id))
 	}
 
 	for {
@@ -157,7 +156,6 @@ func runCmd(c *Context) *cobra.Command {
 			c.pendingMsgs = make(chan ReportMsgWithKey)
 			c.freeKeys = make(chan int64, len(keys))
 			c.keyRoundRobinIndex = -1
-			c.dataSourceCache = new(sync.Map)
 			c.pendingRequests = make(map[oracletypes.RequestID]bool)
 			c.metricsEnabled = cfg.MetricsListenAddr != ""
 			return runImpl(c, l)

@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -25,7 +26,7 @@ import (
 var cdc = app.MakeEncodingConfig().Marshaler
 
 func signAndBroadcast(
-	c *Context, key keyring.Info, msgs []sdk.Msg, gasLimit uint64, memo string,
+	c *Context, key *keyring.Record, msgs []sdk.Msg, gasLimit uint64, memo string,
 ) (string, error) {
 	clientCtx := client.Context{
 		Client:            c.client,
@@ -49,12 +50,19 @@ func signAndBroadcast(
 		WithKeybase(kb).
 		WithAccountRetriever(clientCtx.AccountRetriever)
 
-	txb, err := tx.BuildUnsignedTx(txf, msgs...)
+	address, err := key.GetAddress()
 	if err != nil {
 		return "", err
 	}
 
-	err = tx.Sign(txf, key.GetName(), txb, true)
+	execMsg := authz.NewMsgExec(address, msgs)
+
+	txb, err := txf.BuildUnsignedTx(&execMsg)
+	if err != nil {
+		return "", err
+	}
+
+	err = tx.Sign(txf, key.Name, txb, true)
 	if err != nil {
 		return "", err
 	}
@@ -76,9 +84,15 @@ func signAndBroadcast(
 	return res.TxHash, nil
 }
 
-func queryAccount(clientCtx client.Context, key keyring.Info) (client.Account, error) {
+func queryAccount(clientCtx client.Context, key *keyring.Record) (client.Account, error) {
 	accountRetriever := authtypes.AccountRetriever{}
-	acc, err := accountRetriever.GetAccount(clientCtx, key.GetAddress())
+
+	address, err := key.GetAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	acc, err := accountRetriever.GetAccount(clientCtx, address)
 	if err != nil {
 		return nil, err
 	}
@@ -205,10 +219,6 @@ func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
 
 // GetDataSourceHash fetches data source hash by id
 func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (string, error) {
-	if hash, ok := c.dataSourceCache.Load(id); ok {
-		return hash.(string), nil
-	}
-
 	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.DataSourceStoreKey(id))
 	if err != nil {
 		l.Error(":skull: Failed to get data source with error: %s", c, err.Error())
@@ -218,9 +228,7 @@ func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (stri
 	var d oracletypes.DataSource
 	cdc.MustUnmarshal(res.Response.Value, &d)
 
-	hash, _ := c.dataSourceCache.LoadOrStore(id, d.Filename)
-
-	return hash.(string), nil
+	return d.Filename, nil
 }
 
 // GetRequest fetches request by id

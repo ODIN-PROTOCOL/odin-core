@@ -104,12 +104,20 @@ func (msg MsgRequestData) GetSignBytes() []byte {
 }
 
 // NewMsgReportData creates a new MsgReportData instance
-func NewMsgReportData(requestID RequestID, rawReports []RawReport, validator sdk.ValAddress, reporter sdk.AccAddress) *MsgReportData {
+// func NewMsgReportData(requestID RequestID, rawReports []RawReport, validator sdk.ValAddress, reporter sdk.AccAddress) *MsgReportData {
+// 	return &MsgReportData{
+// 		RequestID:  requestID,
+// 		RawReports: rawReports,
+// 		Validator:  validator.String(),
+// 		Reporter:   reporter.String(),
+// 	}
+// }
+
+func NewMsgReportData(requestID RequestID, rawReports []RawReport, validator sdk.ValAddress) *MsgReportData {
 	return &MsgReportData{
 		RequestID:  requestID,
 		RawReports: rawReports,
 		Validator:  validator.String(),
-		Reporter:   reporter.String(),
 	}
 }
 

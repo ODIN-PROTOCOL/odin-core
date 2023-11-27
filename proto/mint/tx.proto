@@ -16,8 +16,7 @@ service Msg {
   rpc WithdrawCoinsToAccFromTreasury(MsgWithdrawCoinsToAccFromTreasury)
       returns (MsgWithdrawCoinsToAccFromTreasuryResponse);
   // MintCoins defines a method for minting from mint module.
-  rpc MintCoins(MsgMintCoins)
-      returns (MsgMintCoinsResponse);
+  rpc MintCoins(MsgMintCoins) returns (MsgMintCoinsResponse);
 }
 
 // MsgWithdrawCoinsToAccFromTreasury is a message for withdrawing from mint

@@ -5,18 +5,17 @@ package types
 
 import (
 	fmt "fmt"
+	_ "github.com/cosmos/cosmos-sdk/codec/types"
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
 	time "time"
-
-	_ "github.com/cosmos/cosmos-sdk/codec/types"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	types "github.com/cosmos/cosmos-sdk/types"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -623,7 +622,7 @@ func (m *AverageBlockSizePerDay) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x10
 	}
-	n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Date):])
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date):])
 	if err1 != nil {
 		return 0, err1
 	}
@@ -659,7 +658,7 @@ func (m *AverageBlockTimePerDay) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 		i--
 		dAtA[i] = 0x10
 	}
-	n2, err2 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Date):])
+	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date):])
 	if err2 != nil {
 		return 0, err2
 	}
@@ -704,7 +703,7 @@ func (m *AverageTxFeePerDay) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Date):])
+	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date):])
 	if err3 != nil {
 		return 0, err3
 	}
@@ -740,7 +739,7 @@ func (m *TxVolumePerDay) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Date):])
+	n4, err4 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Date, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date):])
 	if err4 != nil {
 		return 0, err4
 	}
@@ -835,7 +834,7 @@ func (m *ValidatorBlock) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x18
 	}
-	n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Time, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Time):])
+	n5, err5 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Time, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Time):])
 	if err5 != nil {
 		return 0, err5
 	}
@@ -868,7 +867,7 @@ func (m *AverageBlockSizePerDay) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Date)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date)
 	n += 1 + l + sovTelemetry(uint64(l))
 	if m.Bytes != 0 {
 		n += 1 + sovTelemetry(uint64(m.Bytes))
@@ -882,7 +881,7 @@ func (m *AverageBlockTimePerDay) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Date)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date)
 	n += 1 + l + sovTelemetry(uint64(l))
 	if m.Seconds != 0 {
 		n += 1 + sovTelemetry(uint64(m.Seconds))
@@ -896,7 +895,7 @@ func (m *AverageTxFeePerDay) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Date)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date)
 	n += 1 + l + sovTelemetry(uint64(l))
 	if len(m.Fee) > 0 {
 		for _, e := range m.Fee {
@@ -913,7 +912,7 @@ func (m *TxVolumePerDay) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Date)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Date)
 	n += 1 + l + sovTelemetry(uint64(l))
 	if m.Volume != 0 {
 		n += 1 + sovTelemetry(uint64(m.Volume))
@@ -948,7 +947,7 @@ func (m *ValidatorBlock) Size() (n int) {
 	if m.Height != 0 {
 		n += 1 + sovTelemetry(uint64(m.Height))
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Time)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Time)
 	n += 1 + l + sovTelemetry(uint64(l))
 	if m.TxsCount != 0 {
 		n += 1 + sovTelemetry(uint64(m.TxsCount))
@@ -1026,7 +1025,7 @@ func (m *AverageBlockSizePerDay) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1128,7 +1127,7 @@ func (m *AverageBlockTimePerDay) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1230,7 +1229,7 @@ func (m *AverageTxFeePerDay) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1347,7 +1346,7 @@ func (m *TxVolumePerDay) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Date, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1603,7 +1602,7 @@ func (m *ValidatorBlock) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Time, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Time, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

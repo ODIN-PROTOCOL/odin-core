@@ -8,6 +8,7 @@ import "google/api/annotations.proto";
 import "oracle/v1/oracle.proto";
 import "oracle/v1/params.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 // Query defines the gRPC querier service.
 service Query {
@@ -86,7 +87,8 @@ service Query {
     option (google.api.http).get = "/oracle/request_search";
   }
 
-  // RequestPrice queries the latest price on standard price reference oracle script.
+  // RequestPrice queries the latest price on standard price reference oracle
+  // script.
   rpc RequestPrice(QueryRequestPriceRequest)
       returns (QueryRequestPriceResponse) {
     option (google.api.http).post = "/oracle/request_prices";
@@ -107,7 +109,8 @@ service Query {
     option (google.api.http).get = "/oracle/data_provider_reward";
   }
 
-  // PendingRequests queries list of pending request IDs assigned to given validator.
+  // PendingRequests queries list of pending request IDs assigned to given
+  // validator.
   rpc PendingRequests(QueryPendingRequestsRequest)
       returns (QueryPendingRequestsResponse) {
     option (google.api.http).get =
@@ -121,9 +124,12 @@ service Query {
     option (google.api.http).get = "/oracle/v1/verify_request";
   }
 
-  // DataProviderAccumulatedReward queries oracle info of reporter rewards for given reporter address.
-  rpc DataProviderAccumulatedReward(QueryDataProviderAccumulatedRewardRequest) returns (QueryDataProviderAccumulatedRewardResponse) {
-    option (google.api.http).get = "/oracle/data_provider_accumulated_reward/{data_provider_address}";
+  // DataProviderAccumulatedReward queries oracle info of reporter rewards for
+  // given reporter address.
+  rpc DataProviderAccumulatedReward(QueryDataProviderAccumulatedRewardRequest)
+      returns (QueryDataProviderAccumulatedRewardResponse) {
+    option (google.api.http).get =
+        "/oracle/data_provider_accumulated_reward/{data_provider_address}";
   }
 }
 
@@ -138,59 +144,66 @@ message QueryCountsResponse {
 }
 
 // QueryDataRequest is request type for the Query/Data RPC method.
-message QueryDataRequest {string data_hash = 1;}
+message QueryDataRequest { string data_hash = 1; }
 
 // QueryDataResponse is response type for the Query/Data RPC method.
-message QueryDataResponse {bytes data = 1;}
+message QueryDataResponse { bytes data = 1; }
 
 // QueryDataSourceRequest is request type for the Query/DataSource RPC method.
-message QueryDataSourceRequest {int64 data_source_id = 1;}
+message QueryDataSourceRequest { int64 data_source_id = 1; }
 
 // QueryDataSourceResponse is response type for the Query/DataSource RPC method.
-message QueryDataSourceResponse {DataSource data_source = 1;}
+message QueryDataSourceResponse { DataSource data_source = 1; }
 
 // QueryDataSourcesRequest is request type for the Query/DataSources RPC method.
 message QueryDataSourcesRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-// QueryDataSourcesResponse is response type for the Query/DataSources RPC method.
+// QueryDataSourcesResponse is response type for the Query/DataSources RPC
+// method.
 message QueryDataSourcesResponse {
-  repeated DataSource data_sources = 1 [(gogoproto.nullable) = false];
+  repeated DataSource data_sources = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// QueryOracleScriptRequest is request type for the Query/OracleScript RPC method.
-message QueryOracleScriptRequest {int64 oracle_script_id = 1;}
+// QueryOracleScriptRequest is request type for the Query/OracleScript RPC
+// method.
+message QueryOracleScriptRequest { int64 oracle_script_id = 1; }
 
-// QueryOracleScriptResponse is response type for the Query/OracleScript RPC method.
-message QueryOracleScriptResponse {OracleScript oracle_script = 1;}
+// QueryOracleScriptResponse is response type for the Query/OracleScript RPC
+// method.
+message QueryOracleScriptResponse { OracleScript oracle_script = 1; }
 
-// QueryOracleScriptsRequest is request type for the Query/OracleScripts RPC method.
+// QueryOracleScriptsRequest is request type for the Query/OracleScripts RPC
+// method.
 message QueryOracleScriptsRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-// QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC method.
+// QueryOracleScriptsResponse is response type for the Query/OracleScripts RPC
+// method.
 message QueryOracleScriptsResponse {
-  repeated OracleScript oracle_scripts = 1 [(gogoproto.nullable) = false];
+  repeated OracleScript oracle_scripts = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// QueryRequestReportsRequest is request type for the Query/RequestReports RPC method.
+// QueryRequestReportsRequest is request type for the Query/RequestReports RPC
+// method.
 message QueryRequestReportsRequest {
   int64 request_id = 1;
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
-// QueryRequestReportsResponse is response type for the Query/RequestReports RPC method.
+// QueryRequestReportsResponse is response type for the Query/RequestReports RPC
+// method.
 message QueryRequestReportsResponse {
-  repeated Report reports = 1 [(gogoproto.nullable) = false];
+  repeated Report reports = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 // QueryRequestRequest is request type for the Query/Request RPC method.
-message QueryRequestRequest {int64 request_id = 1;}
+message QueryRequestRequest { int64 request_id = 1; }
 
 // QueryRequestResponse is response type for the Query/Request RPC method.
 message QueryRequestResponse {
@@ -210,7 +223,7 @@ message QueryRequestsRequest {
 
 // QueryRequestsResponse is response type for the Query/Requests RPC method.
 message QueryRequestsResponse {
-  repeated RequestResult requests = 1 [(gogoproto.nullable) = false];
+  repeated RequestResult requests = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
@@ -220,14 +233,14 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
   // pagination defines an optional pagination for the request.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
 // QueryValidatorRequest is request type for the Query/Validator RPC method.
-message QueryValidatorRequest {string validator_address = 1;}
+message QueryValidatorRequest { string validator_address = 1; }
 
 // QueryValidatorResponse is response type for the Query/Validator RPC method.
-message QueryValidatorResponse {ValidatorStatus status = 1;}
+message QueryValidatorResponse { ValidatorStatus status = 1; }
 
 // QueryIsReporterRequest is request type for the Query/Reporter RPC method.
 message QueryIsReporterRequest {
@@ -244,18 +257,21 @@ message QueryIsReporterResponse {
 }
 
 // QueryReportersRequest is request type for the Query/Reporters RPC method.
-message QueryReportersRequest {string validator_address = 1;}
+message QueryReportersRequest { string validator_address = 1; }
 
 // QueryReportersResponse is response type for the Query/Reporters RPC method.
-message QueryReportersResponse {repeated string reporter = 1;}
+message QueryReportersResponse { repeated string reporter = 1; }
 
-// QueryActiveValidatorsRequest is request type for the Query/ActiveValidators RPC method.
+// QueryActiveValidatorsRequest is request type for the Query/ActiveValidators
+// RPC method.
 message QueryActiveValidatorsRequest {}
 
-// QueryActiveValidatorsResponse is response type for the Query/ActiveValidators RPC method.
-message QueryActiveValidatorsResponse {int64 count = 1;}
+// QueryActiveValidatorsResponse is response type for the Query/ActiveValidators
+// RPC method.
+message QueryActiveValidatorsResponse { int64 count = 1; }
 
-// QueryRequestSearchRequest is request type for the Query/RequestSearch RPC method.
+// QueryRequestSearchRequest is request type for the Query/RequestSearch RPC
+// method.
 message QueryRequestSearchRequest {
   int64 oracle_script_id = 1;
   bytes calldata = 2;
@@ -263,21 +279,24 @@ message QueryRequestSearchRequest {
   int64 min_count = 4;
 }
 
-// QueryRequestSearchResponse is response type for the Query/RequestSearch RPC method.
+// QueryRequestSearchResponse is response type for the Query/RequestSearch RPC
+// method.
 message QueryRequestSearchResponse {
   Request request = 1;
   Result result = 2;
   repeated Report reports = 3 [ (gogoproto.nullable) = false ];
 }
 
-// QueryRequestPriceRequest is request type for the Query/RequestPrice RPC method.
+// QueryRequestPriceRequest is request type for the Query/RequestPrice RPC
+// method.
 message QueryRequestPriceRequest {
   string symbol = 1;
   int64 ask_count = 2;
   int64 min_count = 3;
 }
 
-// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method.
+// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC
+// method.
 message QueryRequestPriceResponse {
   int64 oracle_script_id = 1;
   bytes calldata = 2;
@@ -287,7 +306,8 @@ message QueryRequestPriceResponse {
 
 message QueryDataProvidersPoolRequest {}
 
-// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC method.
+// QueryRequestPriceResponse is response type for the Query/RequestPrice RPC
+// method.
 message QueryDataProvidersPoolResponse {
   repeated cosmos.base.v1beta1.Coin pool = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
@@ -295,12 +315,14 @@ message QueryDataProvidersPoolResponse {
   ];
 }
 
-message QueryRequestIDs {repeated int64 request_ids = 1;}
+message QueryRequestIDs { repeated int64 request_ids = 1; }
 
-// QueryDataProviderRewardRequest is request type for the Query/DataProviderReward RPC method.
+// QueryDataProviderRewardRequest is request type for the
+// Query/DataProviderReward RPC method.
 message QueryDataProviderRewardRequest {}
 
-// QueryDataProviderRewardResponse is response type for the Query/DataProviderReward RPC method.
+// QueryDataProviderRewardResponse is response type for the
+// Query/DataProviderReward RPC method.
 message QueryDataProviderRewardResponse {
   repeated cosmos.base.v1beta1.Coin reward_per_byte = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
@@ -308,16 +330,18 @@ message QueryDataProviderRewardResponse {
   ];
 }
 
-// QueryPendingRequestRequest is request type for the Query/PendingRequests RPC method.
+// QueryPendingRequestRequest is request type for the Query/PendingRequests RPC
+// method.
 message QueryPendingRequestsRequest {
   // ValidatorAddress is address of a validator
   string validator_address = 1;
 }
 
-// QueryPendingRequestResponse is response type for the Query/PendingRequests RPC method.
+// QueryPendingRequestResponse is response type for the Query/PendingRequests
+// RPC method.
 message QueryPendingRequestsResponse {
   // RequestIDs is a list of pending request IDs assigned to the given validator
-  repeated int64 request_ids = 1 [(gogoproto.customname) = "RequestIDs"];
+  repeated int64 request_ids = 1 [ (gogoproto.customname) = "RequestIDs" ];
 }
 
 // QueryRequestVerificationRequest is request type for the
@@ -333,11 +357,13 @@ message QueryRequestVerificationRequest {
   // ExternalID is an oracle's external ID
   uint64 external_id = 4;
   // Reporter is an bech32-encoded public key of the reporter authorized by the
+    // DataSourceID is the ID of data source
+  uint64 data_source_id = 5;
   // validator
-  string reporter = 5;
+  string reporter = 6;
   // Signature is a signature signed by the reporter using reporter's private
   // key
-  bytes signature = 6;
+  bytes signature = 7;
 }
 
 // QueryRequestVerificationResponse is response type for the
@@ -356,10 +382,14 @@ message QueryRequestVerificationResponse {
   uint64 data_source_id = 5;
 }
 
-// QueryDataProviderAccumulatedRewardRequest is request type for the Query/DataProviderAccumulatedReward RPC method.
-message QueryDataProviderAccumulatedRewardRequest {string data_provider_address = 1;}
+// QueryDataProviderAccumulatedRewardRequest is request type for the
+// Query/DataProviderAccumulatedReward RPC method.
+message QueryDataProviderAccumulatedRewardRequest {
+  string data_provider_address = 1;
+}
 
-// QueryDataProviderAccumulatedRewardResponse is response type for the Query/DataProviderAccumulatedReward RPC method.
+// QueryDataProviderAccumulatedRewardResponse is response type for the
+// Query/DataProviderAccumulatedReward RPC method.
 message QueryDataProviderAccumulatedRewardResponse {
   repeated cosmos.base.v1beta1.Coin accumulated_reward = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",

@@ -1,7 +1,6 @@
 package yoda
 
 import (
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -34,7 +33,7 @@ type Context struct {
 	client           rpcclient.Client
 	validator        sdk.ValAddress
 	gasPrices        string
-	keys             []keyring.Info
+	keys             []*keyring.Record
 	executor         executor.Executor
 	fileCache        filecache.Cache
 	broadcastTimeout time.Duration
@@ -46,7 +45,6 @@ type Context struct {
 	freeKeys           chan int64
 	keyRoundRobinIndex int64 // Must use in conjunction with sync/atomic
 
-	dataSourceCache *sync.Map
 	pendingRequests map[oracletypes.RequestID]bool
 
 	metricsEnabled bool

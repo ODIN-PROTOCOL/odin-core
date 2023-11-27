@@ -13,5 +13,6 @@ message GenesisState {
   repeated DataSource data_sources = 2 [ (gogoproto.nullable) = false ];
   repeated OracleScript oracle_scripts = 3 [ (gogoproto.nullable) = false ];
   OraclePool oracle_pool = 4 [ (gogoproto.nullable) = false ];
-  string module_coins_account = 5 [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
+  string module_coins_account = 5
+      [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
 }
