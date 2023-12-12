@@ -9,9 +9,14 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unsafe"
 
-	"github.com/cosmos/cosmos-sdk/internal/conv"
+	"github.com/ODIN-PROTOCOL/odin-core/app/helpers/conv"
 )
+
+func UnsafeStrToBytes(s string) []byte {
+	return unsafe.Slice(unsafe.StringData(s), len(s)) // ref https://github.com/golang/go/issues/53003#issuecomment-1140276077
+}
 
 // Info is the special structure that the Plan.Info string can be (as json).
 type Info struct {

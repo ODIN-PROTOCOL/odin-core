@@ -70,7 +70,7 @@ func CreateDefaultGenesisApp(accountsCount int) TestAppBuilder {
 	// bank
 	bankBuilder := NewBankBuilder(accountsCount, fillBalances(authBuilder.Accounts, Coins10000000000loki), initialSupply)
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	// oracle

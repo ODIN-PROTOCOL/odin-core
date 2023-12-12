@@ -27,7 +27,7 @@ func CreateAppCustomValidators(accountsCount int, powers ...int) (*odinapp.OdinA
 	// bank
 	bankBuilder := NewBankBuilder(accountsCount, fillBalances(builder.GetAuthBuilder().Accounts), initialSupply)
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	builder.UpdateModules(map[string]json.RawMessage{
@@ -49,7 +49,7 @@ func CreateAppCustomBalances(balancesRate ...int) (*odinapp.OdinApp, sdk.Context
 
 	bankBuilder := NewBankBuilder(len(balancesRate), fillBalances(builder.GetAuthBuilder().Accounts, balancesToFill...), sdk.NewCoins())
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	builder.UpdateModules(map[string]json.RawMessage{

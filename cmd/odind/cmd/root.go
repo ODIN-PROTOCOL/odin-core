@@ -81,6 +81,11 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 	rootCmd.AddCommand(
 		InitCmd(odin.NewDefaultGenesisState(), odin.DefaultNodeHome),
+		// genesisCommand(
+		// 	encodingConfig,
+		// 	AddGenesisDataSourceCmd(odin.DefaultNodeHome),
+		// 	AddGenesisOracleScriptCmd(odin.DefaultNodeHome),
+		// ),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome, nil),
 		genutilcli.GenTxCmd(odin.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
 		genutilcli.ValidateGenesisCmd(odin.ModuleBasics),

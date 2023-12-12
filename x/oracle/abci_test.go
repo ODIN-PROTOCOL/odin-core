@@ -77,16 +77,17 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	k.SetParamUint64(ctx, types.KeyOracleRewardPercentage, 70)
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	// If there are no validators active, Calling begin block should be no-op.
+
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
+		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	// 1 validator active, begin block should take 70% of the fee. 2% of that goes to comm pool.
 	k.Activate(ctx, testapp.Validators[1].ValAddress)
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
+		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 30)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 70)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))
@@ -100,7 +101,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	k.Activate(ctx, testapp.Validators[0].ValAddress)
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
+		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 9)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 91)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))
@@ -114,7 +115,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	k.MissReport(ctx, testapp.Validators[1].ValAddress, testapp.ParseTime(100))
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
+		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 3)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 97)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))
@@ -166,7 +167,7 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	k.Activate(ctx, testapp.Validators[0].ValAddress)
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-		LastCommitInfo: abci.LastCommitInfo{Votes: votes},
+		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
 	require.Equal(t, sdk.Coins{}, app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
 	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))

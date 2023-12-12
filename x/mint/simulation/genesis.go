@@ -95,7 +95,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 	integrationAddresses := map[string]string{"eth": hexutil.Encode(privateKeyBytes)}
 	eligibleAccountsPool := []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"}
 	maxAllowedMintVolume := sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))}
-	allowedMintDenoms := []*minttypes.AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}}
+	allowedMintDenoms := []*minttypes.AllowedDenom{{TokenUnitDenom: "loki", TokenDenom: "odin"}, {TokenUnitDenom: "minigeo", TokenDenom: "geo"}}
 	allowedMinter := []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"}
 
 	params := minttypes.NewParams(

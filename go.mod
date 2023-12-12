@@ -1,6 +1,6 @@
 module github.com/ODIN-PROTOCOL/odin-core
 
-go 1.19
+go 1.20
 
 // sudo apt-get install -f
 
@@ -43,11 +43,11 @@ require (
 
 require (
 	cosmossdk.io/errors v1.0.0
+	cosmossdk.io/math v1.2.0
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v7 v7.3.1
 	github.com/golang/protobuf v1.5.3
 	github.com/hashicorp/go-getter v1.7.1
-	github.com/tendermint/tendermint v0.33.6
 	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97
 )
 
@@ -58,7 +58,6 @@ require (
 	cloud.google.com/go/iam v1.1.2 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
 	cosmossdk.io/log v1.2.1 // indirect
-	cosmossdk.io/math v1.2.0 // indirect
 	cosmossdk.io/tools/rosetta v0.2.1 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/aws/aws-sdk-go v1.44.203 // indirect

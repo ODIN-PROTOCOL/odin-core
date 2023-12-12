@@ -2,8 +2,8 @@ package testapp
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"math/rand"
+	"os"
 	"time"
 
 	dbm "github.com/cometbft/cometbft-db"
@@ -84,7 +84,7 @@ func (ao EmptyAppOptions) Get(o string) interface{} {
 // NewSimApp creates instance of our app using in test.
 func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	// Set HomeFlag to a temp folder for simulation run.
-	dir, err := ioutil.TempDir("", "odind")
+	dir, err := os.MkdirTemp("", "odind")
 	if err != nil {
 		panic(err)
 	}
@@ -209,7 +209,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(int64(bamtSum)))},
 	})
 
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	genesis[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
 
 	// Add genesis data sources and oracle scripts

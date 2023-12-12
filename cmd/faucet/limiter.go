@@ -6,12 +6,13 @@ import (
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	httpclient "github.com/cometbft/cometbft/rpc/client/http"
 
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
@@ -28,7 +29,7 @@ type Limiter struct {
 	store  LimitStore
 	client rpcclient.Client
 	ticker *time.Ticker
-	keys   chan keyring.Info
+	keys   chan keyring.Record
 }
 
 // NewLimiter creates a new limiter.
@@ -43,11 +44,11 @@ func NewLimiter(ctx *Context) *Limiter {
 		panic(sdkerrors.Wrap(err, "failed to retrieve keys from keybase"))
 	}
 	if len(kb) == 0 {
-		panic(sdkerrors.Wrap(sdkerrors.ErrKeyNotFound, "there are no available keys"))
+		panic(sdkerrors.Wrap(errortypes.ErrKeyNotFound, "there are no available keys"))
 	}
-	keys := make(chan keyring.Info, len(kb))
+	keys := make(chan keyring.Record, len(kb))
 	for _, key := range kb {
-		keys <- key
+		keys <- *key
 	}
 
 	return &Limiter{
@@ -99,8 +100,13 @@ func (l *Limiter) updateLimitation(address, denom string, coins sdk.Coins) {
 }
 
 // transferCoinsToClaimer transfers coins from faucet accounts to the claimer.
-func (l *Limiter) transferCoinsToClaimer(key keyring.Info, to sdk.AccAddress, amt sdk.Coins) (*sdk.TxResponse, error) {
-	msg := banktypes.NewMsgSend(key.GetAddress(), to, amt)
+func (l *Limiter) transferCoinsToClaimer(key keyring.Record, to sdk.AccAddress, amt sdk.Coins) (*sdk.TxResponse, error) {
+	address, error := key.GetAddress()
+	if error != nil {
+		return nil, sdkerrors.Wrap(error, "Error when retrieving address")
+	}
+
+	msg := banktypes.NewMsgSend(address, to, amt)
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, sdkerrors.Wrapf(err, "failed to validate a message: %s", msg.String())
 	}
@@ -112,7 +118,7 @@ func (l *Limiter) transferCoinsToClaimer(key keyring.Info, to sdk.AccAddress, am
 		InterfaceRegistry: odin.MakeEncodingConfig().InterfaceRegistry,
 	}
 	accountRetriever := authtypes.AccountRetriever{}
-	acc, err := accountRetriever.GetAccount(clientCtx, key.GetAddress())
+	acc, err := accountRetriever.GetAccount(clientCtx, address)
 	if err != nil {
 		return nil, sdkerrors.Wrapf(err, "failed to the account: %s", acc)
 	}
@@ -128,12 +134,12 @@ func (l *Limiter) transferCoinsToClaimer(key keyring.Info, to sdk.AccAddress, am
 		WithKeybase(faucet.keybase).
 		WithAccountRetriever(clientCtx.AccountRetriever)
 
-	txb, err := tx.BuildUnsignedTx(txf, msg)
+	txb, err := txf.BuildUnsignedTx(msg)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to build unsigned tx")
 	}
 
-	err = tx.Sign(txf, key.GetName(), txb, true)
+	err = tx.Sign(txf, key.Name, txb, true)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to sign tx")
 	}
@@ -144,6 +150,6 @@ func (l *Limiter) transferCoinsToClaimer(key keyring.Info, to sdk.AccAddress, am
 	}
 
 	// broadcast to a Tendermint node
-	res, err := clientCtx.BroadcastTxCommit(txBytes)
+	res, err := clientCtx.BroadcastTx(txBytes)
 	return res, sdkerrors.Wrap(err, "failed to broadcast tx commit")
 }
