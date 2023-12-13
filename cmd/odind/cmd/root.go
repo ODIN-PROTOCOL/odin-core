@@ -26,6 +26,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
 	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/app/params"
@@ -86,7 +87,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		// 	AddGenesisDataSourceCmd(odin.DefaultNodeHome),
 		// 	AddGenesisOracleScriptCmd(odin.DefaultNodeHome),
 		// ),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome, nil),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome, genutiltypes.DefaultMessageValidator),
 		genutilcli.GenTxCmd(odin.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
 		genutilcli.ValidateGenesisCmd(odin.ModuleBasics),
 		AddGenesisAccountCmd(odin.DefaultNodeHome),
