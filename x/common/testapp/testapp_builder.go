@@ -3,6 +3,8 @@ package testapp
 import (
 	"encoding/json"
 
+	"github.com/cosmos/cosmos-sdk/baseapp"
+
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
@@ -76,7 +78,7 @@ func NewTestAppBuilder(dir string, logger log.Logger) TestAppBuilder {
 
 	db := dbm.NewMemDB()
 	encCdc := odinapp.MakeEncodingConfig()
-	builder.app = odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
+	builder.app = odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0, baseapp.SetChainID("ODINCHAIN"))
 	return &builder
 }
 

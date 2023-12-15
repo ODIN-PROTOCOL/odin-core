@@ -204,7 +204,7 @@ func TestPrepareRequestSuccessBasicNotEnoughFund(t *testing.T) {
 	// OracleScript#1: Prepare asks for DS#1,2,3 with ExtID#1,2,3 and calldata "beeb"
 	m := oracletypes.NewMsgRequestData(1, BasicCalldata, 1, 1, BasicClientID, testapp.Coins100000000loki, oracletypes.DefaultPrepareGas, oracletypes.DefaultExecuteGas, testapp.Alice.Address)
 	_, err := k.PrepareRequest(ctx, m, testapp.Alice.Address, nil)
-	require.EqualError(t, err, "0loki is smaller than 1000000loki: insufficient funds")
+	require.EqualError(t, err, "spendable balance  is smaller than 1000000loki: insufficient funds")
 }
 
 func TestPrepareRequestNotEnoughPrepareGas(t *testing.T) {
@@ -733,7 +733,7 @@ func TestCollectFeeWithEnoughFeeButInsufficientBalance(t *testing.T) {
 	require.Nil(t, coins)
 	// MAX is 100m but have only 1m in account
 	// First ds collect 1m so there no balance enough for next ds but it doesn't touch limit
-	require.EqualError(t, err, "1000000loki is smaller than 100000000loki: insufficient funds")
+	require.EqualError(t, err, "spendable balance 1000000loki is smaller than 100000000loki: insufficient funds")
 }
 
 func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {

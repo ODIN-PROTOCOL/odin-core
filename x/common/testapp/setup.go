@@ -25,6 +25,7 @@ import (
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	me "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 )
 
 const (
@@ -92,7 +93,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 
 	db := dbm.NewMemDB()
 	encCdc := odinapp.MakeEncodingConfig()
-	app := odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
+	app := odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0, baseapp.SetChainID("ODINCHAIN"))
 
 	genesis := odinapp.NewDefaultGenesisState()
 	acc := []authtypes.GenesisAccount{

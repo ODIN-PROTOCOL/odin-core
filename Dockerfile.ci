@@ -7,6 +7,10 @@ COPY ./ /core
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 RUN apt-get update && apt-get install -y wget
 
+RUN wget https://github.com/WebAssembly/wabt/releases/download/1.0.17/wabt-1.0.17-ubuntu.tar.gz
+RUN tar -zxf wabt-1.0.17-ubuntu.tar.gz
+RUN cp wabt-1.0.17/bin/wat2wasm /usr/local/bin
+
 RUN make install && make faucet
 
 COPY ./docker-config/validator1/ validator1/
