@@ -128,6 +128,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 }
 
 func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
+	// TODO: Recheck the math!
 	app, ctx, k := testapp.CreateTestInput(false)
 	ctx = ctx.WithBlockHeight(10) // Set block height to ensure distr's AllocateTokens gets called.
 	votes := []abci.VoteInfo{{
@@ -137,41 +138,71 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 		Validator:       abci.Validator{Address: testapp.Validators[1].PubKey.Address(), Power: 30},
 		SignedLastBlock: true,
 	}}
-	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
+
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
+	distModule := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
+
+	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
 	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
-	app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, authtypes.FeeCollectorName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
+	app.BankKeeper.SendCoinsFromModuleToModule(
+		ctx,
+		minttypes.ModuleName,
+		authtypes.FeeCollectorName,
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
+	)
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
 	mintParams := app.MintKeeper.GetParams(ctx)
 	mintParams.InflationMin = sdk.ZeroDec()
 	mintParams.InflationMax = sdk.ZeroDec()
 	app.MintKeeper.SetParams(ctx, mintParams)
-	k.SetParamUint64(ctx, types.KeyOracleRewardPercentage, 70)
-	// Set block proposer to Validator2, who will receive 5% bonus.
+	params := k.GetParams(ctx)
+	params.OracleRewardPercentage = 70
+	k.SetParams(ctx, params)
+	// Set block proposer to Validators[1], who will receive 5% bonus.
 	app.DistrKeeper.SetPreviousProposerConsAddr(ctx, testapp.Validators[1].Address.Bytes())
-	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
-	// Only validator1 active. After we call begin block:
+	require.Equal(
+		t,
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
+		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
+	)
+	// Only Validators[0] active. After we call begin block:
 	//   35loki = 70% go to oracle pool
 	//     0.7loki (2%) go to community pool
-	//     34.3loki go to validator1 (active)
+	//     34.3loki go to Validators[0] (active)
 	//   15loki = 30% go to distr pool
 	//     0.3loki (2%) go to community pool
-	//     2.25loki (15%) go to validator2 (proposer)
+	//     2.25loki (15%) go to Validators[1] (proposer)
 	//     12.45loki split among voters
-	//        8.715loki (70%) go to validator1
-	//        3.735loki (30%) go to validator2
+	//        8.715loki (70%) go to Validators[0]
+	//        3.735loki (30%) go to Validators[1]
 	// In summary
 	//   Community pool: 0.7 + 0.3 = 1
-	//   Validator1: 34.3 + 8.715 = 43.015
-	//   Validator2: 2.25 + 3.735 = 5.985
+	//   Validators[0]: 34.3 + 8.715 = 43.015
+	//   Validators[1]: 2.25 + 3.735 = 5.985
 	k.Activate(ctx, testapp.Validators[0].ValAddress)
 	app.BeginBlocker(ctx, abci.RequestBeginBlock{
 		Hash:           fromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
 		LastCommitInfo: abci.CommitInfo{Votes: votes},
 	})
-	require.Equal(t, sdk.Coins{}, app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(authtypes.FeeCollectorName)))
-	require.Equal(t, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)), app.BankKeeper.GetAllBalances(ctx, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName)))
-	require.Equal(t, sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDec(1)}}, app.DistrKeeper.GetFeePool(ctx).CommunityPool)
-	require.Equal(t, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.NewDecCoins(sdk.NewDecCoinFromDec("loki", sdk.NewDecWithPrec(43015, 3)))}, app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress))
-	require.Equal(t, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.NewDecCoins(sdk.NewDecCoinFromDec("loki", sdk.NewDecWithPrec(5985, 3)))}, app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress))
+	require.Equal(t, sdk.Coins{}, app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()))
+	require.Equal(
+		t,
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
+		app.BankKeeper.GetAllBalances(ctx, distModule.GetAddress()),
+	)
+	require.Equal(
+		t,
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDec(1)}},
+		app.DistrKeeper.GetFeePool(ctx).CommunityPool,
+	)
+	require.Equal(
+		t,
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(44590, 3)}},
+		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress).Rewards,
+	)
+	require.Equal(
+		t,
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(4410, 3)}},
+		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress).Rewards,
+	)
 }
