@@ -10,7 +10,7 @@ require (
 	github.com/cometbft/cometbft v0.37.4
 	github.com/cometbft/cometbft-db v0.8.0
 	github.com/confio/ics23/go v0.9.0
-	github.com/cosmos/cosmos-sdk v0.47.6
+	github.com/cosmos/cosmos-sdk v0.47.7
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-gorp/gorp v2.2.0+incompatible
