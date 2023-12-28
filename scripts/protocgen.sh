@@ -21,6 +21,6 @@ cd ..
 
 # move proto files to the right places
 cp -r github.com/ODIN-PROTOCOL/odin-core/* ./
-# rm -rf github.com
+rm -rf github.com
 
 echo "Proto files generated"
