@@ -6,6 +6,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 
 	errortypes "cosmossdk.io/errors"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,9 +22,10 @@ type HandlerOptions struct {
 	ante.HandlerOptions
 
 	IBCKeeper         *ibckeeper.Keeper
-	TxCounterStoreKey storetypes.StoreKey
-	WasmConfig        wasmTypes.WasmConfig
-	Cdc               codec.BinaryCodec
+	WasmKeeper        *wasmkeeper.Keeper
+	WasmConfig        *wasmTypes.WasmConfig
+	TXCounterStoreKey storetypes.StoreKey
+	Cdc               codec.Codec
 }
 
 type MinCommissionDecorator struct {
@@ -115,34 +117,23 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		return nil, errortypes.Wrap(sdkerrors.ErrLogic, "sign mode handler is required for ante builder")
 	}
 
+	if options.WasmConfig == nil {
+		return nil, errortypes.Wrap(sdkerrors.ErrLogic, "wasm config is required for ante builder")
+	}
+	if options.TXCounterStoreKey == nil {
+		return nil, errortypes.Wrap(sdkerrors.ErrLogic, "tx counter key is required for ante builder")
+	}
+
 	sigGasConsumer := options.SigGasConsumer
 	if sigGasConsumer == nil {
 		sigGasConsumer = ante.DefaultSigVerificationGasConsumer
 	}
 
-	// anteDecorators := []sdk.AnteDecorator{
-	// 	ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
-	// 	NewMinCommissionDecorator(options.Cdc),
-	// 	wasmkeeper.NewLimitSimulationGasDecorator(options.WasmConfig.SimulationGasLimit),
-	// 	wasmkeeper.NewCountTXDecorator(options.TxCounterStoreKey),
-	// 	ante.NewRejectExtensionOptionsDecorator(),
-	// 	ante.NewMempoolFeeDecorator(),
-	// 	ante.NewValidateBasicDecorator(),
-	// 	ante.NewTxTimeoutHeightDecorator(),
-	// 	ante.NewValidateMemoDecorator(options.AccountKeeper),
-	// 	ante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-	// 	ante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper),
-	// 	// SetPubKeyDecorator must be called before all signature verification decorators
-	// 	ante.NewSetPubKeyDecorator(options.AccountKeeper),
-	// 	ante.NewValidateSigCountDecorator(options.AccountKeeper),
-	// 	ante.NewSigGasConsumeDecorator(options.AccountKeeper, sigGasConsumer),
-	// 	ante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
-	// 	ante.NewIncrementSequenceDecorator(options.AccountKeeper),
-	// 	ibcante.NewAnteDecorator(options.IBCKeeper),
-	// }
-
 	anteDecorators := []sdk.AnteDecorator{
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first(),
+		wasmkeeper.NewLimitSimulationGasDecorator(options.WasmConfig.SimulationGasLimit), // after setup context to enforce limits early
+		wasmkeeper.NewCountTXDecorator(options.TXCounterStoreKey),
+		wasmkeeper.NewGasRegisterDecorator(options.WasmKeeper.GetGasRegister()),
 		ante.NewExtensionOptionsDecorator(options.ExtensionOptionChecker),
 		ante.NewValidateBasicDecorator(),
 		ante.NewTxTimeoutHeightDecorator(),
