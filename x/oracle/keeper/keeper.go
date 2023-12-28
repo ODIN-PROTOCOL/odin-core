@@ -6,7 +6,7 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 	gogotypes "github.com/gogo/protobuf/types"
-	owasm "github.com/slandymani/go-owasm/api"
+	owasm "github.com/odin-protocol/go-owasm/api"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"

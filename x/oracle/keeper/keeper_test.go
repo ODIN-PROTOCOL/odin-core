@@ -95,6 +95,7 @@ func TestGetSetParams(t *testing.T) {
 			oracletypes.DefaultRewardThreshold(),
 			oracletypes.DefaultRewardDecreasingFraction,
 			oracletypes.DefaultDataRequesterFeeDenoms,
+			oracletypes.DefaultMaxReportDataSize,
 		),
 		k.GetParams(ctx),
 	)
@@ -119,6 +120,7 @@ func TestGetSetParams(t *testing.T) {
 			oracletypes.DefaultRewardThreshold(),
 			oracletypes.DefaultRewardDecreasingFraction,
 			oracletypes.DefaultDataRequesterFeeDenoms,
+			oracletypes.DefaultMaxReportDataSize,
 		),
 		k.GetParams(ctx),
 	)

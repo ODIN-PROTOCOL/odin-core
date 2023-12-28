@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/cometbft/cometbft/libs/cli"
-	"github.com/slandymani/go-owasm/api"
+	"github.com/odin-protocol/go-owasm/api"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"

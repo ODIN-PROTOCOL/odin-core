@@ -357,7 +357,7 @@ message QueryRequestVerificationRequest {
   // ExternalID is an oracle's external ID
   uint64 external_id = 4;
   // Reporter is an bech32-encoded public key of the reporter authorized by the
-    // DataSourceID is the ID of data source
+  // DataSourceID is the ID of data source
   uint64 data_source_id = 5;
   // validator
   string reporter = 6;

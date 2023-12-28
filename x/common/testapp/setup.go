@@ -11,7 +11,7 @@ import (
 	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	owasm "github.com/slandymani/go-owasm/api"
+	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/spf13/viper"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

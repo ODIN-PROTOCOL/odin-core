@@ -57,6 +57,9 @@ message Params {
   ];
   // Denominations that can be used for withdrawing fee from data requesters
   repeated string data_requester_fee_denoms = 14;
+  // MaxReportDataSize is the maximum size limit of report data (bytes) in a
+  // report.
+  uint64 max_report_data_size = 15;
 }
 
 // RewardThreshold

@@ -12,7 +12,6 @@ import "google/protobuf/timestamp.proto";
 import "telemetry/telemetry.proto";
 import "cosmos/staking/v1beta1/staking.proto";
 
-
 // Query defines the gRPC querier service.
 service Query {
   // TopBalances returns all the system balances for specific denom.

@@ -15,8 +15,8 @@ import (
 // 1 cosmos gas is equal to 7 owasm gas
 const gasConversionFactor = 7
 
-func convertToOwasmGas(cosmos uint64) uint32 {
-	return uint32(cosmos * gasConversionFactor)
+func ConvertToOwasmGas(cosmos uint64) uint64 {
+	return uint64(cosmos * gasConversionFactor)
 }
 
 // GetRandomValidators returns a pseudorandom subset of active validators. Each validator has
@@ -88,8 +88,12 @@ func (k Keeper) PrepareRequest(
 	ctx.GasMeter().ConsumeGas(k.GetParamUint64(ctx, types.KeyBaseOwasmGas), "BASE_OWASM_FEE")
 	ctx.GasMeter().ConsumeGas(r.GetPrepareGas(), "OWASM_PREPARE_FEE")
 	code := k.GetFile(script.Filename)
-	maxDataSize := k.GetParamUint64(ctx, types.KeyMaxDataSize)
-	output, err := k.owasmVM.Prepare(code, convertToOwasmGas(r.GetPrepareGas()), int64(maxDataSize), env)
+
+	output, err := k.owasmVM.Prepare(code, ConvertToOwasmGas(r.GetPrepareGas()), env)
+	if err != nil {
+		return 0, sdkerrors.Wrapf(types.ErrBadWasmExecution, err.Error())
+	}
+
 	if err != nil {
 		return 0, sdkerrors.Wrapf(types.ErrBadWasmExecution, err.Error())
 	}
@@ -165,8 +169,8 @@ func (k Keeper) ResolveRequest(ctx sdk.Context, reqID types.RequestID) {
 	env := types.NewExecuteEnv(req, k.GetRequestReports(ctx, reqID), ctx.BlockTime())
 	script := k.MustGetOracleScript(ctx, req.OracleScriptID)
 	code := k.GetFile(script.Filename)
-	maxDataSize := k.GetParamUint64(ctx, types.KeyMaxDataSize)
-	output, err := k.owasmVM.Execute(code, convertToOwasmGas(req.GetExecuteGas()), int64(maxDataSize), env)
+
+	output, err := k.owasmVM.Execute(code, ConvertToOwasmGas(req.GetExecuteGas()), env)
 	if err != nil {
 		k.ResolveFailure(ctx, reqID, err.Error())
 		// TODO: send response to IBC module on fail request
@@ -176,4 +180,13 @@ func (k Keeper) ResolveRequest(ctx sdk.Context, reqID types.RequestID) {
 	} else {
 		k.ResolveSuccess(ctx, reqID, env.Retdata, output.GasUsed)
 	}
+}
+
+// GetSpanSize return maximum value between MaxReportDataSize and MaxCallDataSize
+func (k Keeper) GetSpanSize(ctx sdk.Context) uint64 {
+	params := k.GetParams(ctx)
+	if params.MaxReportDataSize > params.MaxCalldataSize {
+		return params.MaxReportDataSize
+	}
+	return params.MaxCalldataSize
 }

@@ -39,9 +39,9 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 	"github.com/gorilla/mux"
+	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rakyll/statik/fs"
-	owasm "github.com/slandymani/go-owasm/api"
 	"github.com/spf13/cast"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -140,6 +140,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
+	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 )
 
 const (
@@ -188,6 +189,7 @@ var (
 		groupmodule.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		ibctm.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{

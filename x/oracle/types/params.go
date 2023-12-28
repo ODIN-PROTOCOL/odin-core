@@ -27,6 +27,7 @@ const (
 	DefaultPrepareGas              = uint64(40000)
 	DefaultExecuteGas              = uint64(300000)
 	DefaultRewardThresholdBlocks   = uint64(28820)
+	DefaultMaxReportDataSize       = uint64(512) // 512B
 	DefaultDataProviderRewardDenom = "minigeo"
 	DefaultDataRequesterFeeDenom   = "loki"
 )
@@ -57,6 +58,7 @@ var (
 	KeyRewardDecreasingFraction    = []byte("RewardDecreasingFraction")
 	KeyDataProviderRewardThreshold = []byte("DataProviderRewardThreshold")
 	KeyDataRequesterFeeDenoms      = []byte("DataRequesterFeeDenoms")
+	KeyMaxReportDataSize           = []byte("MaxReportDataSize")
 )
 
 var _ paramtypes.ParamSet = (*Params)(nil)
@@ -71,7 +73,7 @@ func NewParams(
 	maxRawRequestCount, maxAskCount, expirationBlockCount, baseRequestGas, perValidatorRequestGas,
 	samplingTryCount, oracleRewardPercentage, inactivePenaltyDuration, maxDataSize, maxCallDataSize uint64,
 	dataProviderRewardPerByte sdk.Coins, dataProviderRewardThreshold RewardThreshold, rewardDecreasingFraction sdk.Dec,
-	dataRequesterFeeDenoms []string,
+	dataRequesterFeeDenoms []string, maxReportDataSize uint64,
 ) Params {
 	return Params{
 		MaxRawRequestCount:          maxRawRequestCount,
@@ -88,6 +90,7 @@ func NewParams(
 		DataProviderRewardThreshold: dataProviderRewardThreshold,
 		RewardDecreasingFraction:    rewardDecreasingFraction,
 		DataRequesterFeeDenoms:      dataRequesterFeeDenoms,
+		MaxReportDataSize:           maxReportDataSize,
 	}
 }
 
@@ -122,6 +125,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyRewardDecreasingFraction, &p.RewardDecreasingFraction, validateRewardDecreasingFraction),
 		paramtypes.NewParamSetPair(KeyDataProviderRewardThreshold, &p.DataProviderRewardThreshold, validateRewardThreshold),
 		paramtypes.NewParamSetPair(KeyDataRequesterFeeDenoms, &p.DataRequesterFeeDenoms, validateDataRequesterFeeDenoms),
+		paramtypes.NewParamSetPair(KeyMaxReportDataSize, &p.MaxReportDataSize, validateMaxReportDataSize),
 	}
 }
 
@@ -142,6 +146,7 @@ func DefaultParams() Params {
 		DefaultRewardThreshold(),
 		DefaultRewardDecreasingFraction,
 		DefaultDataRequesterFeeDenoms,
+		DefaultMaxReportDataSize,
 	)
 }
 
@@ -217,6 +222,17 @@ func validateDataRequesterFeeDenoms(i interface{}) error {
 		if err := sdk.ValidateDenom(d); err != nil {
 			return fmt.Errorf("denoms must be valid: %s, error: %w", d, err)
 		}
+	}
+	return nil
+}
+
+func validateMaxReportDataSize(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	if err := validateUint64("max report data size", true)(v); err != nil {
+		return err
 	}
 	return nil
 }
