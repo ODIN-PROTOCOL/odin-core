@@ -2,16 +2,20 @@ package keeper
 
 import (
 	"fmt"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+
+	"github.com/cometbft/cometbft/libs/log"
+	gogotypes "github.com/gogo/protobuf/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	gogotypes "github.com/gogo/protobuf/types"
-	"github.com/tendermint/tendermint/libs/log"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 type Keeper struct {
-	storeKey     sdk.StoreKey
+	storeKey     storetypes.StoreKey
 	cdc          codec.BinaryCodec
 	paramstore   paramstypes.Subspace
 	bankKeeper   coinswaptypes.BankKeeper
@@ -21,12 +25,12 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	subspace paramstypes.Subspace,
 	bk coinswaptypes.BankKeeper,
 	dk coinswaptypes.DistrKeeper,
-	ok coinswaptypes.OracleKeeper) Keeper {
-
+	ok coinswaptypes.OracleKeeper,
+) Keeper {
 	if !subspace.HasKeyTable() {
 		subspace = subspace.WithKeyTable(coinswaptypes.ParamKeyTable())
 	}

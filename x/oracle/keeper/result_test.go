@@ -3,11 +3,10 @@ package oraclekeeper_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestResultBasicFunctions(t *testing.T) {

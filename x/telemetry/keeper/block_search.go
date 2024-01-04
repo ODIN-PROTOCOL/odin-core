@@ -1,13 +1,16 @@
 package keeper
 
 import (
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	"time"
+
+	"github.com/cometbft/cometbft/rpc/core"
+	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
+	tendermint "github.com/cometbft/cometbft/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/tendermint/tendermint/rpc/core"
-	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	tendermint "github.com/tendermint/tendermint/types"
-	"time"
+
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 const (

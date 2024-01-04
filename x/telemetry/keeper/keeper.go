@@ -1,7 +1,11 @@
 package keeper
 
 import (
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+	"sort"
+	"time"
+
+	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,11 +13,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/query"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"sort"
-	"time"
+
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 type Keeper struct {
@@ -28,7 +31,7 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	txCfg client.TxConfig,
 	bk bankkeeper.ViewKeeper,
-	sk stakingkeeper.Keeper,
+	sk *stakingkeeper.Keeper,
 	dk distrkeeper.Keeper,
 ) Keeper {
 	return Keeper{
@@ -48,7 +51,6 @@ func (k Keeper) GetPaginatedBalances(
 	desc bool,
 	pagination *query.PageRequest,
 ) ([]banktypes.Balance, uint64) {
-
 	balances := k.bankKeeper.GetAccountsBalances(ctx)
 
 	sort.Slice(balances, func(i, j int) bool {
@@ -196,7 +198,6 @@ func (k Keeper) GetTopValidatorsByBlocks(
 	desc bool,
 	pagination *query.PageRequest,
 ) ([]telemetrytypes.ValidatorBlockStats, uint64, error) {
-
 	blocksByDates, err := k.GetBlocksByDates(startDate, endDate)
 	if err != nil {
 		return nil, 0, sdkerrors.Wrap(err, "failed to get the blocks by date")
@@ -285,7 +286,6 @@ func (k Keeper) GetValidatorBlocks(
 	desc bool,
 	pagination *query.PageRequest,
 ) ([]telemetrytypes.ValidatorBlock, uint64, error) {
-
 	validatorBlocks, err := k.GetBlocksByValidator(ctx, valAddr)
 	if err != nil {
 		return nil, 0, sdkerrors.Wrap(err, "failed to get the blocks by validator")

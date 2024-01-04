@@ -3,10 +3,12 @@ package oraclekeeper
 import (
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	abci "github.com/cometbft/cometbft/abci/types"
+
 	distr "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -47,7 +49,7 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) {
 	if err != nil {
 		panic(err)
 	}
-	// Convert the transfered tokens back to DecCoins for internal distr allocations.
+	// Convert the transferred tokens back to DecCoins for internal distr allocations.
 	oracleReward := sdk.NewDecCoinsFromCoins(oracleRewardInt...)
 	remaining := oracleReward
 	rewardMultiplier := sdk.OneDec().Sub(k.distrKeeper.GetCommunityTax(ctx))

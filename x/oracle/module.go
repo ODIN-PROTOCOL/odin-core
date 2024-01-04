@@ -3,11 +3,14 @@ package oracle
 import (
 	"context"
 	"encoding/json"
-	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
+	"errors"
 	"math"
-	"math/rand"
 
-	"github.com/gorilla/mux"
+	abci "github.com/cometbft/cometbft/abci/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
@@ -19,13 +22,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v3/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	oraclecli "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
-	oraclerest "github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/rest"
+
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -71,11 +70,6 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return gs.Validate()
 }
 
-// RegisterRESTRoutes adds oracle REST endpoints to the main mux (SDK AppModuleBasic interface).
-func (AppModuleBasic) RegisterRESTRoutes(ctx client.Context, rtr *mux.Router) {
-	oraclerest.RegisterRoutes(ctx, rtr)
-}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the oracle module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	err := oracletypes.RegisterQueryHandlerClient(context.WithValue(context.Background(), client.ClientContextKey, clientCtx), mux, oracletypes.NewQueryClient(clientCtx))
@@ -118,24 +112,13 @@ func NewAppModule(k oraclekeeper.Keeper) AppModule {
 // RegisterInvariants is a noop function to satisfy SDK AppModule interface.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 
-// Route returns the module's path for message route (SDK AppModule interface).
-func (am AppModule) Route() sdk.Route {
-	return sdk.NewRoute(oracletypes.RouterKey, NewHandler(am.keeper))
-}
-
 // QuerierRoute returns the oracle module's querier route name.
 func (AppModule) QuerierRoute() string {
 	return oracletypes.QuerierRoute
 }
 
-// LegacyQuerierHandler returns the staking module sdk.Querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return oraclekeeper.NewQuerier(am.keeper, legacyQuerierCdc)
-}
-
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-
 	oracletypes.RegisterMsgServer(cfg.MsgServer(), oraclekeeper.NewMsgServerImpl(am.keeper))
 	oracletypes.RegisterQueryServer(cfg.QueryServer(), oraclekeeper.Querier{Keeper: am.keeper})
 }
@@ -179,14 +162,9 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 	return nil
 }
 
-// RandomizedParams creates randomized ibc-transfer param changes for the simulator.
-func (AppModule) RandomizedParams(r *rand.Rand) []simtypes.ParamChange {
-	return []simtypes.ParamChange{}
-}
-
 // RegisterStoreDecoder registers a decoder for transfer module's oracletypes
 func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	//sdr[oracletypes.StoreKey] = simulation.NewDecodeStore(am.keeperoraclekeeper)
+	// sdr[oracletypes.StoreKey] = simulation.NewDecodeStore(am.keeperoraclekeeper)
 }
 
 // WeightedOperations returns the all the transfer module operations with their respective weights.
@@ -250,21 +228,21 @@ func (am IBCModule) OnChanOpenInit(
 	chanCap *capabilitytypes.Capability,
 	counterparty channeltypes.Counterparty,
 	version string,
-) error {
+) (string, error) {
 	if err := ValidateOracleChannelParams(ctx, am.keeper, order, portID, channelID); err != nil {
-		return err
+		return "", err
 	}
 
 	if version != oracletypes.Version {
-		return sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
+		return "", sdkerrors.Wrapf(oracletypes.ErrInvalidVersion, "got %s, expected %s", version, oracletypes.Version)
 	}
 
 	// Claim channel capability passed back by IBC module
 	if err := am.keeper.ClaimCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "", nil
 }
 
 // OnChanOpenTry implements the IBCModule interface
@@ -348,16 +326,15 @@ func (am IBCModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-
 	var data oracletypes.OracleRequestPacketData
 	if err := oracletypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
 		// TODO: Ack with non-deterministic error break consensus?
-		return channeltypes.NewErrorAcknowledgement("cannot unmarshal oracle request packet data")
+		return channeltypes.NewErrorAcknowledgement(errors.New("cannot unmarshal oracle request packet data"))
 	}
 
 	id, err := am.keeper.OnRecvPacket(ctx, packet, data, relayer)
 	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(err.Error())
+		return channeltypes.NewErrorAcknowledgement(errors.New(err.Error()))
 	}
 	return channeltypes.NewResultAcknowledgement(oracletypes.ModuleCdc.MustMarshalJSON(oracletypes.NewOracleRequestPacketAcknowledgement(id)))
 }

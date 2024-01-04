@@ -2,8 +2,9 @@ package common
 
 import (
 	"encoding/hex"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"testing"
+
+	"github.com/cometbft/cometbft/crypto/secp256k1"
 )
 
 func Test_FromHex(t *testing.T) {

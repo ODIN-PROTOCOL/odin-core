@@ -3,10 +3,9 @@ package oraclekeeper_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetSetRequestCount(t *testing.T) {
@@ -96,6 +95,7 @@ func TestGetSetParams(t *testing.T) {
 			oracletypes.DefaultRewardThreshold(),
 			oracletypes.DefaultRewardDecreasingFraction,
 			oracletypes.DefaultDataRequesterFeeDenoms,
+			oracletypes.DefaultMaxReportDataSize,
 		),
 		k.GetParams(ctx),
 	)
@@ -120,6 +120,7 @@ func TestGetSetParams(t *testing.T) {
 			oracletypes.DefaultRewardThreshold(),
 			oracletypes.DefaultRewardDecreasingFraction,
 			oracletypes.DefaultDataRequesterFeeDenoms,
+			oracletypes.DefaultMaxReportDataSize,
 		),
 		k.GetParams(ctx),
 	)

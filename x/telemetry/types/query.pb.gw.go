@@ -497,15 +497,15 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_TopBalances_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "top_balances"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TopBalances_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "top_balances"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ExtendedValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validators_balances"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ExtendedValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validators_balances"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TopValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "top_validators"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_TopValidators_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "top_validators"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ValidatorBlocks_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_blocks"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ValidatorBlocks_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"telemetry", "validator_blocks"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"telemetry", "validator_by_cons_addr", "consensus_address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ValidatorByConsAddr_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"telemetry", "validator_by_cons_addr", "consensus_address"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

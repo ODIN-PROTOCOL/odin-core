@@ -1,9 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	dbm "github.com/cometbft/cometbft-db"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/log"
+	"github.com/spf13/cast"
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -18,20 +25,21 @@ import (
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	"github.com/spf13/cast"
-	"github.com/spf13/cobra"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
 	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/app/params"
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/emitter"
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/request"
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmtypes "github.com/cometbft/cometbft/types"
+	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
+	"github.com/cosmos/cosmos-sdk/server/types"
+	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 )
 
 const (
@@ -54,9 +62,11 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithTxConfig(encodingConfig.TxConfig).
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
-		WithAccountRetriever(types.AccountRetriever{}).
-		WithBroadcastMode(flags.BroadcastBlock).
-		WithHomeDir(odin.DefaultNodeHome)
+		WithAccountRetriever(authtypes.AccountRetriever{}).
+		WithHomeDir(odin.DefaultNodeHome).WithViper("ODIN")
+
+	srvCfg := serverconfig.DefaultConfig()
+	cfg := tmcfg.DefaultConfig()
 
 	rootCmd := &cobra.Command{
 		Use:   "odind",
@@ -66,7 +76,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 				return err
 			}
 
-			return server.InterceptConfigsPreRunHandler(cmd, "", nil)
+			return server.InterceptConfigsPreRunHandler(cmd, serverconfig.DefaultConfigTemplate, srvCfg, cfg)
 		},
 	}
 
@@ -76,11 +86,14 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 }
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
-
 	rootCmd.AddCommand(
 		InitCmd(odin.NewDefaultGenesisState(), odin.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
-		// odin.MigrateGenesisCmd(),
+		// genesisCommand(
+		// 	encodingConfig,
+		// 	AddGenesisDataSourceCmd(odin.DefaultNodeHome),
+		// 	AddGenesisOracleScriptCmd(odin.DefaultNodeHome),
+		// ),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome, genutiltypes.DefaultMessageValidator),
 		genutilcli.GenTxCmd(odin.ModuleBasics, encodingConfig.TxConfig, banktypes.GenesisBalancesIterator{}, odin.DefaultNodeHome),
 		genutilcli.ValidateGenesisCmd(odin.ModuleBasics),
 		AddGenesisAccountCmd(odin.DefaultNodeHome),
@@ -104,6 +117,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 	rootCmd.PersistentFlags().String(flagWithEmitter, "", "[Experimental] Enable mode with emitter")
 	rootCmd.PersistentFlags().Uint32(flagWithOwasmCacheSize, 100, "[Experimental] Number of oracle scripts to cache")
 }
+
 func addModuleInitFlags(startCmd *cobra.Command) {
 	crisis.AddModuleInitFlags(startCmd)
 }
@@ -158,6 +172,18 @@ func txCommand() *cobra.Command {
 	return cmd
 }
 
+func GetAppDBBackend(opts types.AppOptions) dbm.BackendType {
+	rv := cast.ToString(opts.Get("app-db-backend"))
+	if len(rv) == 0 {
+		rv = cast.ToString(opts.Get("db-backend"))
+	}
+	if len(rv) != 0 {
+		return dbm.BackendType(rv)
+	}
+
+	return dbm.GoLevelDBBackend
+}
+
 // newApp is an AppCreator
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts servertypes.AppOptions) servertypes.Application {
 	var cache sdk.MultiStorePersistentCache
@@ -176,8 +202,26 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 		panic(err)
 	}
 
-	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
+	// snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
+	// snapshotDB, err := dbm.NewGoLevelDB("metadata", snapshotDir)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
+	chainID := getChainId(appOpts)
+
+	snapshotDir := filepath.Join(homeDir, "data", "snapshots")
+	if err = os.MkdirAll(snapshotDir, os.ModePerm); err != nil {
+		panic(fmt.Errorf("failed to create snapshots directory: %w", err))
+	}
+
+	snapshotDB, err := dbm.NewDB("metadata", GetAppDBBackend(appOpts), snapshotDir)
 	if err != nil {
 		panic(err)
 	}
@@ -185,6 +229,11 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 	if err != nil {
 		panic(err)
 	}
+
+	snapshotOptions := snapshottypes.NewSnapshotOptions(
+		cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)),
+		cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)),
+	)
 
 	odinApp := odin.NewOdinApp(
 		logger, db, traceStore, true, skipUpgradeHeights,
@@ -202,9 +251,8 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 		baseapp.SetInterBlockCache(cache),
 		baseapp.SetTrace(cast.ToBool(appOpts.Get(server.FlagTrace))),
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
-		baseapp.SetSnapshotStore(snapshotStore),
-		baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
-		baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
+		baseapp.SetChainID(chainID),
+		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
 	)
 	connStr, _ := appOpts.Get(flagWithRequestSearch).(string)
 	if connStr != "" {
@@ -223,22 +271,40 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, appOpts serverty
 	return odinApp
 }
 
+func getChainId(appOpts servertypes.AppOptions) string {
+	homeDir := cast.ToString(appOpts.Get(flags.FlagHome))
+	chainID := cast.ToString(appOpts.Get(flags.FlagChainID))
+	if chainID == "" {
+		// fallback to genesis chain-id
+		appGenesis, err := tmtypes.GenesisDocFromFile(filepath.Join(homeDir, "config", "genesis.json"))
+		if err != nil {
+			panic(err)
+		}
+
+		chainID = appGenesis.ChainID
+	}
+	return chainID
+}
+
 func createSimappAndExport(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailAllowedAddrs []string,
-	appOpts servertypes.AppOptions) (servertypes.ExportedApp, error) {
-
+	appOpts servertypes.AppOptions, modulesToExport []string,
+) (servertypes.ExportedApp, error) {
 	encCfg := odin.MakeEncodingConfig() // Ideally, we would reuse the one created by NewRootCmd.
 	encCfg.Marshaler = codec.NewProtoCodec(encCfg.InterfaceRegistry)
 	var odinConsumerApp *odin.OdinApp
+
+	chainID := getChainId(appOpts)
+
 	if height != -1 {
-		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
+		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)), baseapp.SetChainID(chainID))
 
 		if err := odinConsumerApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	} else {
-		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)))
+		odinConsumerApp = odin.NewOdinApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), encCfg, appOpts, false, cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)), baseapp.SetChainID(chainID))
 	}
 
-	return odinConsumerApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+	return odinConsumerApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }

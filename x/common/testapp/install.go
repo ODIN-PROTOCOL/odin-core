@@ -2,17 +2,20 @@ package testapp
 
 import (
 	"encoding/json"
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"io/ioutil"
+
+	"github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/spf13/viper"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/cli"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	"io/ioutil"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (
@@ -67,7 +70,7 @@ func CreateDefaultGenesisApp(accountsCount int) TestAppBuilder {
 	// bank
 	bankBuilder := NewBankBuilder(accountsCount, fillBalances(authBuilder.Accounts, Coins10000000000loki), initialSupply)
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	// oracle

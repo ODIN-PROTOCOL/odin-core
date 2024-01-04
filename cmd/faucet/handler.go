@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (

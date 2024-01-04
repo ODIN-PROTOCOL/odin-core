@@ -3,19 +3,20 @@ package auction
 import (
 	"context"
 	"encoding/json"
-	auctioncli "github.com/ODIN-PROTOCOL/odin-core/x/auction/client/cli"
-	auctionrest "github.com/ODIN-PROTOCOL/odin-core/x/auction/client/rest"
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-	abci "github.com/tendermint/tendermint/abci/types"
+
+	auctioncli "github.com/ODIN-PROTOCOL/odin-core/x/auction/client/cli"
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 )
 
 var (
@@ -56,12 +57,6 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return auctiontypes.ValidateGenesis(gs)
 }
 
-// RegisterRESTRoutes adds oracle REST endpoints to the main mux (SDK AppModuleBasic interface).
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	auctionrest.RegisterRoutes(clientCtx, rtr)
-	return
-}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the oracle module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	auctiontypes.RegisterQueryHandlerClient(context.Background(), mux, auctiontypes.NewQueryClient(clientCtx))
@@ -93,19 +88,9 @@ func NewAppModule(k auctionkeeper.Keeper) AppModule {
 // RegisterInvariants is a noop function to satisfy SDK AppModule interface.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 
-// Route returns the module's path for message route (SDK AppModule interface).
-func (am AppModule) Route() sdk.Route {
-	return sdk.NewRoute(auctiontypes.RouterKey, NewHandler(am.keeper))
-}
-
 // QuerierRoute returns the oracle module's querier route name.
 func (AppModule) QuerierRoute() string {
 	return auctiontypes.QuerierRoute
-}
-
-// LegacyQuerierHandler returns the staking module sdk.Querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return auctionkeeper.NewQuerier(am.keeper, legacyQuerierCdc)
 }
 
 // RegisterServices registers module services.

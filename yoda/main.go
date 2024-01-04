@@ -6,12 +6,13 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
@@ -91,7 +92,7 @@ func Main() {
 		if err := os.MkdirAll(home, os.ModePerm); err != nil {
 			return err
 		}
-		kb, err = keyring.New("app", "test", home, nil)
+		kb, err = keyring.New("band", keyring.BackendTest, home, nil, cdc)
 		if err != nil {
 			return err
 		}

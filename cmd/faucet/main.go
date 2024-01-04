@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
-	odin "github.com/ODIN-PROTOCOL/odin-core/app"
+	"os"
+
+	"github.com/spf13/cobra"
+
+	sdkerrors "cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/spf13/cobra"
-	"os"
+
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (
@@ -38,6 +42,10 @@ func main() {
 		configCmd(),
 		KeysCmd(),
 	)
+
+	clientCtx := client.GetClientContextFromCmd(rootCmd)
+	cdc := clientCtx.Codec
+
 	rootCmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
 		home, err := rootCmd.PersistentFlags().GetString(flags.FlagHome)
 		if err != nil {
@@ -50,7 +58,7 @@ func main() {
 		if err := os.MkdirAll(home, os.ModePerm); err != nil {
 			return sdkerrors.Wrap(err, "failed to create a directory")
 		}
-		faucet.keybase, err = keyring.New(sdk.KeyringServiceName(), keyringBackend, home, nil)
+		faucet.keybase, err = keyring.New(sdk.KeyringServiceName(), keyringBackend, home, nil, cdc)
 		if err != nil {
 			return sdkerrors.Wrap(err, "failed to create a new keyring")
 		}

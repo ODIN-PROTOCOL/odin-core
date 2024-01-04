@@ -1,122 +1,124 @@
 package proof
 
-import (
-	"context"
-	"encoding/json"
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
-	"net/http"
-	"strconv"
+// import (
+// 	"context"
+// 	"encoding/json"
+// 	"net/http"
+// 	"strconv"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/gorilla/mux"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
-)
+// 	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+// 	rpcclient "github.com/cometbft/cometbft/rpc/client"
+// 	"github.com/ethereum/go-ethereum/accounts/abi"
+// 	"github.com/gorilla/mux"
 
-type JsonProof struct {
-	BlockHeight     uint64          `json:"block_height"`
-	OracleDataProof OracleDataProof `json:"oracle_data_proof"`
-	BlockRelayProof BlockRelayProof `json:"block_relay_proof"`
-}
+// 	"github.com/cosmos/cosmos-sdk/client"
+// 	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
-type Proof struct {
-	JsonProof     JsonProof        `json:"json_proof"`
-	EVMProofBytes tmbytes.HexBytes `json:"evm_proof_bytes"`
-}
+// 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+// 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+// )
 
-func GetProofHandlerFn(cliCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
-		if !ok {
-			return
-		}
-		height := &ctx.Height
-		if ctx.Height == 0 {
-			height = nil
-		}
+// type JsonProof struct {
+// 	BlockHeight     uint64          `json:"block_height"`
+// 	OracleDataProof OracleDataProof `json:"oracle_data_proof"`
+// 	BlockRelayProof BlockRelayProof `json:"block_relay_proof"`
+// }
 
-		// Parse Request ID
-		vars := mux.Vars(r)
-		intRequestID, err := strconv.ParseUint(vars[RequestIDTag], 10, 64)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		requestID := oracletypes.RequestID(intRequestID)
+// type Proof struct {
+// 	JsonProof     JsonProof        `json:"json_proof"`
+// 	EVMProofBytes tmbytes.HexBytes `json:"evm_proof_bytes"`
+// }
 
-		commit, err := ctx.Client.Commit(context.Background(), height)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
-			return
-		}
+// func GetProofHandlerFn(cliCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		ctx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, cliCtx, r)
+// 		if !ok {
+// 			return
+// 		}
+// 		height := &ctx.Height
+// 		if ctx.Height == 0 {
+// 			height = nil
+// 		}
 
-		value, iavlEp, multiStoreEp, err := getProofsByKey(
-			ctx,
-			oracletypes.ResultStoreKey(requestID),
-			rpcclient.ABCIQueryOptions{Height: commit.Height - 1, Prove: true},
-			true,
-		)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		// Parse Request ID
+// 		vars := mux.Vars(r)
+// 		intRequestID, err := strconv.ParseUint(vars[RequestIDTag], 10, 64)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+// 			return
+// 		}
+// 		requestID := oracletypes.RequestID(intRequestID)
 
-		signatures, err := GetSignaturesAndPrefix(&commit.SignedHeader)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		blockRelay := BlockRelayProof{
-			MultiStoreProof:        GetMultiStoreProof(multiStoreEp),
-			BlockHeaderMerkleParts: GetBlockHeaderMerkleParts(commit.Header),
-			Signatures:             signatures,
-		}
+// 		commit, err := ctx.Client.Commit(context.Background(), height)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+// 			return
+// 		}
 
-		var rs oracletypes.Result
-		obi.MustDecode(value, &rs)
+// 		value, iavlEp, multiStoreEp, err := getProofsByKey(
+// 			ctx,
+// 			oracletypes.ResultStoreKey(requestID),
+// 			rpcclient.ABCIQueryOptions{Height: commit.Height - 1, Prove: true},
+// 			true,
+// 		)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		oracleData := OracleDataProof{
-			Result:      rs,
-			Version:     decodeIAVLLeafPrefix(iavlEp.Leaf.Prefix),
-			MerklePaths: GetMerklePaths(iavlEp),
-		}
+// 		signatures, err := GetSignaturesAndPrefix(&commit.SignedHeader)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+// 		blockRelay := BlockRelayProof{
+// 			MultiStoreProof:        GetMultiStoreProof(multiStoreEp),
+// 			BlockHeaderMerkleParts: GetBlockHeaderMerkleParts(commit.Header),
+// 			Signatures:             signatures,
+// 		}
 
-		// Calculate byte for proofbytes
-		var relayAndVerifyArguments abi.Arguments
-		format := `[{"type":"bytes"},{"type":"bytes"}]`
-		err = json.Unmarshal([]byte(format), &relayAndVerifyArguments)
-		if err != nil {
-			panic(err)
-		}
+// 		var rs oracletypes.Result
+// 		obi.MustDecode(value, &rs)
 
-		blockRelayBytes, err := blockRelay.encodeToEthData()
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		oracleData := OracleDataProof{
+// 			Result:      rs,
+// 			Version:     decodeIAVLLeafPrefix(iavlEp.Leaf.Prefix),
+// 			MerklePaths: GetMerklePaths(iavlEp),
+// 		}
 
-		oracleDataBytes, err := oracleData.encodeToEthData(uint64(commit.Height))
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		// Calculate byte for proofbytes
+// 		var relayAndVerifyArguments abi.Arguments
+// 		format := `[{"type":"bytes"},{"type":"bytes"}]`
+// 		err = json.Unmarshal([]byte(format), &relayAndVerifyArguments)
+// 		if err != nil {
+// 			panic(err)
+// 		}
 
-		evmProofBytes, err := relayAndVerifyArguments.Pack(blockRelayBytes, oracleDataBytes)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
+// 		blockRelayBytes, err := blockRelay.encodeToEthData()
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
 
-		rest.PostProcessResponse(w, ctx, Proof{
-			JsonProof: JsonProof{
-				BlockHeight:     uint64(commit.Height),
-				OracleDataProof: oracleData,
-				BlockRelayProof: blockRelay,
-			},
-			EVMProofBytes: evmProofBytes,
-		})
-	}
-}
+// 		oracleDataBytes, err := oracleData.encodeToEthData(uint64(commit.Height))
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+
+// 		evmProofBytes, err := relayAndVerifyArguments.Pack(blockRelayBytes, oracleDataBytes)
+// 		if err != nil {
+// 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 			return
+// 		}
+
+// 		rest.PostProcessResponse(w, ctx, Proof{
+// 			JsonProof: JsonProof{
+// 				BlockHeight:     uint64(commit.Height),
+// 				OracleDataProof: oracleData,
+// 				BlockRelayProof: blockRelay,
+// 			},
+// 			EVMProofBytes: evmProofBytes,
+// 		})
+// 	}
+// }

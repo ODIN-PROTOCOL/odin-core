@@ -8,9 +8,9 @@ import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
-	_ "github.com/gogo/protobuf/gogoproto"
-	grpc1 "github.com/gogo/protobuf/grpc"
-	proto "github.com/gogo/protobuf/proto"
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	grpc1 "github.com/cosmos/gogoproto/grpc"
+	proto "github.com/cosmos/gogoproto/proto"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -445,8 +445,8 @@ func (m *QueryTreasuryPoolResponse) GetTreasuryPool() github_com_cosmos_cosmos_s
 	return nil
 }
 
-// QueryCurrentMintVolumeRequest is request type for the Query/QueryCurrentMintVolume RPC
-// method.
+// QueryCurrentMintVolumeRequest is request type for the
+// Query/QueryCurrentMintVolume RPC method.
 type QueryCurrentMintVolumeRequest struct {
 }
 
@@ -483,8 +483,8 @@ func (m *QueryCurrentMintVolumeRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryCurrentMintVolumeRequest proto.InternalMessageInfo
 
-// QueryCurrentMintVolumeResponse is response type for the Query/QueryCurrentMintVolume
-// RPC method.
+// QueryCurrentMintVolumeResponse is response type for the
+// Query/QueryCurrentMintVolume RPC method.
 type QueryCurrentMintVolumeResponse struct {
 	CurrentMintVolume github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=current_mint_volume,json=currentMintVolume,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"current_mint_volume"`
 }

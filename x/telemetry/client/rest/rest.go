@@ -1,300 +1,303 @@
 package rest
 
-import (
-	"fmt"
-	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/gorilla/mux"
-	"net/http"
-)
+// import (
+// 	"fmt"
+// 	"net/http"
 
-func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopBalances),
-		getTopBalancesHandler(clientCtx),
-	).Methods("GET")
+// 	"github.com/gorilla/mux"
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryExtendedValidators),
-		getExtendedValidatorsHandler(clientCtx),
-	).Methods("GET")
+// 	"github.com/cosmos/cosmos-sdk/client"
+// 	"github.com/cosmos/cosmos-sdk/testutil/rest"
 
-	/*rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgBlockSize),
-		getAvgBlockSizeHandler(clientCtx),
-	).Methods("GET")
+// 	commonrest "github.com/ODIN-PROTOCOL/odin-core/x/common/client/rest"
+// 	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
+// )
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgBlockTime),
-		getAvgBlockTimeHandler(clientCtx),
-	).Methods("GET")
+// func RegisterRoutes(clientCtx client.Context, rtr *mux.Router) {
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopBalances),
+// 		getTopBalancesHandler(clientCtx),
+// 	).Methods("GET")
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgTxFee),
-		getAvgTxFeeHandler(clientCtx),
-	).Methods("GET")
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryExtendedValidators),
+// 		getExtendedValidatorsHandler(clientCtx),
+// 	).Methods("GET")
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTxVolume),
-		getTxVolumeHandler(clientCtx),
-	).Methods("GET")*/
+// 	/*rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgBlockSize),
+// 		getAvgBlockSizeHandler(clientCtx),
+// 	).Methods("GET")
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopValidators),
-		getTopValidatorsHandler(clientCtx),
-	).Methods("GET")
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgBlockTime),
+// 		getAvgBlockTimeHandler(clientCtx),
+// 	).Methods("GET")
 
-	/*rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorBlocks),
-		getValidatorBlocksHandler(clientCtx),
-	).Methods("GET")*/
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryAvgTxFee),
+// 		getAvgTxFeeHandler(clientCtx),
+// 	).Methods("GET")
 
-	rtr.HandleFunc(
-		fmt.Sprintf("/%s/%s/{consensus_address}", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorByConsAddress),
-		getValidatorByConsAddressHandler(clientCtx),
-	).Methods("GET")
-}
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTxVolume),
+// 		getTxVolumeHandler(clientCtx),
+// 	).Methods("GET")*/
 
-func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryTopValidators),
+// 		getTopValidatorsHandler(clientCtx),
+// 	).Methods("GET")
 
-		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
-		if !ok {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(paginationParams)
+// 	/*rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorBlocks),
+// 		getValidatorBlocksHandler(clientCtx),
+// 	).Methods("GET")*/
 
-		query := r.URL.Query()
+// 	rtr.HandleFunc(
+// 		fmt.Sprintf("/%s/%s/{consensus_address}", telemetrytypes.ModuleName, telemetrytypes.QueryValidatorByConsAddress),
+// 		getValidatorByConsAddressHandler(clientCtx),
+// 	).Methods("GET")
+// }
 
-		res, height, err := clientCtx.QueryWithData(fmt.Sprintf(
-			"custom/%s/%s/%s",
-			telemetrytypes.QuerierRoute,
-			telemetrytypes.QueryTopBalances,
-			query.Get(telemetrytypes.DenomTag),
-		), bin)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// func getTopBalancesHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// 		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
+// 		if !ok {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(paginationParams)
 
-func getExtendedValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		query := r.URL.Query()
 
-		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
-		if !ok {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(paginationParams)
+// 		res, height, err := clientCtx.QueryWithData(fmt.Sprintf(
+// 			"custom/%s/%s/%s",
+// 			telemetrytypes.QuerierRoute,
+// 			telemetrytypes.QueryTopBalances,
+// 			query.Get(telemetrytypes.DenomTag),
+// 		), bin)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		vars := mux.Vars(r)
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		res, height, err := clientCtx.QueryWithData(fmt.Sprintf(
-			"custom/%s/%s/%s",
-			telemetrytypes.QuerierRoute,
-			telemetrytypes.QueryExtendedValidators,
-			vars[telemetrytypes.StatusTag],
-		), bin)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// func getExtendedValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// 		paginationParams, ok := commonrest.CheckPaginationParams(w, r)
+// 		if !ok {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(paginationParams)
 
-func getAvgBlockSizeHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		vars := mux.Vars(r)
 
-		var request telemetrytypes.QueryAvgBlockSizeRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(fmt.Sprintf(
+// 			"custom/%s/%s/%s",
+// 			telemetrytypes.QuerierRoute,
+// 			telemetrytypes.QueryExtendedValidators,
+// 			vars[telemetrytypes.StatusTag],
+// 		), bin)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgBlockSize),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getAvgBlockSizeHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getAvgBlockTimeHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryAvgBlockSizeRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		var request telemetrytypes.QueryAvgBlockTimeRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgBlockSize),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgBlockTime),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getAvgBlockTimeHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getAvgTxFeeHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryAvgBlockTimeRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		var request telemetrytypes.QueryAvgTxFeeRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgBlockTime),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgTxFee),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getAvgTxFeeHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getTxVolumeHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryAvgTxFeeRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		var request telemetrytypes.QueryTxVolumeRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryAvgTxFee),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryTxVolume),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getTxVolumeHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getTopValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryTxVolumeRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		var request telemetrytypes.QueryTopValidatorsRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryTxVolume),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryTopValidators),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getTopValidatorsHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getValidatorBlocksHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryTopValidatorsRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		var request telemetrytypes.QueryValidatorBlocksRequest
-		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
-			return
-		}
-		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryTopValidators),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.QueryWithData(
-			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorBlocks),
-			bin,
-		)
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// func getValidatorBlocksHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-func getValidatorByConsAddressHandler(clientCtx client.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
-		if !ok {
-			return
-		}
+// 		var request telemetrytypes.QueryValidatorBlocksRequest
+// 		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &request) {
+// 			return
+// 		}
+// 		bin := clientCtx.LegacyAmino.MustMarshalJSON(request)
 
-		vars := mux.Vars(r)
-		validatorConsAddr := vars["consensus_address"]
+// 		res, height, err := clientCtx.QueryWithData(
+// 			fmt.Sprintf("custom/%s/%s", telemetrytypes.QuerierRoute, telemetrytypes.QueryValidatorBlocks),
+// 			bin,
+// 		)
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
 
-		res, height, err := clientCtx.Query(fmt.Sprintf(
-			"custom/%s/%s/%s",
-			telemetrytypes.QuerierRoute,
-			telemetrytypes.QueryValidatorByConsAddress,
-			validatorConsAddr,
-		))
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }
 
-		if rest.CheckInternalServerError(w, err) {
-			return
-		}
+// func getValidatorByConsAddressHandler(clientCtx client.Context) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		clientCtx, ok := rest.ParseQueryHeightOrReturnBadRequest(w, clientCtx, r)
+// 		if !ok {
+// 			return
+// 		}
 
-		clientCtx = clientCtx.WithHeight(height)
-		rest.PostProcessResponse(w, clientCtx, res)
-	}
-}
+// 		vars := mux.Vars(r)
+// 		validatorConsAddr := vars["consensus_address"]
+
+// 		res, height, err := clientCtx.Query(fmt.Sprintf(
+// 			"custom/%s/%s/%s",
+// 			telemetrytypes.QuerierRoute,
+// 			telemetrytypes.QueryValidatorByConsAddress,
+// 			validatorConsAddr,
+// 		))
+
+// 		if rest.CheckInternalServerError(w, err) {
+// 			return
+// 		}
+
+// 		clientCtx = clientCtx.WithHeight(height)
+// 		rest.PostProcessResponse(w, clientCtx, res)
+// 	}
+// }

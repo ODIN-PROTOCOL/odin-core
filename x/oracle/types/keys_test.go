@@ -30,7 +30,8 @@ func TestOracleScriptStoreKey(t *testing.T) {
 
 func TestReporterStoreKey(t *testing.T) {
 	val, _ := sdk.ValAddressFromHex("b80f2a5df7d5710b15622d1a9f1e3830ded5bda8")
-	rep, _ := sdk.AccAddressFromHex("ba11d00c5f74255f56a5e366f4f77f5a186d7f55")
+
+	rep, _ := sdk.AccAddressFromHexUnsafe("ba11d00c5f74255f56a5e366f4f77f5a186d7f55")
 	expect, _ := hex.DecodeString("05b80f2a5df7d5710b15622d1a9f1e3830ded5bda8ba11d00c5f74255f56a5e366f4f77f5a186d7f55")
 	require.Equal(t, expect, ReporterStoreKey(val, rep))
 }

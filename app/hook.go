@@ -1,8 +1,9 @@
 package odin
 
 import (
+	abci "github.com/cometbft/cometbft/abci/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // Hook is an interface of hook that can process along with abci application

@@ -1,11 +1,12 @@
 package keeper
 
 import (
-	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	telemetrytypes "github.com/ODIN-PROTOCOL/odin-core/x/telemetry/types"
 )
 
 func ExtendedValidatorsRequestToValidatorsRequest(request *telemetrytypes.QueryExtendedValidatorsRequest) *stakingtypes.QueryValidatorsRequest {

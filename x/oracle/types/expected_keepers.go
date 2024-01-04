@@ -1,14 +1,16 @@
 package types
 
 import (
+	connectiontypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	connectiontypes "github.com/cosmos/ibc-go/v3/modules/core/03-connection/types"
-	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-	ibcexported "github.com/cosmos/ibc-go/v3/modules/core/exported"
+	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 )
 
 // AccountKeeper defines the expected account keeper.
@@ -46,11 +48,23 @@ type DistrKeeper interface {
 }
 
 // ChannelKeeper defines the expected IBC channel keeper
+// type ChannelKeeper interface {
+// 	// GetChannel(ctx sdk.Context, srcPort, srcChan string) (channel channeltypes.Channel, found bool)
+// 	// GetNextSequenceSend(ctx sdk.Context, portID, channelID string) (uint64, bool)
+// 	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
+// 	//ChanCloseInit(ctx sdk.Context, portID, channelID string, chanCap *capabilitytypes.Capability) error
+// }
+
 type ChannelKeeper interface {
-	GetChannel(ctx sdk.Context, srcPort, srcChan string) (channel channeltypes.Channel, found bool)
-	GetNextSequenceSend(ctx sdk.Context, portID, channelID string) (uint64, bool)
-	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
-	ChanCloseInit(ctx sdk.Context, portID, channelID string, chanCap *capabilitytypes.Capability) error
+	SendPacket(
+		ctx sdk.Context,
+		chanCap *capabilitytypes.Capability,
+		sourcePort string,
+		sourceChannel string,
+		timeoutHeight ibcclienttypes.Height,
+		timeoutTimestamp uint64,
+		data []byte,
+	) (sequence uint64, err error)
 }
 
 // ClientKeeper defines the expected IBC client keeper

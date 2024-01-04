@@ -2,30 +2,30 @@ package odin
 
 import (
 	"encoding/json"
-	"github.com/CosmWasm/wasmd/x/wasm"
-	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
-	"github.com/cosmos/cosmos-sdk/x/authz"
-	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
-	ica "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
-	"github.com/osmosis-labs/bech32-ibc/x/bech32ibc"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 	"time"
 
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/CosmWasm/wasmd/x/wasm"
+
+	// "github.com/althea-net/bech32-ibc/x/bech32ibc"
+	// bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+
+	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
+	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/capability"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/cosmos/cosmos-sdk/x/evidence"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
@@ -35,11 +35,14 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ibctypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v3/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v3/modules/core/24-host"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 // GenesisState defines a type alias for the Odin genesis application state.
@@ -54,7 +57,7 @@ func NewDefaultGenesisState() GenesisState {
 	stakingGenesis := stakingtypes.DefaultGenesisState()
 	distrGenesis := distrtypes.DefaultGenesisState()
 	mintGenesis := minttypes.DefaultGenesisState()
-	govGenesis := govtypes.DefaultGenesisState()
+	govGenesis := govv1.DefaultGenesisState()
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
 	oracleGenesis := oracletypes.DefaultGenesisState()
@@ -68,7 +71,10 @@ func NewDefaultGenesisState() GenesisState {
 	mintGenesis.Params.BlocksPerYear = 10519200                         // target 3-second block time
 	mintGenesis.Params.MintDenom = denom
 	mintGenesis.Params.MintAir = true
-	govGenesis.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)))
+
+	govGenesis.Params.MinDeposit = sdk.NewCoins(
+		sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)),
+	)
 	crisisGenesis.ConstantFee = sdk.NewCoin(denom, sdk.TokensFromConsensusPower(10000, sdk.DefaultPowerReduction))
 	slashingGenesis.Params.SignedBlocksWindow = 30000                         // approximately 1 day
 	slashingGenesis.Params.MinSignedPerWindow = sdk.NewDecWithPrec(5, 2)      // 5%
@@ -88,7 +94,7 @@ func NewDefaultGenesisState() GenesisState {
 		govtypes.ModuleName:        cdc.MustMarshalJSON(govGenesis),
 		crisistypes.ModuleName:     cdc.MustMarshalJSON(crisisGenesis),
 		slashingtypes.ModuleName:   cdc.MustMarshalJSON(slashingGenesis),
-		ibchost.ModuleName:         ibc.AppModuleBasic{}.DefaultGenesis(cdc),
+		ibcexported.ModuleName:     ibc.AppModuleBasic{}.DefaultGenesis(cdc),
 		upgradetypes.ModuleName:    upgrade.AppModuleBasic{}.DefaultGenesis(cdc),
 		evidencetypes.ModuleName:   evidence.AppModuleBasic{}.DefaultGenesis(cdc),
 		authz.ModuleName:           authzmodule.AppModuleBasic{}.DefaultGenesis(cdc),
@@ -97,8 +103,6 @@ func NewDefaultGenesisState() GenesisState {
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
 		icatypes.ModuleName:        ica.AppModuleBasic{}.DefaultGenesis(cdc),
-		bech32ibctypes.ModuleName:  bech32ibc.AppModuleBasic{}.DefaultGenesis(cdc),
-		gravitytypes.ModuleName:    gravity.AppModuleBasic{}.DefaultGenesis(cdc),
 		wasm.ModuleName:            wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }

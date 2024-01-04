@@ -1,10 +1,10 @@
 package emitter
 
 import (
+	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 var (
@@ -14,43 +14,48 @@ var (
 )
 
 func (h *Hook) emitGovModule(ctx sdk.Context) {
-	h.govKeeper.IterateProposals(ctx, func(proposal types.Proposal) (stop bool) {
+	h.govKeeper.IterateProposals(ctx, func(proposal govv1.Proposal) (stop bool) {
 		h.emitNewProposal(proposal, nil)
 		return false
 	})
-	h.govKeeper.IterateAllDeposits(ctx, func(deposit types.Deposit) (stop bool) {
+	h.govKeeper.IterateAllDeposits(ctx, func(deposit govv1.Deposit) (stop bool) {
 		h.Write("SET_DEPOSIT", common.JsDict{
 			"proposal_id": deposit.ProposalId,
 			"depositor":   deposit.Depositor,
-			"amount":      deposit.Amount.String(),
+			"amount":      deposit.Amount,
 			"tx_hash":     nil,
 		})
 		return false
 	})
-	h.govKeeper.IterateAllVotes(ctx, func(vote types.Vote) (stop bool) {
+	h.govKeeper.IterateAllVotes(ctx, func(vote govv1.Vote) (stop bool) {
+		var answers []common.JsDict
+		for _, voteOption := range vote.Options {
+			answers = append(answers, common.JsDict{
+				"answer": voteOption.Option,
+				"weight": voteOption.Weight,
+			})
+		}
+
 		h.Write("SET_VOTE", common.JsDict{
 			"proposal_id": vote.ProposalId,
 			"voter":       vote.Voter,
-			"answer":      int(vote.Option),
+			"answers":     answers,
 			"tx_hash":     nil,
 		})
 		return false
 	})
 }
 
-func (h *Hook) emitNewProposal(proposal types.Proposal, proposer sdk.AccAddress) {
-	content := proposal.GetContent()
+func (h *Hook) emitNewProposal(proposal govv1.Proposal, proposer sdk.AccAddress) {
 	h.Write("NEW_PROPOSAL", common.JsDict{
-		"id":               proposal.ProposalId,
+		"id":               proposal.Id,
 		"proposer":         proposer,
-		"type":             content.ProposalType(),
-		"title":            content.GetTitle(),
-		"description":      content.GetDescription(),
-		"proposal_route":   content.ProposalRoute(),
+		"title":            proposal.Title,
+		"description":      proposal.Summary,
 		"status":           int(proposal.Status),
 		"submit_time":      proposal.SubmitTime.UnixNano(),
 		"deposit_end_time": proposal.DepositEndTime.UnixNano(),
-		"total_deposit":    proposal.TotalDeposit.String(),
+		"total_deposit":    proposal.TotalDeposit[len(proposal.TotalDeposit)-1].String(),
 		"voting_time":      proposal.VotingStartTime.UnixNano(),
 		"voting_end_time":  proposal.VotingEndTime.UnixNano(),
 	})
@@ -61,7 +66,7 @@ func (h *Hook) emitSetDeposit(ctx sdk.Context, txHash []byte, id uint64, deposit
 	h.Write("SET_DEPOSIT", common.JsDict{
 		"proposal_id": id,
 		"depositor":   depositor,
-		"amount":      deposit.Amount.String(),
+		"amount":      deposit.Amount[len(deposit.Amount)-1].String(),
 		"tx_hash":     txHash,
 	})
 }
@@ -71,7 +76,7 @@ func (h *Hook) emitUpdateProposalAfterDeposit(ctx sdk.Context, id uint64) {
 	h.Write("UPDATE_PROPOSAL", common.JsDict{
 		"id":              id,
 		"status":          int(proposal.Status),
-		"total_deposit":   proposal.TotalDeposit.String(),
+		"total_deposit":   proposal.TotalDeposit[len(proposal.TotalDeposit)-1].String(),
 		"voting_time":     proposal.VotingStartTime.UnixNano(),
 		"voting_end_time": proposal.VotingEndTime.UnixNano(),
 	})
@@ -79,22 +84,19 @@ func (h *Hook) emitUpdateProposalAfterDeposit(ctx sdk.Context, id uint64) {
 
 // handleMsgSubmitProposal implements emitter handler for MsgSubmitProposal.
 func (app *Hook) handleMsgSubmitProposal(
-	ctx sdk.Context, txHash []byte, msg *types.MsgSubmitProposal, evMap common.EvMap,
+	ctx sdk.Context, txHash []byte, msg *govv1.MsgSubmitProposal, evMap common.EvMap,
 ) {
 	proposalId := uint64(common.Atoi(evMap[types.EventTypeSubmitProposal+"."+types.AttributeKeyProposalID][0]))
 	proposal, _ := app.govKeeper.GetProposal(ctx, proposalId)
-	content := msg.GetContent()
 	app.Write("NEW_PROPOSAL", common.JsDict{
-		"id":               proposalId,
+		"id":               proposal.Id,
 		"proposer":         msg.Proposer,
-		"type":             content.ProposalType(),
-		"title":            content.GetTitle(),
-		"description":      content.GetDescription(),
-		"proposal_route":   content.ProposalRoute(),
+		"title":            proposal.Title,
+		"description":      proposal.Summary,
 		"status":           int(proposal.Status),
 		"submit_time":      proposal.SubmitTime.UnixNano(),
 		"deposit_end_time": proposal.DepositEndTime.UnixNano(),
-		"total_deposit":    proposal.TotalDeposit.String(),
+		"total_deposit":    proposal.TotalDeposit[len(proposal.TotalDeposit)-1].String(),
 		"voting_time":      proposal.VotingStartTime.UnixNano(),
 		"voting_end_time":  proposal.VotingEndTime.UnixNano(),
 	})
@@ -104,7 +106,7 @@ func (app *Hook) handleMsgSubmitProposal(
 
 // handleMsgDeposit implements emitter handler for MsgDeposit.
 func (h *Hook) handleMsgDeposit(
-	ctx sdk.Context, txHash []byte, msg *types.MsgDeposit,
+	ctx sdk.Context, txHash []byte, msg *govv1.MsgDeposit,
 ) {
 	depositor, _ := sdk.AccAddressFromBech32(msg.Depositor)
 	h.emitSetDeposit(ctx, txHash, msg.ProposalId, depositor)
@@ -113,7 +115,7 @@ func (h *Hook) handleMsgDeposit(
 
 // handleMsgVote implements emitter handler for MsgVote.
 func (h *Hook) handleMsgVote(
-	txHash []byte, msg *types.MsgVote,
+	txHash []byte, msg *govv1.MsgVote,
 ) {
 	h.Write("SET_VOTE", common.JsDict{
 		"proposal_id": msg.ProposalId,

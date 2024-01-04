@@ -1,10 +1,11 @@
 package oracle
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 

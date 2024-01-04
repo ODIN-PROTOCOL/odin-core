@@ -3,19 +3,20 @@ package coinswap
 import (
 	"context"
 	"encoding/json"
-	coinswapcli "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/client/cli"
-	coinswaprest "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/client/rest"
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-	abci "github.com/tendermint/tendermint/abci/types"
+
+	coinswapcli "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/client/cli"
+	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 var (
@@ -56,12 +57,6 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return gs.Validate()
 }
 
-// RegisterRESTRoutes adds oracle REST endpoints to the main mux (SDK AppModuleBasic interface).
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	coinswaprest.RegisterRoutes(clientCtx, rtr)
-	return
-}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the oracle module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
@@ -93,19 +88,9 @@ func NewAppModule(k coinswapkeeper.Keeper) AppModule {
 // RegisterInvariants is a noop function to satisfy SDK AppModule interface.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 
-// Route returns the module's path for message route (SDK AppModule interface).
-func (am AppModule) Route() sdk.Route {
-	return sdk.NewRoute(types.RouterKey, NewHandler(am.keeper))
-}
-
 // QuerierRoute returns the oracle module's querier route name.
 func (AppModule) QuerierRoute() string {
 	return types.QuerierRoute
-}
-
-// LegacyQuerierHandler returns the staking module sdk.Querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return coinswapkeeper.NewQuerier(am.keeper, legacyQuerierCdc)
 }
 
 // RegisterServices registers module services.

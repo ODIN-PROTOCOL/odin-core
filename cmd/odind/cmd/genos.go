@@ -6,18 +6,19 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/cometbft/cometbft/libs/cli"
+	"github.com/odin-protocol/go-owasm/api"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/slandymani/go-owasm/api"
 )
 
 // AddGenesisOracleScriptCmd returns add-oracle-script cobra Command.
@@ -28,7 +29,7 @@ func AddGenesisOracleScriptCmd(defaultNodeHome string) *cobra.Command {
 		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
-			depCdc := clientCtx.JSONCodec
+			depCdc := clientCtx.Codec
 			cdc := depCdc.(codec.Codec)
 
 			serverCtx := server.GetServerContextFromCmd(cmd)

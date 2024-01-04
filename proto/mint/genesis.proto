@@ -18,5 +18,6 @@ message GenesisState {
   // mint_pool defines the pool of eligible accounts and treasury pool
   MintPool mint_pool = 3 [ (gogoproto.nullable) = false ];
 
-  string module_coins_account = 4 [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
+  string module_coins_account = 4
+      [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
 }

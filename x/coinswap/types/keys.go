@@ -14,6 +14,4 @@ const (
 	QueryRate   = "rate"
 )
 
-var (
-	InitialRateStoreKey = []byte("InitialRateStore") // key initial rate store
-)
+var InitialRateStoreKey = []byte("InitialRateStore") // key initial rate store

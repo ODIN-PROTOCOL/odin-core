@@ -1,19 +1,22 @@
 package keeper
 
 import (
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/cometbft/cometbft/libs/log"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/tendermint/tendermint/libs/log"
+
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // Keeper of the mint store
 type Keeper struct {
 	cdc              codec.BinaryCodec
-	storeKey         sdk.StoreKey
+	storeKey         storetypes.StoreKey
 	paramSpace       paramtypes.Subspace
 	stakingKeeper    minttypes.StakingKeeper
 	authKeeper       minttypes.AccountKeeper
@@ -23,7 +26,7 @@ type Keeper struct {
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
-	cdc codec.BinaryCodec, key sdk.StoreKey, paramSpace paramtypes.Subspace,
+	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace,
 	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
 	feeCollectorName string,
 ) Keeper {
@@ -198,7 +201,9 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 		)
 	}
 
-	mintPool.TreasuryPool = mintPool.TreasuryPool.Sub(amount)
+	for _, coinAmount := range amount {
+		mintPool.TreasuryPool = mintPool.TreasuryPool.Sub(coinAmount)
+	}
 	k.SetMintPool(ctx, mintPool)
 
 	return nil

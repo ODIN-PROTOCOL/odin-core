@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"math/big"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	ics23 "github.com/confio/ics23/go"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
+
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

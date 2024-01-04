@@ -5,8 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
+	"cosmossdk.io/math"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -14,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/stretchr/testify/require"
 )
 
 // TestRandomizedGenState tests the normal scenario of applying RandomizedGenState.
@@ -31,7 +31,7 @@ func TestRandomizedGenState(t *testing.T) {
 		Rand:         r,
 		NumBonded:    3,
 		Accounts:     simtypes.RandomAccounts(r, 3),
-		InitialStake: 1000,
+		InitialStake: math.Int{},
 		GenState:     make(map[string]json.RawMessage),
 	}
 

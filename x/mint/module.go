@@ -4,24 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
-	mintcli "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
-	mintrest "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/rest"
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"math/rand"
+
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
+	mintcli "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 var (
@@ -68,11 +68,6 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return minttypes.ValidateGenesis(data)
 }
 
-// RegisterRESTRoutes registers the REST routes for the mint module.
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	mintrest.RegisterRoutes(clientCtx, rtr)
-}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the mint module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
 	err := minttypes.RegisterQueryHandlerClient(context.Background(), mux, minttypes.NewQueryClient(clientCtx))
@@ -116,27 +111,6 @@ func (AppModule) Name() string {
 // RegisterInvariants registers the mint module invariants.
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// Route returns the message routing key for the mint module.
-func (am AppModule) Route() sdk.Route {
-	return sdk.NewRoute(minttypes.RouterKey, NewHandler(am.keeper))
-}
-
-// QuerierRoute returns the mint module's querier route name.
-func (AppModule) QuerierRoute() string {
-	return minttypes.QuerierRoute
-}
-
-// LegacyQuerierHandler returns the mint module sdk.Querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
-	return keeper.NewQuerier(am.keeper, legacyQuerierCdc)
-}
-
-// RegisterServices registers a gRPC query service to respond to the
-// module-specific gRPC queries.
-func (am AppModule) RegisterServices(cfg module.Configurator) {
-	minttypes.RegisterQueryServer(cfg.QueryServer(), am.keeper)
-}
-
 // InitGenesis performs genesis initialization for the mint module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
@@ -173,11 +147,6 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 // ProposalContents doesn't return any content functions for governance proposals.
 func (AppModule) ProposalContents(simState module.SimulationState) []simtypes.WeightedProposalContent {
 	return nil
-}
-
-// RandomizedParams creates randomized mint param changes for the simulator.
-func (AppModule) RandomizedParams(r *rand.Rand) []simtypes.ParamChange {
-	return simulation.ParamChanges(r)
 }
 
 // RegisterStoreDecoder registers a decoder for mint module's types.

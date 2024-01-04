@@ -2,22 +2,28 @@ package oraclekeeper
 
 import (
 	"fmt"
+
+	"github.com/cometbft/cometbft/libs/log"
+	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
+	gogotypes "github.com/gogo/protobuf/types"
+	owasm "github.com/odin-protocol/go-owasm/api"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	gogotypes "github.com/gogo/protobuf/types"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	owasm "github.com/slandymani/go-owasm/api"
+	channelkeeper "github.com/cosmos/ibc-go/v7/modules/core/04-channel/keeper"
+	portkeeper "github.com/cosmos/ibc-go/v7/modules/core/05-port/keeper"
 )
 
 type Keeper struct {
-	storeKey         sdk.StoreKey
+	storeKey         storetypes.StoreKey
 	cdc              codec.BinaryCodec
 	fileCache        filecache.Cache
 	feeCollectorName string
@@ -28,15 +34,15 @@ type Keeper struct {
 	bankKeeper       oracletypes.BankKeeper
 	distrKeeper      oracletypes.DistrKeeper
 	stakingKeeper    oracletypes.StakingKeeper
-	channelKeeper    oracletypes.ChannelKeeper
-	portKeeper       oracletypes.PortKeeper
+	channelKeeper    channelkeeper.Keeper
+	portKeeper       portkeeper.Keeper
 	scopedKeeper     capabilitykeeper.ScopedKeeper
 }
 
 // NewKeeper creates a new oracle Keeper instance.
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	fileDir string,
 	feeCollectorName string,
@@ -44,8 +50,8 @@ func NewKeeper(
 	bankKeeper oracletypes.BankKeeper,
 	stakingKeeper oracletypes.StakingKeeper,
 	distrKeeper oracletypes.DistrKeeper,
-	channelKeeper oracletypes.ChannelKeeper,
-	portKeeper oracletypes.PortKeeper,
+	channelKeeper channelkeeper.Keeper,
+	portKeeper portkeeper.Keeper,
 	scopeKeeper capabilitykeeper.ScopedKeeper,
 	owasmVM *owasm.Vm,
 ) Keeper {

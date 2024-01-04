@@ -1,11 +1,15 @@
 package keeper
 
 import (
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"strings"
+
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
+	errortypes "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"strings"
+
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 )
 
 // ExchangeDenom exchanges given amount
@@ -19,13 +23,13 @@ func (k Keeper) ExchangeDenom(
 	// convert source amount to destination amount according to rate
 	convertedAmt, err := k.convertToRate(ctx, fromDenom, toDenom, amt, additionalExchangeRates...)
 	if err != nil {
-		return sdkerrors.Wrap(err, "converting rate")
+		return errortypes.Wrap(err, "converting rate")
 	}
 
 	// first send source tokens to module
 	err = k.distrKeeper.FundCommunityPool(ctx, sdk.NewCoins(amt), requester)
 	if err != nil {
-		return sdkerrors.Wrapf(
+		return errortypes.Wrapf(
 			err,
 			"sending coins from account: %s, to module: %s",
 			requester.String(),
@@ -50,7 +54,6 @@ func (k Keeper) ExchangeDenom(
 		return sdkerrors.ErrInsufficientFunds
 	}
 	feePool.CommunityPool = diff
-
 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, distrtypes.ModuleName, requester, sdk.NewCoins(toSend))
 	if err != nil {
 		return err
@@ -59,7 +62,8 @@ func (k Keeper) ExchangeDenom(
 	k.distrKeeper.SetFeePool(ctx, feePool)
 
 	accumulatedPaymentsForData := k.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
-	accumulatedPaymentsForData.AccumulatedAmount, _ = accumulatedPaymentsForData.AccumulatedAmount.SafeSub(sdk.NewCoins(toSend))
+
+	accumulatedPaymentsForData.AccumulatedAmount, _ = accumulatedPaymentsForData.AccumulatedAmount.SafeSub(toSend)
 	k.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
 
 	return nil
@@ -74,11 +78,11 @@ func (k Keeper) convertToRate(
 ) (sdk.DecCoin, error) {
 	rate, err := k.GetRate(ctx, fromDenom, toDenom, additionalExchangeRates...)
 	if err != nil {
-		return sdk.DecCoin{}, sdkerrors.Wrap(err, "failed to convert to rate")
+		return sdk.DecCoin{}, errortypes.Wrap(err, "failed to convert to rate")
 	}
 
-	if rate.GT(amt.Amount.ToDec()) {
-		return sdk.DecCoin{}, sdkerrors.Wrapf(
+	if rate.GT(sdk.NewDecFromInt(amt.Amount)) {
+		return sdk.DecCoin{}, errortypes.Wrapf(
 			sdkerrors.ErrInsufficientFunds,
 			"current rate: %s is higher then amount provided: %s",
 			rate.String(),
@@ -86,7 +90,7 @@ func (k Keeper) convertToRate(
 		)
 	}
 
-	convertedAmt := amt.Amount.ToDec().QuoRoundUp(rate)
+	convertedAmt := sdk.NewDecFromInt(amt.Amount).QuoRoundUp(rate)
 	return sdk.NewDecCoinFromDec(toDenom, convertedAmt), nil
 }
 

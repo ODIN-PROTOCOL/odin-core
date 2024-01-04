@@ -1,11 +1,11 @@
 package emitter
 
 import (
+	"github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
-	"github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 

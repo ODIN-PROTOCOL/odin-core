@@ -2,11 +2,14 @@ package testapp
 
 import (
 	"encoding/json"
-	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
+
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 func CreateAppCustomValidators(accountsCount int, powers ...int) (*odinapp.OdinApp, sdk.Context, TestAppBuilder) {
@@ -24,7 +27,7 @@ func CreateAppCustomValidators(accountsCount int, powers ...int) (*odinapp.OdinA
 	// bank
 	bankBuilder := NewBankBuilder(accountsCount, fillBalances(builder.GetAuthBuilder().Accounts), initialSupply)
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	builder.UpdateModules(map[string]json.RawMessage{
@@ -46,7 +49,7 @@ func CreateAppCustomBalances(balancesRate ...int) (*odinapp.OdinApp, sdk.Context
 
 	bankBuilder := NewBankBuilder(len(balancesRate), fillBalances(builder.GetAuthBuilder().Accounts, balancesToFill...), sdk.NewCoins())
 	balances, totalSupply := bankBuilder.Build()
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultParams(), balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	builder.SetBankBuilder(bankBuilder)
 
 	builder.UpdateModules(map[string]json.RawMessage{

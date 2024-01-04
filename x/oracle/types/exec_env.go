@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"github.com/slandymani/go-owasm/api"
+	"github.com/odin-protocol/go-owasm/api"
 )
 
 var (
@@ -13,12 +13,18 @@ var (
 
 // BaseEnv combines shared functions used in prepare and execution Owasm program,
 type BaseEnv struct {
-	request Request
+	request     Request
+	maxSpanSize int64
 }
 
 // GetCalldata implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetCalldata() []byte {
 	return env.request.Calldata
+}
+
+// GetSpanSize implements Owasm ExecEnv interface.
+func (env *BaseEnv) GetSpanSize() int64 {
+	return env.maxSpanSize
 }
 
 // SetReturnData implements Owasm ExecEnv interface.

@@ -3,12 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	band "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"github.com/cosmos/go-bip39"
 	"github.com/spf13/cobra"
+
+	sdkerrors "cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+
+	odin "github.com/ODIN-PROTOCOL/odin-core/app"
 )
 
 const (
@@ -75,12 +78,17 @@ func (f *Faucet) keysAddCmd() *cobra.Command {
 				fmt.Printf("Mnemonic: %s\n", mnemonic)
 			}
 
-			hdPath := hd.CreateHDPath(band.Bip44CoinType, account, index)
-			info, err := f.keybase.NewAccount(args[0], mnemonic, "", hdPath.String(), hd.Secp256k1)
+			hdPath := hd.CreateHDPath(odin.Bip44CoinType, account, index)
+			record, err := f.keybase.NewAccount(args[0], mnemonic, "", hdPath.String(), hd.Secp256k1)
 			if err != nil {
 				return sdkerrors.Wrap(err, "failed to create a new keybase account")
 			}
-			fmt.Printf("Address: %s\n", info.GetAddress().String())
+			address, info_error := record.GetAddress()
+			if info_error != nil {
+				return sdkerrors.Wrap(err, "failed to retrieve address from new keybase account")
+			}
+
+			fmt.Printf("Address: %s\n", address.String())
 			return nil
 		},
 	}
@@ -141,7 +149,13 @@ func (f *Faucet) keysListCmd() *cobra.Command {
 				return sdkerrors.Wrap(err, "failed to retrieve the keys list")
 			}
 			for _, key := range keys {
-				fmt.Printf("%s => %s\n", key.GetName(), key.GetAddress().String())
+				addr, error := key.GetAddress()
+				if error != nil {
+					fmt.Printf("failed to retrieve address from key: %s", key.Name)
+					continue
+				}
+
+				fmt.Printf("%s => %s\n", key.Name, addr.String())
 			}
 			return nil
 		},
@@ -162,7 +176,11 @@ func (f *Faucet) keysShowCmd() *cobra.Command {
 			if err != nil {
 				return sdkerrors.Wrap(err, "failed to get by the given key")
 			}
-			fmt.Println(key.GetAddress().String())
+			keyAddress, err := key.GetAddress()
+			if err != nil {
+				return sdkerrors.Wrap(err, "failed to get key address")
+			}
+			fmt.Println(keyAddress.String())
 			return nil
 		},
 	}

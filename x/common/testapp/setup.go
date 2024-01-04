@@ -2,28 +2,30 @@ package testapp
 
 import (
 	"encoding/json"
-	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/cli"
-	"io/ioutil"
 	"math/rand"
+	"os"
 	"time"
+
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/cli"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	owasm "github.com/odin-protocol/go-owasm/api"
+	"github.com/spf13/viper"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
 
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	me "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	owasm "github.com/slandymani/go-owasm/api"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 )
 
 const (
@@ -83,7 +85,7 @@ func (ao EmptyAppOptions) Get(o string) interface{} {
 // NewSimApp creates instance of our app using in test.
 func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 	// Set HomeFlag to a temp folder for simulation run.
-	dir, err := ioutil.TempDir("", "odind")
+	dir, err := os.MkdirTemp("", "odind")
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +93,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 
 	db := dbm.NewMemDB()
 	encCdc := odinapp.MakeEncodingConfig()
-	app := odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0)
+	app := odinapp.NewOdinApp(logger, db, nil, true, map[int64]bool{}, dir, 0, encCdc, EmptyAppOptions{}, false, 0, baseapp.SetChainID("ODINCHAIN"))
 
 	genesis := odinapp.NewDefaultGenesisState()
 	acc := []authtypes.GenesisAccount{
@@ -208,7 +210,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(int64(bamtSum)))},
 	})
 
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})
 	genesis[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
 
 	// Add genesis data sources and oracle scripts
@@ -234,7 +236,7 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 // params[0] - activate;
 // params[1] - fund pools;
 // Deprecated
-//  - use TestAppBuilder instead
+//   - use TestAppBuilder instead
 func CreateTestInput(params ...bool) (*odinapp.OdinApp, sdk.Context, me.Keeper) {
 	app := NewSimApp("ODINCHAIN", log.NewNopLogger())
 	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})

@@ -4,18 +4,19 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/kyokomi/emoji"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/kyokomi/emoji"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (
@@ -88,7 +89,12 @@ func keysAddCmd(c *Context) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Address: %s\n", info.GetAddress().String())
+			address, err := info.GetAddress()
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Address: %s\n", address.String())
 			return nil
 		},
 	}
@@ -151,13 +157,22 @@ func keysListCmd(c *Context) *cobra.Command {
 			}
 			isShowAddr := viper.GetBool(flagAddress)
 			for _, key := range keys {
+
+				address, err := key.GetAddress()
+				if err != nil {
+					return err
+				}
+
 				if isShowAddr {
-					fmt.Printf("%s ", key.GetAddress().String())
+
+					fmt.Printf("Address: %s\n", address.String())
+
 				} else {
 					queryClient := oracletypes.NewQueryClient(clientCtx)
+
 					r, err := queryClient.IsReporter(
 						context.Background(),
-						&oracletypes.QueryIsReporterRequest{ValidatorAddress: cfg.Validator, ReporterAddress: key.GetAddress().String()},
+						&oracletypes.QueryIsReporterRequest{ValidatorAddress: cfg.Validator, ReporterAddress: address.String()},
 					)
 					s := ":question:"
 					if err == nil {
@@ -167,7 +182,13 @@ func keysListCmd(c *Context) *cobra.Command {
 							s = ":x:"
 						}
 					}
-					emoji.Printf("%s%s => %s\n", s, key.GetName(), key.GetAddress().String())
+
+					address, err := key.GetAddress()
+					if err != nil {
+						return err
+					}
+
+					emoji.Printf("%s%s => %s\n", s, key.Name, address.String())
 				}
 			}
 			return nil
@@ -192,7 +213,12 @@ func keysShowCmd(c *Context) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Println(key.GetAddress().String())
+			address, err := key.GetAddress()
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(address.String())
 			return nil
 		},
 	}

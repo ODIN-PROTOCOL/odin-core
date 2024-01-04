@@ -9,7 +9,7 @@ package price
 // 	sdk "github.com/cosmos/cosmos-sdk/types"
 // 	"github.com/syndtr/goleveldb/leveldb"
 // 	"github.com/syndtr/goleveldb/leveldb/util"
-// 	abci "github.com/tendermint/tendermint/abci/types"
+// 	abci "github.com/cometbft/cometbft/abci/types"
 
 // 	"github.com/ODIN-PROTOCOL/odin-core/hooks/common"
 // 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"

@@ -1,9 +1,9 @@
 package main
 
 import (
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // Context defines the structure of faucet context.
@@ -14,7 +14,7 @@ type Context struct {
 	gasPrices              sdk.DecCoins
 	coins                  sdk.Coins
 	maxPerPeriodWithdrawal sdk.Coins
-	keys                   chan keyring.Info
+	keys                   chan keyring.Record
 }
 
 // initCtx parses config string literals.

@@ -4,19 +4,18 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"sync"
 	"time"
+
+	"github.com/cometbft/cometbft/libs/log"
+	httpclient "github.com/cometbft/cometbft/rpc/client/http"
+	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/log"
-	httpclient "github.com/tendermint/tendermint/rpc/client/http"
-	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 )
@@ -69,7 +68,7 @@ func runImpl(c *Context, l *Logger) error {
 	l.Info(":mag: Found %d pending requests", len(pendingRequests.RequestIDs))
 	for _, id := range pendingRequests.RequestIDs {
 		c.pendingRequests[oracletypes.RequestID(id)] = true
-		go handlePendingRequest(c, l.With("rid", id), oracletypes.RequestID(id))
+		go handleRequest(c, l.With("rid", id), oracletypes.RequestID(id))
 	}
 
 	for {
@@ -157,7 +156,6 @@ func runCmd(c *Context) *cobra.Command {
 			c.pendingMsgs = make(chan ReportMsgWithKey)
 			c.freeKeys = make(chan int64, len(keys))
 			c.keyRoundRobinIndex = -1
-			c.dataSourceCache = new(sync.Map)
 			c.pendingRequests = make(map[oracletypes.RequestID]bool)
 			c.metricsEnabled = cfg.MetricsListenAddr != ""
 			return runImpl(c, l)

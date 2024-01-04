@@ -16,9 +16,9 @@ package main
 // 	crypto "github.com/ethereum/go-ethereum/crypto"
 // 	"github.com/ethereum/go-ethereum/ethclient"
 // 	"github.com/spf13/cobra"
-// 	"github.com/tendermint/tendermint/crypto/secp256k1"
-// 	"github.com/tendermint/tendermint/libs/log"
-// 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+// 	"github.com/cometbft/cometbft/crypto/secp256k1"
+// 	"github.com/cometbft/cometbft/libs/log"
+// 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 // )
 
 // var (
@@ -122,7 +122,6 @@ package main
 // )
 
 func main() {
-
 	// 	cmd := &cobra.Command{
 	// 		Use:   "(--rpc-uri [rpc-uri]) (--contract-address [contract-address]) (--node-uri [node-uri]) (--priv-key [priv-key]) (--gas-price [gas-price]) (--poll-interval [poll-interval])",
 	// 		Short: "Periodically update validator set to the destination EVM blockchain",

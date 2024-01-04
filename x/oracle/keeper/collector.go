@@ -1,9 +1,10 @@
 package oraclekeeper
 
 import (
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type FeeCollector interface {
@@ -21,7 +22,6 @@ type RewardCollector interface {
 func (k Keeper) CollectFee(
 	ctx sdk.Context, payer sdk.AccAddress, feeLimit sdk.Coins, askCount uint64, rawRequests []oracletypes.RawRequest,
 ) (sdk.Coins, error) {
-
 	collector := newFeeCollector(k.distrKeeper, k, feeLimit, payer)
 
 	for _, r := range rawRequests {

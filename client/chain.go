@@ -4,7 +4,7 @@ package rpc
 // 	"net/http"
 
 // 	"github.com/cosmos/cosmos-sdk/client/context"
-// 	"github.com/cosmos/cosmos-sdk/types/rest"
+// 	"github.com/cosmos/cosmos-sdk/testutil/rest"
 // )
 
 // func GetChainIDFn(cliCtx context.CLIContext) http.HandlerFunc {

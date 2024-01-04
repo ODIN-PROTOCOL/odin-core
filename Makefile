@@ -3,8 +3,8 @@ VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
-DOCKER := $(shell which docker)
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
+DOCKER := docker
+DOCKER_BUF := docker run --rm -v $(cwd):/workspace --workdir /workspace bufbuild/buf
 
 DEB_BIN_DIR ?= /usr/local/bin
 DEB_LIB_DIR ?= /usr/lib
@@ -32,6 +32,9 @@ install-yoda: go.sum
 
 build: go.sum
 	go build -mod=readonly -o ./build/odind $(BUILD_FLAGS) ./cmd/odind
+	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
+
+build-yoda: go.sum
 	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
 
 faucet: go.sum
@@ -63,36 +66,41 @@ test:
 ###                                Protobuf                                 ###
 ###############################################################################
 
+protoVer=0.13.0
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+
 proto-all: proto-format proto-lint proto-gen
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace tendermintdev/sdk-proto-gen sh ./scripts/protocgen.sh
+	@$(protoImage) sh ./scripts/protocgen.sh
+
+proto-swagger-gen:
+	@echo "Generating Protobuf Swagger"
+	@$(protoImage) sh ./scripts/protoc-swagger-gen.sh
+	$(MAKE) update-swagger-docs
 
 proto-format:
-	@echo "Formatting Protobuf files"
-	$(DOCKER) run --rm -v $(CURDIR):/workspace \
-	--workdir /workspace tendermintdev/docker-build-proto \
-	find ./ -not -path "./third_party/*" -name *.proto -exec clang-format -i {} \;
+	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
 
 # This generates the SDK's custom wrapper for google.protobuf.Any. It should only be run manually when needed
 proto-gen-any:
-	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace tendermintdev/sdk-proto-gen sh ./scripts/protocgen-any.sh
-
-proto-swagger-gen:
-	@./scripts/protoc-swagger-gen.sh
+	$(DOCKER) run --rm -v $(pwd):/workspace --workdir /workspace tendermintdev/sdk-proto-gen sh ./scripts/protocgen-any.sh
 
 proto-lint:
-	@$(DOCKER_BUF) check lint --error-format=json
+	@$(protoImage) buf lint --error-format=json
 
 proto-check-breaking:
-	@$(DOCKER_BUF) check breaking --against-input $(HTTPS_GIT)#branch=master
+	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=main
 
-TM_URL              = https://raw.githubusercontent.com/tendermint/tendermint/v0.34.0-rc6/proto/tendermint
+
+TM_URL              = https://raw.githubusercontent.com/cometbft/cometbft/v0.37.4/proto/tendermint
+
 GOGO_PROTO_URL      = https://raw.githubusercontent.com/regen-network/protobuf/cosmos
 COSMOS_PROTO_URL    = https://raw.githubusercontent.com/regen-network/cosmos-proto/master
-CONFIO_URL          = https://raw.githubusercontent.com/confio/ics23/v0.6.3
-
+CONFIO_URL          = https://raw.githubusercontent.com/cosmos/ics23/master/proto/cosmos/ics23/v1
+IBC_URL 			= https://raw.githubusercontent.com/cosmos/ibc-go/v7.3.1/proto
 TM_CRYPTO_TYPES     = third_party/proto/tendermint/crypto
 TM_ABCI_TYPES       = third_party/proto/tendermint/abci
 TM_TYPES            = third_party/proto/tendermint/types
@@ -100,7 +108,7 @@ TM_VERSION          = third_party/proto/tendermint/version
 TM_LIBS             = third_party/proto/tendermint/libs/bits
 TM_P2P              = third_party/proto/tendermint/p2p
 
-GOGO_PROTO_TYPES    = third_party/proto/gogoproto
+# GOGO_PROTO_TYPES    = third_party/proto/gogoproto
 COSMOS_PROTO_TYPES  = third_party/proto/cosmos_proto
 CONFIO_TYPES        = third_party/proto/confio
 
@@ -130,43 +138,39 @@ deb:
 	cp ./odinprotocol_$(VERSION)_amd64.deb ./odinprotocol_v$(VERSION)_amd64.deb
 
 proto-update-deps:
-	@mkdir -p $(GOGO_PROTO_TYPES)
-	@curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo.proto
+	# @mkdir -p $(GOGO_PROTO_TYPES)
+	# @curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo.proto
+	# @mkdir -p $(COSMOS_PROTO_TYPES)
+	# @curl -sSL $(COSMOS_PROTO_URL)/cosmos.proto > $(COSMOS_PROTO_TYPES)/cosmos.proto
 
-	@mkdir -p $(COSMOS_PROTO_TYPES)
-	@curl -sSL $(COSMOS_PROTO_URL)/cosmos.proto > $(COSMOS_PROTO_TYPES)/cosmos.proto
-
-## Importing of tendermint protobuf definitions currently requires the
+## Importing of cometbft protobuf definitions currently requires the
 ## use of `sed` in order to build properly with cosmos-sdk's proto file layout
 ## (which is the standard Buf.build FILE_LAYOUT)
-## Issue link: https://github.com/tendermint/tendermint/issues/5021
-	@mkdir -p $(TM_ABCI_TYPES)
-	@curl -sSL $(TM_URL)/abci/types.proto > $(TM_ABCI_TYPES)/types.proto
+## Issue link: https://github.com/cometbft/cometbft/issues/5021
+	# @mkdir -p $(TM_ABCI_TYPES)
+	# @curl -sSL $(TM_URL)/abci/types.proto > $(TM_ABCI_TYPES)/types.proto
 
-	@mkdir -p $(TM_VERSION)
-	@curl -sSL $(TM_URL)/version/types.proto > $(TM_VERSION)/types.proto
+	# @mkdir -p $(TM_VERSION)
+	# @curl -sSL $(TM_URL)/version/types.proto > $(TM_VERSION)/types.proto
 
-	@mkdir -p $(TM_TYPES)
-	@curl -sSL $(TM_URL)/types/types.proto > $(TM_TYPES)/types.proto
-	@curl -sSL $(TM_URL)/types/evidence.proto > $(TM_TYPES)/evidence.proto
-	@curl -sSL $(TM_URL)/types/params.proto > $(TM_TYPES)/params.proto
-	@curl -sSL $(TM_URL)/types/validator.proto > $(TM_TYPES)/validator.proto
-	@curl -sSL $(TM_URL)/types/block.proto > $(TM_TYPES)/block.proto
+	# @mkdir -p $(TM_TYPES)
+	# @curl -sSL $(TM_URL)/types/types.proto > $(TM_TYPES)/types.proto
+	# @curl -sSL $(TM_URL)/types/evidence.proto > $(TM_TYPES)/evidence.proto
+	# @curl -sSL $(TM_URL)/types/params.proto > $(TM_TYPES)/params.proto
+	# @curl -sSL $(TM_URL)/types/validator.proto > $(TM_TYPES)/validator.proto
+	# @curl -sSL $(TM_URL)/types/block.proto > $(TM_TYPES)/block.proto
 
-	@mkdir -p $(TM_CRYPTO_TYPES)
-	@curl -sSL $(TM_URL)/crypto/proof.proto > $(TM_CRYPTO_TYPES)/proof.proto
-	@curl -sSL $(TM_URL)/crypto/keys.proto > $(TM_CRYPTO_TYPES)/keys.proto
+	# @mkdir -p $(TM_CRYPTO_TYPES)
+	# @curl -sSL $(TM_URL)/crypto/proof.proto > $(TM_CRYPTO_TYPES)/proof.proto
+	# @curl -sSL $(TM_URL)/crypto/keys.proto > $(TM_CRYPTO_TYPES)/keys.proto
 
-	@mkdir -p $(TM_LIBS)
-	@curl -sSL $(TM_URL)/libs/bits/types.proto > $(TM_LIBS)/types.proto
+	# @mkdir -p $(TM_LIBS)
+	# @curl -sSL $(TM_URL)/libs/bits/types.proto > $(TM_LIBS)/types.proto
 
-	@mkdir -p $(TM_P2P)
-	@curl -sSL $(TM_URL)/p2p/types.proto > $(TM_P2P)/types.proto
+	# @mkdir -p $(TM_P2P)
+	# @curl -sSL $(TM_URL)/p2p/types.proto > $(TM_P2P)/types.proto
 
 	@mkdir -p $(CONFIO_TYPES)
 	@curl -sSL $(CONFIO_URL)/proofs.proto > $(CONFIO_TYPES)/proofs.proto
-## insert go package option into proofs.proto file
-## Issue link: https://github.com/confio/ics23/issues/32
-	@sed -i '4ioption go_package = "github.com/confio/ics23/go";' $(CONFIO_TYPES)/proofs.proto
 
 .PHONY: proto-all proto-gen proto-gen-any proto-swagger-gen proto-format proto-lint proto-check-breaking proto-update-deps
