@@ -196,12 +196,13 @@ func handleRawRequest(
 	}
 
 	result, err := c.executor.Exec(exec, req.calldata, map[string]interface{}{
-		"BAND_CHAIN_ID":    vmsg.ChainID,
-		"BAND_VALIDATOR":   vmsg.Validator,
-		"BAND_REQUEST_ID":  strconv.Itoa(int(vmsg.RequestID)),
-		"BAND_EXTERNAL_ID": strconv.Itoa(int(vmsg.ExternalID)),
-		"BAND_REPORTER":    hex.EncodeToString(pubkey.Bytes()),
-		"BAND_SIGNATURE":   sig,
+		"BAND_CHAIN_ID":       vmsg.ChainID,
+		"BAND_DATA_SOURCE_ID": strconv.Itoa(int(vmsg.DataSourceID)),
+		"BAND_VALIDATOR":      vmsg.Validator,
+		"BAND_REQUEST_ID":     strconv.Itoa(int(vmsg.RequestID)),
+		"BAND_EXTERNAL_ID":    strconv.Itoa(int(vmsg.ExternalID)),
+		"BAND_REPORTER":       hex.EncodeToString(pubkey.Bytes()),
+		"BAND_SIGNATURE":      sig,
 	})
 
 	if err != nil {

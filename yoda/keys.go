@@ -183,11 +183,6 @@ func keysListCmd(c *Context) *cobra.Command {
 						}
 					}
 
-					address, err := key.GetAddress()
-					if err != nil {
-						return err
-					}
-
 					emoji.Printf("%s%s => %s\n", s, key.Name, address.String())
 				}
 			}
