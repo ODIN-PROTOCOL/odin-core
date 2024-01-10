@@ -22,7 +22,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/oasisprotocol/oasis-core/go v0.0.0-20200730171716-3be2b460b3ac
-	github.com/odin-protocol/go-owasm v0.2.5
+	github.com/odin-protocol/go-owasm v0.2.6
 	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/poy/onpar v1.1.2 // indirect
