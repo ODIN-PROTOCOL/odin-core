@@ -12,8 +12,8 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-// 1 cosmos gas is equal to 7 owasm gas
-const gasConversionFactor = 7
+// 1 cosmos gas is equal to 20_000_000 owasm gas
+const gasConversionFactor = 20_000_000
 
 func ConvertToOwasmGas(cosmos uint64) uint64 {
 	return uint64(cosmos * gasConversionFactor)
@@ -90,10 +90,6 @@ func (k Keeper) PrepareRequest(
 	code := k.GetFile(script.Filename)
 
 	output, err := k.owasmVM.Prepare(code, ConvertToOwasmGas(r.GetPrepareGas()), env)
-	if err != nil {
-		return 0, sdkerrors.Wrapf(types.ErrBadWasmExecution, err.Error())
-	}
-
 	if err != nil {
 		return 0, sdkerrors.Wrapf(types.ErrBadWasmExecution, err.Error())
 	}
