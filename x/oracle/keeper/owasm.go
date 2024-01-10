@@ -55,8 +55,13 @@ func (k Keeper) PrepareRequest(
 	ctx sdk.Context,
 	r types.RequestSpec,
 	feePayer sdk.AccAddress,
-	ibcSource *types.IBCSource,
+	ibcSource *types.IBCSource, // TODO: change to *types.IBCChannel
 ) (types.RequestID, error) {
+	calldataSize := len(r.GetCalldata())
+	if calldataSize > int(k.GetSpanSize(ctx)) {
+		return 0, types.WrapMaxError(types.ErrTooLargeCalldata, calldataSize, int(k.GetSpanSize(ctx)))
+	}
+
 	askCount := r.GetAskCount()
 	if askCount > k.GetParamUint64(ctx, types.KeyMaxAskCount) {
 		return 0, sdkerrors.Wrapf(types.ErrInvalidAskCount, "got: %d, max: %d", askCount, k.GetParamUint64(ctx, types.KeyMaxAskCount))
@@ -82,7 +87,8 @@ func (k Keeper) PrepareRequest(
 		req,
 		int64(k.GetParamUint64(ctx, types.KeyMaxDataSize)),
 		int64(k.GetParamUint64(ctx, types.KeyMaxRawRequestCount)),
-		int64(k.GetSpanSize(ctx)))
+		int64(k.GetSpanSize(ctx)),
+	)
 	script, err := k.GetOracleScript(ctx, req.OracleScriptID)
 	if err != nil {
 		return 0, err
@@ -119,6 +125,7 @@ func (k Keeper) PrepareRequest(
 	// TODO now fees are sent to the data source 'Treasury' which is, what we want is to send it to Data Providers Pool
 	// TODO rework this and remove
 	// Collect ds fee
+	// TODO: add totalFees to event attributes
 	if _, err := k.CollectFee(ctx, feePayer, r.GetFeeLimit(), askCount, req.RawRequests); err != nil {
 		return 0, err
 	}
@@ -145,12 +152,13 @@ func (k Keeper) PrepareRequest(
 	ctx.GasMeter().ConsumeGas(k.GetParamUint64(ctx, types.KeyBaseOwasmGas), "BASE_OWASM_FEE")
 	ctx.GasMeter().ConsumeGas(r.GetExecuteGas(), "OWASM_EXECUTE_FEE")
 
-	// Emit an event for each of the raw data requests
+	// Emit an event for each of the raw data requests.
 	for _, rawReq := range env.GetRawRequests() {
 		ds, err := k.GetDataSource(ctx, rawReq.DataSourceID)
 		if err != nil {
 			return 0, err
 		}
+		// TODO: add fee to event attributes
 		ctx.EventManager().EmitEvent(sdk.NewEvent(
 			types.EventTypeRawRequest,
 			sdk.NewAttribute(types.AttributeKeyDataSourceID, fmt.Sprintf("%d", rawReq.DataSourceID)),

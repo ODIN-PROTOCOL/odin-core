@@ -511,7 +511,7 @@ func TestResolveReadNilExternalData(t *testing.T) {
 		sdk.NewAttribute(oracletypes.AttributeKeyID, "42"),
 		sdk.NewAttribute(oracletypes.AttributeKeyResolveStatus, "1"),
 		sdk.NewAttribute(oracletypes.AttributeKeyResult, "0000001062656562643176326265656264327631"),
-		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "12653"),
+		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "31417800000"),
 	)}, ctx.EventManager().Events())
 }
 
