@@ -78,7 +78,11 @@ func (k Keeper) PrepareRequest(
 	)
 
 	// Create an execution environment and call Owasm prepare function.
-	env := types.NewPrepareEnv(req, 1024, int64(k.GetParamUint64(ctx, types.KeyMaxRawRequestCount)))
+	env := types.NewPrepareEnv(
+		req,
+		int64(k.GetParamUint64(ctx, types.KeyMaxDataSize)),
+		int64(k.GetParamUint64(ctx, types.KeyMaxRawRequestCount)),
+		int64(k.GetSpanSize(ctx)))
 	script, err := k.GetOracleScript(ctx, req.OracleScriptID)
 	if err != nil {
 		return 0, err
@@ -162,7 +166,7 @@ func (k Keeper) PrepareRequest(
 // assumes that the given request is in a resolvable state with sufficient reporters.
 func (k Keeper) ResolveRequest(ctx sdk.Context, reqID types.RequestID) {
 	req := k.MustGetRequest(ctx, reqID)
-	env := types.NewExecuteEnv(req, k.GetRequestReports(ctx, reqID), ctx.BlockTime())
+	env := types.NewExecuteEnv(req, k.GetRequestReports(ctx, reqID), ctx.BlockTime(), int64(k.GetSpanSize(ctx)))
 	script := k.MustGetOracleScript(ctx, req.OracleScriptID)
 	code := k.GetFile(script.Filename)
 
