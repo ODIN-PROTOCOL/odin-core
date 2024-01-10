@@ -108,7 +108,7 @@ TM_VERSION          = third_party/proto/tendermint/version
 TM_LIBS             = third_party/proto/tendermint/libs/bits
 TM_P2P              = third_party/proto/tendermint/p2p
 
-# GOGO_PROTO_TYPES    = third_party/proto/gogoproto
+GOGO_PROTO_TYPES    = third_party/proto/gogoproto
 COSMOS_PROTO_TYPES  = third_party/proto/cosmos_proto
 CONFIO_TYPES        = third_party/proto/confio
 
@@ -139,7 +139,8 @@ deb:
 
 proto-update-deps:
 	# @mkdir -p $(GOGO_PROTO_TYPES)
-	# @curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo.proto
+	# @curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo_1.proto
+
 	# @mkdir -p $(COSMOS_PROTO_TYPES)
 	# @curl -sSL $(COSMOS_PROTO_URL)/cosmos.proto > $(COSMOS_PROTO_TYPES)/cosmos.proto
 
