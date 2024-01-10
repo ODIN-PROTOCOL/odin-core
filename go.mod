@@ -2,10 +2,6 @@ module github.com/ODIN-PROTOCOL/odin-core
 
 go 1.21
 
-toolchain go1.21.5
-
-// sudo apt-get install -f
-
 require (
 	github.com/CosmWasm/wasmd v0.45.0
 	github.com/Masterminds/squirrel v1.5.2
@@ -226,7 +222,6 @@ require (
 )
 
 replace (
-	github.com/ODIN-PROTOCOL/odin-core => github.com/ODIN-PROTOCOL/odin-core/tree/v047-dep-update v0.7.2
 	github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
