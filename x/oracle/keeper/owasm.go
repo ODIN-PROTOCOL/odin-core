@@ -78,7 +78,7 @@ func (k Keeper) PrepareRequest(
 	)
 
 	// Create an execution environment and call Owasm prepare function.
-	env := types.NewPrepareEnv(req, int64(k.GetParamUint64(ctx, types.KeyMaxDataSize)), int64(k.GetParamUint64(ctx, types.KeyMaxRawRequestCount)))
+	env := types.NewPrepareEnv(req, 1024, int64(k.GetParamUint64(ctx, types.KeyMaxRawRequestCount)))
 	script, err := k.GetOracleScript(ctx, req.OracleScriptID)
 	if err != nil {
 		return 0, err
