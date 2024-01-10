@@ -523,7 +523,7 @@ func TestResolveRequestNoReturnData(t *testing.T) {
 		3, BasicCalldata, []sdk.ValAddress{testapp.Validators[0].ValAddress, testapp.Validators[1].ValAddress}, 1,
 		42, testapp.ParseTime(1581589790), BasicClientID, []oracletypes.RawRequest{
 			oracletypes.NewRawRequest(1, 1, []byte("beeb")),
-		}, nil, 0,
+		}, nil, 1,
 	))
 	k.SetReport(ctx, 42, oracletypes.NewReport(
 		testapp.Validators[0].ValAddress, true, []oracletypes.RawReport{
