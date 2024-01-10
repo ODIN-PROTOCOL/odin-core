@@ -141,7 +141,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 		sdk.NewAttribute(oracletypes.AttributeKeyCalldata, hex.EncodeToString(BasicCalldata)),
 		sdk.NewAttribute(oracletypes.AttributeKeyAskCount, "1"),
 		sdk.NewAttribute(oracletypes.AttributeKeyMinCount, "1"),
-		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "3089"), // TODO: might change
+		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "5294700000"), // TODO: might change
 		sdk.NewAttribute(oracletypes.AttributeKeyValidator, testapp.Validators[0].ValAddress.String()),
 	), events[12])
 
@@ -394,8 +394,8 @@ func TestResolveRequestSuccess(t *testing.T) {
 		oracletypes.EventTypeResolve,
 		sdk.NewAttribute(oracletypes.AttributeKeyID, "42"),
 		sdk.NewAttribute(oracletypes.AttributeKeyResolveStatus, "1"),
-		sdk.NewAttribute(oracletypes.AttributeKeyResult, "62656562"), // hex of "beeb"
-		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "1028"),    // TODO might change
+		sdk.NewAttribute(oracletypes.AttributeKeyResult, "62656562"),    // hex of "beeb"
+		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "2485000000"), // TODO might change
 	)}, ctx.EventManager().Events())
 }
 
@@ -441,7 +441,7 @@ func TestResolveRequestSuccessComplex(t *testing.T) {
 		sdk.NewAttribute(oracletypes.AttributeKeyID, "42"),
 		sdk.NewAttribute(oracletypes.AttributeKeyResolveStatus, "1"),
 		sdk.NewAttribute(oracletypes.AttributeKeyResult, "000000206265656264317631626565626431763262656562643276316265656264327632"),
-		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "13634"), // todo might change
+		sdk.NewAttribute(oracletypes.AttributeKeyGasUsed, "32742000000"), // todo might change
 	)}, ctx.EventManager().Events())
 }
 
