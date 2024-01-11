@@ -5,11 +5,11 @@ go 1.21
 require (
 	github.com/CosmWasm/wasmd v0.45.0
 	github.com/Masterminds/squirrel v1.5.2
-	github.com/cometbft/cometbft v0.37.4
+	github.com/cometbft/cometbft v0.37.2
 	github.com/cometbft/cometbft-db v0.8.0
 	github.com/confio/ics23/go v0.9.0
-	github.com/cosmos/cosmos-sdk v0.47.7
-	github.com/ethereum/go-ethereum v1.10.17
+	github.com/cosmos/cosmos-sdk v0.47.5
+	github.com/ethereum/go-ethereum v1.10.22
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-gorp/gorp v2.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
@@ -21,7 +21,7 @@ require (
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-sqlite3 v1.14.15
-	github.com/oasisprotocol/oasis-core/go v0.0.0-20200730171716-3be2b460b3ac
+	github.com/oasisprotocol/oasis-core/go v0.2202.7
 	github.com/odin-protocol/go-owasm v0.2.7
 	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/pkg/errors v0.9.1
@@ -43,7 +43,7 @@ require (
 	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/math v1.2.0
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/cosmos/ibc-go/v7 v7.3.1
+	github.com/cosmos/ibc-go/v7 v7.3.0
 	github.com/golang/protobuf v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97
 )
