@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeStore(t *testing.T) {
-	cdc := simapp.MakeTestEncodingConfig()
+	cdc := app.MakeEncodingConfig()
 	dec := simulation.NewDecodeStore(cdc.Marshaler)
 
 	minter := minttypes.NewMinter(sdk.OneDec(), sdk.NewDec(15), sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(100000000))))

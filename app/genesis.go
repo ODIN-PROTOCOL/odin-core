@@ -5,13 +5,11 @@ import (
 	"time"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	"github.com/althea-net/bech32-ibc/x/bech32ibc"
-	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
-	ica "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/types"
-	ibctypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v8/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
+	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -37,8 +35,6 @@ import (
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/gravity"
-	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -98,8 +94,6 @@ func NewDefaultGenesisState() GenesisState {
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
 		icatypes.ModuleName:        ica.AppModuleBasic{}.DefaultGenesis(cdc),
-		bech32ibctypes.ModuleName:  bech32ibc.AppModuleBasic{}.DefaultGenesis(cdc),
-		gravitytypes.ModuleName:    gravity.AppModuleBasic{}.DefaultGenesis(cdc),
 		wasm.ModuleName:            wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
