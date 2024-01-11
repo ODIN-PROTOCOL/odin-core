@@ -1,0 +1,17 @@
+syntax = "proto3";
+package odin.odin;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "odin/odin/params.proto";
+
+option go_package = "odin/x/odin/types";
+
+// GenesisState defines the odin module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
