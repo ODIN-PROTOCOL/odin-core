@@ -3,7 +3,7 @@ package oraclekeeper
 import (
 	"fmt"
 
-	host "github.com/cosmos/ibc-go/v4/modules/core/24-host"
+	host "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	gogotypes "github.com/gogo/protobuf/types"
 	owasm "github.com/slandymani/go-owasm/api"
 	"github.com/tendermint/tendermint/libs/log"
@@ -16,10 +16,11 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 )
 
 type Keeper struct {
-	storeKey         sdk.StoreKey
+	storeKey         storetypes.StoreKey
 	cdc              codec.BinaryCodec
 	fileCache        filecache.Cache
 	feeCollectorName string
@@ -38,7 +39,7 @@ type Keeper struct {
 // NewKeeper creates a new oracle Keeper instance.
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	fileDir string,
 	feeCollectorName string,

@@ -11,10 +11,11 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 )
 
 type Keeper struct {
-	storeKey     sdk.StoreKey
+	storeKey     storetypes.StoreKey
 	cdc          codec.BinaryCodec
 	paramstore   paramstypes.Subspace
 	bankKeeper   coinswaptypes.BankKeeper
@@ -24,7 +25,7 @@ type Keeper struct {
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key sdk.StoreKey,
+	key storetypes.StoreKey,
 	subspace paramstypes.Subspace,
 	bk coinswaptypes.BankKeeper,
 	dk coinswaptypes.DistrKeeper,

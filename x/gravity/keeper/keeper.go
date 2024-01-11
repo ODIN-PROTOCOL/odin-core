@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v4/modules/apps/transfer/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -22,6 +22,7 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
 	gravitytypes "github.com/ODIN-PROTOCOL/odin-core/x/gravity/types"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 )
 
 // Check that our expected keeper types are implemented
@@ -34,7 +35,7 @@ var (
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
 	// NOTE: If you add anything to this struct, add a nil check to ValidateMembers below!
-	storeKey   sdk.StoreKey // Unexposed key to access store from sdk.Context
+	storeKey   storetypes.StoreKey // Unexposed key to access store from sdk.Context
 	paramSpace paramtypes.Subspace
 
 	// NOTE: If you add anything to this struct, add a nil check to ValidateMembers below!
@@ -79,7 +80,7 @@ func (k Keeper) ValidateMembers() {
 
 // NewKeeper returns a new instance of the gravity keeper
 func NewKeeper(
-	storeKey sdk.StoreKey,
+	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
 	cdc codec.BinaryCodec,
 	bankKeeper gravitytypes.BankKeeper,

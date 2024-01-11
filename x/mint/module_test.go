@@ -3,8 +3,10 @@ package mint_test
 import (
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/runtime"
+
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
+
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
@@ -12,7 +14,7 @@ import (
 )
 
 func TestItCreatesModuleAccountOnInitBlock(t *testing.T) {
-	app := simapp.Setup(false)
+	app := runtime.AppI.Setup(false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	app.InitChain(

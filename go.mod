@@ -43,8 +43,8 @@ require (
 )
 
 require (
-	github.com/althea-net/bech32-ibc v0.4.4
-	github.com/cosmos/ibc-go/v4 v4.4.2
+	github.com/althea-net/bech32-ibc v0.6.0
+	github.com/cosmos/ibc-go/v8 v8.0.0
 )
 
 require (
@@ -181,13 +181,9 @@ require (
 
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-
 replace github.com/confio/ics23/go => github.com/cosmos/cosmos-sdk/ics23/go v0.8.0
-
 replace github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
-
-replace github.com/cosmos/ibc-go/v3 => github.com/cosmos/ibc-go/v4 v4.3.1
-
+replace "github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation" => "github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation" v0.6.9
 //replace github.com/ODIN-PROTOCOL/odin-core => github.com/monopauli/odin-core v0.7.0
 //replace github.com/althea-net/bech32-ibc v0.6.0 => github.com/althea-net/bech32-ibc v0.4.4
 //replace github.com/althea-net/bech32-ibc v0.3.0-rc1 => github.com/althea-net/bech32-ibc v0.4.4
