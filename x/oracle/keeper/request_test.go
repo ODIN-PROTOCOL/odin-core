@@ -79,6 +79,7 @@ func TestSetterGetterRequest(t *testing.T) {
 	require.Equal(t, req2, k.MustGetRequest(ctx, 43))
 	// Replaces id 42 with another request.
 	k.SetRequest(ctx, 42, req2)
+	req2.ID = 42
 	require.NotEqual(t, req1, k.MustGetRequest(ctx, 42))
 	require.Equal(t, req2, k.MustGetRequest(ctx, 42))
 }
