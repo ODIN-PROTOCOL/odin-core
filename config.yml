@@ -2,20 +2,20 @@ version: 1
 accounts:
 - name: alice
   coins:
-  - 20000token
-  - 200000000stake
+  - 20000odin
+  - 200000000loki
 - name: bob
   coins:
-  - 10000token
-  - 100000000stake
+  - 10000odin
+  - 100000000loki
 client:
   openapi:
     path: docs/static/openapi.yml
 faucet:
   name: bob
   coins:
-  - 5token
-  - 100000stake
+  - 5odin
+  - 100000loki
 validators:
 - name: alice
-  bonded: 100000000stake
+  bonded: 100000000loki
