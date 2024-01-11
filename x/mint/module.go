@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -20,7 +19,6 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
 	mintcli "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/cli"
-	mintrest "github.com/ODIN-PROTOCOL/odin-core/x/mint/client/rest"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/simulation"
@@ -71,10 +69,10 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 	return minttypes.ValidateGenesis(data)
 }
 
-// RegisterRESTRoutes registers the REST routes for the mint module.
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
-	mintrest.RegisterRoutes(clientCtx, rtr)
-}
+// // RegisterRESTRoutes registers the REST routes for the mint module.
+// func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {
+// 	mintrest.RegisterRoutes(clientCtx, rtr)
+// }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the mint module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {

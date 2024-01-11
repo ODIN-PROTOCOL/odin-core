@@ -1,12 +1,12 @@
 module github.com/ODIN-PROTOCOL/odin-core
 
-go 1.18
+go 1.20
 
 require (
-	github.com/CosmWasm/wasmd v0.31.0
+	github.com/CosmWasm/wasmd v0.43.0
 	github.com/Masterminds/squirrel v1.5.2
 	github.com/confio/ics23/go v0.9.0
-	github.com/cosmos/cosmos-sdk v0.45.16
+	github.com/cosmos/cosmos-sdk v0.46.16
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/gin-gonic/gin v1.8.1
@@ -179,7 +179,6 @@ require (
 	nhooyr.io/websocket v1.8.6 // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.33.2
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 

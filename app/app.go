@@ -16,6 +16,7 @@ import (
 	"github.com/althea-net/bech32-ibc/x/bech32ibc"
 	bech32ibckeeper "github.com/althea-net/bech32-ibc/x/bech32ibc/keeper"
 	bech32ibctypes "github.com/althea-net/bech32-ibc/x/bech32ibc/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	ica "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts"
 	icahost "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v4/modules/apps/27-interchain-accounts/host/keeper"
@@ -50,13 +51,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
-	authrest "github.com/cosmos/cosmos-sdk/x/auth/client/rest"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
@@ -107,7 +106,6 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	ibchelpers "github.com/ODIN-PROTOCOL/odin-core/app/helpers"
 	odinappparams "github.com/ODIN-PROTOCOL/odin-core/app/params"
 	v7 "github.com/ODIN-PROTOCOL/odin-core/app/upgrade/v7"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
@@ -155,8 +153,8 @@ var (
 		odinmint.AppModuleBasic{},
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(paramsclient.ProposalHandler, distrclient.ProposalHandler, upgradeclient.ProposalHandler, upgradeclient.CancelProposalHandler,
-			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpdateClientProposal, ibchelpers.EmptyRestHandler),
-			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpgradeProposal, ibchelpers.EmptyRestHandler),
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpdateClientProposal),
+			govclient.NewProposalHandler(ibcclientclient.NewCmdSubmitUpgradeProposal),
 		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},
@@ -198,7 +196,7 @@ var (
 )
 
 var (
-	_ simapp.App              = (*OdinApp)(nil)
+	_ runtime.AppI            = (*OdinApp)(nil)
 	_ servertypes.Application = (*OdinApp)(nil)
 )
 
@@ -299,7 +297,7 @@ func NewOdinApp(
 	homePath string, invCheckPeriod uint, encodingConfig odinappparams.EncodingConfig, appOpts servertypes.AppOptions,
 	disableFeelessReports bool, owasmCacheSize uint32, baseAppOptions ...func(*baseapp.BaseApp),
 ) *OdinApp {
-	appCodec := encodingConfig.Marshaler
+	appCodec := encodingConfig.Codec
 	legacyAmino := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 
@@ -966,8 +964,6 @@ func (app *OdinApp) SimulationManager() *module.SimulationManager {
 func (app *OdinApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
 	clientCtx := apiSvr.ClientCtx
 	rpc.RegisterRoutes(clientCtx, apiSvr.Router)
-	// Register legacy tx routes.
-	authrest.RegisterTxRoutes(clientCtx, apiSvr.Router)
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 	// Register new tendermint queries routes from grpc-gateway.
