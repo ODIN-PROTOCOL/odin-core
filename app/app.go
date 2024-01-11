@@ -338,14 +338,30 @@ func NewOdinApp(
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
 	keys := sdk.NewKVStoreKeys(
-		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
-		odinminttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
-		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey,
-		evidencetypes.StoreKey, capabilitytypes.StoreKey, oracletypes.StoreKey,
-		coinswaptypes.StoreKey, auctiontypes.StoreKey, transfertypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey, icahosttypes.StoreKey, consensusparamtypes.StoreKey,
-		crisistypes.StoreKey, ibcexported.StoreKey, group.StoreKey,
-		wasmtypes.StoreKey, icacontrollertypes.StoreKey,
+		authtypes.StoreKey,
+		banktypes.StoreKey,
+		stakingtypes.StoreKey,
+		odinminttypes.StoreKey,
+		distrtypes.StoreKey,
+		slashingtypes.StoreKey,
+		govtypes.StoreKey,
+		paramstypes.StoreKey,
+		upgradetypes.StoreKey,
+		evidencetypes.StoreKey,
+		capabilitytypes.StoreKey,
+		oracletypes.StoreKey,
+		coinswaptypes.StoreKey,
+		auctiontypes.StoreKey,
+		transfertypes.StoreKey,
+		feegrant.StoreKey,
+		authzkeeper.StoreKey,
+		icahosttypes.StoreKey,
+		consensusparamtypes.StoreKey,
+		crisistypes.StoreKey,
+		ibcexported.StoreKey,
+		group.StoreKey,
+		wasmtypes.StoreKey,
+		icacontrollertypes.StoreKey,
 	)
 
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)

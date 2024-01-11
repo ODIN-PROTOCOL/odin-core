@@ -55,7 +55,7 @@ func (k Keeper) PrepareRequest(
 	ctx sdk.Context,
 	r types.RequestSpec,
 	feePayer sdk.AccAddress,
-	ibcSource *types.IBCSource, // TODO: change to *types.IBCChannel
+	ibcSource *types.IBCChannel, // TODO: change to *types.IBCChannel
 ) (types.RequestID, error) {
 	calldataSize := len(r.GetCalldata())
 	if calldataSize > int(k.GetSpanSize(ctx)) {
