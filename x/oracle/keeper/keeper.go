@@ -26,14 +26,19 @@ type Keeper struct {
 	feeCollectorName string
 	paramstore       paramtypes.Subspace
 	owasmVM          *owasm.Vm
-	ics4Wrapper      oracletypes.ICS4Wrapper
-	authKeeper       oracletypes.AccountKeeper
-	bankKeeper       oracletypes.BankKeeper
-	distrKeeper      oracletypes.DistrKeeper
-	stakingKeeper    oracletypes.StakingKeeper
-	channelKeeper    oracletypes.ChannelKeeper
-	portKeeper       oracletypes.PortKeeper
-	scopedKeeper     capabilitykeeper.ScopedKeeper
+
+	authKeeper    oracletypes.AccountKeeper
+	bankKeeper    oracletypes.BankKeeper
+	stakingKeeper oracletypes.StakingKeeper
+	distrKeeper   oracletypes.DistrKeeper
+	authzKeeper   oracletypes.AuthzKeeper
+	channelKeeper oracletypes.ChannelKeeper
+	portKeeper    oracletypes.PortKeeper
+	scopedKeeper  capabilitykeeper.ScopedKeeper
+
+	// the address capable of executing a MsgUpdateParams message. Typically, this
+	// should be the x/gov module account.
+	authority string
 }
 
 // NewKeeper creates a new oracle Keeper instance.
@@ -47,10 +52,12 @@ func NewKeeper(
 	bankKeeper oracletypes.BankKeeper,
 	stakingKeeper oracletypes.StakingKeeper,
 	distrKeeper oracletypes.DistrKeeper,
+	authzKeeper oracletypes.AuthzKeeper,
 	channelKeeper oracletypes.ChannelKeeper,
 	portKeeper oracletypes.PortKeeper,
 	scopeKeeper capabilitykeeper.ScopedKeeper,
 	owasmVM *owasm.Vm,
+	authority string,
 ) Keeper {
 	if addr := authKeeper.GetModuleAddress(oracletypes.ModuleName); addr == nil {
 		panic("the oracle module account has not been set")
@@ -70,9 +77,11 @@ func NewKeeper(
 		bankKeeper:       bankKeeper,
 		distrKeeper:      distrKeeper,
 		stakingKeeper:    stakingKeeper,
+		authzKeeper:      authzKeeper,
 		channelKeeper:    channelKeeper,
 		portKeeper:       portKeeper,
 		scopedKeeper:     scopeKeeper,
+		authority:        authority,
 	}
 }
 
