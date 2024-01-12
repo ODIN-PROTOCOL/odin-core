@@ -13,11 +13,11 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestCreateDataSourceSuccess(t *testing.T) {

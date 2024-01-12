@@ -1,10 +1,10 @@
 package proof
 
 import (
+	"github.com/cometbft/cometbft/crypto/merkle"
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
+	"github.com/cometbft/cometbft/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/tendermint/tendermint/crypto/merkle"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
-	"github.com/tendermint/tendermint/types"
 )
 
 // BlockHeaderMerkleParts stores a group of hashes using for computing Tendermint's block

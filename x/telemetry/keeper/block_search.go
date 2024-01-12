@@ -3,9 +3,9 @@ package keeper
 import (
 	"time"
 
-	"github.com/tendermint/tendermint/rpc/core"
-	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
-	tendermint "github.com/tendermint/tendermint/types"
+	"github.com/cometbft/cometbft/rpc/core"
+	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
+	tendermint "github.com/cometbft/cometbft/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

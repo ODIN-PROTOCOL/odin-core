@@ -3,10 +3,10 @@ package oraclekeeper
 import (
 	"fmt"
 
+	"github.com/cometbft/cometbft/libs/log"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 	gogotypes "github.com/gogo/protobuf/types"
 	owasm "github.com/slandymani/go-owasm/api"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"

@@ -2,7 +2,7 @@ package oraclekeeper_test
 
 import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 )
 
 func defaultVotes() []abci.VoteInfo {

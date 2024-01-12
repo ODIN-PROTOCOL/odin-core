@@ -3,8 +3,8 @@ package testapp
 import (
 	"math/rand"
 
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/cometbft/cometbft/crypto"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

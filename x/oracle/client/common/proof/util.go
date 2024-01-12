@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"time"
 
+	tmbytes "github.com/cometbft/cometbft/libs/bytes"
 	gogotypes "github.com/gogo/protobuf/types"
-	tmbytes "github.com/tendermint/tendermint/libs/bytes"
 )
 
 // Copied from https://github.com/tendermint/tendermint/blob/master/types/encoding_helper.go

@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/slandymani/go-owasm/api"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"

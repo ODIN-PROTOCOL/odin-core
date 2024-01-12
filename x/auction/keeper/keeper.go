@@ -3,7 +3,7 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/cometbft/cometbft/libs/log"
 
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"

@@ -7,10 +7,10 @@ import (
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 
+	abcitypes "github.com/cometbft/cometbft/abci/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 )
 
 func TestItCreatesModuleAccountOnInitBlock(t *testing.T) {
