@@ -1,0 +1,17 @@
+syntax = "proto3";
+package odincore.odincore;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "odincore/odincore/params.proto";
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/odincore/types";
+
+// GenesisState defines the odincore module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
