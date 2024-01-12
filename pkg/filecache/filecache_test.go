@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bandprotocol/chain/v2/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 )
 
 func TestAddFile(t *testing.T) {

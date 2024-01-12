@@ -3,7 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 func (s *IntegrationTestSuite) TestUpdateParams() {

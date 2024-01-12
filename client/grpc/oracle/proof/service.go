@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // RegisterProofService registers the node gRPC service on the provided gRPC router.

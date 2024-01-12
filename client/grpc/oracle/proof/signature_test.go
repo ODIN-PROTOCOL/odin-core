@@ -66,7 +66,7 @@ func TestGetPrefix(t *testing.T) {
 
 func TestGetSignaturesAndPrefix(t *testing.T) {
 	header := types.Header{
-		ChainID: "bandchain",
+		ChainID: "odinchain",
 	}
 	commit := types.Commit{
 		Height: 25000,

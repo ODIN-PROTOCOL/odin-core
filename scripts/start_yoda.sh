@@ -37,7 +37,7 @@ echo "y" | bandd tx bank send validator $(yoda keys list -a) 1000000uband --gas-
 # wait for sending band tokens transaction success
 sleep 2
 
-# add reporter to bandchain
+# add reporter to odinchain
 echo "y" | bandd tx oracle add-reporters $(yoda keys list -a) --from validator --gas-prices 0.0025uband --keyring-backend test --chain-id bandchain
 
 # wait for addding reporter transaction success

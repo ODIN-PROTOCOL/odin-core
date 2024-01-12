@@ -12,10 +12,10 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bandprotocol/chain/v2/pkg/obi"
-	"github.com/bandprotocol/chain/v2/testing/testapp"
-	"github.com/bandprotocol/chain/v2/x/oracle/keeper"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func TestGetRandomValidatorsSuccessActivateAll(t *testing.T) {

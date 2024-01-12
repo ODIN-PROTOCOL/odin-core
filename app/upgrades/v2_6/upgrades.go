@@ -1,7 +1,7 @@
 package v2_6
 
 import (
-	oracletypes "github.com/bandprotocol/chain/v2/x/oracle/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -18,9 +18,9 @@ import (
 	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
-	"github.com/bandprotocol/chain/v2/app/keepers"
-	"github.com/bandprotocol/chain/v2/app/upgrades"
-	globalfeetypes "github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
+	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 func CreateUpgradeHandler(

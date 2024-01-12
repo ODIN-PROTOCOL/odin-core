@@ -33,9 +33,9 @@ import (
 	"github.com/cosmos/ibc-go/v7/testing/mock"
 	"github.com/stretchr/testify/require"
 
-	bandapp "github.com/bandprotocol/chain/v2/app"
-	"github.com/bandprotocol/chain/v2/testing/testapp"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	bandapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (

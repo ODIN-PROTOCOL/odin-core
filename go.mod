@@ -1,4 +1,4 @@
-module github.com/bandprotocol/chain/v2
+module github.com/ODIN-PROTOCOL/odin-core
 
 go 1.19
 

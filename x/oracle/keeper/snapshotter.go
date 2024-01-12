@@ -10,9 +10,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/bandprotocol/chain/v2/pkg/filecache"
-	"github.com/bandprotocol/chain/v2/pkg/gzip"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/gzip"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var _ snapshot.ExtensionSnapshotter = &OracleSnapshotter{}

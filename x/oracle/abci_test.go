@@ -11,7 +11,7 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bandprotocol/chain/v2/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
 )
 
 func fromHex(hexStr string) []byte {

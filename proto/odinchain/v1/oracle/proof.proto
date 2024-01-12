@@ -1,7 +1,7 @@
 syntax = "proto3";
-package bandchain.v1.oracle;
+package odincahin.v1.oracle;
 
-option go_package = "github.com/bandprotocol/chain/v2/client/grpc/oracle/proof";
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof";
 
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
@@ -11,17 +11,17 @@ import "oracle/v1/oracle.proto";
 service Service {
   // Proof queries the proof for given request ID
   rpc Proof(QueryProofRequest) returns (QueryProofResponse) {
-    option (google.api.http).get = "/bandchain/v1/oracle/proof/{request_id}";
+    option (google.api.http).get = "/odinchain/v1/oracle/proof/{request_id}";
   }
 
   // MultiProof queries multiple proofs for given list of request IDs
   rpc MultiProof(QueryMultiProofRequest) returns (QueryMultiProofResponse) {
-    option (google.api.http).get = "/bandchain/v1/oracle/multi_proof";
+    option (google.api.http).get = "/odinchain/v1/oracle/multi_proof";
   }
 
   // RequestCountProof queries the count proof
   rpc RequestCountProof(QueryRequestCountProofRequest) returns (QueryRequestCountProofResponse) {
-    option (google.api.http).get = "/bandchain/v1/oracle/requests_count_proof";
+    option (google.api.http).get = "/odinchain/v1/oracle/requests_count_proof";
   }
 }
 

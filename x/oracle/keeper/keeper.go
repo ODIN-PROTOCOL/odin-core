@@ -15,8 +15,8 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
-	"github.com/bandprotocol/chain/v2/pkg/filecache"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (

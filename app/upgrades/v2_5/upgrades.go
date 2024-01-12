@@ -5,8 +5,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	"github.com/bandprotocol/chain/v2/app/keepers"
-	"github.com/bandprotocol/chain/v2/app/upgrades"
+	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
 )
 
 func CreateUpgradeHandler(

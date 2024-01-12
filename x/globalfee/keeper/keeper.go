@@ -6,7 +6,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 type Keeper struct {

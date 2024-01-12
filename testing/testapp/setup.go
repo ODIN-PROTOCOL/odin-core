@@ -40,10 +40,10 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 	"github.com/stretchr/testify/require"
 
-	bandapp "github.com/bandprotocol/chain/v2/app"
-	"github.com/bandprotocol/chain/v2/pkg/filecache"
-	"github.com/bandprotocol/chain/v2/x/oracle/keeper"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	bandapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Account is a data structure to store key of test account.

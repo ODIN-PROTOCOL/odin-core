@@ -11,7 +11,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/bandprotocol/chain/v2/x/bank/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/bank/types"
 )
 
 // WrappedBankKeeper encapsulates the underlying bank keeper and overrides

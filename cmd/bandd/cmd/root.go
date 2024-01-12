@@ -28,8 +28,8 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
-	band "github.com/bandprotocol/chain/v2/app"
-	"github.com/bandprotocol/chain/v2/app/params"
+	band "github.com/ODIN-PROTOCOL/odin-core/app"
+	"github.com/ODIN-PROTOCOL/odin-core/app/params"
 )
 
 const (

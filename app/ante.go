@@ -8,9 +8,9 @@ import (
 	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee/feechecker"
-	globalfeekeeper "github.com/bandprotocol/chain/v2/x/globalfee/keeper"
-	oraclekeeper "github.com/bandprotocol/chain/v2/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/feechecker"
+	globalfeekeeper "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
 // HandlerOptions extend the SDK's AnteHandler options by requiring the IBC

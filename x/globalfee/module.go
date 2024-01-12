@@ -14,9 +14,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee/client/cli"
-	"github.com/bandprotocol/chain/v2/x/globalfee/keeper"
-	"github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 // ConsensusVersion defines the current x/globalfee module consensus version.

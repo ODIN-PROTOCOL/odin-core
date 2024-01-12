@@ -17,9 +17,9 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
-	"github.com/bandprotocol/chain/v2/app/keepers"
-	"github.com/bandprotocol/chain/v2/app/upgrades"
-	oracletypes "github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func CreateUpgradeHandler(

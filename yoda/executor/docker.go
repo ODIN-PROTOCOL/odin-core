@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/shlex"
 
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type DockerExec struct {

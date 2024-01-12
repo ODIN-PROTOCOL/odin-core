@@ -76,7 +76,7 @@ type DataSource struct {
 	// Description is data source description used for display
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Filename is string of file name used as reference for locating
-	// data source file stored in bandchain nodes
+	// data source file stored in odinchain nodes
 	Filename string `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
 	// Treasury is the account address who receive data source fee from requester.
 	Treasury string `protobuf:"bytes,5,opt,name=treasury,proto3" json:"treasury,omitempty"`
@@ -169,7 +169,7 @@ type OracleScript struct {
 	// Description is oracle script description used for display
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Filename is string of file name used as reference for locating
-	// compiled oracle script WASM file stored in bandchain nodes
+	// compiled oracle script WASM file stored in odinchain nodes
 	Filename string `protobuf:"bytes,4,opt,name=filename,proto3" json:"filename,omitempty"`
 	// Schema is the schema of the oracle script input/output
 	// which is formatted in OBI format e.g.
@@ -412,8 +412,8 @@ type Request struct {
 	// script
 	RawRequests []RawRequest `protobuf:"bytes,8,rep,name=raw_requests,json=rawRequests,proto3" json:"raw_requests"`
 	// IBCChannel is an IBC channel info of the other chain, which contains a
-	// channel and a port to allow bandchain connect to that chain. This field
-	// allows other chain be able to request data from bandchain via IBC.
+	// channel and a port to allow odinchain connect to that chain. This field
+	// allows other chain be able to request data from odinchain via IBC.
 	IBCChannel *IBCChannel `protobuf:"bytes,9,opt,name=ibc_channel,json=ibcChannel,proto3" json:"ibc_channel,omitempty"`
 	// ExecuteGas is amount of gas to reserve for executing
 	ExecuteGas uint64 `protobuf:"varint,10,opt,name=execute_gas,json=executeGas,proto3" json:"execute_gas,omitempty"`

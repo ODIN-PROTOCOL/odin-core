@@ -23,7 +23,7 @@ import (
 				version: {
 					block: "11"
 				},
-				chain_id: "bandchain",
+				chain_id: "odinchain",
 				height: "25000",
 				time: "2021-08-25T00:05:31.290650376Z",
 				last_block_id: {
@@ -50,7 +50,7 @@ func TestBlockHeaderMerkleParts(t *testing.T) {
 	// Copy block header Merkle Part here
 	header := types.Header{
 		Version: tmversion.Consensus{Block: 11},
-		ChainID: "bandchain",
+		ChainID: "odinchain",
 		Height:  25000,
 		Time:    parseTime("2021-08-25T00:05:31.290650376Z"),
 		LastBlockID: types.BlockID{

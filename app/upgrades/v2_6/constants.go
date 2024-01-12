@@ -15,9 +15,9 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
-	"github.com/bandprotocol/chain/v2/app/upgrades"
-	globalfeetypes "github.com/bandprotocol/chain/v2/x/globalfee/types"
-	oracletypes "github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
+	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const UpgradeName = "v2_6"

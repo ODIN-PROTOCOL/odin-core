@@ -37,10 +37,10 @@ import (
 	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
-	"github.com/bandprotocol/chain/v2/app/upgrades/v2_6"
-	globalfeetypes "github.com/bandprotocol/chain/v2/x/globalfee/types"
-	"github.com/bandprotocol/chain/v2/x/oracle"
-	oracletypes "github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
+	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // GenesisState defines a type alias for the Band genesis application state.

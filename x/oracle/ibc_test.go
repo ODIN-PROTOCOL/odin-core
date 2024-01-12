@@ -11,10 +11,10 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/bandprotocol/chain/v2/pkg/obi"
-	ibctesting "github.com/bandprotocol/chain/v2/testing"
-	"github.com/bandprotocol/chain/v2/testing/testapp"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	ibctesting "github.com/ODIN-PROTOCOL/odin-core/testing"
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type OracleTestSuite struct {

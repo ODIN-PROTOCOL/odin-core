@@ -12,9 +12,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee"
-	"github.com/bandprotocol/chain/v2/x/globalfee/keeper"
-	"github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 type GenesisTestSuite struct {

@@ -17,9 +17,9 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bandprotocol/chain/v2/pkg/obi"
-	"github.com/bandprotocol/chain/v2/testing/testapp"
-	oracletypes "github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 type Account struct {

@@ -9,7 +9,7 @@ const (
 	ModuleName = "oracle"
 
 	// Version defines the current version the IBC oracle module supports
-	Version = "bandchain-1"
+	Version = "odinchain-1"
 
 	// StoreKey to be used when creating the KVStore.
 	StoreKey = ModuleName

@@ -16,10 +16,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 
-	"github.com/bandprotocol/chain/v2/x/oracle/client/cli"
-	"github.com/bandprotocol/chain/v2/x/oracle/exported"
-	"github.com/bandprotocol/chain/v2/x/oracle/keeper"
-	"github.com/bandprotocol/chain/v2/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/exported"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // ConsensusVersion defines the current x/oracle module consensus version.

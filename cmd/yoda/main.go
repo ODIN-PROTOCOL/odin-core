@@ -1,6 +1,6 @@
 package main
 
-import "github.com/bandprotocol/chain/v2/yoda"
+import "github.com/ODIN-PROTOCOL/odin-core/yoda"
 
 func main() {
 	yoda.Main()

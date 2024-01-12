@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bandprotocol/chain/v2/x/globalfee/keeper"
-	"github.com/bandprotocol/chain/v2/x/globalfee/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 func TestQueryParams(t *testing.T) {

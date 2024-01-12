@@ -20,9 +20,9 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 
-	bandbankkeeper "github.com/bandprotocol/chain/v2/x/bank/keeper"
-	globalfeekeeper "github.com/bandprotocol/chain/v2/x/globalfee/keeper"
-	oraclekeeper "github.com/bandprotocol/chain/v2/x/oracle/keeper"
+	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	globalfeekeeper "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
 type AppKeepers struct {
