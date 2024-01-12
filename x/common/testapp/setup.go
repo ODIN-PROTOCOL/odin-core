@@ -209,7 +209,10 @@ func NewSimApp(chainID string, logger log.Logger) *odinapp.OdinApp {
 		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(int64(bamtSum)))},
 	})
 
-	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{})
+	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{banktypes.SendEnabled{
+		Denom:   "loki",
+		Enabled: true,
+	}})
 	genesis[banktypes.ModuleName] = app.AppCodec().MustMarshalJSON(bankGenesis)
 
 	// Add genesis data sources and oracle scripts

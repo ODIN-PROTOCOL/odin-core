@@ -7,6 +7,7 @@ import (
 	"time"
 
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -25,12 +26,13 @@ import (
 var cdc = app.MakeEncodingConfig().Marshaler
 
 func signAndBroadcast(
-	c *Context, key keyring.Info, msgs []sdk.Msg, gasLimit uint64, memo string,
+	c *Context, key *keyring.Record, msgs []sdk.Msg, gasLimit uint64, memo string,
 ) (string, error) {
 	clientCtx := client.Context{
 		Client:            c.client,
+		Codec:             cdc,
 		TxConfig:          app.MakeEncodingConfig().TxConfig,
-		BroadcastMode:     "async",
+		BroadcastMode:     "sync",
 		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 	acc, err := queryAccount(clientCtx, key)
@@ -49,12 +51,19 @@ func signAndBroadcast(
 		WithKeybase(kb).
 		WithAccountRetriever(clientCtx.AccountRetriever)
 
-	txb, err := tx.BuildUnsignedTx(txf, msgs...)
+	address, err := key.GetAddress()
 	if err != nil {
 		return "", err
 	}
 
-	err = tx.Sign(txf, key.GetName(), txb, true)
+	execMsg := authz.NewMsgExec(address, msgs)
+
+	txb, err := txf.BuildUnsignedTx(&execMsg)
+	if err != nil {
+		return "", err
+	}
+
+	err = tx.Sign(txf, key.Name, txb, true)
 	if err != nil {
 		return "", err
 	}
@@ -76,9 +85,15 @@ func signAndBroadcast(
 	return res.TxHash, nil
 }
 
-func queryAccount(clientCtx client.Context, key keyring.Info) (client.Account, error) {
+func queryAccount(clientCtx client.Context, key *keyring.Record) (client.Account, error) {
 	accountRetriever := authtypes.AccountRetriever{}
-	acc, err := accountRetriever.GetAccount(clientCtx, key.GetAddress())
+
+	address, err := key.GetAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	acc, err := accountRetriever.GetAccount(clientCtx, address)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +134,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	}
 	memo := fmt.Sprintf("yoda:%s/exec:%s", version.Version, strings.Join(versions, ","))
 	key := c.keys[keyIndex]
-	// cliCtx := sdkCtx.CLIContext{Client: c.client, TrustNode: true, Codec: cdc}
+
 	clientCtx := client.Context{
 		Client:            c.client,
 		TxConfig:          app.MakeEncodingConfig().TxConfig,
@@ -176,7 +191,11 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 			}
 		}
 		if !txFound {
-			l.Error(":question_mark: Cannot get transaction response from hash: %s transaction might be included in the next few blocks or check your node's health.", c, txHash)
+			l.Error(
+				":question_mark: Cannot get transaction response from hash: %s transaction might be included in the next few blocks or check your node's health.",
+				c,
+				txHash,
+			)
 			return
 		}
 	}
@@ -188,12 +207,21 @@ func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
 	resValue, err := c.fileCache.GetFile(hash)
 	if err != nil {
 		l.Debug(":magnifying_glass_tilted_left: Fetching data source hash: %s from bandchain querier", hash)
-		res, err := abciQuery(c, l, fmt.Sprintf("custom/%s/%s/%s", oracletypes.StoreKey, oracletypes.QueryData, hash), nil)
+		bz := cdc.MustMarshal(&oracletypes.QueryDataRequest{
+			DataHash: hash,
+		})
+		res, err := abciQuery(c, l, "/oracle.v1.Query/Data", bz)
 		if err != nil {
 			l.Error(":exploding_head: Failed to get data source with error: %s", c, err.Error())
 			return nil, err
 		}
-		resValue = res.Response.GetValue()
+		var dr oracletypes.QueryDataResponse
+		err = cdc.Unmarshal(res.Response.GetValue(), &dr)
+		if err != nil {
+			l.Error(":exploding_head: Failed to unmarshal data source with error: %s", c, err.Error())
+			return nil, err
+		}
+		resValue = dr.Data
 		c.fileCache.AddFile(resValue)
 	} else {
 		l.Debug(":card_file_box: Found data source hash: %s in cache file", hash)
@@ -205,10 +233,6 @@ func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
 
 // GetDataSourceHash fetches data source hash by id
 func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (string, error) {
-	if hash, ok := c.dataSourceCache.Load(id); ok {
-		return hash.(string), nil
-	}
-
 	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.DataSourceStoreKey(id))
 	if err != nil {
 		l.Error(":skull: Failed to get data source with error: %s", c, err.Error())
@@ -218,9 +242,7 @@ func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (stri
 	var d oracletypes.DataSource
 	cdc.MustUnmarshal(res.Response.Value, &d)
 
-	hash, _ := c.dataSourceCache.LoadOrStore(id, d.Filename)
-
-	return hash.(string), nil
+	return d.Filename, nil
 }
 
 // GetRequest fetches request by id

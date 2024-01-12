@@ -14,7 +14,7 @@ import (
 )
 
 type processingResult struct {
-	rawReport oracletypes.RawReport
+	rawReport types.RawReport
 	version   string
 	err       error
 }
@@ -46,102 +46,47 @@ func handleTransaction(c *Context, l *Logger, tx abci.TxResult) {
 }
 
 func handleRequestLog(c *Context, l *Logger, log sdk.ABCIMessageLog) {
-	idStr, err := GetEventValue(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyID)
-	if err != nil {
-		l.Debug(":cold_sweat: Failed to parse request id with error: %s", err.Error())
-		return
-	}
+	idStrs := GetEventValues(log, types.EventTypeRequest, types.AttributeKeyID)
 
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		l.Error(":cold_sweat: Failed to convert %s to integer with error: %s", c, idStr, err.Error())
-		return
-	}
-
-	l = l.With("rid", id)
-
-	// If id is in pending requests list, then skip it.
-	if c.pendingRequests[oracletypes.RequestID(id)] {
-		l.Debug(":eyes: Request is in pending list, then skip")
-		return
-	}
-
-	// Skip if not related to this validator
-	validators := GetEventValues(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyValidator)
-	hasMe := false
-	for _, validator := range validators {
-		if validator == c.validator.String() {
-			hasMe = true
-			break
+	for _, idStr := range idStrs {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			l.Error(":cold_sweat: Failed to convert %s to integer with error: %s", c, idStr, err.Error())
+			return
 		}
-	}
 
-	if !hasMe {
-		l.Debug(":next_track_button: Skip request not related to this validator")
-		return
-	}
+		// If id is in pending requests list, then skip it.
+		if c.pendingRequests[types.RequestID(id)] {
+			l.Debug(":eyes: Request is in pending list, then skip")
+			return
+		}
 
-	l.Info(":delivery_truck: Processing incoming request event")
-
-	reqs, err := GetRawRequests(log)
-	if err != nil {
-		l.Error(":skull: Failed to parse raw requests with error: %s", c, err.Error())
-	}
-
-	keyIndex := c.nextKeyIndex()
-	key := c.keys[keyIndex]
-
-	reports, execVersions := handleRawRequests(c, l, oracletypes.RequestID(id), reqs, key)
-
-	rawAskCount := GetEventValues(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyAskCount)
-	if len(rawAskCount) != 1 {
-		panic("Fail to get ask count")
-	}
-	askCount := MustAtoi(rawAskCount[0])
-
-	rawMinCount := GetEventValues(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyMinCount)
-	if len(rawMinCount) != 1 {
-		panic("Fail to get min count")
-	}
-	minCount := MustAtoi(rawMinCount[0])
-
-	rawCallData := GetEventValues(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyCalldata)
-	if len(rawCallData) != 1 {
-		panic("Fail to get call data")
-	}
-	callData, err := hex.DecodeString(rawCallData[0])
-	if err != nil {
-		l.Error(":skull: Fail to parse call data: %s", c, err.Error())
-	}
-
-	var clientID string
-	rawClientID := GetEventValues(log, oracletypes.EventTypeRequest, oracletypes.AttributeKeyClientID)
-	if len(rawClientID) > 0 {
-		clientID = rawClientID[0]
-	}
-
-	c.pendingMsgs <- ReportMsgWithKey{
-		msg:         oracletypes.NewMsgReportData(oracletypes.RequestID(id), reports, c.validator, key.GetAddress()),
-		execVersion: execVersions,
-		keyIndex:    keyIndex,
-		feeEstimationData: FeeEstimationData{
-			askCount:    askCount,
-			minCount:    minCount,
-			callData:    callData,
-			rawRequests: reqs,
-			clientID:    clientID,
-		},
+		go handleRequest(c, l, types.RequestID(id))
 	}
 }
 
-func handlePendingRequest(c *Context, l *Logger, id oracletypes.RequestID) {
+func handleRequest(c *Context, l *Logger, id types.RequestID) {
+	l = l.With("rid", id)
+
 	req, err := GetRequest(c, l, id)
 	if err != nil {
 		l.Error(":skull: Failed to get request with error: %s", c, err.Error())
 		return
 	}
 
-	l.Info(":delivery_truck: Processing pending request")
+	hasMe := false
+	for _, val := range req.RequestedValidators {
+		if val == c.validator.String() {
+			hasMe = true
+			break
+		}
+	}
+	if !hasMe {
+		l.Debug(":next_track_button: Skip request not related to this validator")
+		return
+	}
+
+	l.Info(":delivery_truck: Processing request")
 
 	keyIndex := c.nextKeyIndex()
 	key := c.keys[keyIndex]
@@ -150,7 +95,6 @@ func handlePendingRequest(c *Context, l *Logger, id oracletypes.RequestID) {
 
 	// prepare raw requests
 	for _, raw := range req.RawRequests {
-
 		hash, err := GetDataSourceHash(c, l, raw.DataSourceID)
 		if err != nil {
 			l.Error(":skull: Failed to get data source hash with error: %s", c, err.Error())
@@ -169,7 +113,7 @@ func handlePendingRequest(c *Context, l *Logger, id oracletypes.RequestID) {
 	reports, execVersions := handleRawRequests(c, l, id, rawRequests, key)
 
 	c.pendingMsgs <- ReportMsgWithKey{
-		msg:         oracletypes.NewMsgReportData(oracletypes.RequestID(id), reports, c.validator, key.GetAddress()),
+		msg:         types.NewMsgReportData(types.RequestID(id), reports, c.validator),
 		execVersion: execVersions,
 		keyIndex:    keyIndex,
 		feeEstimationData: FeeEstimationData{
@@ -182,10 +126,23 @@ func handlePendingRequest(c *Context, l *Logger, id oracletypes.RequestID) {
 	}
 }
 
-func handleRawRequests(c *Context, l *Logger, id oracletypes.RequestID, reqs []rawRequest, key keyring.Info) (reports []oracletypes.RawReport, execVersions []string) {
+func handleRawRequests(
+	c *Context,
+	l *Logger,
+	id types.RequestID,
+	reqs []rawRequest,
+	key *keyring.Record,
+) (reports []types.RawReport, execVersions []string) {
 	resultsChan := make(chan processingResult, len(reqs))
 	for _, req := range reqs {
-		go handleRawRequest(c, l.With("did", req.dataSourceID, "eid", req.externalID), req, key, oracletypes.RequestID(id), resultsChan)
+		go handleRawRequest(
+			c,
+			l.With("did", req.dataSourceID, "eid", req.externalID),
+			req,
+			key,
+			types.RequestID(id),
+			resultsChan,
+		)
 	}
 
 	versions := map[string]bool{}
@@ -205,7 +162,14 @@ func handleRawRequests(c *Context, l *Logger, id oracletypes.RequestID, reqs []r
 	return
 }
 
-func handleRawRequest(c *Context, l *Logger, req rawRequest, key keyring.Info, id oracletypes.RequestID, processingResultCh chan processingResult) {
+func handleRawRequest(
+	c *Context,
+	l *Logger,
+	req rawRequest,
+	key *keyring.Record,
+	id oracletypes.RequestID,
+	processingResultCh chan processingResult,
+) {
 	c.updateHandlingGauge(1)
 	defer c.updateHandlingGauge(-1)
 
@@ -222,7 +186,7 @@ func handleRawRequest(c *Context, l *Logger, req rawRequest, key keyring.Info, i
 	}
 
 	vmsg := oracletypes.NewRequestVerification(cfg.ChainID, c.validator, id, req.externalID)
-	sig, pubkey, err := kb.Sign(key.GetName(), vmsg.GetSignBytes())
+	sig, pubkey, err := kb.Sign(key.Name, vmsg.GetSignBytes())
 	if err != nil {
 		l.Error(":skull: Failed to sign verify message: %s", c, err.Error())
 		processingResultCh <- processingResult{
@@ -233,12 +197,13 @@ func handleRawRequest(c *Context, l *Logger, req rawRequest, key keyring.Info, i
 	}
 
 	result, err := c.executor.Exec(exec, req.calldata, map[string]interface{}{
-		"BAND_CHAIN_ID":    vmsg.ChainID,
-		"BAND_VALIDATOR":   vmsg.Validator,
-		"BAND_REQUEST_ID":  strconv.Itoa(int(vmsg.RequestID)),
-		"BAND_EXTERNAL_ID": strconv.Itoa(int(vmsg.ExternalID)),
-		"BAND_REPORTER":    hex.EncodeToString(pubkey.Bytes()),
-		"BAND_SIGNATURE":   sig,
+		"BAND_CHAIN_ID":       vmsg.ChainID,
+		"BAND_DATA_SOURCE_ID": strconv.Itoa(int(vmsg.DataSourceID)),
+		"BAND_VALIDATOR":      vmsg.Validator,
+		"BAND_REQUEST_ID":     strconv.Itoa(int(vmsg.RequestID)),
+		"BAND_EXTERNAL_ID":    strconv.Itoa(int(vmsg.ExternalID)),
+		"BAND_REPORTER":       hex.EncodeToString(pubkey.Bytes()),
+		"BAND_SIGNATURE":      sig,
 	})
 
 	if err != nil {

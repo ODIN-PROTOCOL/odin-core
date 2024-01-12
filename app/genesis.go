@@ -5,12 +5,7 @@ import (
 	"time"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
-	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
-	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v7/modules/core"
-	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
-
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
@@ -26,10 +21,18 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/cosmos/cosmos-sdk/x/group"
+	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	ibctypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibc "github.com/cosmos/ibc-go/v7/modules/core"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
@@ -51,7 +54,7 @@ func NewDefaultGenesisState() GenesisState {
 	stakingGenesis := stakingtypes.DefaultGenesisState()
 	distrGenesis := distrtypes.DefaultGenesisState()
 	mintGenesis := minttypes.DefaultGenesisState()
-	govGenesis := govtypes.DefaultGenesisState()
+	govGenesis := govv1.DefaultGenesisState()
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
 	oracleGenesis := oracletypes.DefaultGenesisState()
@@ -85,15 +88,16 @@ func NewDefaultGenesisState() GenesisState {
 		govtypes.ModuleName:        cdc.MustMarshalJSON(govGenesis),
 		crisistypes.ModuleName:     cdc.MustMarshalJSON(crisisGenesis),
 		slashingtypes.ModuleName:   cdc.MustMarshalJSON(slashingGenesis),
-		ibchost.ModuleName:         ibc.AppModuleBasic{}.DefaultGenesis(cdc),
+		ibcexported.ModuleName:     ibc.AppModuleBasic{}.DefaultGenesis(cdc),
 		upgradetypes.ModuleName:    upgrade.AppModuleBasic{}.DefaultGenesis(cdc),
 		evidencetypes.ModuleName:   evidence.AppModuleBasic{}.DefaultGenesis(cdc),
 		authz.ModuleName:           authzmodule.AppModuleBasic{}.DefaultGenesis(cdc),
 		oracletypes.ModuleName:     cdc.MustMarshalJSON(oracleGenesis),
 		coinswaptypes.ModuleName:   coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:    auction.AppModuleBasic{}.DefaultGenesis(cdc),
+		group.ModuleName:           groupmodule.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctypes.ModuleName:        cdc.MustMarshalJSON(transferGenesis),
 		icatypes.ModuleName:        ica.AppModuleBasic{}.DefaultGenesis(cdc),
-		wasm.ModuleName:            wasm.AppModuleBasic{}.DefaultGenesis(cdc),
+		wasmtypes.ModuleName:       wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
