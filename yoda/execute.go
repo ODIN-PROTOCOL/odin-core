@@ -17,13 +17,13 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
 
-	band "github.com/ODIN-PROTOCOL/odin-core/app"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 var (
 	// Proto codec for encoding/decoding proto message
-	cdc = band.MakeEncodingConfig().Marshaler
+	cdc = app.MakeEncodingConfig().Marshaler
 )
 
 func signAndBroadcast(
@@ -32,9 +32,9 @@ func signAndBroadcast(
 	clientCtx := client.Context{
 		Client:            c.client,
 		Codec:             cdc,
-		TxConfig:          band.MakeEncodingConfig().TxConfig,
+		TxConfig:          app.MakeEncodingConfig().TxConfig,
 		BroadcastMode:     "sync",
-		InterfaceRegistry: band.MakeEncodingConfig().InterfaceRegistry,
+		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 	acc, err := queryAccount(clientCtx, key)
 	if err != nil {
@@ -44,7 +44,7 @@ func signAndBroadcast(
 	txf := tx.Factory{}.
 		WithAccountNumber(acc.GetAccountNumber()).
 		WithSequence(acc.GetSequence()).
-		WithTxConfig(band.MakeEncodingConfig().TxConfig).
+		WithTxConfig(app.MakeEncodingConfig().TxConfig).
 		WithGas(gasLimit).WithGasAdjustment(1).
 		WithChainID(cfg.ChainID).
 		WithMemo(memo).
@@ -138,8 +138,8 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 
 	clientCtx := client.Context{
 		Client:            c.client,
-		TxConfig:          band.MakeEncodingConfig().TxConfig,
-		InterfaceRegistry: band.MakeEncodingConfig().InterfaceRegistry,
+		TxConfig:          app.MakeEncodingConfig().TxConfig,
+		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 
 	gasLimit := estimateGas(c, l, msgs, feeEstimations)
@@ -260,7 +260,7 @@ func GetRequest(c *Context, l *Logger, id types.RequestID) (types.Request, error
 	return r, nil
 }
 
-// abciQuery will try to query data from BandChain node maxTry time before give up and return error
+// abciQuery will try to query data from OdinChain node maxTry time before give up and return error
 func abciQuery(c *Context, l *Logger, path string, data []byte) (*ctypes.ResultABCIQuery, error) {
 	var lastErr error
 	for try := 0; try < int(c.maxTry); try++ {

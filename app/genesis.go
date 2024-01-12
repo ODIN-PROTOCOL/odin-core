@@ -1,4 +1,4 @@
-package band
+package odin
 
 import (
 	"encoding/json"
@@ -42,14 +42,14 @@ import (
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-// GenesisState defines a type alias for the Band genesis application state.
+// GenesisState defines a type alias for the Odin genesis application state.
 type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState() GenesisState {
 	cdc := MakeEncodingConfig().Marshaler
 	ModuleBasics.DefaultGenesis(cdc)
-	denom := "uband"
+	denom := "loki"
 	// Get default genesis states of the modules we are to override.
 	authGenesis := authtypes.DefaultGenesisState()
 	stakingGenesis := stakingtypes.DefaultGenesisState()

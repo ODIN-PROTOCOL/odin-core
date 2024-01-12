@@ -160,8 +160,8 @@ func runCmd(c *Context) *cobra.Command {
 			return runImpl(c, l)
 		},
 	}
-	cmd.Flags().String(flags.FlagChainID, "", "chain ID of BandChain network")
-	cmd.Flags().String(flags.FlagNode, "tcp://localhost:26657", "RPC url to BandChain node")
+	cmd.Flags().String(flags.FlagChainID, "", "chain ID of OdinChain network")
+	cmd.Flags().String(flags.FlagNode, "tcp://localhost:26657", "RPC url to OdinChain node")
 	cmd.Flags().String(flagValidator, "", "validator address")
 	cmd.Flags().String(flagExecutor, "", "executor name and url for executing the data source script")
 	cmd.Flags().String(flags.FlagGasPrices, "", "gas prices for report transaction")

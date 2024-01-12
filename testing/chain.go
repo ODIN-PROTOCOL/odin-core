@@ -33,7 +33,7 @@ import (
 	"github.com/cosmos/ibc-go/v7/testing/mock"
 	"github.com/stretchr/testify/require"
 
-	bandapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -105,7 +105,7 @@ func NewTestChain(t *testing.T, coord *Coordinator, chainID string) *TestChain {
 		genesisAccount[i] = senders[testapp.Validators[i].Address.String()]
 		balances[i] = banktypes.Balance{
 			Address: genesisAccount[i].GetAddress().String(),
-			Coins:   sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(10000000))),
+			Coins:   sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000000))),
 		}
 	}
 
@@ -125,7 +125,7 @@ func NewTestChain(t *testing.T, coord *Coordinator, chainID string) *TestChain {
 		Time:    coord.CurrentTime.UTC(),
 	}
 
-	txConfig := bandapp.MakeEncodingConfig().TxConfig
+	txConfig := odinapp.MakeEncodingConfig().TxConfig
 
 	// create an account to send transactions from
 	chain := &TestChain{

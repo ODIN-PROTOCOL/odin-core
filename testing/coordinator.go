@@ -73,7 +73,7 @@ func (coord *Coordinator) UpdateTimeForChain(chain *TestChain) {
 
 // Setup constructs a TM client, connection, and channel on both chains provided. It will
 // fail if any error occurs. The clientID's, TestConnections, and TestChannels are returned
-// for both chains. The channels created are connected to the BandChain.
+// for both chains. The channels created are connected to the OdinChain.
 func (coord *Coordinator) Setup(path *Path) {
 	coord.SetupConnections(path)
 

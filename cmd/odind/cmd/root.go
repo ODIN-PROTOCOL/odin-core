@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
-	band "github.com/ODIN-PROTOCOL/odin-core/app"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/app/params"
 )
 
@@ -39,7 +39,7 @@ const (
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
 func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
-	encodingConfig := band.MakeEncodingConfig()
+	encodingConfig := app.MakeEncodingConfig()
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -47,12 +47,12 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
-		WithHomeDir(band.DefaultNodeHome).
-		WithViper("BAND")
+		WithHomeDir(app.DefaultNodeHome).
+		WithViper("ODIN")
 
 	rootCmd := &cobra.Command{
-		Use:   "bandd",
-		Short: "BandChain App",
+		Use:   "odind",
+		Short: "OdinChain App",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
@@ -83,28 +83,28 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 	rootCmd.AddCommand(
-		InitCmd(band.NewDefaultGenesisState(), band.DefaultNodeHome),
+		InitCmd(app.NewDefaultGenesisState(), app.DefaultNodeHome),
 		genesisCommand(
 			encodingConfig,
-			AddGenesisDataSourceCmd(band.DefaultNodeHome),
-			AddGenesisOracleScriptCmd(band.DefaultNodeHome),
+			AddGenesisDataSourceCmd(app.DefaultNodeHome),
+			AddGenesisOracleScriptCmd(app.DefaultNodeHome),
 		),
 		tmcli.NewCompletionCmd(rootCmd, true),
-		// testnetCmd(band.ModuleBasics, banktypes.GenesisBalancesIterator{}),
+		// testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		debug.Cmd(),
 		config.Cmd(),
-		pruning.Cmd(newApp, band.DefaultNodeHome),
+		pruning.Cmd(newApp, app.DefaultNodeHome),
 		snapshot.Cmd(newApp),
 	)
 
-	server.AddCommands(rootCmd, band.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
+	server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
 		rpc.StatusCommand(),
 		queryCommand(),
 		txCommand(),
-		keys.Commands(band.DefaultNodeHome),
+		keys.Commands(app.DefaultNodeHome),
 	)
 }
 
@@ -113,9 +113,9 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 	startCmd.Flags().Uint32(flagWithOwasmCacheSize, 100, "[Experimental] Number of oracle scripts to cache")
 }
 
-// genesisCommand builds genesis-related `bandd genesis` command. Users may provide application specific commands as a parameter
+// genesisCommand builds genesis-related `odindd genesis` command. Users may provide application specific commands as a parameter
 func genesisCommand(encodingConfig params.EncodingConfig, cmds ...*cobra.Command) *cobra.Command {
-	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, band.ModuleBasics, band.DefaultNodeHome)
+	cmd := genutilcli.GenesisCoreCommand(encodingConfig.TxConfig, app.ModuleBasics, app.DefaultNodeHome)
 
 	for _, subCmd := range cmds {
 		cmd.AddCommand(subCmd)
@@ -141,7 +141,7 @@ func queryCommand() *cobra.Command {
 		authcmd.QueryTxCmd(),
 	)
 
-	band.ModuleBasics.AddQueryCommands(cmd)
+	app.ModuleBasics.AddQueryCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
@@ -170,7 +170,7 @@ func txCommand() *cobra.Command {
 		vestingcli.GetTxCmd(),
 	)
 
-	band.ModuleBasics.AddTxCommands(cmd)
+	app.ModuleBasics.AddTxCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
@@ -190,14 +190,14 @@ func newApp(
 		skipUpgradeHeights[int64(h)] = true
 	}
 
-	bandApp := band.NewBandApp(
+	odinApp := app.NewOdinApp(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		appOpts,
 		cast.ToUint32(appOpts.Get(flagWithOwasmCacheSize)),
 		baseappOptions...,
 	)
 
-	return bandApp
+	return odinApp
 }
 
 func appExport(
@@ -213,7 +213,7 @@ func appExport(
 		loadLatest = true
 	}
 
-	bandApp := band.NewBandApp(
+	odinApp := app.NewOdinApp(
 		logger,
 		db,
 		traceStore,
@@ -224,10 +224,10 @@ func appExport(
 	)
 
 	if height != -1 {
-		if err := bandApp.LoadHeight(height); err != nil {
+		if err := odinApp.LoadHeight(height); err != nil {
 			return servertypes.ExportedApp{}, err
 		}
 	}
 
-	return bandApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+	return odinApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
 }

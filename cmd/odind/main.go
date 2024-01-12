@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
-	"github.com/ODIN-PROTOCOL/odin-core/cmd/bandd/cmd"
+	"github.com/ODIN-PROTOCOL/odin-core/cmd/odind/cmd"
 )
 
 func main() {

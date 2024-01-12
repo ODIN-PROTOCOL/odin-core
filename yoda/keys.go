@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	band "github.com/ODIN-PROTOCOL/odin-core/app"
+	app "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -83,7 +83,7 @@ func keysAddCmd(c *Context) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			hdPath := hd.CreateHDPath(band.Bip44CoinType, account, index)
+			hdPath := hd.CreateHDPath(app.Bip44CoinType, account, index)
 			info, err := kb.NewAccount(args[0], mnemonic, "", hdPath.String(), hd.Secp256k1)
 			if err != nil {
 				return err

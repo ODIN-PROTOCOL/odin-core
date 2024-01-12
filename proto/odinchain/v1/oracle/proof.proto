@@ -1,5 +1,5 @@
 syntax = "proto3";
-package odincahin.v1.oracle;
+package odinchain.v1.oracle;
 
 option go_package = "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof";
 

@@ -20,10 +20,10 @@ func TestParseExecutor(t *testing.T) {
 	require.Equal(t, url, "www.beeb.com/anna/kondanna")
 	require.NoError(t, err)
 
-	name, url, timeout, err = parseExecutor("beeb3:https://bandprotocol.com/gg/gg2/odinchain?timeout=1s300ms")
+	name, url, timeout, err = parseExecutor("beeb3:https://odinprotocol.com/gg/gg2/odinchain?timeout=1s300ms")
 	require.Equal(t, name, "beeb3")
 	require.Equal(t, timeout, 1*time.Second+300*time.Millisecond)
-	require.Equal(t, url, "https://bandprotocol.com/gg/gg2/bandchain")
+	require.Equal(t, url, "https://odinprotocol.com/gg/gg2/odinchain")
 	require.NoError(t, err)
 }
 

@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bandprotocol/go-owasm/api"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
@@ -96,7 +96,7 @@ func TestEditDataSourceSuccess(t *testing.T) {
 		newName,
 		newDescription,
 		newExecutable,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.Treasury.Address,
 		testapp.Alice.Address,
 		testapp.Owner.Address,
@@ -112,7 +112,7 @@ func TestEditDataSourceSuccess(t *testing.T) {
 			newName,
 			newDescription,
 			newFilename,
-			testapp.Coins1000000uband,
+			testapp.Coins1000000loki,
 			testapp.Treasury.Address,
 		),
 		ds,
@@ -409,7 +409,7 @@ func TestRequestDataSuccess(t *testing.T) {
 		2,
 		2,
 		"CID",
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
@@ -436,7 +436,7 @@ func TestRequestDataSuccess(t *testing.T) {
 		Type: authtypes.EventTypeCoinSpent,
 		Attributes: []abci.EventAttribute{
 			{Key: authtypes.AttributeKeySpender, Value: testapp.FeePayer.Address.String()},
-			{Key: sdk.AttributeKeyAmount, Value: "2000000uband"},
+			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[0])
@@ -446,7 +446,7 @@ func TestRequestDataSuccess(t *testing.T) {
 		Type: authtypes.EventTypeCoinReceived,
 		Attributes: []abci.EventAttribute{
 			{Key: authtypes.AttributeKeyReceiver, Value: testapp.Treasury.Address.String()},
-			{Key: sdk.AttributeKeyAmount, Value: "2000000uband"},
+			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[1])
@@ -457,7 +457,7 @@ func TestRequestDataSuccess(t *testing.T) {
 		Attributes: []abci.EventAttribute{
 			{Key: authtypes.AttributeKeyRecipient, Value: testapp.Treasury.Address.String()},
 			{Key: authtypes.AttributeKeySender, Value: testapp.FeePayer.Address.String()},
-			{Key: sdk.AttributeKeyAmount, Value: "2000000uband"},
+			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[2])
@@ -483,7 +483,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyAskCount, Value: "2"},
 			{Key: types.AttributeKeyMinCount, Value: "2"},
 			{Key: types.AttributeKeyGasUsed, Value: "5294700000"},
-			{Key: types.AttributeKeyTotalFees, Value: "6000000uband"},
+			{Key: types.AttributeKeyTotalFees, Value: "6000000loki"},
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[2].ValAddress.String()},
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[0].ValAddress.String()},
 		},
@@ -496,7 +496,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyDataSourceHash, Value: testapp.DataSources[1].Filename},
 			{Key: types.AttributeKeyExternalID, Value: "1"},
 			{Key: types.AttributeKeyCalldata, Value: "beeb"},
-			{Key: types.AttributeKeyFee, Value: "1000000uband"},
+			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[13])
@@ -507,7 +507,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyDataSourceHash, Value: testapp.DataSources[2].Filename},
 			{Key: types.AttributeKeyExternalID, Value: "2"},
 			{Key: types.AttributeKeyCalldata, Value: "beeb"},
-			{Key: types.AttributeKeyFee, Value: "1000000uband"},
+			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[14])
@@ -518,7 +518,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyDataSourceHash, Value: testapp.DataSources[3].Filename},
 			{Key: types.AttributeKeyExternalID, Value: "3"},
 			{Key: types.AttributeKeyCalldata, Value: "beeb"},
-			{Key: types.AttributeKeyFee, Value: "1000000uband"},
+			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
 	require.Equal(t, abci.Event(event), res.Events[15])
@@ -537,7 +537,7 @@ func TestRequestDataFail(t *testing.T) {
 			2,
 			2,
 			"CID",
-			testapp.Coins100000000uband,
+			testapp.Coins100000000loki,
 			testapp.TestDefaultPrepareGas,
 			testapp.TestDefaultExecuteGas,
 			testapp.FeePayer.Address,
@@ -558,7 +558,7 @@ func TestRequestDataFail(t *testing.T) {
 			2,
 			2,
 			"CID",
-			testapp.Coins100000000uband,
+			testapp.Coins100000000loki,
 			testapp.TestDefaultPrepareGas,
 			testapp.TestDefaultExecuteGas,
 			testapp.FeePayer.Address,
@@ -577,7 +577,7 @@ func TestRequestDataFail(t *testing.T) {
 			3,
 			2,
 			"CID",
-			testapp.Coins100000000uband,
+			testapp.Coins100000000loki,
 			testapp.TestDefaultPrepareGas,
 			testapp.TestDefaultExecuteGas,
 			testapp.FeePayer.Address,
@@ -596,7 +596,7 @@ func TestRequestDataFail(t *testing.T) {
 			2,
 			2,
 			"CID",
-			testapp.Coins100000000uband,
+			testapp.Coins100000000loki,
 			testapp.TestDefaultPrepareGas,
 			testapp.TestDefaultExecuteGas,
 			testapp.FeePayer.Address,
@@ -621,7 +621,7 @@ func TestRequestDataFail(t *testing.T) {
 			testapp.FeePayer.Address,
 		),
 	)
-	testapp.CheckErrorf(t, err, types.ErrNotEnoughFee, "require: 2000000uband, max: 0uband")
+	testapp.CheckErrorf(t, err, types.ErrNotEnoughFee, "require: 2000000loki, max: 0loki")
 	require.Nil(t, res)
 }
 

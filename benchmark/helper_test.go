@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	owasm "github.com/bandprotocol/go-owasm/api"
 	types "github.com/cometbft/cometbft/abci/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
@@ -61,7 +61,7 @@ func GenMsgRequestData(
 		AskCount:   1,
 		MinCount:   1,
 		ClientID:   "",
-		FeeLimit:   sdk.Coins{sdk.NewInt64Coin("uband", 1)},
+		FeeLimit:   sdk.Coins{sdk.NewInt64Coin("loki", 1)},
 		PrepareGas: prepareGas,
 		ExecuteGas: executeGas,
 		Sender:     sender.Address.String(),
@@ -77,7 +77,7 @@ func GenMsgSend(
 	msg := banktypes.MsgSend{
 		FromAddress: sender.Address.String(),
 		ToAddress:   receiver.Address.String(),
-		Amount:      sdk.Coins{sdk.NewInt64Coin("uband", 1)},
+		Amount:      sdk.Coins{sdk.NewInt64Coin("loki", 1)},
 	}
 
 	return []sdk.Msg{&msg}
@@ -131,7 +131,7 @@ func GenSequenceOfTxs(
 		txs[i], _ = testapp.GenTx(
 			txConfig,
 			msgs,
-			sdk.Coins{sdk.NewInt64Coin("uband", 1)},
+			sdk.Coins{sdk.NewInt64Coin("loki", 1)},
 			math.MaxInt64,
 			"",
 			[]uint64{account.Num},

@@ -31,7 +31,7 @@ var (
 	_ porttypes.IBCModule   = IBCModule{}
 )
 
-// AppModuleBasic is Band Oracle's module basic object.
+// AppModuleBasic is Odin Oracle's module basic object.
 type AppModuleBasic struct{}
 
 // Name returns this module's name - "oracle" (SDK AppModuleBasic interface).

@@ -48,32 +48,32 @@ func TestMustGetFileOK(t *testing.T) {
 	}()
 
 	f := filecache.New(dir)
-	filename := f.AddFile([]byte("BAND"))
+	filename := f.AddFile([]byte("ODIN"))
 	require.Equal(t, filename, "52f1b54ce34b64a02f9946b29f670a12933152b1122514ea969a91c211aa32fc")
 
 	content := f.MustGetFile(filename)
-	require.Equal(t, content, []byte("BAND"))
+	require.Equal(t, content, []byte("ODIN"))
 }
 
 func TestGetFileOK(t *testing.T) {
-	dir, err := ioutil.TempDir("", "filecache")
+	dir, err := os.CreateTemp("", "filecache")
 	if err != nil {
 		panic(err)
 	}
 	defer func() {
-		err := os.RemoveAll(dir)
+		err := os.RemoveAll(dir.Name())
 		if err != nil {
 			panic(err)
 		}
 	}()
 
-	f := filecache.New(dir)
-	filename := f.AddFile([]byte("BAND"))
+	f := filecache.New(dir.Name())
+	filename := f.AddFile([]byte("ODIN"))
 	require.Equal(t, filename, "52f1b54ce34b64a02f9946b29f670a12933152b1122514ea969a91c211aa32fc")
 
 	content, err := f.GetFile(filename)
 	require.NoError(t, err)
-	require.Equal(t, content, []byte("BAND"))
+	require.Equal(t, content, []byte("ODIN"))
 }
 
 func TestMustGetFileNotExist(t *testing.T) {

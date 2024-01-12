@@ -20,14 +20,14 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 
-	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
 type AppKeepers struct {
 	// keepers
 	AccountKeeper    authkeeper.AccountKeeper
-	BankKeeper       bandbankkeeper.WrappedBankKeeper
+	BankKeeper       odinbankkeeper.WrappedBankKeeper
 	CapabilityKeeper *capabilitykeeper.Keeper
 	StakingKeeper    *stakingkeeper.Keeper
 	SlashingKeeper   slashingkeeper.Keeper

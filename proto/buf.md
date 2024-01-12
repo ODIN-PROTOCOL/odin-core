@@ -1,6 +1,6 @@
 # Protobufs
 
-This is the public protocol buffers API for [bandd](https://github.com/bandprotocol/chain).
+This is the public protocol buffers API for [odindd](https://github.com/ODIN-PRTOCOL/odin-core).
 
 ## Download
 

@@ -35,7 +35,7 @@ const (
 	baseAuthAnteGas              = readParamGas*4 + readAccountGas*4 + writeAccountGas + signatureVerificationGasCost + readAccountWithoutPublicKeyGas + writeAccountGas
 	payingFeeGasCost             = uint64(19834)
 	baseTransactionSize          = uint64(253)
-	txCostPerByte                = uint64(5)    // Using DefaultTxSizeCostPerByte of BandChain
+	txCostPerByte                = uint64(5)    // Using DefaultTxSizeCostPerByte of OdinChain
 	signatureVerificationGasCost = uint64(1000) // for secp256k1 signature, which more than ed21559
 
 	// Report Data byte lengths

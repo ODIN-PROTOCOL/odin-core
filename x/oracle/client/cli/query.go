@@ -42,7 +42,7 @@ func GetQueryCmd() *cobra.Command {
 func GetQueryCmdParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
-		Short: "Get current parameters of Bandchain's oracle module",
+		Short: "Get current parameters of OdinChain's oracle module",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -67,7 +67,7 @@ func GetQueryCmdParams() *cobra.Command {
 func GetQueryCmdCounts() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "counts",
-		Short: "Get number of requests, oracle scripts, and data source scripts currently deployed on Bandchain",
+		Short: "Get number of requests, oracle scripts, and data source scripts currently deployed on OdinChain",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)

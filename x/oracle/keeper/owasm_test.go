@@ -135,7 +135,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
@@ -155,48 +155,48 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 		sdk.NewEvent(
 			authtypes.EventTypeCoinSpent,
 			sdk.NewAttribute(authtypes.AttributeKeySpender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
 			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
 			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeySender, testapp.FeePayer.Address.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinSpent,
 			sdk.NewAttribute(authtypes.AttributeKeySpender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
 			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
 			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeySender, testapp.FeePayer.Address.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinSpent,
 			sdk.NewAttribute(authtypes.AttributeKeySpender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
 			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
 			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000uband.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeySender, testapp.FeePayer.Address.String()),
@@ -209,7 +209,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 			sdk.NewAttribute(types.AttributeKeyAskCount, "1"),
 			sdk.NewAttribute(types.AttributeKeyMinCount, "1"),
 			sdk.NewAttribute(types.AttributeKeyGasUsed, "5294700000"),
-			sdk.NewAttribute(types.AttributeKeyTotalFees, "3000000uband"),
+			sdk.NewAttribute(types.AttributeKeyTotalFees, "3000000loki"),
 			sdk.NewAttribute(types.AttributeKeyValidator, testapp.Validators[0].ValAddress.String()),
 		), sdk.NewEvent(
 			types.EventTypeRawRequest,
@@ -217,21 +217,21 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 			sdk.NewAttribute(types.AttributeKeyDataSourceHash, testapp.DataSources[1].Filename),
 			sdk.NewAttribute(types.AttributeKeyExternalID, "1"),
 			sdk.NewAttribute(types.AttributeKeyCalldata, "beeb"),
-			sdk.NewAttribute(types.AttributeKeyFee, "1000000uband"),
+			sdk.NewAttribute(types.AttributeKeyFee, "1000000loki"),
 		), sdk.NewEvent(
 			types.EventTypeRawRequest,
 			sdk.NewAttribute(types.AttributeKeyDataSourceID, "2"),
 			sdk.NewAttribute(types.AttributeKeyDataSourceHash, testapp.DataSources[2].Filename),
 			sdk.NewAttribute(types.AttributeKeyExternalID, "2"),
 			sdk.NewAttribute(types.AttributeKeyCalldata, "beeb"),
-			sdk.NewAttribute(types.AttributeKeyFee, "1000000uband"),
+			sdk.NewAttribute(types.AttributeKeyFee, "1000000loki"),
 		), sdk.NewEvent(
 			types.EventTypeRawRequest,
 			sdk.NewAttribute(types.AttributeKeyDataSourceID, "3"),
 			sdk.NewAttribute(types.AttributeKeyDataSourceHash, testapp.DataSources[3].Filename),
 			sdk.NewAttribute(types.AttributeKeyExternalID, "3"),
 			sdk.NewAttribute(types.AttributeKeyCalldata, "beeb"),
-			sdk.NewAttribute(types.AttributeKeyFee, "1000000uband"),
+			sdk.NewAttribute(types.AttributeKeyFee, "1000000loki"),
 		),
 	}, ctx.EventManager().Events())
 
@@ -241,7 +241,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 	require.Equal(t, 1, wrappedGasMeter.CountRecord(testapp.TestDefaultPrepareGas, "OWASM_PREPARE_FEE"))
 	require.Equal(t, 1, wrappedGasMeter.CountRecord(testapp.TestDefaultExecuteGas, "OWASM_EXECUTE_FEE"))
 
-	paid := sdk.NewCoins(sdk.NewInt64Coin("uband", 3000000))
+	paid := sdk.NewCoins(sdk.NewInt64Coin("loki", 3000000))
 	feePayerBalances = feePayerBalances.Sub(paid...)
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.Treasury.Address, paid)
@@ -263,53 +263,53 @@ func TestPrepareRequestNotEnoughMaxFee(t *testing.T) {
 		testapp.FeePayer.Address,
 	)
 	_, err := k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
-	require.EqualError(t, err, "require: 1000000uband, max: 0uband: not enough fee")
+	require.EqualError(t, err, "require: 1000000loki, max: 0loki: not enough fee")
 	m = types.NewMsgRequestData(
 		1,
 		BasicCalldata,
 		1,
 		1,
 		BasicClientID,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 1000000)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000)),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
 	)
 	_, err = k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
-	require.EqualError(t, err, "require: 2000000uband, max: 1000000uband: not enough fee")
+	require.EqualError(t, err, "require: 2000000loki, max: 1000000loki: not enough fee")
 	m = types.NewMsgRequestData(
 		1,
 		BasicCalldata,
 		1,
 		1,
 		BasicClientID,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 2000000)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 2000000)),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
 	)
 	_, err = k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
-	require.EqualError(t, err, "require: 3000000uband, max: 2000000uband: not enough fee")
+	require.EqualError(t, err, "require: 3000000loki, max: 2000000loki: not enough fee")
 	m = types.NewMsgRequestData(
 		1,
 		BasicCalldata,
 		1,
 		1,
 		BasicClientID,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 2999999)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 2999999)),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
 	)
 	_, err = k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
-	require.EqualError(t, err, "require: 3000000uband, max: 2999999uband: not enough fee")
+	require.EqualError(t, err, "require: 3000000loki, max: 2999999loki: not enough fee")
 	m = types.NewMsgRequestData(
 		1,
 		BasicCalldata,
 		1,
 		1,
 		BasicClientID,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 3000000)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 3000000)),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.FeePayer.Address,
@@ -329,13 +329,13 @@ func TestPrepareRequestNotEnoughFund(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
 	)
 	_, err := k.PrepareRequest(ctx, m, testapp.Alice.Address, nil)
-	require.EqualError(t, err, "spendable balance  is smaller than 1000000uband: insufficient funds")
+	require.EqualError(t, err, "spendable balance  is smaller than 1000000loki: insufficient funds")
 }
 
 func TestPrepareRequestInvalidCalldataSize(t *testing.T) {
@@ -346,7 +346,7 @@ func TestPrepareRequestInvalidCalldataSize(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -398,7 +398,7 @@ func TestPrepareRequestInvalidAskCountFail(t *testing.T) {
 		10,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -416,7 +416,7 @@ func TestPrepareRequestInvalidAskCountFail(t *testing.T) {
 		4,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -434,7 +434,7 @@ func TestPrepareRequestInvalidAskCountFail(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -459,7 +459,7 @@ func TestPrepareRequestBaseOwasmFeePanic(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -488,7 +488,7 @@ func TestPrepareRequestPerValidatorRequestFeePanic(t *testing.T) {
 		2,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -505,7 +505,7 @@ func TestPrepareRequestPerValidatorRequestFeePanic(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -524,7 +524,7 @@ func TestPrepareRequestEmptyCalldata(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -541,7 +541,7 @@ func TestPrepareRequestOracleScriptNotFound(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -558,7 +558,7 @@ func TestPrepareRequestBadWasmExecutionFail(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -575,7 +575,7 @@ func TestPrepareRequestWithEmptyRawRequest(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -589,7 +589,7 @@ func TestPrepareRequestUnknownDataSource(t *testing.T) {
 	m := types.NewMsgRequestData(4, obi.MustEncode(testapp.Wasm4Input{
 		IDs:      []int64{1, 2, 99},
 		Calldata: "beeb",
-	}), 1, 1, BasicClientID, testapp.Coins100000000uband, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
+	}), 1, 1, BasicClientID, testapp.Coins100000000loki, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
 	_, err := k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
 	require.EqualError(t, err, "id: 99: data source not found")
 }
@@ -602,13 +602,13 @@ func TestPrepareRequestInvalidDataSourceCount(t *testing.T) {
 	m := types.NewMsgRequestData(4, obi.MustEncode(testapp.Wasm4Input{
 		IDs:      []int64{1, 2, 3, 4},
 		Calldata: "beeb",
-	}), 1, 1, BasicClientID, testapp.Coins100000000uband, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
+	}), 1, 1, BasicClientID, testapp.Coins100000000loki, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
 	_, err := k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
 	require.ErrorIs(t, err, types.ErrBadWasmExecution)
 	m = types.NewMsgRequestData(4, obi.MustEncode(testapp.Wasm4Input{
 		IDs:      []int64{1, 2, 3},
 		Calldata: "beeb",
-	}), 1, 1, BasicClientID, testapp.Coins100000000uband, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
+	}), 1, 1, BasicClientID, testapp.Coins100000000loki, testapp.TestDefaultPrepareGas, testapp.TestDefaultExecuteGas, testapp.Alice.Address)
 	id, err := k.PrepareRequest(ctx, m, testapp.FeePayer.Address, nil)
 	require.Equal(t, types.RequestID(1), id)
 	require.NoError(t, err)
@@ -623,7 +623,7 @@ func TestPrepareRequestTooMuchWasmGas(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -637,7 +637,7 @@ func TestPrepareRequestTooMuchWasmGas(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -655,7 +655,7 @@ func TestPrepareRequestTooLargeCalldata(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -669,7 +669,7 @@ func TestPrepareRequestTooLargeCalldata(t *testing.T) {
 		1,
 		1,
 		BasicClientID,
-		testapp.Coins100000000uband,
+		testapp.Coins100000000loki,
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Alice.Address,
@@ -947,7 +947,7 @@ func TestCollectFeeEmptyFee(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, coins)
 
-	coins, err = k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000uband, 1, raws)
+	coins, err = k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000loki, 1, raws)
 	require.NoError(t, err)
 	require.Empty(t, coins)
 
@@ -955,7 +955,7 @@ func TestCollectFeeEmptyFee(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, coins)
 
-	coins, err = k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000uband, 2, raws)
+	coins, err = k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000loki, 2, raws)
 	require.NoError(t, err)
 	require.Empty(t, coins)
 }
@@ -965,9 +965,9 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000))),
 		testapp.EmptyCoins,
 	})
 
@@ -979,9 +979,9 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 	feePayerBalances := balancesRes.Balances
 	feePayerBalances[0].Amount = feePayerBalances[0].Amount.Sub(sdk.NewInt(3000000))
 
-	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins100000000uband, 1, raws)
+	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins100000000loki, 1, raws)
 	require.NoError(t, err)
-	require.Equal(t, sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(3000000))), coins)
+	require.Equal(t, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))), coins)
 
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
 	testapp.CheckBalances(
@@ -989,7 +989,7 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 		ctx,
 		app.BankKeeper,
 		testapp.Treasury.Address,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(3000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))),
 	)
 }
 
@@ -998,9 +998,9 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000))),
 		testapp.EmptyCoins,
 	})
 
@@ -1012,9 +1012,9 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 	feePayerBalances := balancesRes.Balances
 	feePayerBalances[0].Amount = feePayerBalances[0].Amount.Sub(sdk.NewInt(12000000))
 
-	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins100000000uband, 4, raws)
+	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins100000000loki, 4, raws)
 	require.NoError(t, err)
-	require.Equal(t, sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(12000000))), coins)
+	require.Equal(t, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))), coins)
 
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
 	testapp.CheckBalances(
@@ -1022,7 +1022,7 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 		ctx,
 		app.BankKeeper,
 		testapp.Treasury.Address,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(12000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))),
 	)
 }
 
@@ -1031,9 +1031,9 @@ func TestCollectFeeWithMixedAndFeeNotEnough(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000))),
 		testapp.EmptyCoins,
 	})
 
@@ -1041,7 +1041,7 @@ func TestCollectFeeWithMixedAndFeeNotEnough(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrNotEnoughFee)
 	require.Nil(t, coins)
 
-	coins, err = k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins1000000uband, 1, raws)
+	coins, err = k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins1000000loki, 1, raws)
 	require.ErrorIs(t, err, types.ErrNotEnoughFee)
 	require.Nil(t, coins)
 }
@@ -1051,17 +1051,17 @@ func TestCollectFeeWithEnoughFeeButInsufficientBalance(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000))),
 		testapp.EmptyCoins,
 	})
 
-	coins, err := k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000uband, 1, raws)
+	coins, err := k.CollectFee(ctx, testapp.Alice.Address, testapp.Coins100000000loki, 1, raws)
 	require.Nil(t, coins)
 	// MAX is 100m but have only 1m in account
 	// First ds collect 1m so there no balance enough for next ds but it doesn't touch limit
-	require.EqualError(t, err, "spendable balance  is smaller than 2000000uband: insufficient funds")
+	require.EqualError(t, err, "spendable balance  is smaller than 2000000loki: insufficient funds")
 }
 
 func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
@@ -1069,15 +1069,15 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 		testapp.EmptyCoins,
 	})
 
 	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(2000000))))
 
-	// Carol have not enough uband but have enough uabc
+	// Carol have not enough loki but have enough uabc
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		minttypes.ModuleName,
@@ -1097,31 +1097,31 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 	// Coins sum is correct
 	require.True(
 		t,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))).
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))).
 			IsEqual(coins),
 	)
 
 	// FeePayer balance
-	// start: 100band, 0abc
-	// top-up: 100band, 2abc
-	// collect 3 band and 1 abc => 97band, 1abc
+	// start: 100odin, 0abc
+	// top-up: 100odin, 2abc
+	// collect 3 odin and 1 abc => 97odin, 1abc
 	testapp.CheckBalances(
 		t,
 		ctx,
 		app.BankKeeper,
 		testapp.FeePayer.Address,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(97000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(97000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 	)
 
 	// Treasury balance
-	// start: 0band, 0abc
-	// collect 3 band and 1 abc => 3band, 1abc
+	// start: 0odin, 0abc
+	// collect 3 odin and 1 abc => 3odin, 1abc
 	testapp.CheckBalances(
 		t,
 		ctx,
 		app.BankKeeper,
 		testapp.Treasury.Address,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 	)
 }
 
@@ -1130,24 +1130,24 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
-		testapp.Coins1000000uband,
+		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 		testapp.EmptyCoins,
 	})
 
 	app.BankKeeper.MintCoins(
 		ctx,
 		minttypes.ModuleName,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(10000000)), sdk.NewCoin("uabc", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000000)), sdk.NewCoin("uabc", sdk.NewInt(2000000))),
 	)
-	// Alice have no enough uband and don't have uabc so don't top up
-	// Bob have enough uband and have some but not enough uabc so add some
+	// Alice have no enough loki and don't have uabc so don't top up
+	// Bob have enough loki and have some but not enough uabc so add some
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		minttypes.ModuleName,
 		testapp.Bob.Address,
-		sdk.NewCoins(sdk.NewCoin("uband", sdk.NewInt(3000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))),
 	)
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
@@ -1155,7 +1155,7 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		testapp.Bob.Address,
 		sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(1))),
 	)
-	// Carol have not enough uband but have enough uabc
+	// Carol have not enough loki but have enough uabc
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		minttypes.ModuleName,
@@ -1191,5 +1191,5 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		1,
 		raws,
 	)
-	require.EqualError(t, err, "require: 3000000uband, max: 1000000uband: not enough fee")
+	require.EqualError(t, err, "require: 3000000loki, max: 1000000loki: not enough fee")
 }

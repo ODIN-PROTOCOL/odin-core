@@ -66,15 +66,15 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 		Validator:       abci.Validator{Address: testapp.Validators[1].PubKey.Address(), Power: 30},
 		SignedLastBlock: true,
 	}}
-	// Set collected fee to 100uband + 70% oracle reward proportion + disable minting inflation.
+	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
 	// NOTE: we intentionally keep ctx.BlockHeight = 0, so distr's AllocateTokens doesn't get called.
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("uband", 100)))
+	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)))
 	app.BankKeeper.SendCoinsFromModuleToModule(
 		ctx,
 		minttypes.ModuleName,
 		authtypes.FeeCollectorName,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 100)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 100)),
 	)
 	distModule := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
 
@@ -88,7 +88,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	k.SetParams(ctx, params)
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 100)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 100)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	// If there are no validators active, Calling begin block should be no-op.
@@ -98,7 +98,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	})
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 100)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 100)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	// 1 validator active, begin block should take 70% of the fee. 2% of that goes to comm pool.
@@ -109,26 +109,26 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	})
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 30)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 30)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 70)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 70)),
 		app.BankKeeper.GetAllBalances(ctx, distModule.GetAddress()),
 	)
-	// 100*70%*2% = 1.4uband
+	// 100*70%*2% = 1.4loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(14, 1)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(14, 1)}},
 		app.DistrKeeper.GetFeePool(ctx).CommunityPool,
 	)
-	// 0uband
+	// 0loki
 	require.Empty(t, app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress))
-	// 100*70%*98% = 68.6uband
+	// 100*70%*98% = 68.6loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(686, 1)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(686, 1)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress).Rewards,
 	)
 	// 2 validators active now. 70% of the remaining fee pool will be split 3 ways (comm pool + val1 + val2).
@@ -139,30 +139,30 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	})
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 9)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 9)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 91)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 91)),
 		app.BankKeeper.GetAllBalances(ctx, distModule.GetAddress()),
 	)
-	// 1.4uband + 30*70%*2% = 1.82uband
+	// 1.4loki + 30*70%*2% = 1.82loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(182, 2)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(182, 2)}},
 		app.DistrKeeper.GetFeePool(ctx).CommunityPool,
 	)
-	// 30*70%*98%*70% = 14.406uband
+	// 30*70%*98%*70% = 14.406loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(14406, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(14406, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress).Rewards,
 	)
-	// 68.6uband + 30*70%*98%*30% = 74.774uband
+	// 68.6loki + 30*70%*98%*30% = 74.774loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(74774, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(74774, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress).Rewards,
 	)
 	// 1 validator becomes in active, and will not get reward this time.
@@ -173,30 +173,30 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	})
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 3)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 3)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 97)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 97)),
 		app.BankKeeper.GetAllBalances(ctx, distModule.GetAddress()),
 	)
-	// 1.82uband + 6*2% = 1.82uband
+	// 1.82loki + 6*2% = 1.82loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(194, 2)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(194, 2)}},
 		app.DistrKeeper.GetFeePool(ctx).CommunityPool,
 	)
-	// 14.406uband + 6*98% = 20.286uband
+	// 14.406loki + 6*98% = 20.286loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(20286, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(20286, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress).Rewards,
 	)
-	// 74.774uband
+	// 74.774loki
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(74774, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(74774, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress).Rewards,
 	)
 }
@@ -215,13 +215,13 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
 	distModule := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
 
-	// Set collected fee to 100uband + 70% oracle reward proportion + disable minting inflation.
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("uband", 50)))
+	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
+	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
 	app.BankKeeper.SendCoinsFromModuleToModule(
 		ctx,
 		minttypes.ModuleName,
 		authtypes.FeeCollectorName,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 50)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
 	)
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
 	mintParams := app.MintKeeper.GetParams(ctx)
@@ -235,19 +235,19 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	app.DistrKeeper.SetPreviousProposerConsAddr(ctx, testapp.Validators[1].Address.Bytes())
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 50)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
 		app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()),
 	)
 	// Only Validators[0] active. After we call begin block:
-	//   35uband = 70% go to oracle pool
-	//     0.7uband (2%) go to community pool
-	//     34.3uband go to Validators[0] (active)
-	//   15uband = 30% go to distr pool
-	//     0.3uband (2%) go to community pool
-	//     2.25uband (15%) go to Validators[1] (proposer)
-	//     12.45uband split among voters
-	//        8.715uband (70%) go to Validators[0]
-	//        3.735uband (30%) go to Validators[1]
+	//   35loki = 70% go to oracle pool
+	//     0.7loki (2%) go to community pool
+	//     34.3loki go to Validators[0] (active)
+	//   15loki = 30% go to distr pool
+	//     0.3loki (2%) go to community pool
+	//     2.25loki (15%) go to Validators[1] (proposer)
+	//     12.45loki split among voters
+	//        8.715loki (70%) go to Validators[0]
+	//        3.735loki (30%) go to Validators[1]
 	// In summary
 	//   Community pool: 0.7 + 0.3 = 1
 	//   Validators[0]: 34.3 + 8.715 = 43.015
@@ -260,22 +260,22 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	require.Equal(t, sdk.Coins{}, app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()))
 	require.Equal(
 		t,
-		sdk.NewCoins(sdk.NewInt64Coin("uband", 50)),
+		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
 		app.BankKeeper.GetAllBalances(ctx, distModule.GetAddress()),
 	)
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDec(1)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDec(1)}},
 		app.DistrKeeper.GetFeePool(ctx).CommunityPool,
 	)
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(44590, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(44590, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[0].ValAddress).Rewards,
 	)
 	require.Equal(
 		t,
-		sdk.DecCoins{{Denom: "uband", Amount: sdk.NewDecWithPrec(4410, 3)}},
+		sdk.DecCoins{{Denom: "loki", Amount: sdk.NewDecWithPrec(4410, 3)}},
 		app.DistrKeeper.GetValidatorOutstandingRewards(ctx, testapp.Validators[1].ValAddress).Rewards,
 	)
 }

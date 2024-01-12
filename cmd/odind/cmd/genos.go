@@ -6,13 +6,13 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/bandprotocol/go-owasm/api"
 	"github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/odin-protocol/go-owasm/api"
 	"github.com/spf13/cobra"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"

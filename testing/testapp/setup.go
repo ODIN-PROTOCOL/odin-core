@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	owasm "github.com/bandprotocol/go-owasm/api"
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
@@ -38,9 +37,10 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
-	bandapp "github.com/ODIN-PROTOCOL/odin-core/app"
+	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -70,18 +70,18 @@ var (
 
 // nolint
 var (
-	EmptyCoins          = sdk.Coins(nil)
-	Coins1uband         = sdk.NewCoins(sdk.NewInt64Coin("uband", 1))
-	Coins10uband        = sdk.NewCoins(sdk.NewInt64Coin("uband", 10))
-	Coins11uband        = sdk.NewCoins(sdk.NewInt64Coin("uband", 11))
-	Coins1000000uband   = sdk.NewCoins(sdk.NewInt64Coin("uband", 1000000))
-	Coins99999999uband  = sdk.NewCoins(sdk.NewInt64Coin("uband", 99999999))
-	Coins100000000uband = sdk.NewCoins(sdk.NewInt64Coin("uband", 100000000))
-	BadCoins            = []sdk.Coin{{Denom: "uband", Amount: sdk.NewInt(-1)}}
-	Port1               = "port-1"
-	Port2               = "port-2"
-	Channel1            = "channel-1"
-	Channel2            = "channel-2"
+	EmptyCoins         = sdk.Coins(nil)
+	Coins1loki         = sdk.NewCoins(sdk.NewInt64Coin("loki", 1))
+	Coins10loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 10))
+	Coins11loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 11))
+	Coins1000000loki   = sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000))
+	Coins99999999loki  = sdk.NewCoins(sdk.NewInt64Coin("loki", 99999999))
+	Coins100000000loki = sdk.NewCoins(sdk.NewInt64Coin("loki", 100000000))
+	BadCoins           = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
+	Port1              = "port-1"
+	Port2              = "port-2"
+	Channel1           = "channel-1"
+	Channel2           = "channel-2"
 )
 
 const (
@@ -108,7 +108,7 @@ var DefaultConsensusParams = &tmproto.ConsensusParams{
 }
 
 type TestingApp struct {
-	*bandapp.BandApp
+	*odinapp.OdinApp
 }
 
 func (app *TestingApp) GetBaseApp() *baseapp.BaseApp {
@@ -132,11 +132,11 @@ func (app *TestingApp) GetScopedIBCKeeper() capabilitykeeper.ScopedKeeper {
 
 // GetTxConfig implements the TestingApp interface.
 func (app *TestingApp) GetTxConfig() client.TxConfig {
-	return bandapp.MakeEncodingConfig().TxConfig
+	return odinapp.MakeEncodingConfig().TxConfig
 }
 
 func init() {
-	bandapp.SetBech32AddressPrefixesAndBip44CoinTypeAndSeal(sdk.GetConfig())
+	odinapp.SetBech32AddressPrefixesAndBip44CoinTypeAndSeal(sdk.GetConfig())
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	Owner = createArbitraryAccount(r)
 	Treasury = createArbitraryAccount(r)
@@ -180,7 +180,7 @@ func getGenesisDataSources(homePath string) []types.DataSource {
 		idxStr := fmt.Sprintf("%d", idx+1)
 		hash := fc.AddFile([]byte("code" + idxStr))
 		DataSources = append(DataSources, types.NewDataSource(
-			Owner.Address, "name"+idxStr, "desc"+idxStr, hash, Coins1000000uband, Treasury.Address,
+			Owner.Address, "name"+idxStr, "desc"+idxStr, hash, Coins1000000loki, Treasury.Address,
 		))
 	}
 	return DataSources[1:]
@@ -214,7 +214,7 @@ func (ao EmptyAppOptions) Get(o string) interface{} {
 // NewTestApp creates instance of our app using in test.
 func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	// Set HomeFlag to a temp folder for simulation run.
-	dir, err := os.MkdirTemp("", "bandd")
+	dir, err := os.MkdirTemp("", "odind")
 	if err != nil {
 		panic(err)
 	}
@@ -241,7 +241,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	)
 
 	app := &TestingApp{
-		BandApp: bandapp.NewBandApp(
+		OdinApp: odinapp.NewOdinApp(
 			log.NewNopLogger(),
 			db,
 			nil,
@@ -253,7 +253,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 			baseapp.SetChainID(chainID),
 		),
 	}
-	genesis := bandapp.NewDefaultGenesisState()
+	genesis := odinapp.NewDefaultGenesisState()
 	acc := []authtypes.GenesisAccount{
 		&authtypes.BaseAccount{Address: Owner.Address.String()},
 		&authtypes.BaseAccount{Address: FeePayer.Address.String()},
@@ -270,7 +270,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	validators := make([]stakingtypes.Validator, 0, len(Validators))
 	signingInfos := make([]slashingtypes.SigningInfo, 0, len(Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(Validators))
-	bamt := []sdk.Int{Coins100000000uband[0].Amount, Coins1000000uband[0].Amount, Coins99999999uband[0].Amount}
+	bamt := []sdk.Int{Coins100000000loki[0].Amount, Coins1000000loki[0].Amount, Coins99999999loki[0].Amount}
 	// bondAmt := sdk.NewInt(1000000)
 	for idx, val := range Validators {
 		tmpk, err := cryptocodec.ToTmPubKeyInterface(val.PubKey)
@@ -315,7 +315,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	}
 	// set validators and delegations
 	stakingParams := stakingtypes.DefaultParams()
-	stakingParams.BondDenom = "uband"
+	stakingParams.BondDenom = "loki"
 	stakingGenesis := stakingtypes.NewGenesisState(stakingParams, validators, delegations)
 	genesis[stakingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(stakingGenesis)
 
@@ -323,19 +323,19 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	slashingGenesis := slashingtypes.NewGenesisState(slashingParams, signingInfos, nil)
 	genesis[slashingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(slashingGenesis)
 
-	// Fund seed accounts and validators with 1000000uband and 100000000uband initially.
+	// Fund seed accounts and validators with 1000000loki and 100000000loki initially.
 	balances := []banktypes.Balance{
 		{
 			Address: Owner.Address.String(),
-			Coins:   Coins1000000uband,
+			Coins:   Coins1000000loki,
 		},
-		{Address: FeePayer.Address.String(), Coins: Coins100000000uband},
-		{Address: Alice.Address.String(), Coins: Coins1000000uband},
-		{Address: Bob.Address.String(), Coins: Coins1000000uband},
-		{Address: Carol.Address.String(), Coins: Coins1000000uband},
-		{Address: Validators[0].Address.String(), Coins: Coins100000000uband},
-		{Address: Validators[1].Address.String(), Coins: Coins100000000uband},
-		{Address: Validators[2].Address.String(), Coins: Coins100000000uband},
+		{Address: FeePayer.Address.String(), Coins: Coins100000000loki},
+		{Address: Alice.Address.String(), Coins: Coins1000000loki},
+		{Address: Bob.Address.String(), Coins: Coins1000000loki},
+		{Address: Carol.Address.String(), Coins: Coins1000000loki},
+		{Address: Validators[0].Address.String(), Coins: Coins100000000loki},
+		{Address: Validators[1].Address.String(), Coins: Coins100000000loki},
+		{Address: Validators[2].Address.String(), Coins: Coins100000000loki},
 	}
 	totalSupply := sdk.NewCoins()
 	for idx := 0; idx < len(balances)-len(validators); idx++ {
@@ -345,13 +345,13 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	for idx := 0; idx < len(validators); idx++ {
 		// add genesis acc tokens and delegated tokens to total supply
 		totalSupply = totalSupply.Add(
-			balances[idx+len(balances)-len(validators)].Coins.Add(sdk.NewCoin("uband", bamt[idx]))...)
+			balances[idx+len(balances)-len(validators)].Coins.Add(sdk.NewCoin("loki", bamt[idx]))...)
 	}
 
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin("uband", sdk.NewInt(200999999))},
+		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(200999999))},
 	})
 
 	bankGenesis := banktypes.NewGenesisState(
@@ -385,7 +385,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 
 // CreateTestInput creates a new test environment for unit tests.
 func CreateTestInput(autoActivate bool) (*TestingApp, sdk.Context, keeper.Keeper) {
-	app := NewTestApp("BANDCHAIN", log.NewNopLogger())
+	app := NewTestApp("ODINCHAIN", log.NewNopLogger())
 	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})
 	if autoActivate {
 		app.OracleKeeper.Activate(ctx, Validators[0].ValAddress)
@@ -395,8 +395,8 @@ func CreateTestInput(autoActivate bool) (*TestingApp, sdk.Context, keeper.Keeper
 	return app, ctx, app.OracleKeeper
 }
 
-func setup(withGenesis bool, invCheckPeriod uint, chainID string) (*TestingApp, bandapp.GenesisState, string) {
-	dir, err := os.MkdirTemp("", "bandibc")
+func setup(withGenesis bool, invCheckPeriod uint, chainID string) (*TestingApp, odinapp.GenesisState, string) {
+	dir, err := os.MkdirTemp("", "odinibc")
 	if err != nil {
 		panic(err)
 	}
@@ -422,7 +422,7 @@ func setup(withGenesis bool, invCheckPeriod uint, chainID string) (*TestingApp, 
 	)
 
 	app := &TestingApp{
-		BandApp: bandapp.NewBandApp(
+		OdinApp: odinapp.NewOdinApp(
 			log.NewNopLogger(),
 			db,
 			nil,
@@ -435,20 +435,20 @@ func setup(withGenesis bool, invCheckPeriod uint, chainID string) (*TestingApp, 
 		),
 	}
 	if withGenesis {
-		return app, bandapp.NewDefaultGenesisState(), dir
+		return app, odinapp.NewDefaultGenesisState(), dir
 	}
-	return app, bandapp.GenesisState{}, dir
+	return app, odinapp.GenesisState{}, dir
 }
 
 // SetupWithEmptyStore setup a TestingApp instance with empty DB
 func SetupWithEmptyStore() *TestingApp {
-	app, _, _ := setup(false, 0, "BANDCHAIN")
+	app, _, _ := setup(false, 0, "ODINCHAIN")
 	return app
 }
 
 // SetupWithGenesisValSet initializes a new TestingApp with a validator set and genesis accounts
 // that also act as delegators. For simplicity, each validator is bonded with a delegation
-// of one consensus engine unit (10^6) in the default token of the BandChain from first genesis
+// of one consensus engine unit (10^6) in the default token of the OdinChain from first genesis
 // account. A Nop logger is set in TestingApp.
 func SetupWithGenesisValSet(
 	t *testing.T,
@@ -494,20 +494,20 @@ func SetupWithGenesisValSet(
 
 	// set validators and delegations
 	ps := stakingtypes.DefaultParams()
-	ps.BondDenom = "uband"
+	ps.BondDenom = "loki"
 	stakingGenesis := stakingtypes.NewGenesisState(ps, validators, delegations)
 	genesisState[stakingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(stakingGenesis)
 
 	totalSupply := sdk.NewCoins()
 	for _, b := range balances {
 		// add genesis acc tokens and delegated tokens to total supply
-		totalSupply = totalSupply.Add(b.Coins.Add(sdk.NewCoin("uband", bondAmt))...)
+		totalSupply = totalSupply.Add(b.Coins.Add(sdk.NewCoin("loki", bondAmt))...)
 	}
 
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin("uband", bondAmt.Mul(sdk.NewInt(2)))},
+		Coins:   sdk.Coins{sdk.NewCoin("loki", bondAmt.Mul(sdk.NewInt(2)))},
 	})
 
 	// update total supply
@@ -634,7 +634,7 @@ func SignAndDeliver(
 	tx, err := GenTx(
 		txCfg,
 		msgs,
-		sdk.Coins{sdk.NewInt64Coin("uband", 2500)},
+		sdk.Coins{sdk.NewInt64Coin("loki", 2500)},
 		DefaultGenTxGas,
 		chainID,
 		accNums,

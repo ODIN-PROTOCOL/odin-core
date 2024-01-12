@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	"github.com/bandprotocol/go-owasm/api"
+	"github.com/odin-protocol/go-owasm/api"
 )
 
 var (

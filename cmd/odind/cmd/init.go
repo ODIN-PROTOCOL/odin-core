@@ -99,7 +99,7 @@ func genFilePVIfNotExists(keyFilePath, stateFilePath string) error {
 	return nil
 }
 
-// InitCmd returns a command that initializes all files needed for Tendermint and BandChain app.
+// InitCmd returns a command that initializes all files needed for Tendermint and OdinChain app.
 func InitCmd(customAppState map[string]json.RawMessage, defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init [moniker]",

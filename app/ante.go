@@ -1,4 +1,4 @@
-package band
+package odin
 
 import (
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"

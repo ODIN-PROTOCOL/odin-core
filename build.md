@@ -17,10 +17,10 @@ source ~/.bash_profile
 
 Now, you can install and run the application.
 
-```
+```bash
 # Clone the source of the tutorial repository
-git clone https://github.com/bandprotocol/bandchain.git
-cd bandchain/chain/
+git clone https://github.com/ODIN-PROTOCOL/odin-core
+cd odin-core
 ```
 
 ```bash
@@ -28,30 +28,31 @@ cd bandchain/chain/
 make install
 
 # Now you should be able to run the following commands:
-bandd help
+odind version
+odind help
 ```
 
 ## Running test application locally
 
-You can use the following script to generate a test environment to run BandChain locally. This will create the default genesis file with one validator, as well as some test accounts.
+You can use the following script to generate a test environment to run OdinChain locally. This will create the default genesis file with one validator, as well as some test accounts.
 
 ```bash
 ./scripts/generate_genesis.sh
-cp ./docker-config/single-validator/priv_validator_key.json ~/.band/config/priv_validator_key.json
-cp ./docker-config/single-validator/node_key.json ~/.band/config/node_key.json
+cp ./docker-config/single-validator/priv_validator_key.json ~/.odin/config/priv_validator_key.json
+cp ./docker-config/single-validator/node_key.json ~/.odin/config/node_key.json
 ```
 
-Once done, you can optionally add data sources or oracle scripts to the genesis file using `bandd`.
+Once done, you can optionally add data sources or oracle scripts to the genesis file using `odind`.
 
 ```bash
-bandd genesis add-data-source ...
-bandd genesis add-oracle-script ...
+odind genesis add-data-source ...
+odind genesis add-oracle-script ...
 ```
 
-You can now start the chain with `bandd`.
+You can now start the chain with `odind`.
 
 ```bash
-bandd start
+odind start
 ```
 
 On a separate tab, you should run the oracle daemon script to ensure your validator responds to oracle requests.
@@ -60,8 +61,8 @@ On a separate tab, you should run the oracle daemon script to ensure your valida
 ./scripts/start_yoda.sh validator
 ```
 
-To send an oracle request to the chain, use `bandd`.
+To send an oracle request to the chain, use `odind`.
 
 ```bash
-bandd tx oracle request [ORACLE_SCRIPT_ID] [ASK_COUNT] [MIN_COUNT] -c [CALLDATA] --from requester --gas auto --keyring-backend test --from requester
+odind tx oracle request [ORACLE_SCRIPT_ID] [ASK_COUNT] [MIN_COUNT] -c [CALLDATA] --from requester --gas auto --keyring-backend test --from requester
 ```

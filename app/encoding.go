@@ -1,4 +1,4 @@
-package band
+package odin
 
 import (
 	"github.com/cosmos/cosmos-sdk/std"
