@@ -33,9 +33,9 @@ func init() {
 // RegisterLegacyAminoCodec registers the necessary x/staking interfaces and concrete types
 // on the provided LegacyAmino codec. These types are used for Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(Params{}, "cosmos-sdk/x/mint/Params", nil)
-	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "cosmos-sdk/x/mint/MsgUpdateParams")
-	cdc.RegisterConcrete(&MsgWithdrawCoinsToAccFromTreasury{}, "mint/WithdrawCoinsToAccFromTreasury", nil)
+	legacy.RegisterAminoMsg(cdc, &MsgUpdateParams{}, "odin-core/x/mint/MsgUpdateParams")
+	cdc.RegisterConcrete(Params{}, "odin-core/x/mint/Params", nil)
+	cdc.RegisterConcrete(&MsgWithdrawCoinsToAccFromTreasury{}, "cosmos-sdk/x/mint/WithdrawCoinsToAccFromTreasury", nil)
 }
 
 // RegisterInterfaces register the mint module interfaces to protobuf Any.
