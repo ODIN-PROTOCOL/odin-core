@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/slashing/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -26,8 +26,7 @@ func (k Keeper) HasResult(ctx sdk.Context, id oracletypes.RequestID) bool {
 
 // SetResult sets result to the store.
 func (k Keeper) SetResult(ctx sdk.Context, reqID oracletypes.RequestID, result oracletypes.Result) {
-	store := ctx.KVStore(k.storeKey)
-	store.Set(oracletypes.ResultStoreKey(reqID), obi.MustEncode(result))
+	ctx.KVStore(k.storeKey).Set(oracletypes.ResultStoreKey(reqID), k.cdc.MustMarshal(&result))
 }
 
 // GetResult returns the result for the given request ID or error if not exists.
@@ -37,7 +36,7 @@ func (k Keeper) GetResult(ctx sdk.Context, id oracletypes.RequestID) (oracletype
 		return oracletypes.Result{}, sdkerrors.Wrapf(oracletypes.ErrResultNotFound, "id: %d", id)
 	}
 	var result oracletypes.Result
-	obi.MustDecode(bz, &result)
+	k.cdc.MustUnmarshal(bz, &result)
 	return result, nil
 }
 
@@ -103,42 +102,36 @@ func (k Keeper) SaveResult(
 		result,                             // Result
 	))
 
-	if r.IBCSource != nil {
-		sourceChannel := r.IBCSource.SourceChannel
-		sourcePort := r.IBCSource.SourcePort
+	if r.IBCChannel != nil {
+		sourceChannel := r.IBCChannel.ChannelId
+		sourcePort := r.IBCChannel.PortId
+
 		channelCap, ok := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(sourcePort, sourceChannel))
-
-		// if !found {
-		// 	panic(fmt.Sprintf("Cannot find channel on port ID (%s) channel ID (%s)", sourcePort, sourceChannel))
-		// }
-
-		// if !found {
-		// 	panic(fmt.Sprintf("Cannot get sequence number on source port: %s, source channel: %s", sourcePort, sourceChannel))
-		// }
-		// channelCap, ok := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(sourcePort, sourceChannel))
-
 		if !ok {
-			panic("Module does not own channel capability")
+			ctx.EventManager().EmitEvent(sdk.NewEvent(
+				oracletypes.EventTypeSendPacketFail,
+				sdk.NewAttribute(oracletypes.AttributeKeyReason, "Module does not own channel capability"),
+			))
+			return
 		}
 
 		packetData := oracletypes.NewOracleResponsePacketData(
 			r.ClientID, id, reportCount, int64(r.RequestTime), ctx.BlockTime().Unix(), status, result,
 		)
 
-		// packet := channeltypes.NewPacket(
-		// 	packetData.GetBytes(),
-		// 	sequence,
-		// 	sourcePort,
-		// 	sourceChannel,
-		// 	destinationPort,
-		// 	destinationChannel,
-		// 	clienttypes.NewHeight(0, 0),
-		// 	uint64(ctx.BlockTime().UnixNano()+int64(10*time.Minute)), // TODO: Find what time out will be used on response packet
-		// )
-
-		if _, err := k.channelKeeper.SendPacket(ctx, channelCap, sourcePort,
-			sourceChannel, clienttypes.NewHeight(0, 0), uint64(ctx.BlockTime().UnixNano()+packetExpireTime), packetData.GetBytes()); err != nil {
-			panic(err)
+		if _, err := k.channelKeeper.SendPacket(
+			ctx,
+			channelCap,
+			sourcePort,
+			sourceChannel,
+			clienttypes.NewHeight(0, 0),
+			uint64(ctx.BlockTime().UnixNano()+packetExpireTime),
+			packetData.GetBytes(),
+		); err != nil {
+			ctx.EventManager().EmitEvent(sdk.NewEvent(
+				oracletypes.EventTypeSendPacketFail,
+				sdk.NewAttribute(types.AttributeKeyReason, fmt.Sprintf("Unable to send packet: %s", err)),
+			))
 		}
 	}
 }

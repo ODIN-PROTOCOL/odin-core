@@ -464,7 +464,7 @@ func TestResolveRequestOutOfGas(t *testing.T) {
 	result := oracletypes.NewResult(
 		BasicClientID, 1, BasicCalldata, 2, 1,
 		42, 1, testapp.ParseTime(1581589790).Unix(),
-		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
+		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, nil,
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
 }
@@ -533,7 +533,7 @@ func TestResolveRequestNoReturnData(t *testing.T) {
 	k.ResolveRequest(ctx, 42)
 	result := oracletypes.NewResult(
 		BasicClientID, 3, BasicCalldata, 2, 1, 42, 1, testapp.ParseTime(1581589790).Unix(),
-		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
+		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, nil,
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
 	require.Equal(t, sdk.Events{sdk.NewEvent(
@@ -562,7 +562,7 @@ func TestResolveRequestWasmFailure(t *testing.T) {
 	k.ResolveRequest(ctx, 42)
 	result := oracletypes.NewResult(
 		BasicClientID, 6, BasicCalldata, 2, 1, 42, 1, testapp.ParseTime(1581589790).Unix(),
-		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
+		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, nil,
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
 	require.Equal(t, sdk.Events{sdk.NewEvent(
@@ -587,7 +587,7 @@ func TestResolveRequestCallReturnDataSeveralTimes(t *testing.T) {
 
 	result := oracletypes.NewResult(
 		BasicClientID, 9, BasicCalldata, 2, 1, 42, 0, testapp.ParseTime(1581589790).Unix(),
-		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, []byte{},
+		testapp.ParseTime(1581589890).Unix(), oracletypes.RESOLVE_STATUS_FAILURE, nil,
 	)
 	require.Equal(t, result, k.MustGetResult(ctx, 42))
 

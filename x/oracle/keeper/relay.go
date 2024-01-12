@@ -17,7 +17,7 @@ func (k Keeper) OnRecvPacket(
 	if err := data.ValidateBasic(); err != nil {
 		return 0, err
 	}
-	ibcSource := types.NewIBCSource(packet.DestinationPort, packet.DestinationChannel)
+	ibcSource := types.NewIBCChannel(packet.DestinationPort, packet.DestinationChannel)
 
 	return k.PrepareRequest(ctx, &data, relayer, &ibcSource)
 }

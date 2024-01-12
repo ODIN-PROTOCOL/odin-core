@@ -14,6 +14,8 @@ const (
 	EventTypeAddReporter        = "add_reporter"
 	EventTypeRemoveReporter     = "remove_reporter"
 	EventTypeResolve            = "resolve"
+	EventTypeSendPacketFail     = "send_packet_fail"
+	EventTypeUpdateParams       = "update_params"
 
 	AttributeKeyID             = "id"
 	AttributeKeyDataSourceID   = "data_source_id"
@@ -28,6 +30,9 @@ const (
 	AttributeKeyMinCount       = "min_count"
 	AttributeKeyResolveStatus  = "resolve_status"
 	AttributeKeyGasUsed        = "gas_used"
+	AttributeKeyTotalFees      = "total_fees"
+	AttributeKeyFee            = "fee"
 	AttributeKeyResult         = "result"
 	AttributeKeyReason         = "reason"
+	AttributeKeyParams         = "params"
 )

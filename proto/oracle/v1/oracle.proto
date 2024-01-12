@@ -79,7 +79,7 @@ message Request {
   uint64 request_time = 7;
   string client_id = 8 [ (gogoproto.customname) = "ClientID" ];
   repeated RawRequest raw_requests = 9 [ (gogoproto.nullable) = false ];
-  IBCSource ibc_source = 10 [ (gogoproto.customname) = "IBCSource" ];
+  IBCChannel ibc_channel = 10 [ (gogoproto.customname) = "IBCChannel" ];
   uint64 execute_gas = 11;
 }
 
@@ -234,9 +234,9 @@ message Result {
   int64 resolve_time = 9;
   // ResolveStatus is the status of this oracle request, which can be OK,
   // FAILURE, or EXPIRED.
-  ResolveStatus resolve_status = 11;
+  ResolveStatus resolve_status = 10;
   // Result is the final aggregated value only available if status if OK.
-  bytes result = 10;
+  bytes result = 11;
 }
 
 // ValidatorStatus maintains whether a validator is an active oracle provider.
@@ -245,6 +245,13 @@ message ValidatorStatus {
   bool is_active = 1;
   google.protobuf.Timestamp since = 2
       [ (gogoproto.nullable) = false, (gogoproto.stdtime) = true ];
+}
+
+message ActiveValidator {
+  // Address is a validator address
+  string address = 1;
+  // Power is an amount of token that the validator is holding
+  uint64 power = 2;
 }
 
 // PendingResolveList
