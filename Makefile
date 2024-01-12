@@ -9,6 +9,9 @@ DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bu
 
 export GO111MODULE = on
 
+DEB_BIN_DIR ?= /usr/local/bin
+DEB_LIB_DIR ?= /usr/lib
+
 build_tags = netgo
 ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
@@ -22,8 +25,8 @@ empty = $(whitespace) $(whitespace)
 comma := ,
 build_tags_comma_sep := $(subst $(empty),$(comma),$(build_tags))
 
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=bandchain \
-	-X github.com/cosmos/cosmos-sdk/version.AppName=bandd \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
+	-X github.com/cosmos/cosmos-sdk/version.AppName=odind \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
@@ -39,16 +42,29 @@ BUILD_FLAGS := -tags "$(build_tags_comma_sep)" -ldflags '$(ldflags)'
 all: install
 
 install: go.sum
-	go install -mod=readonly $(BUILD_FLAGS) ./cmd/bandd
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
+
+install-yoda: go.sum
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
+
+build: go.sum
+	go build -mod=readonly -o ./build/odind $(BUILD_FLAGS) ./cmd/odind
+	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
+
+build-yoda: go.sum
+	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
+
+faucet: go.sum
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/faucet
 
 release: go.sum
 	env GOOS=linux GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_linux_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_linux_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=darwin GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_darwin_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_darwin_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=windows GOARCH=amd64 \
-		go build -mod=readonly -o ./build/bandd_windows_amd64 $(BUILD_FLAGS) ./cmd/bandd
+		go build -mod=readonly -o ./build/odind_windows_amd64 $(BUILD_FLAGS) ./cmd/odind
 	env GOOS=linux GOARCH=amd64 \
 		go build -mod=readonly -o ./build/yoda_linux_amd64 $(BUILD_FLAGS) ./cmd/yoda
 	env GOOS=darwin GOARCH=amd64 \
@@ -86,10 +102,38 @@ proto-swagger-gen:
 proto-format:
 	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
 
+proto-gen-any:
+	$(DOCKER) run --rm -v $(pwd):/workspace --workdir /workspace tendermintdev/sdk-proto-gen sh ./scripts/protocgen-any.sh
+
 proto-lint:
 	@$(protoImage) buf lint --error-format=json
 
 proto-check-breaking:
 	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=main
 
-.PHONY: proto-all proto-gen proto-swagger-gen proto-format proto-lint proto-check-breaking
+deb:
+	rm -rf /tmp/GeoDB
+
+	mkdir -p /tmp/GeoDB/deb/$(DEB_BIN_DIR)
+	cp -f ./build/yoda /tmp/GeoDB/deb/$(DEB_BIN_DIR)/yoda
+	cp -f ./build/odind /tmp/GeoDB/deb/$(DEB_BIN_DIR)/odind
+	chmod +x /tmp/GeoDB/deb/$(DEB_BIN_DIR)/odind /tmp/GeoDB/deb/$(DEB_BIN_DIR)/yoda
+
+	mkdir -p /tmp/GeoDB/deb/$(DEB_LIB_DIR)
+
+	mkdir -p /tmp/GeoDB/deb/DEBIAN
+	cp ./deployment/deb/control /tmp/GeoDB/deb/DEBIAN/control
+	printf "Version: " >> /tmp/GeoDB/deb/DEBIAN/control
+	printf "$(VERSION)" >> /tmp/GeoDB/deb/DEBIAN/control
+	echo "" >> /tmp/GeoDB/deb/DEBIAN/control
+	#cp ./deployment/deb/postinst /tmp/GeoDB/deb/DEBIAN/postinst
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/postinst
+	#cp ./deployment/deb/postrm /tmp/GeoDB/deb/DEBIAN/postrm
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/postrm
+	#cp ./deployment/deb/triggers /tmp/GeoDB/deb/DEBIAN/triggers
+	#chmod 755 /tmp/GeoDB/deb/DEBIAN/triggers
+	dpkg-deb --build /tmp/GeoDB/deb/ .
+	-rm -rf /tmp/GeoDB
+	cp ./odinprotocol_$(VERSION)_amd64.deb ./odinprotocol_v$(VERSION)_amd64.deb
+
+.PHONY: proto-all proto-gen proto-swagger-gen proto-format proto-gen-any proto-lint proto-check-breaking

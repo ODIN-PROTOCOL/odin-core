@@ -38,7 +38,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
-	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -60,7 +59,6 @@ func NewDefaultGenesisState() GenesisState {
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
 	icaGenesis := icagenesistypes.DefaultGenesis()
-	globalfeeGenesis := globalfeetypes.DefaultGenesisState()
 	// Override the genesis parameters.
 	authGenesis.Params.TxSizeCostPerByte = 5
 	stakingGenesis.Params.BondDenom = denom
@@ -84,10 +82,6 @@ func NewDefaultGenesisState() GenesisState {
 		AllowMessages: v2_6.ICAAllowMessages,
 	}
 
-	globalfeeGenesis.Params.MinimumGasPrices = sdk.NewDecCoins(
-		sdk.NewDecCoinFromDec(denom, sdk.NewDecWithPrec(25, 4)),
-	)
-
 	return GenesisState{
 		authtypes.ModuleName:         cdc.MustMarshalJSON(authGenesis),
 		genutiltypes.ModuleName:      genutil.AppModuleBasic{}.DefaultGenesis(cdc),
@@ -108,6 +102,5 @@ func NewDefaultGenesisState() GenesisState {
 		ibctransafertypes.ModuleName: ibctransfer.AppModuleBasic{}.DefaultGenesis(cdc),
 		icatypes.ModuleName:          cdc.MustMarshalJSON(icaGenesis),
 		oracletypes.ModuleName:       oracle.AppModuleBasic{}.DefaultGenesis(cdc),
-		globalfeetypes.ModuleName:    cdc.MustMarshalJSON(globalfeeGenesis),
 	}
 }

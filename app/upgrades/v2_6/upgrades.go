@@ -20,7 +20,6 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
-	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 )
 
 func CreateUpgradeHandler(
@@ -76,13 +75,6 @@ func CreateUpgradeHandler(
 		keepers.ICAHostKeeper.SetParams(ctx, hostParams)
 
 		vm, err := mm.RunMigrations(ctx, configurator, fromVM)
-		if err != nil {
-			return nil, err
-		}
-
-		err = keepers.GlobalfeeKeeper.SetParams(ctx, globalfeetypes.Params{
-			MinimumGasPrices: sdk.DecCoins{sdk.NewDecCoinFromDec("uband", sdk.NewDecWithPrec(25, 4))},
-		})
 		if err != nil {
 			return nil, err
 		}

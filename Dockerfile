@@ -1,8 +1,16 @@
-FROM golang:1.19-buster
+FROM golang:1.19-buster as builder
 
-WORKDIR /chain
-COPY . /chain
+WORKDIR /core
+COPY ./ /core
 
-RUN make install
+RUN apt-get update && \
+    apt-get install -y ca-certificates wget libc6-dev && \
+    update-ca-certificates && \
+    wget https://github.com/WebAssembly/wabt/releases/download/1.0.17/wabt-1.0.17-ubuntu.tar.gz && \
+    tar -zxf wabt-1.0.17-ubuntu.tar.gz && \
+    cp wabt-1.0.17/bin/wat2wasm /usr/local/bin && \
+    make install && \
+    make faucet && rm -rf /core/* \
+    && rm -rf /var/lib/apt/lists/*
 
-CMD bandd start --rpc.laddr tcp://0.0.0.0:26657
+CMD ["odind", "--help"]

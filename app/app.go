@@ -120,18 +120,15 @@ import (
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	bandbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
 	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee"
-	globalfeekeeper "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
-	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (
-	appName          = "BandApp"
-	Bech32MainPrefix = "band"
-	Bip44CoinType    = 494
+	appName          = "OdinApp"
+	Bech32MainPrefix = "odin"
+	Bip44CoinType    = 118
 )
 
 var (
@@ -173,7 +170,6 @@ var (
 		consensus.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		oracle.AppModuleBasic{},
-		globalfee.AppModule{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -285,7 +281,6 @@ func NewBandApp(
 		icahosttypes.StoreKey,
 		group.StoreKey,
 		oracletypes.StoreKey,
-		globalfeetypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -527,12 +522,6 @@ func NewBandApp(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
-	app.GlobalfeeKeeper = globalfeekeeper.NewKeeper(
-		appCodec,
-		keys[globalfeetypes.StoreKey],
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-
 	/****  Module Options ****/
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
 	// we prefer to be more strict in what arguments the modules expect.
@@ -600,7 +589,6 @@ func NewBandApp(
 		transferModule,
 		icaModule,
 		oracleModule,
-		globalfee.NewAppModule(app.GlobalfeeKeeper),
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
@@ -630,7 +618,6 @@ func NewBandApp(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		globalfeetypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
@@ -655,7 +642,6 @@ func NewBandApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		globalfeetypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -686,7 +672,6 @@ func NewBandApp(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		oracletypes.ModuleName,
-		globalfeetypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(app.CrisisKeeper)
@@ -728,10 +713,9 @@ func NewBandApp(
 				FeegrantKeeper:  app.FeegrantKeeper,
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
-			OracleKeeper:    &app.OracleKeeper,
-			IBCKeeper:       app.IBCKeeper,
-			StakingKeeper:   app.StakingKeeper,
-			GlobalfeeKeeper: &app.GlobalfeeKeeper,
+			OracleKeeper:  &app.OracleKeeper,
+			IBCKeeper:     app.IBCKeeper,
+			StakingKeeper: app.StakingKeeper,
 		},
 	)
 	if err != nil {

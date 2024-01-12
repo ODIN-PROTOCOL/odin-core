@@ -1,4 +1,4 @@
-package bandrng
+package odinrng
 
 import (
 	"math"
@@ -7,7 +7,7 @@ import (
 // safeAdd performs the addition operation on two uint64 integers, but panics if overflow.
 func safeAdd(a, b uint64) uint64 {
 	if math.MaxUint64-a < b {
-		panic("bandrng::safeAdd: overflow addition")
+		panic("odinrng::safeAdd: overflow addition")
 	}
 	return a + b
 }
@@ -29,7 +29,7 @@ func ChooseOne(rng *Rng, weights []uint64) int {
 		}
 	}
 	// We should never reach here since the sum of weights is greater than the lucky number.
-	panic("bandrng::ChooseOne: reaching the unreachable")
+	panic("odinrng::ChooseOne: reaching the unreachable")
 }
 
 // ChooseSome randomly picks non-duplicate "cnt" indexes between 0 and len(weights)-1 inclusively.

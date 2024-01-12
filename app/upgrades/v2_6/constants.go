@@ -16,7 +16,6 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
-	globalfeetypes "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -26,7 +25,7 @@ var Upgrade = upgrades.Upgrade{
 	UpgradeName:          UpgradeName,
 	CreateUpgradeHandler: CreateUpgradeHandler,
 	StoreUpgrades: storetypes.StoreUpgrades{
-		Added: []string{group.StoreKey, globalfeetypes.StoreKey, consensusparamtypes.StoreKey, crisistypes.StoreKey},
+		Added: []string{group.StoreKey, consensusparamtypes.StoreKey, crisistypes.StoreKey},
 	},
 }
 

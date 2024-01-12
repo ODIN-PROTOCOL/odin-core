@@ -1,0 +1,39 @@
+name: Build Deb
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.19.0"
+
+      - name: Check go mod cache
+        uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-chain-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-chain-
+
+      - name: Make deb
+        run: |
+          make build
+          make deb
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: odinprotocol_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+          path: odinprotocol_${{ steps.get_version.outputs.VERSION }}_amd64.deb

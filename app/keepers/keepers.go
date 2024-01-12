@@ -21,7 +21,6 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 
 	bandbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
-	globalfeekeeper "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
@@ -48,7 +47,6 @@ type AppKeepers struct {
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
-	GlobalfeeKeeper       globalfeekeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper

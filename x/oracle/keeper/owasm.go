@@ -8,7 +8,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/bandrng"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/odinrng"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -45,12 +45,12 @@ func (k Keeper) GetRandomValidators(ctx sdk.Context, size int, id uint64) ([]sdk
 		return nil, sdkerrors.Wrapf(
 			types.ErrInsufficientValidators, "%d < %d", len(valOperators), size)
 	}
-	rng, err := bandrng.NewRng(k.GetRollingSeed(ctx), sdk.Uint64ToBigEndian(id), []byte(ctx.ChainID()))
+	rng, err := odinrng.NewRng(k.GetRollingSeed(ctx), sdk.Uint64ToBigEndian(id), []byte(ctx.ChainID()))
 	if err != nil {
 		return nil, sdkerrors.Wrapf(types.ErrBadDrbgInitialization, err.Error())
 	}
 	tryCount := int(k.GetParams(ctx).SamplingTryCount)
-	chosenValIndexes := bandrng.ChooseSomeMaxWeight(rng, valPowers, size, tryCount)
+	chosenValIndexes := odinrng.ChooseSomeMaxWeight(rng, valPowers, size, tryCount)
 	validators := make([]sdk.ValAddress, size)
 	for i, idx := range chosenValIndexes {
 		validators[i] = valOperators[idx]

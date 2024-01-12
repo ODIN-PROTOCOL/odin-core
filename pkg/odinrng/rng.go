@@ -1,4 +1,4 @@
-package bandrng
+package odinrng
 
 import (
 	"crypto"

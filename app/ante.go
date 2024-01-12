@@ -1,26 +1,22 @@
 package band
 
 import (
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/globalfee/feechecker"
-	globalfeekeeper "github.com/ODIN-PROTOCOL/odin-core/x/globalfee/keeper"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
 // HandlerOptions extend the SDK's AnteHandler options by requiring the IBC
 // channel keeper.
 type HandlerOptions struct {
 	ante.HandlerOptions
-	OracleKeeper    *oraclekeeper.Keeper
-	IBCKeeper       *ibckeeper.Keeper
-	StakingKeeper   *stakingkeeper.Keeper
-	GlobalfeeKeeper *globalfeekeeper.Keeper
+	OracleKeeper  *oraclekeeper.Keeper
+	IBCKeeper     *ibckeeper.Keeper
+	StakingKeeper *stakingkeeper.Keeper
 }
 
 func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
@@ -42,22 +38,10 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	if options.StakingKeeper == nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "Staking keeper is required for AnteHandler")
 	}
-	if options.GlobalfeeKeeper == nil {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "Globalfee keeper is required for AnteHandler")
-	}
 
 	sigGasConsumer := options.SigGasConsumer
 	if sigGasConsumer == nil {
 		sigGasConsumer = ante.DefaultSigVerificationGasConsumer
-	}
-
-	if options.TxFeeChecker == nil {
-		feeChecker := feechecker.NewFeeChecker(
-			options.OracleKeeper,
-			options.GlobalfeeKeeper,
-			options.StakingKeeper,
-		)
-		options.TxFeeChecker = feeChecker.CheckTxFeeWithMinGasPrices
 	}
 
 	anteDecorators := []sdk.AnteDecorator{
