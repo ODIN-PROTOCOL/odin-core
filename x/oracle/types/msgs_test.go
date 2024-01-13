@@ -126,7 +126,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 		SetBech32PrefixForConsensusNode("odin"+sdk.PrefixValidator+sdk.PrefixConsensus, "odin"+sdk.PrefixValidator+sdk.PrefixConsensus+sdk.PrefixPublic)
 	require.Equal(
 		t,
-		`{"type":"oracle/CreateDataSource","value":{"description":"desc","executable":"ZXhlYw==","fee":[{"amount":"1000","denom":"loki"}],"name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","treasury":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4"}}`,
+		`{"type":"oracle/CreateDataSource","value":{"description":"desc","executable":"ZXhlYw==","fee":[{"amount":"1000","denom":"loki"}],"name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","treasury":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth"}}`,
 		string(
 			NewMsgCreateDataSource(
 				"name",
@@ -141,7 +141,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 	)
 	require.Equal(
 		t,
-		`{"type":"oracle/EditDataSource","value":{"data_source_id":"1","description":"desc","executable":"ZXhlYw==","fee":[{"amount":"1000","denom":"loki"}],"name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","treasury":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4"}}`,
+		`{"type":"oracle/EditDataSource","value":{"data_source_id":"1","description":"desc","executable":"ZXhlYw==","fee":[{"amount":"1000","denom":"loki"}],"name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","treasury":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth"}}`,
 		string(
 			NewMsgEditDataSource(
 				1,
@@ -157,7 +157,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 	)
 	require.Equal(
 		t,
-		`{"type":"oracle/CreateOracleScript","value":{"code":"Y29kZQ==","description":"desc","name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","schema":"schema","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","source_code_url":"url"}}`,
+		`{"type":"oracle/CreateOracleScript","value":{"code":"Y29kZQ==","description":"desc","name":"name","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","schema":"schema","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","source_code_url":"url"}}`,
 		string(
 			NewMsgCreateOracleScript(
 				"name",
@@ -172,7 +172,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 	)
 	require.Equal(
 		t,
-		`{"type":"oracle/EditOracleScript","value":{"code":"Y29kZQ==","description":"desc","name":"name","oracle_script_id":"1","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","schema":"schema","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4","source_code_url":"url"}}`,
+		`{"type":"oracle/EditOracleScript","value":{"code":"Y29kZQ==","description":"desc","name":"name","oracle_script_id":"1","owner":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","schema":"schema","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth","source_code_url":"url"}}`,
 		string(
 			NewMsgEditOracleScript(
 				1,
@@ -188,7 +188,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 	)
 	require.Equal(
 		t,
-		`{"type":"oracle/Request","value":{"ask_count":"10","calldata":"Y2FsbGRhdGE=","client_id":"client-id","execute_gas":"250000","fee_limit":[{"amount":"1000","denom":"loki"}],"min_count":"5","oracle_script_id":"1","prepare_gas":"50000","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2vqal4"}}`,
+		`{"type":"oracle/Request","value":{"ask_count":"10","calldata":"Y2FsbGRhdGE=","client_id":"client-id","execute_gas":"250000","fee_limit":[{"amount":"1000","denom":"loki"}],"min_count":"5","oracle_script_id":"1","prepare_gas":"50000","sender":"odin1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhrxuth"}}`,
 		string(
 			NewMsgRequestData(
 				1,

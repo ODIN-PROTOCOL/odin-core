@@ -9,11 +9,11 @@ import (
 	"cosmossdk.io/depinject"
 	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/exported"
+	"github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	store "github.com/cosmos/cosmos-sdk/store/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
