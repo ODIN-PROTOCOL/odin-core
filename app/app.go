@@ -9,6 +9,12 @@ import (
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -170,6 +176,8 @@ var (
 		consensus.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		oracle.AppModuleBasic{},
+		coinswap.AppModuleBasic{},
+		auction.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -281,6 +289,8 @@ func NewOdinApp(
 		icahosttypes.StoreKey,
 		group.StoreKey,
 		oracletypes.StoreKey,
+		coinswaptypes.StoreKey,
+		auctiontypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -503,6 +513,23 @@ func NewOdinApp(
 		owasmVM,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
+
+	app.CoinswapKeeper = coinswapkeeper.NewKeeper(
+		appCodec,
+		keys[coinswaptypes.StoreKey],
+		app.GetSubspace(coinswaptypes.ModuleName),
+		app.BankKeeper,
+		app.DistrKeeper,
+		app.OracleKeeper,
+	)
+	app.AuctionKeeper = auctionkeeper.NewKeeper(
+		appCodec,
+		keys[auctiontypes.StoreKey],
+		app.GetSubspace(auctiontypes.ModuleName),
+		app.OracleKeeper,
+		app.CoinswapKeeper,
+	)
+
 	oracleModule := oracle.NewAppModule(app.OracleKeeper, app.GetSubspace(oracletypes.ModuleName))
 	oracleIBCModule := oracle.NewIBCModule(app.OracleKeeper)
 

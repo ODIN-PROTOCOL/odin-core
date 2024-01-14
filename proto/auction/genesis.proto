@@ -1,0 +1,10 @@
+syntax = "proto3";
+package auction;
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/auction/types";
+
+import "gogoproto/gogo.proto";
+import "auction/params.proto";
+
+// GenesisState defines the oracle module's genesis state.
+message GenesisState { Params params = 1 [ (gogoproto.nullable) = false ]; }
