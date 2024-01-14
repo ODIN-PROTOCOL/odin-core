@@ -53,8 +53,11 @@ import (
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
+	odinbankmodulekeeper "github.com/ODIN-PROTOCOL/odin-core/x/odinbank/keeper"
 	odincoremodulekeeper "github.com/ODIN-PROTOCOL/odin-core/x/odincore/keeper"
-	// this line is used by starport scaffolding # stargate/app/moduleImport
+	odinmintmodulekeeper "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/keeper"
+testmodulekeeper "github.com/ODIN-PROTOCOL/odin-core/x/test/keeper"
+// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	"github.com/ODIN-PROTOCOL/odin-core/docs"
 )
@@ -117,7 +120,10 @@ type App struct {
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
 
 	OdincoreKeeper odincoremodulekeeper.Keeper
-	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+	OdinbankKeeper odinbankmodulekeeper.Keeper
+	OdinmintKeeper odinmintmodulekeeper.Keeper
+TestKeeper testmodulekeeper.Keeper
+// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -255,6 +261,9 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.OdincoreKeeper,
+		&app.OdinbankKeeper,
+		&app.OdinmintKeeper,
+		&app.TestKeeper,
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {
 		panic(err)

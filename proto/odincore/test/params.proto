@@ -1,0 +1,15 @@
+syntax = "proto3";
+package odincore.test;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/test/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "odincore/x/test/Params";
+  option (gogoproto.equal) = true;
+
+  
+}

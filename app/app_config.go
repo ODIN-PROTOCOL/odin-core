@@ -71,10 +71,19 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	"google.golang.org/protobuf/types/known/durationpb"
 
+	odinbankmodulev1 "github.com/ODIN-PROTOCOL/odin-core/api/odincore/odinbank/module"
 	odincoremodulev1 "github.com/ODIN-PROTOCOL/odin-core/api/odincore/odincore/module"
+	_ "github.com/ODIN-PROTOCOL/odin-core/x/odinbank/module" // import for side-effects
+	odinbankmoduletypes "github.com/ODIN-PROTOCOL/odin-core/x/odinbank/types"
 	_ "github.com/ODIN-PROTOCOL/odin-core/x/odincore/module" // import for side-effects
 	odincoremoduletypes "github.com/ODIN-PROTOCOL/odin-core/x/odincore/types"
-	// this line is used by starport scaffolding # stargate/app/moduleImport
+	odinmintmodulev1 "github.com/ODIN-PROTOCOL/odin-core/api/odincore/odinmint/module"
+_ "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/module" // import for side-effects
+odinmintmoduletypes "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/types"
+testmodulev1 "github.com/ODIN-PROTOCOL/odin-core/api/odincore/test/module"
+_ "github.com/ODIN-PROTOCOL/odin-core/x/test/module" // import for side-effects
+testmoduletypes "github.com/ODIN-PROTOCOL/odin-core/x/test/types"
+// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
 var (
@@ -112,7 +121,10 @@ var (
 		circuittypes.ModuleName,
 		// chain modules
 		odincoremoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/initGenesis
+		odinbankmoduletypes.ModuleName,
+		odinmintmoduletypes.ModuleName,
+testmoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -137,7 +149,10 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		odincoremoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/beginBlockers
+		odinbankmoduletypes.ModuleName,
+		odinmintmoduletypes.ModuleName,
+testmoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/beginBlockers
 	}
 
 	endBlockers = []string{
@@ -156,7 +171,10 @@ var (
 		ibcfeetypes.ModuleName,
 		// chain modules
 		odincoremoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/endBlockers
+		odinbankmoduletypes.ModuleName,
+		odinmintmoduletypes.ModuleName,
+testmoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/endBlockers
 	}
 
 	preBlockers = []string{
@@ -175,7 +193,10 @@ var (
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: ibcfeetypes.ModuleName},
 		{Account: icatypes.ModuleName},
-		// this line is used by starport scaffolding # stargate/app/maccPerms
+		{Account: odinbankmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
+		{Account: odinmintmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
+{Account: testmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner, authtypes.Staking}},
+// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 
 	// blocked account addresses
@@ -309,7 +330,19 @@ var (
 				Name:   odincoremoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&odincoremodulev1.Module{}),
 			},
-			// this line is used by starport scaffolding # stargate/app/moduleConfig
+			{
+				Name:   odinbankmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&odinbankmodulev1.Module{}),
+			},
+			{
+				Name:   odinmintmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&odinmintmodulev1.Module{}),
+			},
+{
+				Name:   testmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&testmodulev1.Module{}),
+			},
+// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
 	})
 )

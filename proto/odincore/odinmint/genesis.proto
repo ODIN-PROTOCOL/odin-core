@@ -1,0 +1,24 @@
+syntax = "proto3";
+package odincore.odinmint;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "odincore/odinmint/params.proto";
+import "odincore/odinmint/mint.proto";
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/types";
+
+// GenesisState defines the odinmint module's genesis state.
+message GenesisState {
+  // minter is a space for holding current inflation information.
+  Minter minter = 1 [ (gogoproto.nullable) = false ];
+
+  // params defines all the paramaters of the module.
+  Params params = 2 [ (gogoproto.nullable) = false ];
+
+  // mint_pool defines the pool of eligible accounts and treasury pool
+  MintPool mint_pool = 3 [ (gogoproto.nullable) = false ];
+
+  string module_coins_account = 4
+      [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
+}

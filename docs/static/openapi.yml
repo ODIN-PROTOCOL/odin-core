@@ -18966,10 +18966,544 @@ paths:
             description: MsgUpdateParams is the Msg/UpdateParams request type.
       tags:
         - Msg
-  /ODIN-PROTOCOL/odin-core/odincore/params:
+  /odincore.odinmint.Msg/MintCoins:
+    post:
+      summary: MintCoins defines a method for minting from mint module.
+      operationId: OdincoreOdinmintMsg_MintCoins
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            title: MsgMintCoinsResponse
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: body
+          description: MsgMintCoins is a message for minting from mint module.
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                title: Amount is the amount of coins to mint
+              sender:
+                type: string
+                title: >-
+                  Sender is the message signer who submits this report
+                  transaction
+            description: MsgMintCoins is a message for minting from mint module.
+      tags:
+        - Msg
+  /odincore.odinmint.Msg/WithdrawCoinsToAccFromTreasury:
+    post:
+      summary: >-
+        WithdrawCoinsToAccFromTreasury defines a method for withdrawing from
+        mint
+
+        module.
+      operationId: OdincoreOdinmintMsg_WithdrawCoinsToAccFromTreasury
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            title: MsgWithdrawCoinsToAccFromTreasuryResponse
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: body
+          description: >-
+            MsgWithdrawCoinsToAccFromTreasury is a message for withdrawing from
+            mint
+
+            module.
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                title: Amount is the amoutn of coins to withdraw
+              receiver:
+                type: string
+                title: Receiver is for whom withdraw coins
+              sender:
+                type: string
+                title: >-
+                  Sender is the message signer who submits this report
+                  transaction
+            description: >-
+              MsgWithdrawCoinsToAccFromTreasury is a message for withdrawing
+              from mint
+
+              module.
+      tags:
+        - Msg
+  /mint/annual_provisions:
+    get:
+      summary: Inflation returns current annual provisions.
+      operationId: OdincoreOdinmintQuery_AnnualProvisions
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              annual_provisions:
+                type: string
+            description: |-
+              QueryAnnualProvisionsResponse is response type for the
+              Query/QueryAnnualProvisions RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /mint/current_mint_volume:
+    get:
+      summary: CurrentMintVolume returns current minted coins volume.
+      operationId: OdincoreOdinmintQuery_CurrentMintVolume
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              current_mint_volume:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            description: |-
+              QueryCurrentMintVolumeResponse is response type for the
+              Query/QueryCurrentMintVolume RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /mint/integration_addresses/{network_name}:
+    get:
+      summary: Inflation returns integration address.
+      operationId: OdincoreOdinmintQuery_IntegrationAddress
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              integration_address:
+                type: string
+            description: |-
+              QueryIntegrationAddressResponse is response type for the
+              Query/QueryEthIntegrationAddress RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: network_name
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /mint/parameters:
+    get:
+      summary: Inflation returns current inflation.
+      operationId: OdincoreOdinmintQuery_Inflation
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              inflation:
+                type: string
+            description: >-
+              QueryInflationResponse is response type for the
+              Query/QueryInflation RPC
+
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /mint/params:
+    get:
+      summary: Params returns the total set of minting parameters.
+      operationId: OdincoreOdinmintQuery_Params
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                type: object
+                properties:
+                  mint_denom:
+                    type: string
+                    title: type of coin to mint
+                  inflation_rate_change:
+                    type: string
+                    title: maximum annual change in inflation rate
+                  inflation_max:
+                    type: string
+                    title: maximum inflation rate
+                  inflation_min:
+                    type: string
+                    title: minimum inflation rate
+                  goal_bonded:
+                    type: string
+                    title: goal of percent bonded atoms
+                  blocks_per_year:
+                    type: string
+                    format: uint64
+                    title: expected blocks per year
+                  max_withdrawal_per_time:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    title: max amount to withdraw per time
+                  integration_addresses:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    title: map with smart contracts addresses
+                  mint_air:
+                    type: boolean
+                    title: flag if minting from air
+                  eligible_accounts_pool:
+                    type: array
+                    items:
+                      type: string
+                    title: eligible to withdraw accounts
+                  max_allowed_mint_volume:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    title: max allowed mint volume
+                  allowed_mint_denoms:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        token_unit_denom:
+                          type: string
+                          title: little version of coin
+                        token_denom:
+                          type: string
+                          title: large version of coin
+                      description: AllowedDenom represents the allowed minting denom.
+                    title: allowed mint denoms
+                  allowed_minter:
+                    type: array
+                    items:
+                      type: string
+                    title: allowed minter
+                description: |-
+                  Params defines the parameters for the module.
+                  Params holds parameters for the mint module.
+            description: |-
+              QueryParamsResponse is response type for the Query/QueryParams RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /mint/treasury_pool:
+    get:
+      summary: Inflation returns current treasury pool.
+      operationId: OdincoreOdinmintQuery_TreasuryPool
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              treasury_pool:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            description: >-
+              QueryTreasuryPoolResponse is response type for the
+              Query/QueryTreasuryPool
+
+              RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /odincore.test.Msg/UpdateParams:
+    post:
+      summary: |-
+        UpdateParams defines a (governance) operation for updating the module
+        parameters. The authority defaults to the x/gov module account.
+      operationId: OdincoreTestMsg_UpdateParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            description: >-
+              MsgUpdateParamsResponse defines the response structure for
+              executing a
+
+              MsgUpdateParams message.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: body
+          description: MsgUpdateParams is the Msg/UpdateParams request type.
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              authority:
+                type: string
+                description: >-
+                  authority is the address that controls the module (defaults to
+                  x/gov unless overwritten).
+              params:
+                description: |-
+                  params defines the module parameters to update.
+
+                  NOTE: All parameters must be supplied.
+                type: object
+            description: MsgUpdateParams is the Msg/UpdateParams request type.
+      tags:
+        - Msg
+  /ODIN-PROTOCOL/odin-core/test/params:
     get:
       summary: Parameters queries the parameters of the module.
-      operationId: OdincoreOdincoreQuery_Params
+      operationId: OdincoreTestQuery_Params
       responses:
         '200':
           description: A successful response.
@@ -26660,7 +27194,343 @@ definitions:
   odincore.odincore.Params:
     type: object
     description: Params defines the parameters for the module.
-  odincore.odincore.QueryParamsResponse:
+  odincore.odinmint.MsgMintCoins:
+    type: object
+    properties:
+      amount:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        title: Amount is the amount of coins to mint
+      sender:
+        type: string
+        title: Sender is the message signer who submits this report transaction
+    description: MsgMintCoins is a message for minting from mint module.
+  odincore.odinmint.MsgMintCoinsResponse:
+    type: object
+    title: MsgMintCoinsResponse
+  odincore.odinmint.MsgWithdrawCoinsToAccFromTreasury:
+    type: object
+    properties:
+      amount:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        title: Amount is the amoutn of coins to withdraw
+      receiver:
+        type: string
+        title: Receiver is for whom withdraw coins
+      sender:
+        type: string
+        title: Sender is the message signer who submits this report transaction
+    description: |-
+      MsgWithdrawCoinsToAccFromTreasury is a message for withdrawing from mint
+      module.
+  odincore.odinmint.MsgWithdrawCoinsToAccFromTreasuryResponse:
+    type: object
+    title: MsgWithdrawCoinsToAccFromTreasuryResponse
+  odincore.odinmint.AllowedDenom:
+    type: object
+    properties:
+      token_unit_denom:
+        type: string
+        title: little version of coin
+      token_denom:
+        type: string
+        title: large version of coin
+    description: AllowedDenom represents the allowed minting denom.
+  odincore.odinmint.Params:
+    type: object
+    properties:
+      mint_denom:
+        type: string
+        title: type of coin to mint
+      inflation_rate_change:
+        type: string
+        title: maximum annual change in inflation rate
+      inflation_max:
+        type: string
+        title: maximum inflation rate
+      inflation_min:
+        type: string
+        title: minimum inflation rate
+      goal_bonded:
+        type: string
+        title: goal of percent bonded atoms
+      blocks_per_year:
+        type: string
+        format: uint64
+        title: expected blocks per year
+      max_withdrawal_per_time:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        title: max amount to withdraw per time
+      integration_addresses:
+        type: object
+        additionalProperties:
+          type: string
+        title: map with smart contracts addresses
+      mint_air:
+        type: boolean
+        title: flag if minting from air
+      eligible_accounts_pool:
+        type: array
+        items:
+          type: string
+        title: eligible to withdraw accounts
+      max_allowed_mint_volume:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        title: max allowed mint volume
+      allowed_mint_denoms:
+        type: array
+        items:
+          type: object
+          properties:
+            token_unit_denom:
+              type: string
+              title: little version of coin
+            token_denom:
+              type: string
+              title: large version of coin
+          description: AllowedDenom represents the allowed minting denom.
+        title: allowed mint denoms
+      allowed_minter:
+        type: array
+        items:
+          type: string
+        title: allowed minter
+    description: |-
+      Params defines the parameters for the module.
+      Params holds parameters for the mint module.
+  odincore.odinmint.QueryAnnualProvisionsResponse:
+    type: object
+    properties:
+      annual_provisions:
+        type: string
+    description: |-
+      QueryAnnualProvisionsResponse is response type for the
+      Query/QueryAnnualProvisions RPC method.
+  odincore.odinmint.QueryCurrentMintVolumeResponse:
+    type: object
+    properties:
+      current_mint_volume:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: |-
+      QueryCurrentMintVolumeResponse is response type for the
+      Query/QueryCurrentMintVolume RPC method.
+  odincore.odinmint.QueryInflationResponse:
+    type: object
+    properties:
+      inflation:
+        type: string
+    description: |-
+      QueryInflationResponse is response type for the Query/QueryInflation RPC
+      method.
+  odincore.odinmint.QueryIntegrationAddressResponse:
+    type: object
+    properties:
+      integration_address:
+        type: string
+    description: |-
+      QueryIntegrationAddressResponse is response type for the
+      Query/QueryEthIntegrationAddress RPC method.
+  odincore.odinmint.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        type: object
+        properties:
+          mint_denom:
+            type: string
+            title: type of coin to mint
+          inflation_rate_change:
+            type: string
+            title: maximum annual change in inflation rate
+          inflation_max:
+            type: string
+            title: maximum inflation rate
+          inflation_min:
+            type: string
+            title: minimum inflation rate
+          goal_bonded:
+            type: string
+            title: goal of percent bonded atoms
+          blocks_per_year:
+            type: string
+            format: uint64
+            title: expected blocks per year
+          max_withdrawal_per_time:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            title: max amount to withdraw per time
+          integration_addresses:
+            type: object
+            additionalProperties:
+              type: string
+            title: map with smart contracts addresses
+          mint_air:
+            type: boolean
+            title: flag if minting from air
+          eligible_accounts_pool:
+            type: array
+            items:
+              type: string
+            title: eligible to withdraw accounts
+          max_allowed_mint_volume:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            title: max allowed mint volume
+          allowed_mint_denoms:
+            type: array
+            items:
+              type: object
+              properties:
+                token_unit_denom:
+                  type: string
+                  title: little version of coin
+                token_denom:
+                  type: string
+                  title: large version of coin
+              description: AllowedDenom represents the allowed minting denom.
+            title: allowed mint denoms
+          allowed_minter:
+            type: array
+            items:
+              type: string
+            title: allowed minter
+        description: |-
+          Params defines the parameters for the module.
+          Params holds parameters for the mint module.
+    description: |-
+      QueryParamsResponse is response type for the Query/QueryParams RPC
+      method.
+  odincore.odinmint.QueryTreasuryPoolResponse:
+    type: object
+    properties:
+      treasury_pool:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: |-
+      QueryTreasuryPoolResponse is response type for the Query/QueryTreasuryPool
+      RPC method.
+  odincore.test.MsgUpdateParams:
+    type: object
+    properties:
+      authority:
+        type: string
+        description: >-
+          authority is the address that controls the module (defaults to x/gov
+          unless overwritten).
+      params:
+        description: |-
+          params defines the module parameters to update.
+
+          NOTE: All parameters must be supplied.
+        type: object
+    description: MsgUpdateParams is the Msg/UpdateParams request type.
+  odincore.test.MsgUpdateParamsResponse:
+    type: object
+    description: |-
+      MsgUpdateParamsResponse defines the response structure for executing a
+      MsgUpdateParams message.
+  odincore.test.Params:
+    type: object
+    description: Params defines the parameters for the module.
+  odincore.test.QueryParamsResponse:
     type: object
     properties:
       params:
