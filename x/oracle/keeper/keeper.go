@@ -30,8 +30,8 @@ type Keeper struct {
 	feeCollectorName string
 	owasmVM          *owasm.Vm
 
-	authKeeper    types.AccountKeeper
-	bankKeeper    types.BankKeeper
+	AuthKeeper    types.AccountKeeper
+	BankKeeper    types.BankKeeper
 	stakingKeeper types.StakingKeeper
 	distrKeeper   types.DistrKeeper
 	authzKeeper   types.AuthzKeeper
@@ -67,8 +67,8 @@ func NewKeeper(
 		fileCache:        filecache.New(fileDir),
 		feeCollectorName: feeCollectorName,
 		owasmVM:          owasmVM,
-		authKeeper:       authKeeper,
-		bankKeeper:       bankKeeper,
+		AuthKeeper:       authKeeper,
+		BankKeeper:       bankKeeper,
 		stakingKeeper:    stakingKeeper,
 		distrKeeper:      distrKeeper,
 		authzKeeper:      authzKeeper,

@@ -3,8 +3,11 @@ package keeper
 import (
 	"bytes"
 
+	"cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -18,7 +21,7 @@ func (k Keeper) HasOracleScript(ctx sdk.Context, id types.OracleScriptID) bool {
 func (k Keeper) GetOracleScript(ctx sdk.Context, id types.OracleScriptID) (types.OracleScript, error) {
 	bz := ctx.KVStore(k.storeKey).Get(types.OracleScriptStoreKey(id))
 	if bz == nil {
-		return types.OracleScript{}, sdkerrors.Wrapf(types.ErrOracleScriptNotFound, "id: %d", id)
+		return types.OracleScript{}, errors.Wrapf(types.ErrOracleScriptNotFound, "id: %d", id)
 	}
 	var oracleScript types.OracleScript
 	k.cdc.MustUnmarshal(bz, &oracleScript)
@@ -70,6 +73,39 @@ func (k Keeper) GetAllOracleScripts(ctx sdk.Context) (oracleScripts []types.Orac
 		oracleScripts = append(oracleScripts, oracleScript)
 	}
 	return oracleScripts
+}
+
+// GetPaginatedOracleScripts returns oracle scripts with pagination.
+func (k Keeper) GetPaginatedOracleScripts(
+	ctx sdk.Context,
+	limit, offset uint64,
+) ([]types.OracleScript, *query.PageResponse, error) {
+	oracleScripts := make([]types.OracleScript, 0)
+	oracleScriptsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.OracleScriptStoreKeyPrefix)
+	pagination := &query.PageRequest{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	pageRes, err := query.FilteredPaginate(
+		oracleScriptsStore,
+		pagination,
+		func(key []byte, value []byte, accumulate bool) (bool, error) {
+			var oracleScript types.OracleScript
+			if err := k.cdc.Unmarshal(value, &oracleScript); err != nil {
+				return false, err
+			}
+			if accumulate {
+				oracleScripts = append(oracleScripts, oracleScript)
+			}
+			return true, nil
+		},
+	)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to paginate oracle scripts")
+	}
+
+	return oracleScripts, pageRes, nil
 }
 
 // AddOracleScriptFile compiles Wasm code (see go-owasm), adds the compiled file to filecache,

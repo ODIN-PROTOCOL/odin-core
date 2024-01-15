@@ -1,8 +1,11 @@
 package keeper
 
 import (
+	"cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -103,6 +106,40 @@ func (k Keeper) GetReports(ctx sdk.Context, rid types.RequestID) (reports []type
 		reports = append(reports, rep)
 	}
 	return reports
+}
+
+// GetPaginatedRequestReports returns all reports for the given request ID with pagination.
+func (k Keeper) GetPaginatedRequestReports(
+	ctx sdk.Context,
+	rid types.RequestID,
+	limit, offset uint64,
+) ([]types.Report, *query.PageResponse, error) {
+	reports := make([]types.Report, 0)
+	reportsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ReportStoreKey(rid))
+	pagination := &query.PageRequest{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	pageRes, err := query.FilteredPaginate(
+		reportsStore,
+		pagination,
+		func(key []byte, value []byte, accumulate bool) (bool, error) {
+			var report types.Report
+			if err := k.cdc.Unmarshal(value, &report); err != nil {
+				return false, err
+			}
+			if accumulate {
+				reports = append(reports, report)
+			}
+			return true, nil
+		},
+	)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to paginate request reports")
+	}
+
+	return reports, pageRes, nil
 }
 
 // DeleteReports removes all reports for the given request ID.

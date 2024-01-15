@@ -3,8 +3,10 @@ package keeper
 import (
 	"bytes"
 
+	"cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -18,7 +20,7 @@ func (k Keeper) HasDataSource(ctx sdk.Context, id types.DataSourceID) bool {
 func (k Keeper) GetDataSource(ctx sdk.Context, id types.DataSourceID) (types.DataSource, error) {
 	bz := ctx.KVStore(k.storeKey).Get(types.DataSourceStoreKey(id))
 	if bz == nil {
-		return types.DataSource{}, sdkerrors.Wrapf(types.ErrDataSourceNotFound, "id: %d", id)
+		return types.DataSource{}, errors.Wrapf(types.ErrDataSourceNotFound, "id: %d", id)
 	}
 	var dataSource types.DataSource
 	k.cdc.MustUnmarshal(bz, &dataSource)
@@ -70,6 +72,39 @@ func (k Keeper) GetAllDataSources(ctx sdk.Context) (dataSources []types.DataSour
 		dataSources = append(dataSources, dataSource)
 	}
 	return dataSources
+}
+
+// GetPaginatedDataSources returns the list of all data sources in the store with pagination
+func (k Keeper) GetPaginatedDataSources(
+	ctx sdk.Context,
+	limit, offset uint64,
+) ([]types.DataSource, *query.PageResponse, error) {
+	dataSources := make([]types.DataSource, 0)
+	dataSourcesStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.DataSourceStoreKeyPrefix)
+	pagination := &query.PageRequest{
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	pageRes, err := query.FilteredPaginate(
+		dataSourcesStore,
+		pagination,
+		func(key []byte, value []byte, accumulate bool) (bool, error) {
+			var dataSource types.DataSource
+			if err := k.cdc.Unmarshal(value, &dataSource); err != nil {
+				return false, err
+			}
+			if accumulate {
+				dataSources = append(dataSources, dataSource)
+			}
+			return true, nil
+		},
+	)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to paginate data sources")
+	}
+
+	return dataSources, pageRes, nil
 }
 
 // AddExecutableFile saves the given executable file to a file to filecahe storage and returns

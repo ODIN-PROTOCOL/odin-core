@@ -35,13 +35,31 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data *types.GenesisState) {
 			panic(fmt.Sprintf("could not claim port capability: %v", err))
 		}
 	}
+
+	moduleAcc := k.AuthKeeper.GetModuleAccount(ctx, types.ModuleName)
+	if moduleAcc == nil {
+		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
+	}
+
+	balances := k.BankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
+	if balances.IsZero() {
+		if err := k.BankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.OraclePool.DataProvidersPool); err != nil {
+			panic(err)
+		}
+
+		k.AuthKeeper.SetModuleAccount(ctx, moduleAcc)
+	}
+
+	k.SetOraclePool(ctx, data.OraclePool)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
 func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	return &types.GenesisState{
-		Params:        k.GetParams(ctx),
-		DataSources:   k.GetAllDataSources(ctx),
-		OracleScripts: k.GetAllOracleScripts(ctx),
+		Params:             k.GetParams(ctx),
+		DataSources:        k.GetAllDataSources(ctx),
+		OracleScripts:      k.GetAllOracleScripts(ctx),
+		OraclePool:         k.GetOraclePool(ctx),
+		ModuleCoinsAccount: k.GetOracleModuleCoinsAccount(ctx).String(),
 	}
 }

@@ -33,13 +33,13 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) {
 		// No active validators performing oracle tasks, nothing needs to be done here.
 		return
 	}
-	feeCollector := k.authKeeper.GetModuleAccount(ctx, k.feeCollectorName)
-	totalFee := sdk.NewDecCoinsFromCoins(k.bankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())...)
+	feeCollector := k.AuthKeeper.GetModuleAccount(ctx, k.feeCollectorName)
+	totalFee := sdk.NewDecCoinsFromCoins(k.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())...)
 	// Compute the fee allocated for oracle module to distribute to active validators.
 	oracleRewardRatio := sdk.NewDecWithPrec(int64(k.GetParams(ctx).OracleRewardPercentage), 2)
 	oracleRewardInt, _ := totalFee.MulDecTruncate(oracleRewardRatio).TruncateDecimal()
 	// Transfer the oracle reward portion from fee collector to distr module.
-	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, k.feeCollectorName, distr.ModuleName, oracleRewardInt)
+	err := k.BankKeeper.SendCoinsFromModuleToModule(ctx, k.feeCollectorName, distr.ModuleName, oracleRewardInt)
 	if err != nil {
 		panic(err)
 	}

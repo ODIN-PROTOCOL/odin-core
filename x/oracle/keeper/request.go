@@ -1,10 +1,16 @@
 package keeper
 
 import (
+	"fmt"
 	"time"
 
+	"cosmossdk.io/errors"
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/query"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
@@ -18,7 +24,7 @@ func (k Keeper) HasRequest(ctx sdk.Context, id types.RequestID) bool {
 func (k Keeper) GetRequest(ctx sdk.Context, id types.RequestID) (types.Request, error) {
 	bz := ctx.KVStore(k.storeKey).Get(types.RequestStoreKey(id))
 	if bz == nil {
-		return types.Request{}, sdkerrors.Wrapf(types.ErrRequestNotFound, "id: %d", id)
+		return types.Request{}, errors.Wrapf(types.ErrRequestNotFound, "id: %d", id)
 	}
 	var request types.Request
 	k.cdc.MustUnmarshal(bz, &request)
@@ -123,4 +129,48 @@ func (k Keeper) GetPendingResolveList(ctx sdk.Context) (ids []types.RequestID) {
 		ids = append(ids, types.RequestID(rid))
 	}
 	return ids
+}
+
+// GetPaginatedRequests returns all requests with pagination
+func (k Keeper) GetPaginatedRequests(
+	ctx sdk.Context,
+	limit, offset uint64, reverse bool,
+) ([]types.RequestResult, *query.PageResponse, error) {
+	requests := make([]types.RequestResult, 0)
+	requestsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ResultStoreKeyPrefix)
+	pagination := &query.PageRequest{
+		Limit:   limit,
+		Offset:  offset,
+		Reverse: reverse,
+	}
+
+	pageRes, err := query.FilteredPaginate(requestsStore, pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
+		var result types.Result
+		obi.MustDecode(value, &result)
+
+		request, err := k.GetRequest(ctx, result.RequestID)
+		if err != nil {
+			lastExpired := k.GetRequestLastExpired(ctx)
+			if result.RequestID > lastExpired {
+				return false, status.Error(codes.NotFound, fmt.Sprintf("unable to get request from chain: request id (%d) > latest expired request id (%d)", result.RequestID, lastExpired))
+			}
+		}
+
+		reports := k.GetReports(ctx, result.RequestID)
+
+		requestResult := types.RequestResult{
+			Request: &request,
+			Result:  &result,
+			Reports: reports,
+		}
+		if accumulate {
+			requests = append(requests, requestResult)
+		}
+		return true, nil
+	})
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to paginate requests")
+	}
+
+	return requests, pageRes, nil
 }

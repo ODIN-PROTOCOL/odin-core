@@ -60,6 +60,22 @@ func (k Querier) DataSource(
 	return &types.QueryDataSourceResponse{DataSource: &ds}, nil
 }
 
+// DataSources queries data sources
+func (k Querier) DataSources(
+	c context.Context,
+	req *types.QueryDataSourcesRequest,
+) (*types.QueryDataSourcesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	dataSources, pageRes, err := k.GetPaginatedDataSources(ctx, req.Pagination.Limit, req.Pagination.Offset)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryDataSourcesResponse{DataSources: dataSources, Pagination: pageRes}, nil
+}
+
 // OracleScript queries oracle script info for given oracle script id.
 func (k Querier) OracleScript(
 	c context.Context,
@@ -74,6 +90,19 @@ func (k Querier) OracleScript(
 		return nil, err
 	}
 	return &types.QueryOracleScriptResponse{OracleScript: &os}, nil
+}
+
+// OracleScripts queries all oracle scripts with pagination.
+func (k Querier) OracleScripts(c context.Context, req *types.QueryOracleScriptsRequest) (*types.QueryOracleScriptsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	oracleScripts, pageRes, err := k.GetPaginatedOracleScripts(ctx, req.Pagination.Limit, req.Pagination.Offset)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryOracleScriptsResponse{OracleScripts: oracleScripts, Pagination: pageRes}, nil
 }
 
 // Request queries request info for given request id.
@@ -108,6 +137,37 @@ func (k Querier) Request(c context.Context, req *types.QueryRequestRequest) (*ty
 
 	result := k.MustGetResult(ctx, rid)
 	return &types.QueryRequestResponse{Request: &request, Reports: reports, Result: &result}, nil
+}
+
+// Requests queries all requests with pagination.
+func (k Querier) Requests(c context.Context, req *types.QueryRequestsRequest) (*types.QueryRequestsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	requests, pageRes, err := k.GetPaginatedRequests(ctx, req.Pagination.Limit, req.Pagination.Offset, req.Pagination.Reverse)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryRequestsResponse{Requests: requests, Pagination: pageRes}, nil
+}
+
+// RequestReports queries all reports by the giver request id with pagination.
+func (k Querier) RequestReports(c context.Context, req *types.QueryRequestReportsRequest) (*types.QueryRequestReportsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	reports, pageRes, err := k.GetPaginatedRequestReports(
+		ctx,
+		types.RequestID(req.RequestId),
+		req.Pagination.Limit,
+		req.Pagination.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryRequestReportsResponse{Reports: reports, Pagination: pageRes}, nil
 }
 
 func (k Querier) PendingRequests(
@@ -461,4 +521,35 @@ func (k Querier) RequestVerification(
 		DataSourceId: uint64(*dataSourceID),
 		IsDelay:      false,
 	}, nil
+}
+
+func (k Querier) DataProvidersPool(c context.Context, req *types.QueryDataProvidersPoolRequest) (*types.QueryDataProvidersPoolResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+
+	return &types.QueryDataProvidersPoolResponse{
+		Pool: k.GetOraclePool(ctx).DataProvidersPool,
+	}, nil
+}
+
+// DataProviderReward returns current reward per byte for data providers
+func (k Querier) DataProviderReward(
+	c context.Context, _ *types.QueryDataProviderRewardRequest,
+) (*types.QueryDataProviderRewardResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	accumulatedRewards := k.GetAccumulatedDataProvidersRewards(ctx)
+	return &types.QueryDataProviderRewardResponse{RewardPerByte: accumulatedRewards.CurrentRewardPerByte}, nil
+}
+
+// DataProviderAccumulatedReward queries reward of a given data provider address.
+func (k Querier) DataProviderAccumulatedReward(c context.Context, req *types.QueryDataProviderAccumulatedRewardRequest) (*types.QueryDataProviderAccumulatedRewardResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	ctx := sdk.UnwrapSDKContext(c)
+	addr, err := sdk.AccAddressFromBech32(req.DataProviderAddress)
+	if err != nil {
+		return nil, err
+	}
+	accumulatedReward := k.GetDataProviderAccumulatedReward(ctx, addr)
+	return &types.QueryDataProviderAccumulatedRewardResponse{AccumulatedReward: accumulatedReward}, nil
 }

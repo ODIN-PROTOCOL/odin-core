@@ -22,7 +22,7 @@ type RewardCollector interface {
 func (k Keeper) CollectReward(
 	ctx sdk.Context, rawReports []oracletypes.RawReport, rawRequests []oracletypes.RawRequest,
 ) (sdk.Coins, error) {
-	collector := newRewardCollector(k, k.bankKeeper)
+	collector := newRewardCollector(k, k.BankKeeper)
 	oracleParams := k.GetParams(ctx)
 
 	rawReportsMap := make(map[oracletypes.ExternalID]oracletypes.RawReport)
