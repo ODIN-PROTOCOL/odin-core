@@ -72,6 +72,11 @@ func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (
 	if reportInTime {
 		req := k.MustGetRequest(ctx, msg.RequestID)
 		if k.GetReportCount(ctx, msg.RequestID) == req.MinCount {
+			// at this moment we are sure, that all the raw reports here are validated
+			// so we can distribute the reward for them in end-block
+			if _, err := k.CollectReward(ctx, msg.GetRawReports(), req.RawRequests); err != nil {
+				return nil, err
+			}
 			// At the exact moment when the number of reports is sufficient, we add the request to
 			// the pending resolve list. This can happen at most one time for any request.
 			k.AddPendingRequest(ctx, msg.RequestID)

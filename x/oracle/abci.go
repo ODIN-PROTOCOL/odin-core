@@ -15,6 +15,17 @@ func handleBeginBlock(ctx sdk.Context, req abci.RequestBeginBlock, k keeper.Keep
 	k.SetRollingSeed(ctx, append(rollingSeed[1:], req.GetHash()[0]))
 	// Reward a portion of block rewards (inflation + tx fee) to active oracle validators.
 	k.AllocateTokens(ctx, req.LastCommitInfo.GetVotes())
+	params := k.GetParams(ctx)
+	// Reset the price to the original price if a new boundary period has begun
+	rewardThresholdBlocks := params.DataProviderRewardThreshold.Blocks
+	previousBlock := uint64(ctx.BlockHeight() - 1)
+	if previousBlock%rewardThresholdBlocks == 0 {
+		initialReward := params.DataProviderRewardPerByte
+		k.SetAccumulatedDataProvidersRewards(
+			ctx,
+			types.NewDataProvidersAccumulatedRewards(initialReward, sdk.NewCoins()),
+		)
+	}
 }
 
 // handleEndBlock cleans up the state during end block. See comment in the implementation!

@@ -191,16 +191,12 @@ func (k Keeper) CollectFee(
 	askCount uint64,
 	rawRequests []types.RawRequest,
 ) (sdk.Coins, error) {
-	collector := newFeeCollector(k.bankKeeper, feeLimit, payer)
+	collector := newFeeCollector(k.distrKeeper, k, feeLimit, payer)
 
 	for _, r := range rawRequests {
 		ds, err := k.GetDataSource(ctx, r.DataSourceID)
 		if err != nil {
 			return nil, err
-		}
-
-		if ds.Fee.Empty() {
-			continue
 		}
 
 		fee := sdk.NewCoins()
@@ -209,12 +205,7 @@ func (k Keeper) CollectFee(
 			fee = fee.Add(c)
 		}
 
-		treasury, err := sdk.AccAddressFromBech32(ds.Treasury)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := collector.Collect(ctx, fee, treasury); err != nil {
+		if err := collector.Collect(ctx, fee); err != nil {
 			return nil, err
 		}
 	}

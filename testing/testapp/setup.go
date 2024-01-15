@@ -56,32 +56,37 @@ type Account struct {
 
 // nolint
 var (
-	Owner         Account
-	Treasury      Account
-	FeePayer      Account
-	Alice         Account
-	Bob           Account
-	Carol         Account
-	Validators    []Account
-	DataSources   []types.DataSource
-	OracleScripts []types.OracleScript
-	OwasmVM       *owasm.Vm
+	Owner           Account
+	Treasury        Account
+	FeePayer        Account
+	Alice           Account
+	Bob             Account
+	Carol           Account
+	FeePoolProvider Account
+	Validators      []Account
+	DataSources     []types.DataSource
+	OracleScripts   []types.OracleScript
+	OwasmVM         *owasm.Vm
 )
 
 // nolint
 var (
-	EmptyCoins         = sdk.Coins(nil)
-	Coins1loki         = sdk.NewCoins(sdk.NewInt64Coin("loki", 1))
-	Coins10loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 10))
-	Coins11loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 11))
-	Coins1000000loki   = sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000))
-	Coins99999999loki  = sdk.NewCoins(sdk.NewInt64Coin("loki", 99999999))
-	Coins100000000loki = sdk.NewCoins(sdk.NewInt64Coin("loki", 100000000))
-	BadCoins           = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
-	Port1              = "port-1"
-	Port2              = "port-2"
-	Channel1           = "channel-1"
-	Channel2           = "channel-2"
+	EmptyCoins               = sdk.Coins(nil)
+	Coins1loki               = sdk.NewCoins(sdk.NewInt64Coin("loki", 1))
+	Coins10loki              = sdk.NewCoins(sdk.NewInt64Coin("loki", 10))
+	Coins11loki              = sdk.NewCoins(sdk.NewInt64Coin("loki", 11))
+	Coin100000000minigeo     = sdk.NewInt64Coin("minigeo", 100000000)
+	Coins1000000loki         = sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000))
+	Coin100000000loki        = sdk.NewInt64Coin("loki", 100000000)
+	Coins99999999loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 99999999))
+	Coins100000000loki       = sdk.NewCoins(sdk.NewInt64Coin("loki", 100000000))
+	BadCoins                 = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
+	Port1                    = "port-1"
+	Port2                    = "port-2"
+	Channel1                 = "channel-1"
+	Channel2                 = "channel-2"
+	DefaultCommunityPool     = sdk.NewCoins(Coin100000000minigeo, Coin100000000loki)
+	DefaultDataProvidersPool = sdk.NewCoins(Coin100000000loki)
 )
 
 const (
@@ -384,13 +389,23 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 }
 
 // CreateTestInput creates a new test environment for unit tests.
-func CreateTestInput(autoActivate bool) (*TestingApp, sdk.Context, keeper.Keeper) {
+func CreateTestInput(params ...bool) (*TestingApp, sdk.Context, keeper.Keeper) {
 	app := NewTestApp("ODINCHAIN", log.NewNopLogger())
 	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})
-	if autoActivate {
+	if len(params) > 0 && params[0] {
 		app.OracleKeeper.Activate(ctx, Validators[0].ValAddress)
 		app.OracleKeeper.Activate(ctx, Validators[1].ValAddress)
 		app.OracleKeeper.Activate(ctx, Validators[2].ValAddress)
+	}
+
+	if len(params) > 1 && params[1] {
+		app.DistrKeeper.FundCommunityPool(ctx, DefaultCommunityPool, FeePoolProvider.Address)
+		accumulatedPaymentsForData := app.OracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(DefaultDataProvidersPool...)
+
+		app.OracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+
+		ctx = app.NewContext(false, tmproto.Header{})
 	}
 	return app, ctx, app.OracleKeeper
 }

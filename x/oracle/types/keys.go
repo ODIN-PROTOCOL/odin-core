@@ -41,6 +41,13 @@ var (
 	DataSourceCountStoreKey = append(GlobalStoreKeyPrefix, []byte("DataSourceCount")...)
 	// OracleScriptCountStoreKey is the key that keeps the total oracle sciprt count.
 	OracleScriptCountStoreKey = append(GlobalStoreKeyPrefix, []byte("OracleScriptCount")...)
+	// AccumulatedDataProvidersRewardsStoreKey the key that keeps the total allocated rewards to data providers for one day
+	AccumulatedDataProvidersRewardsStoreKey = append(GlobalStoreKeyPrefix, []byte("AllocateRewardsToDataProviders")...)
+	// AccumulatedPaymentsForDataStoreKey the key that keeps the accumulated payments for data
+	AccumulatedPaymentsForDataStoreKey = append(GlobalStoreKeyPrefix, []byte("AccumulatedPaymentsForData")...)
+	// OraclePoolStoreKey is the key that keeps the oracle pool
+	OraclePoolStoreKey          = append(GlobalStoreKeyPrefix, []byte("OraclePool")...) // key for global oracle pool state
+	OracleModuleCoinsAccountKey = append(GlobalStoreKeyPrefix, []byte("OracleModuleCoinsAccount")...)
 
 	// RequestStoreKeyPrefix is the prefix for request store.
 	RequestStoreKeyPrefix = []byte{0x01}
@@ -53,7 +60,8 @@ var (
 	// ValidatorStatusKeyPrefix is the prefix for validator status store.
 	ValidatorStatusKeyPrefix = []byte{0x05}
 	// ParamsKeyPrefix is the prefix for the parameters of the module.
-	ParamsKeyPrefix = []byte{0x06}
+	ParamsKeyPrefix              = []byte{0x06}
+	DataProviderRewardsKeyPrefix = []byte{0x07}
 	// ResultStoreKeyPrefix is the prefix for request result store.
 	ResultStoreKeyPrefix = []byte{0xff}
 
@@ -96,4 +104,8 @@ func ReportsOfValidatorPrefixKey(reqID RequestID, val sdk.ValAddress) []byte {
 	buf := append(ReportStoreKeyPrefix, sdk.Uint64ToBigEndian(uint64(reqID))...)
 	buf = append(buf, val.Bytes()...)
 	return buf
+}
+
+func DataProviderRewardsPrefixKey(acc sdk.AccAddress) []byte {
+	return append(DataProviderRewardsKeyPrefix, acc.Bytes()...)
 }

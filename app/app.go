@@ -616,6 +616,8 @@ func NewOdinApp(
 		transferModule,
 		icaModule,
 		oracleModule,
+		coinswap.NewAppModule(app.CoinswapKeeper),
+		auction.NewAppModule(app.AuctionKeeper),
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
@@ -645,6 +647,8 @@ func NewOdinApp(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
+		coinswaptypes.ModuleName,
+		auctiontypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
 		crisistypes.ModuleName,
@@ -669,6 +673,8 @@ func NewOdinApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
+		coinswaptypes.ModuleName,
+		auctiontypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -699,6 +705,8 @@ func NewOdinApp(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		oracletypes.ModuleName,
+		coinswaptypes.ModuleName,
+		auctiontypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(app.CrisisKeeper)

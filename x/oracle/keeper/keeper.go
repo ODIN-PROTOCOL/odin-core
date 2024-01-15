@@ -237,28 +237,28 @@ func (k Keeper) RevokeReporter(ctx sdk.Context, validator sdk.ValAddress, report
 	return k.authzKeeper.DeleteGrant(ctx, reporter, sdk.AccAddress(validator), sdk.MsgTypeURL(&types.MsgReportData{}))
 }
 
-func (k Keeper) SetAccumulatedDataProvidersRewards(ctx sdk.Context, reward oracletypes.DataProvidersAccumulatedRewards) {
+func (k Keeper) SetAccumulatedDataProvidersRewards(ctx sdk.Context, reward types.DataProvidersAccumulatedRewards) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshal(&reward)
-	store.Set(oracletypes.AccumulatedDataProvidersRewardsStoreKey, b)
+	store.Set(types.AccumulatedDataProvidersRewardsStoreKey, b)
 }
 
-func (k Keeper) GetAccumulatedDataProvidersRewards(ctx sdk.Context) (reward oracletypes.DataProvidersAccumulatedRewards) {
+func (k Keeper) GetAccumulatedDataProvidersRewards(ctx sdk.Context) (reward types.DataProvidersAccumulatedRewards) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(oracletypes.AccumulatedDataProvidersRewardsStoreKey)
+	bz := store.Get(types.AccumulatedDataProvidersRewardsStoreKey)
 	k.cdc.MustUnmarshal(bz, &reward)
 	return
 }
 
-func (k Keeper) SetAccumulatedPaymentsForData(ctx sdk.Context, payments oracletypes.AccumulatedPaymentsForData) {
+func (k Keeper) SetAccumulatedPaymentsForData(ctx sdk.Context, payments types.AccumulatedPaymentsForData) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshal(&payments)
-	store.Set(oracletypes.AccumulatedPaymentsForDataStoreKey, b)
+	store.Set(types.AccumulatedPaymentsForDataStoreKey, b)
 }
 
-func (k Keeper) GetAccumulatedPaymentsForData(ctx sdk.Context) (payments oracletypes.AccumulatedPaymentsForData) {
+func (k Keeper) GetAccumulatedPaymentsForData(ctx sdk.Context) (payments types.AccumulatedPaymentsForData) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(oracletypes.AccumulatedPaymentsForDataStoreKey)
+	bz := store.Get(types.AccumulatedPaymentsForDataStoreKey)
 	k.cdc.MustUnmarshal(bz, &payments)
 	return
 }
@@ -266,7 +266,7 @@ func (k Keeper) GetAccumulatedPaymentsForData(ctx sdk.Context) (payments oraclet
 // get the module coins account
 func (k Keeper) GetOracleModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
-	b := store.Get(oracletypes.OracleModuleCoinsAccountKey)
+	b := store.Get(types.OracleModuleCoinsAccountKey)
 	if b == nil {
 		return nil
 	}
@@ -276,7 +276,7 @@ func (k Keeper) GetOracleModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAdd
 
 // set the module coins account
 func (k Keeper) SetOracleModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
-	ctx.KVStore(k.storeKey).Set(oracletypes.OracleModuleCoinsAccountKey, account)
+	ctx.KVStore(k.storeKey).Set(types.OracleModuleCoinsAccountKey, account)
 }
 
 // IsAllowedFeeDenom checks if fee denom exists in data requester fee denoms list

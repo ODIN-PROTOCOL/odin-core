@@ -7,29 +7,25 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-// FeeCollector define fee collector
-type FeeCollector interface {
-	Collect(sdk.Context, sdk.Coins, sdk.AccAddress) error
-	Collected() sdk.Coins
-}
-
 type feeCollector struct {
-	bankKeeper types.BankKeeper
-	payer      sdk.AccAddress
-	collected  sdk.Coins
-	limit      sdk.Coins
+	distrKeeper  types.DistrKeeper
+	oracleKeeper Keeper
+	payer        sdk.AccAddress
+	collected    sdk.Coins
+	limit        sdk.Coins
 }
 
-func newFeeCollector(bankKeeper types.BankKeeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
+func newFeeCollector(distrKeeper types.DistrKeeper, oracleKeeper Keeper, feeLimit sdk.Coins, payer sdk.AccAddress) FeeCollector {
 	return &feeCollector{
-		bankKeeper: bankKeeper,
-		payer:      payer,
-		collected:  sdk.NewCoins(),
-		limit:      feeLimit,
+		distrKeeper:  distrKeeper,
+		oracleKeeper: oracleKeeper,
+		payer:        payer,
+		collected:    sdk.NewCoins(),
+		limit:        feeLimit,
 	}
 }
 
-func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins, treasury sdk.AccAddress) error {
+func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins) error {
 	coll.collected = coll.collected.Add(coins...)
 
 	// If found any collected coin that exceed limit then return error
@@ -47,7 +43,15 @@ func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins, treasury sdk
 	}
 
 	// Actual send coins
-	return coll.bankKeeper.SendCoins(ctx, coll.payer, treasury, coins)
+	err := coll.distrKeeper.FundCommunityPool(ctx, coins, coll.payer)
+	if err == nil {
+		accumulatedPaymentsForData := coll.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(coins...)
+
+		coll.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+	}
+
+	return err
 }
 
 func (coll *feeCollector) Collected() sdk.Coins {
