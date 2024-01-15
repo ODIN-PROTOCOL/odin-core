@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
+	"cosmossdk.io/log"
 
-	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
@@ -29,19 +28,23 @@ import (
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/types"
 
 	modulev1 "github.com/ODIN-PROTOCOL/odin-core/api/odincore/odinmint/module"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
 var (
-	_ module.AppModule           = (*AppModule)(nil)
-	_ module.AppModuleBasic      = (*AppModule)(nil)
-	_ module.AppModuleSimulation = (*AppModule)(nil)
+	_ appmodule.AppModule       	= AppModule{}
+	_ module.AppModuleBasic      	= AppModule{}
+	_ module.AppModuleSimulation 	= AppModule{}
 
-	_ module.HasGenesis          =  (*AppModule)(nil)
-	_ module.HasInvariants       =  (*AppModule)(nil)
-	_ module.HasConsensusVersion =  (*AppModule)(nil)
-	_ appmodule.AppModule        =  (*AppModule)(nil)
-	_ appmodule.HasBeginBlocker  =  (*AppModule)(nil)
-	_ appmodule.HasEndBlocker    =  (*AppModule)(nil)
+	_ module.HasGenesis          	= AppModule{}
+	_ module.HasInvariants      	= AppModule{}
+	_ module.HasConsensusVersion 	= AppModule{}
+	_ appmodule.AppModule        	= AppModule{}
+
+	_ appmodule.HasBeginBlocker 	= AppModule{}
+	_ appmodule.HasEndBlocker    	= AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -51,16 +54,14 @@ var (
 // AppModuleBasic implements the AppModuleBasic interface that defines the
 // independent methods a Cosmos SDK module needs to implement.
 type AppModuleBasic struct {
-	cdc codec.BinaryCodec
+	cdc codec.Codec
 }
 
-func NewAppModuleBasic(cdc codec.BinaryCodec) AppModuleBasic {
-	return AppModuleBasic{cdc: cdc}
-}
+var _ module.AppModuleBasic = AppModuleBasic{}
 
 // Name returns the name of the module as a string.
 func (AppModuleBasic) Name() string {
-	return types.ModuleName
+	return minttypes.ModuleName
 }
 
 // RegisterLegacyAminoCodec registers the amino codec for the module, which is used
@@ -77,51 +78,21 @@ func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 // DefaultGenesis returns a default GenesisState for the module, marshalled to json.RawMessage.
 // The default GenesisState need to be defined by the module developer and is primarily used for testing.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesis())
+	return cdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
 // ValidateGenesis used to validate the GenesisState, given in its json.RawMessage form.
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
-	var genState types.GenesisState
-	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
-	}
-	return genState.Validate()
-}
-
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
-func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
-		panic(err)
-	}
-}
-// ------------------------
-
-
-
-// AppModuleBasic defines the basic application module used by the mint module.
-
-
-// DefaultGenesis returns default genesis state as raw bytes for the mint
-// module.
-func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(minttypes.DefaultGenesisState())
-}
-
-// ValidateGenesis performs genesis state validation for the mint module.
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
 	var data minttypes.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", minttypes.ModuleName, err)
 	}
-
-	return minttypes.ValidateGenesis(data)
+	return data.Validate()
 }
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the mint module.
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	err := minttypes.RegisterQueryHandlerClient(context.Background(), mux, minttypes.NewQueryClient(clientCtx))
-	if err != nil {
+	if err := minttypes.RegisterQueryHandlerClient(context.Background(), mux, minttypes.NewQueryClient(clientCtx)); err != nil {
 		panic(err)
 	}
 }
@@ -170,7 +141,6 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 	mintkeeper.InitGenesis(ctx, am.keeper, &genesisState)
 }
 
-
 // ExportGenesis returns the exported genesis state as raw bytes for the mint
 // module.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
@@ -178,15 +148,18 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(gs)
 }
 
-// BeginBlock returns the begin blocker for the mint module.
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
-	BeginBlocker(ctx, am.keeper)
+// BeginBlock contains the logic that is automatically triggered at the beginning of each block.
+// The begin block implementation is optional.
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	c := sdk.UnwrapSDKContext(ctx)
+	BeginBlocker(c, am.keeper)
+	return nil
 }
 
-// EndBlock returns the end blocker for the mint module. It returns no validator
-// updates.
-func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return []abci.ValidatorUpdate{}
+// EndBlock contains the logic that is automatically triggered at the end of each block.
+// The end block implementation is optional.
+func (AppModule) EndBlock(_ context.Context) error {
+	return nil
 }
 
 // GenerateGenesisState creates a randomized GenState of the mint module.
@@ -199,8 +172,9 @@ func (AppModule) ProposalContents(simState module.SimulationState) []simtypes.We
 	return nil
 }
 
-// RegisterStoreDecoder registers a decoder for mint module's types.
-func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+
+// RegisterStoreDecoder registers a decoder.
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 	sdr[minttypes.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }
 
@@ -236,15 +210,14 @@ type ModuleInputs struct {
 	depinject.In
 
 	StoreService store.KVStoreService
+	paramSpace 	 paramtypes.Subspace
 	Cdc          codec.Codec
 	Config       *modulev1.Module
 	Logger       log.Logger
 
 	AccountKeeper types.AccountKeeper
 	BankKeeper    types.BankKeeper
-    MintKeeper types.MintKeeper
-
-    
+    StakingKeeper types.StakingKeeper
 }
 
 type ModuleOutputs struct {
@@ -255,24 +228,33 @@ type ModuleOutputs struct {
 }
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
-	// default to governance authority if not provided
+	feeCollectorName := in.Config.FeeCollectorName
+	if feeCollectorName == "" {
+		feeCollectorName = authtypes.FeeCollectorName
+	}
+
+
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 	if in.Config.Authority != "" {
 		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
 	}
+
 	k := keeper.NewKeeper(
 	    in.Cdc,
 		in.StoreService,
+		in.paramSpace,
+		feeCollectorName,
+
 	    in.Logger,
 	    authority.String(), 
-        in.MintKeeper,
-        in.BankKeeper,
+        in.StakingKeeper,
+        in.AccountKeeper,
+		in.BankKeeper,
 	)
 	m := NewAppModule(
 	    in.Cdc,
 	    k,
 	    in.AccountKeeper,
-	    in.BankKeeper,
 	)
 
 	return ModuleOutputs{TestKeeper: k, Module: m}

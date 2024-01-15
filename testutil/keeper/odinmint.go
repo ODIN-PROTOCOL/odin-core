@@ -32,16 +32,20 @@ func OdinmintKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	feeCollectorName := authtypes.FeeCollectorName
 
 	k := keeper.NewKeeper(
 	    cdc,
 	    runtime.NewKVStoreService(storeKey),
+		types.ParamSubspace(),
+		feeCollectorName,
         log.NewNopLogger(),
 	    authority.String(), 
         nil,
         nil,
         nil,
 	)
+
 
 	ctx := sdk.NewContext(stateStore, cmtproto.Header{}, false, log.NewNopLogger())
 

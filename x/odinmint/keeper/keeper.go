@@ -1,55 +1,68 @@
 package keeper
 
 import (
+	"fmt"
+
+	"cosmossdk.io/core/store"
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
-	storetypes "cosmossdk.io/store/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/odinmint/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/runtime"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Keeper of the mint store
 type (
 	Keeper struct {
-		cdc              codec.BinaryCodec
-		storeKey         storetypes.StoreKey
-		paramSpace       paramtypes.Subspace
-		
-		stakingKeeper    minttypes.StakingKeeper
-		authKeeper       minttypes.AccountKeeper
-		bankKeeper       minttypes.BankKeeper
-		feeCollectorName string
+		cdc              	codec.BinaryCodec
+		storeService 		store.KVStoreService
+		//paramSpace 			paramtypes.Subspace
+		logger       		log.Logger
+		feeCollectorName	string
+		stakingKeeper    	minttypes.StakingKeeper
+		authKeeper       	minttypes.AccountKeeper
+		bankKeeper       	minttypes.BankKeeper
 	}
 )
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace,
-	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
-	feeCollectorName string,
+	cdc codec.BinaryCodec, 
+	storeService store.KVStoreService,
+	// paramSpace paramtypes.Subspace,
+	feeCollectorName	string,
+	logger log.Logger,
+	authority string,
+	sk minttypes.StakingKeeper, 
+	ak minttypes.AccountKeeper, 
+	bk minttypes.BankKeeper,
+	
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
 		panic("the mint module account has not been set")
 	}
 
-	// set KeyTable if it has not already been set
-	if !paramSpace.HasKeyTable() {
-		paramSpace = paramSpace.WithKeyTable(minttypes.ParamKeyTable())
+	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
+		panic(fmt.Sprintf("invalid authority address: %s", authority))
 	}
+
+	// // set KeyTable if it has not already been set
+	// if !paramSpace.HasKeyTable() {
+	// 	paramSpace = paramSpace.WithKeyTable(minttypes.ParamKeyTable())
+	// }
 
 	return Keeper{
 		cdc:              cdc,
-		storeKey:         key,
-		paramSpace:       paramSpace,
+		storeService:	  storeService,
+		// paramSpace:       paramSpace,
+		logger: 		  logger,		
 		stakingKeeper:    sk,
 		bankKeeper:       bk,
 		authKeeper:       ak,
-		feeCollectorName: feeCollectorName,
 	}
 }
 
@@ -60,8 +73,9 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // get the minter
 func (k Keeper) GetMinter(ctx sdk.Context) (minter minttypes.Minter) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	b := store.Get(minttypes.MinterKey)
+
 	if b == nil {
 		panic("stored minter should not have been nil")
 	}
@@ -71,15 +85,22 @@ func (k Keeper) GetMinter(ctx sdk.Context) (minter minttypes.Minter) {
 }
 
 // set the minter
-func (k Keeper) SetMinter(ctx sdk.Context, minter minttypes.Minter) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&minter)
+func (k Keeper) SetMinter(ctx sdk.Context, minter minttypes.Minter) error {
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	b, err := k.cdc.Marshal(&minter)
+
+	if err != nil {
+		return err
+	}
 	store.Set(minttypes.MinterKey, b)
+
+	return nil
 }
 
 // get the module coins account
 func (k Keeper) GetMintModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+
 	b := store.Get(minttypes.MintModuleCoinsAccountKey)
 	if b == nil {
 		return nil
@@ -90,13 +111,15 @@ func (k Keeper) GetMintModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddre
 
 // set the module coins account
 func (k Keeper) SetMintModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
-	ctx.KVStore(k.storeKey).Set(minttypes.MintModuleCoinsAccountKey, account)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store.Set(minttypes.MintModuleCoinsAccountKey, account)
 }
 
 // GetMintPool returns the mint pool info
 func (k Keeper) GetMintPool(ctx sdk.Context) (mintPool minttypes.MintPool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	b := store.Get(minttypes.MintPoolStoreKey)
+	
 	if b == nil {
 		panic("Stored fee pool should not have been nil")
 	}
@@ -107,20 +130,35 @@ func (k Keeper) GetMintPool(ctx sdk.Context) (mintPool minttypes.MintPool) {
 
 // SetMintPool sets mint pool to the store
 func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
-	store := ctx.KVStore(k.storeKey)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
 	b := k.cdc.MustMarshal(&mintPool)
 	store.Set(minttypes.MintPoolStoreKey, b)
 }
 
 // GetParams returns the total set of minting parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params minttypes.Params) {
-	k.paramSpace.GetParamSet(ctx, &params)
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	for _, pair := range params.ParamSetPairs() {
+		b := store.Get(pair.Key)
+		if b == nil {
+            continue // Key not found in the store, handle as needed
+        }
+
+		k.cdc.UnmarshalInterface(b, pair.Value)
+	}
 	return params
 }
 
 // SetParams sets the total set of minting parameters.
 func (k Keeper) SetParams(ctx sdk.Context, params minttypes.Params) {
-	k.paramSpace.SetParamSet(ctx, &params)
+
+	store := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	for _, pair := range params.ParamSetPairs() { 
+		b, err := k.cdc.Marshal(pair.Value)
+
+		store.Set(pair.Key, b)
+	}
+	// k.paramSpace.SetParamSet(ctx, &params)
 }
 
 // GetMintAccount returns the mint ModuleAccount
