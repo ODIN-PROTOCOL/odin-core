@@ -1072,18 +1072,18 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 		testapp.EmptyCoins,
 		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))),
 		testapp.EmptyCoins,
 	})
 
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(2000000))))
+	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(2000000))))
 
 	// Carol have not enough loki but have enough uabc
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		minttypes.ModuleName,
 		testapp.FeePayer.Address,
-		sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(2000000))),
 	)
 
 	coins, err := k.CollectFee(
@@ -1098,7 +1098,7 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 	// Coins sum is correct
 	require.True(
 		t,
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))).
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))).
 			IsEqual(coins),
 	)
 
@@ -1111,7 +1111,7 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 		ctx,
 		app.BankKeeper,
 		testapp.FeePayer.Address,
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(97000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(97000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))),
 	)
 
 	// start: 0odin, 0abc
@@ -1121,7 +1121,7 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 		ctx,
 		app.BankKeeper,
 		app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName),
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))),
 	)
 }
 
@@ -1132,14 +1132,14 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		testapp.EmptyCoins,
 		testapp.Coins1000000loki,
 		testapp.EmptyCoins,
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(2000000)), sdk.NewCoin("minigeo", sdk.NewInt(1000000))),
 		testapp.EmptyCoins,
 	})
 
 	app.BankKeeper.MintCoins(
 		ctx,
 		minttypes.ModuleName,
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000000)), sdk.NewCoin("uabc", sdk.NewInt(2000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000000)), sdk.NewCoin("minigeo", sdk.NewInt(2000000))),
 	)
 	// Alice have no enough loki and don't have uabc so don't top up
 	// Bob have enough loki and have some but not enough uabc so add some
@@ -1153,14 +1153,14 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		ctx,
 		minttypes.ModuleName,
 		testapp.Bob.Address,
-		sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(1))),
+		sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(1))),
 	)
 	// Carol have not enough loki but have enough uabc
 	app.BankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		minttypes.ModuleName,
 		testapp.Carol.Address,
-		sdk.NewCoins(sdk.NewCoin("uabc", sdk.NewInt(1000000))),
+		sdk.NewCoins(sdk.NewCoin("minigeo", sdk.NewInt(1000000))),
 	)
 
 	// Alice
@@ -1171,7 +1171,7 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		1,
 		raws,
 	)
-	require.EqualError(t, err, "require: 1000000uabc, max: 0uabc: not enough fee")
+	require.EqualError(t, err, "require: 3000000loki, max: 1000000loki: not enough fee")
 
 	// Bob
 	_, err = k.CollectFee(
@@ -1181,7 +1181,7 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		1,
 		raws,
 	)
-	require.EqualError(t, err, "require: 1000000uabc, max: 1uabc: not enough fee")
+	require.EqualError(t, err, "require: 1000000minigeo, max: 1minigeo: not enough fee")
 
 	// Carol
 	_, err = k.CollectFee(
