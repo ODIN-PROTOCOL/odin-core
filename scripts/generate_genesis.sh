@@ -4,7 +4,7 @@ rm -rf ~/.odin
 
 # initial new node
 odind init validator --chain-id odinchain
-echo "lock nasty suffer dirt dream fine fall deal curtain plate husband sound tower mom crew crawl guard rack snake before fragile course bacon range" \
+echo "lock nasty suffer dirt dream fine fall deal curtain plate husodin sound tower mom crew crawl guard rack snake before fragile course bacon range" \
     | odind keys add validator --recover --keyring-backend test
 echo "smile stem oven genius cave resource better lunar nasty moon company ridge brass rather supply used horn three panic put venue analyst leader comic" \
     | odind keys add requester --recover --keyring-backend test

@@ -24,7 +24,7 @@ var (
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
-// AppModuleBasic is Band Oracle's module basic object.
+// AppModuleBasic is Odin Oracle's module basic object.
 type AppModuleBasic struct{}
 
 // Name returns this module's name - "auction" (SDK AppModuleBasic interface).
