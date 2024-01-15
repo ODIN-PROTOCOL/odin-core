@@ -36,6 +36,7 @@ func TestMigrate(t *testing.T) {
 	store := ctx.KVStore(storeKey)
 
 	legacySubspace := newMockSubspace(types.DefaultParams())
+	legacySubspace.ps.RewardDecreasingFraction = sdk.ZeroDec()
 	require.NoError(t, v2.Migrate(ctx, store, legacySubspace, cdc))
 
 	var res types.Params

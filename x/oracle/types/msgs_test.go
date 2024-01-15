@@ -205,7 +205,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 	)
 	require.Equal(
 		t,
-		`{"type":"oracle/Report","value":{"raw_reports":[{"data":"ZGF0YTE=","exit_code":1,"external_id":"1"},{"data":"ZGF0YTI=","exit_code":2,"external_id":"2"}],"request_id":"1","validator":"odinvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqx6y767"}}`,
+		`{"type":"oracle/Report","value":{"raw_reports":[{"data":"ZGF0YTE=","exit_code":1,"external_id":"1"},{"data":"ZGF0YTI=","exit_code":2,"external_id":"2"}],"request_id":"1","validator":"odinvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq67jzzr"}}`,
 		string(
 			NewMsgReportData(
 				1,
@@ -215,7 +215,7 @@ func TestMsgGetSignBytes(t *testing.T) {
 		),
 	)
 	require.Equal(t,
-		`{"type":"oracle/Activate","value":{"validator":"odinvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqx6y767"}}`,
+		`{"type":"oracle/Activate","value":{"validator":"odinvaloper1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq67jzzr"}}`,
 		string(NewMsgActivate(GoodTestValAddr).GetSignBytes()),
 	)
 }
