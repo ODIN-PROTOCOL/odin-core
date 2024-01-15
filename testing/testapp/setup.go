@@ -80,6 +80,7 @@ var (
 	Coin100000000loki        = sdk.NewInt64Coin("loki", 100000000)
 	Coins99999999loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 99999999))
 	Coins100000000loki       = sdk.NewCoins(sdk.NewInt64Coin("loki", 100000000))
+	Coins10000000000loki     = sdk.NewCoins(sdk.NewInt64Coin("loki", 10000000000))
 	BadCoins                 = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
 	Port1                    = "port-1"
 	Port2                    = "port-2"

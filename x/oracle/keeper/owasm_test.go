@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	authtypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
@@ -174,11 +175,11 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
-			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyReceiver, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
-			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
@@ -190,11 +191,11 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
-			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyReceiver, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
-			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
@@ -979,7 +980,7 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 	feePayerBalances := balancesRes.Balances
 	feePayerBalances[0].Amount = feePayerBalances[0].Amount.Sub(sdk.NewInt(3000000))
 
-	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins100000000loki, 1, raws)
+	coins, err := k.CollectFee(ctx, testapp.FeePayer.Address, testapp.Coins10000000000loki, 1, raws)
 	require.NoError(t, err)
 	require.Equal(t, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))), coins)
 
@@ -988,7 +989,7 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 		t,
 		ctx,
 		app.BankKeeper,
-		testapp.Treasury.Address,
+		app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName),
 		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000))),
 	)
 }
@@ -1021,7 +1022,7 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 		t,
 		ctx,
 		app.BankKeeper,
-		testapp.Treasury.Address,
+		app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName),
 		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(12000000))),
 	)
 }
