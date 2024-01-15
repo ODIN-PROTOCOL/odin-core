@@ -159,11 +159,11 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeCoinReceived,
-			sdk.NewAttribute(authtypes.AttributeKeyReceiver, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyReceiver, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
 			authtypes.EventTypeTransfer,
-			sdk.NewAttribute(authtypes.AttributeKeyRecipient, testapp.Treasury.Address.String()),
+			sdk.NewAttribute(authtypes.AttributeKeyRecipient, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()),
 			sdk.NewAttribute(authtypes.AttributeKeySender, testapp.FeePayer.Address.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, testapp.Coins1000000loki.String()),
 		), sdk.NewEvent(
@@ -245,7 +245,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 	paid := sdk.NewCoins(sdk.NewInt64Coin("loki", 3000000))
 	feePayerBalances = feePayerBalances.Sub(paid...)
 	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.FeePayer.Address, feePayerBalances)
-	testapp.CheckBalances(t, ctx, app.BankKeeper, testapp.Treasury.Address, paid)
+	testapp.CheckBalances(t, ctx, app.BankKeeper, app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName), paid)
 }
 
 func TestPrepareRequestNotEnoughMaxFee(t *testing.T) {
@@ -1114,14 +1114,13 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(97000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 	)
 
-	// Treasury balance
 	// start: 0odin, 0abc
 	// collect 3 odin and 1 abc => 3odin, 1abc
 	testapp.CheckBalances(
 		t,
 		ctx,
 		app.BankKeeper,
-		testapp.Treasury.Address,
+		app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName),
 		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3000000)), sdk.NewCoin("uabc", sdk.NewInt(1000000))),
 	)
 }

@@ -1,6 +1,7 @@
 package keepers
 
 import (
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
 	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
@@ -51,10 +52,12 @@ type AppKeepers struct {
 	CoinswapKeeper        coinswapkeeper.Keeper
 	AuctionKeeper         auctionkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
+	WasmKeeper            wasmkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
+	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 }
