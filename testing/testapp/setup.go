@@ -336,7 +336,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 			Coins:   Coins1000000loki,
 		},
 		{Address: FeePayer.Address.String(), Coins: Coins100000000loki},
-		{Address: Alice.Address.String(), Coins: Coins1000000loki},
+		{Address: Alice.Address.String(), Coins: Coins1000000loki.Add(Coin100000000minigeo)},
 		{Address: Bob.Address.String(), Coins: Coins1000000loki},
 		{Address: Carol.Address.String(), Coins: Coins1000000loki},
 		{Address: Validators[0].Address.String(), Coins: Coins100000000loki},

@@ -394,6 +394,8 @@ func NewOdinApp(
 	)
 	// DistrKeeper must be set afterward due to the circular reference between banker-staking-distr.
 	app.BankKeeper.SetDistrKeeper(&app.DistrKeeper)
+	app.BankKeeper.SetMintKeeper(&app.MintKeeper)
+
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		legacyAmino,

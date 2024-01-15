@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,26 +23,34 @@ const (
 	DefaultOracleRewardPercentage  = uint64(70)
 	DefaultInactivePenaltyDuration = uint64(10 * time.Minute)
 	DefaultIBCRequestEnabled       = true
+	DefaultDataProviderRewardDenom = "minigeo"
+	DefaultRewardThresholdBlocks   = uint64(28820)
+)
+
+var (
+	DefaultRewardThresholdAmount = sdk.NewCoins(sdk.NewInt64Coin(DefaultDataProviderRewardDenom, 200000000000), sdk.NewInt64Coin("loki", 200000000000)) // 200000 * 10^6
+
 )
 
 // NewParams creates a new parameter configuration for the oracle module
 func NewParams(
 	maxRawRequestCount, maxAskCount, maxCalldataSize, maxReportDataSize, expirationBlockCount, baseRequestGas, perValidatorRequestGas,
 	samplingTryCount, oracleRewardPercentage, inactivePenaltyDuration uint64,
-	ibcRequestEnabled bool,
+	ibcRequestEnabled bool, dataProviderRewardThreshold RewardThreshold,
 ) Params {
 	return Params{
-		MaxRawRequestCount:      maxRawRequestCount,
-		MaxAskCount:             maxAskCount,
-		MaxCalldataSize:         maxCalldataSize,
-		MaxReportDataSize:       maxReportDataSize,
-		ExpirationBlockCount:    expirationBlockCount,
-		BaseOwasmGas:            baseRequestGas,
-		PerValidatorRequestGas:  perValidatorRequestGas,
-		SamplingTryCount:        samplingTryCount,
-		OracleRewardPercentage:  oracleRewardPercentage,
-		InactivePenaltyDuration: inactivePenaltyDuration,
-		IBCRequestEnabled:       ibcRequestEnabled,
+		MaxRawRequestCount:          maxRawRequestCount,
+		MaxAskCount:                 maxAskCount,
+		MaxCalldataSize:             maxCalldataSize,
+		MaxReportDataSize:           maxReportDataSize,
+		ExpirationBlockCount:        expirationBlockCount,
+		BaseOwasmGas:                baseRequestGas,
+		PerValidatorRequestGas:      perValidatorRequestGas,
+		SamplingTryCount:            samplingTryCount,
+		OracleRewardPercentage:      oracleRewardPercentage,
+		InactivePenaltyDuration:     inactivePenaltyDuration,
+		IBCRequestEnabled:           ibcRequestEnabled,
+		DataProviderRewardThreshold: dataProviderRewardThreshold,
 	}
 }
 
@@ -59,7 +68,15 @@ func DefaultParams() Params {
 		DefaultOracleRewardPercentage,
 		DefaultInactivePenaltyDuration,
 		DefaultIBCRequestEnabled,
+		DefaultRewardThreshold(),
 	)
+}
+
+func DefaultRewardThreshold() RewardThreshold {
+	return RewardThreshold{
+		Amount: DefaultRewardThresholdAmount,
+		Blocks: DefaultRewardThresholdBlocks,
+	}
 }
 
 // Validate does the sanity check on the params.
