@@ -2,8 +2,10 @@ version: v1
 name: buf.build/odinprotocol/chain
 deps:
   - buf.build/cosmos/cosmos-proto
-  - buf.build/cosmos/cosmos-sdk:v0.47.0
   - buf.build/cosmos/gogo-proto
+  - buf.build/cosmos/cosmos-sdk
+  - buf.build/googleapis/googleapis
+  
 breaking:
   use:
     - FILE

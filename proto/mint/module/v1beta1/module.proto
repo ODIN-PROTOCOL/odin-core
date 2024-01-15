@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package mint.module.v1;
+package mint.module.v1beta1;
 
 import "cosmos/app/v1alpha1/module.proto";
 
