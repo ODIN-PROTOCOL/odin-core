@@ -38,7 +38,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
@@ -58,6 +57,7 @@ func NewDefaultGenesisState() GenesisState {
 	govGenesis := govv1.DefaultGenesisState()
 	crisisGenesis := crisistypes.DefaultGenesisState()
 	slashingGenesis := slashingtypes.DefaultGenesisState()
+	oracleGenesis := oracletypes.DefaultGenesisState()
 	icaGenesis := icagenesistypes.DefaultGenesis()
 	// Override the genesis parameters.
 	authGenesis.Params.TxSizeCostPerByte = 5
@@ -81,6 +81,8 @@ func NewDefaultGenesisState() GenesisState {
 		HostEnabled:   true,
 		AllowMessages: v2_6.ICAAllowMessages,
 	}
+	mintGenesis.ModuleCoinsAccount = "odin13jp4udqlxknzrpsk9jkr3hpmp6gy242xm0s2kq"
+	oracleGenesis.ModuleCoinsAccount = "odin1lqf6hm3nfunmhppmjhgrme9jp9d8vle90hjy5m"
 
 	return GenesisState{
 		authtypes.ModuleName:         cdc.MustMarshalJSON(authGenesis),
@@ -101,6 +103,6 @@ func NewDefaultGenesisState() GenesisState {
 		group.ModuleName:             groupmodule.AppModuleBasic{}.DefaultGenesis(cdc),
 		ibctransafertypes.ModuleName: ibctransfer.AppModuleBasic{}.DefaultGenesis(cdc),
 		icatypes.ModuleName:          cdc.MustMarshalJSON(icaGenesis),
-		oracletypes.ModuleName:       oracle.AppModuleBasic{}.DefaultGenesis(cdc),
+		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
 	}
 }

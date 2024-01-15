@@ -49,7 +49,7 @@ func TestMustGetFileOK(t *testing.T) {
 
 	f := filecache.New(dir)
 	filename := f.AddFile([]byte("ODIN"))
-	require.Equal(t, filename, "52f1b54ce34b64a02f9946b29f670a12933152b1122514ea969a91c211aa32fc")
+	require.Equal(t, filename, "b1254d5b418b9f294db35268f0a8f48a4e861d966d72a65b1c2be11c87fdfb19")
 
 	content := f.MustGetFile(filename)
 	require.Equal(t, content, []byte("ODIN"))
@@ -69,7 +69,7 @@ func TestGetFileOK(t *testing.T) {
 
 	f := filecache.New(dir.Name())
 	filename := f.AddFile([]byte("ODIN"))
-	require.Equal(t, filename, "52f1b54ce34b64a02f9946b29f670a12933152b1122514ea969a91c211aa32fc")
+	require.Equal(t, filename, "b1254d5b418b9f294db35268f0a8f48a4e861d966d72a65b1c2be11c87fdfb19")
 
 	content, err := f.GetFile(filename)
 	require.NoError(t, err)
