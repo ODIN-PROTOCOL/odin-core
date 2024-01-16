@@ -13,6 +13,7 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
@@ -401,7 +402,7 @@ func TestEditOracleScriptFail(t *testing.T) {
 }
 
 func TestRequestDataSuccess(t *testing.T) {
-	_, ctx, k := testapp.CreateTestInput(true)
+	app, ctx, k := testapp.CreateTestInput(true)
 	ctx = ctx.WithBlockHeight(124).WithBlockTime(testapp.ParseTime(1581589790))
 	msg := types.NewMsgRequestData(
 		1,
@@ -445,7 +446,7 @@ func TestRequestDataSuccess(t *testing.T) {
 	event = abci.Event{
 		Type: authtypes.EventTypeCoinReceived,
 		Attributes: []abci.EventAttribute{
-			{Key: authtypes.AttributeKeyReceiver, Value: testapp.Treasury.Address.String()},
+			{Key: authtypes.AttributeKeyReceiver, Value: app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()},
 			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
@@ -455,7 +456,7 @@ func TestRequestDataSuccess(t *testing.T) {
 	event = abci.Event{
 		Type: authtypes.EventTypeTransfer,
 		Attributes: []abci.EventAttribute{
-			{Key: authtypes.AttributeKeyRecipient, Value: testapp.Treasury.Address.String()},
+			{Key: authtypes.AttributeKeyRecipient, Value: app.AccountKeeper.GetModuleAddress(distrtypes.ModuleName).String()},
 			{Key: authtypes.AttributeKeySender, Value: testapp.FeePayer.Address.String()},
 			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
@@ -826,17 +827,18 @@ func TestActivateFail(t *testing.T) {
 func TestUpdateParamsSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	expectedParams := types.Params{
-		MaxRawRequestCount:      1,
-		MaxAskCount:             10,
-		MaxCalldataSize:         256,
-		MaxReportDataSize:       512,
-		ExpirationBlockCount:    30,
-		BaseOwasmGas:            50000,
-		PerValidatorRequestGas:  3000,
-		SamplingTryCount:        3,
-		OracleRewardPercentage:  50,
-		InactivePenaltyDuration: 1000,
-		IBCRequestEnabled:       true,
+		MaxRawRequestCount:       1,
+		MaxAskCount:              10,
+		MaxCalldataSize:          256,
+		MaxReportDataSize:        512,
+		ExpirationBlockCount:     30,
+		BaseOwasmGas:             50000,
+		PerValidatorRequestGas:   3000,
+		SamplingTryCount:         3,
+		OracleRewardPercentage:   50,
+		InactivePenaltyDuration:  1000,
+		IBCRequestEnabled:        true,
+		RewardDecreasingFraction: sdk.NewDec(10),
 	}
 	msg := types.NewMsgUpdateParams(k.GetAuthority(), expectedParams)
 	res, err := oracle.NewHandler(k)(ctx, msg)
@@ -851,17 +853,18 @@ func TestUpdateParamsSuccess(t *testing.T) {
 	require.Equal(t, abci.Event(event), res.Events[0])
 
 	expectedParams = types.Params{
-		MaxRawRequestCount:      2,
-		MaxAskCount:             20,
-		MaxCalldataSize:         512,
-		MaxReportDataSize:       256,
-		ExpirationBlockCount:    40,
-		BaseOwasmGas:            0,
-		PerValidatorRequestGas:  0,
-		SamplingTryCount:        5,
-		OracleRewardPercentage:  0,
-		InactivePenaltyDuration: 0,
-		IBCRequestEnabled:       false,
+		MaxRawRequestCount:       2,
+		MaxAskCount:              20,
+		MaxCalldataSize:          512,
+		MaxReportDataSize:        256,
+		ExpirationBlockCount:     40,
+		BaseOwasmGas:             0,
+		PerValidatorRequestGas:   0,
+		SamplingTryCount:         5,
+		OracleRewardPercentage:   0,
+		InactivePenaltyDuration:  0,
+		IBCRequestEnabled:        false,
+		RewardDecreasingFraction: sdk.NewDec(10),
 	}
 	msg = types.NewMsgUpdateParams(k.GetAuthority(), expectedParams)
 	res, err = oracle.NewHandler(k)(ctx, msg)

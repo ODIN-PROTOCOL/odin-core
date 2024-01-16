@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/stretchr/testify/suite"
@@ -62,8 +63,13 @@ func (suite *OracleTestSuite) sendOracleRequestPacket(
 	return packet
 }
 
+func (suite *OracleTestSuite) getChainBDistributionBalances() sdk.Coins {
+	distributionBalances := suite.chainB.App.BankKeeper.GetAllBalances(suite.chainB.GetContext(), suite.chainB.App.AccountKeeper.GetModuleAddress(distrtypes.ModuleName))
+	return distributionBalances
+}
+
 func (suite *OracleTestSuite) checkChainBTreasuryBalances(expect sdk.Coins) {
-	treasuryBalances := suite.chainB.App.BankKeeper.GetAllBalances(suite.chainB.GetContext(), suite.chainB.Treasury)
+	treasuryBalances := suite.chainB.App.BankKeeper.GetAllBalances(suite.chainB.GetContext(), suite.chainB.App.AccountKeeper.GetModuleAddress(distrtypes.ModuleName))
 	suite.Require().Equal(expect, treasuryBalances)
 }
 
@@ -90,10 +96,14 @@ func (suite *OracleTestSuite) TestHandleIBCRequestSuccess() {
 	)
 	packet := suite.sendOracleRequestPacket(path, 1, oracleRequestPacket, timeoutHeight)
 
+	distrBalance := suite.getChainBDistributionBalances()
 	err := path.RelayPacket(packet)
 	suite.Require().NoError(err) // relay committed
 
-	suite.checkChainBTreasuryBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(6000000))))
+	// new blocks delta
+	distrBalance = distrBalance.Add(sdk.NewCoin("loki", sdk.NewInt(5000)))
+
+	suite.checkChainBTreasuryBalances(distrBalance.Add(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(6000000)))...))
 	suite.checkChainBSenderBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3970000))))
 
 	raws1 := []types.RawReport{
@@ -572,6 +582,7 @@ func (suite *OracleTestSuite) TestIBCResolveRequestOutOfGas() {
 
 	// send request from A to B
 	timeoutHeight := clienttypes.NewHeight(0, 110)
+
 	oracleRequestPacket := types.NewOracleRequestPacketData(
 		path.EndpointA.ClientID,
 		1,
@@ -583,11 +594,14 @@ func (suite *OracleTestSuite) TestIBCResolveRequestOutOfGas() {
 		1,
 	)
 	packet := suite.sendOracleRequestPacket(path, 1, oracleRequestPacket, timeoutHeight)
-
+	distrBalance := suite.getChainBDistributionBalances()
 	err := path.RelayPacket(packet)
 	suite.Require().NoError(err) // relay committed
 
-	suite.checkChainBTreasuryBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(6000000))))
+	// new blocks delta
+	distrBalance = distrBalance.Add(sdk.NewCoin("loki", sdk.NewInt(5000)))
+
+	suite.checkChainBTreasuryBalances(distrBalance.Add(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(6000000)))...))
 	suite.checkChainBSenderBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(3970000))))
 
 	raws := []types.RawReport{
@@ -643,11 +657,14 @@ func (suite *OracleTestSuite) TestIBCResolveReadNilExternalData() {
 		testapp.TestDefaultExecuteGas,
 	)
 	packet := suite.sendOracleRequestPacket(path, 1, oracleRequestPacket, timeoutHeight)
-
+	distrBalance := suite.getChainBDistributionBalances()
 	err := path.RelayPacket(packet)
 	suite.Require().NoError(err) // relay committed
 
-	suite.checkChainBTreasuryBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(4000000))))
+	// new blocks delta
+	distrBalance = distrBalance.Add(sdk.NewCoin("loki", sdk.NewInt(5000)))
+
+	suite.checkChainBTreasuryBalances(distrBalance.Add(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(4000000)))...))
 	suite.checkChainBSenderBalances(sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(5970000))))
 
 	raws1 := []types.RawReport{types.NewRawReport(0, 0, nil), types.NewRawReport(1, 0, []byte("beebd2v1"))}

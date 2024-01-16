@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
+	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
+	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -104,5 +108,7 @@ func NewDefaultGenesisState() GenesisState {
 		ibctransafertypes.ModuleName: ibctransfer.AppModuleBasic{}.DefaultGenesis(cdc),
 		icatypes.ModuleName:          cdc.MustMarshalJSON(icaGenesis),
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
+		coinswaptypes.ModuleName:     coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
+		auctiontypes.ModuleName:      auction.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }

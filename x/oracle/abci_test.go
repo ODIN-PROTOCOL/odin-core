@@ -66,10 +66,20 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 		Validator:       abci.Validator{Address: testapp.Validators[1].PubKey.Address(), Power: 30},
 		SignedLastBlock: true,
 	}}
+
+	mintParams := app.MintKeeper.GetParams(ctx)
+	mintParams.MintAir = true
+	app.MintKeeper.SetParams(ctx, mintParams)
+
 	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
 	// NOTE: we intentionally keep ctx.BlockHeight = 0, so distr's AllocateTokens doesn't get called.
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)))
+	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 100)))
+	require.NoError(t, err)
+
+	mintParams.MintAir = false
+	app.MintKeeper.SetParams(ctx, mintParams)
+
 	app.BankKeeper.SendCoinsFromModuleToModule(
 		ctx,
 		minttypes.ModuleName,
@@ -79,7 +89,7 @@ func TestAllocateTokensCalledOnBeginBlock(t *testing.T) {
 	distModule := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
 
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
-	mintParams := app.MintKeeper.GetParams(ctx)
+	mintParams = app.MintKeeper.GetParams(ctx)
 	mintParams.InflationMin = sdk.ZeroDec()
 	mintParams.InflationMax = sdk.ZeroDec()
 	app.MintKeeper.SetParams(ctx, mintParams)
@@ -215,8 +225,17 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
 	distModule := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
 
+	mintParams := app.MintKeeper.GetParams(ctx)
+	mintParams.MintAir = true
+	app.MintKeeper.SetParams(ctx, mintParams)
+
 	// Set collected fee to 100loki + 70% oracle reward proportion + disable minting inflation.
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
+	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, sdk.NewCoins(sdk.NewInt64Coin("loki", 50)))
+	require.NoError(t, err)
+
+	mintParams.MintAir = false
+	app.MintKeeper.SetParams(ctx, mintParams)
+
 	app.BankKeeper.SendCoinsFromModuleToModule(
 		ctx,
 		minttypes.ModuleName,
@@ -224,7 +243,7 @@ func TestAllocateTokensWithDistrAllocateTokens(t *testing.T) {
 		sdk.NewCoins(sdk.NewInt64Coin("loki", 50)),
 	)
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
-	mintParams := app.MintKeeper.GetParams(ctx)
+	mintParams = app.MintKeeper.GetParams(ctx)
 	mintParams.InflationMin = sdk.ZeroDec()
 	mintParams.InflationMax = sdk.ZeroDec()
 	app.MintKeeper.SetParams(ctx, mintParams)
