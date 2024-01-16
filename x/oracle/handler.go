@@ -9,9 +9,9 @@ import (
 )
 
 // NewHandler creates the msg handler of this module, as required by Cosmos-SDK standard.
-func NewHandler(k oraclekeeper.Keeper) sdk.Handler {
+func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
-		msgServer := oraclekeeper.NewMsgServerImpl(k)
+		msgServer := keeper.NewMsgServerImpl(k)
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case *types.MsgRequestData:
@@ -35,11 +35,8 @@ func NewHandler(k oraclekeeper.Keeper) sdk.Handler {
 		case *types.MsgActivate:
 			res, err := msgServer.Activate(sdk.WrapSDKContext(ctx), msg)
 			return sdk.WrapServiceResult(ctx, res, err)
-		case *types.MsgAddReporter:
-			res, err := msgServer.AddReporter(sdk.WrapSDKContext(ctx), msg)
-			return sdk.WrapServiceResult(ctx, res, err)
-		case *types.MsgRemoveReporter:
-			res, err := msgServer.RemoveReporter(sdk.WrapSDKContext(ctx), msg)
+		case *types.MsgUpdateParams:
+			res, err := msgServer.UpdateParams(sdk.WrapSDKContext(ctx), msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", types.ModuleName, msg)

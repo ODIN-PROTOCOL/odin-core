@@ -16,10 +16,6 @@ const (
 	// QuerierRoute is the querier route for the minting store.
 	QuerierRoute = StoreKey
 
-	// DEPRECATED
-	// for backward compatibility
-	LegacyRoute = "minting"
-
 	// Query endpoints supported by the minting querier
 	QueryParams               = "parameters"
 	QueryInflation            = "inflation"
@@ -34,6 +30,7 @@ var (
 	GlobalStoreKeyPrefix = []byte{0x00}
 	// MinterKey is used for the keeper store
 	MinterKey = append(GlobalStoreKeyPrefix, []byte("Minter")...)
+	ParamsKey = []byte{0x01}
 	// MintPoolStoreKey is the key for global mint pool state
 	MintPoolStoreKey          = append(GlobalStoreKeyPrefix, []byte("MintPool")...)
 	MintModuleCoinsAccountKey = append(GlobalStoreKeyPrefix, []byte("MintModuleCoinsAccount")...)

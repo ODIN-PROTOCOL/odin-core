@@ -3,11 +3,15 @@ package keeper
 import (
 	"context"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
+
+var _ minttypes.MsgServer = msgServer{}
 
 type msgServer struct {
 	Keeper
@@ -16,7 +20,9 @@ type msgServer struct {
 // NewMsgServerImpl returns an implementation of the mint MsgServer interface
 // for the provided Keeper.
 func NewMsgServerImpl(keeper Keeper) minttypes.MsgServer {
-	return &msgServer{Keeper: keeper}
+	return &msgServer{
+		Keeper: keeper,
+	}
 }
 
 var _ minttypes.MsgServer = msgServer{}
@@ -83,4 +89,18 @@ func (k msgServer) MintCoins(
 	))
 
 	return &minttypes.MsgMintCoinsResponse{}, nil
+}
+
+// UpdateParams updates the params.
+func (k msgServer) UpdateParams(goCtx context.Context, req *minttypes.MsgUpdateParams) (*minttypes.MsgUpdateParamsResponse, error) {
+	if k.authority != req.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	if err := k.SetParams(ctx, req.Params); err != nil {
+		return nil, err
+	}
+
+	return &minttypes.MsgUpdateParamsResponse{}, nil
 }

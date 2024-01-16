@@ -9,38 +9,41 @@ import (
 )
 
 // InitGenesis new mint genesis
-func InitGenesis(ctx sdk.Context, keeper Keeper, data *minttypes.GenesisState) {
-	keeper.SetMinter(ctx, data.Minter)
-	keeper.SetParams(ctx, data.Params)
+func (k Keeper) InitGenesis(ctx sdk.Context, ak minttypes.AccountKeeper, data *minttypes.GenesisState) {
+	k.SetMinter(ctx, data.Minter)
 
-	moduleAcc := keeper.GetMintAccount(ctx)
+	if err := k.SetParams(ctx, data.Params); err != nil {
+		panic(err)
+	}
+
+	moduleAcc := k.GetMintAccount(ctx)
 	if moduleAcc == nil {
 		panic(fmt.Sprintf("%s module account has not been set", minttypes.ModuleName))
 	}
 
-	balances := keeper.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
+	balances := k.bankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
 	if balances.IsZero() {
 		addr, err := sdk.AccAddressFromBech32(data.ModuleCoinsAccount)
 		if err != nil {
 			panic(err)
 		}
 
-		if err := keeper.bankKeeper.SendCoins(ctx, addr, moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
+		if err := k.bankKeeper.SendCoins(ctx, addr, moduleAcc.GetAddress(), data.MintPool.TreasuryPool); err != nil {
 			panic(err)
 		}
 
-		keeper.SetMintModuleCoinsAccount(ctx, addr)
-		keeper.authKeeper.SetModuleAccount(ctx, moduleAcc)
+		k.SetMintModuleCoinsAccount(ctx, addr)
+		k.authKeeper.SetModuleAccount(ctx, moduleAcc)
 	}
 
-	keeper.SetMintPool(ctx, data.MintPool)
+	k.SetMintPool(ctx, data.MintPool)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, keeper Keeper) *minttypes.GenesisState {
-	minter := keeper.GetMinter(ctx)
-	params := keeper.GetParams(ctx)
-	mintPool := keeper.GetMintPool(ctx)
-	mintModuleCoinsAccount := keeper.GetMintModuleCoinsAccount(ctx)
+func (k Keeper) ExportGenesis(ctx sdk.Context) *minttypes.GenesisState {
+	minter := k.GetMinter(ctx)
+	params := k.GetParams(ctx)
+	mintPool := k.GetMintPool(ctx)
+	mintModuleCoinsAccount := k.GetMintModuleCoinsAccount(ctx)
 	return minttypes.NewGenesisState(minter, params, mintPool, mintModuleCoinsAccount)
 }

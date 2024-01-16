@@ -3,15 +3,14 @@ package mint
 import (
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/telemetry"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
+	"github.com/cosmos/cosmos-sdk/telemetry"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // BeginBlocker mints new tokens for the previous block.
-func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
+func BeginBlocker(ctx sdk.Context, k keeper.Keeper, ic minttypes.InflationCalculationFn) {
 	defer telemetry.ModuleMeasureSince(minttypes.ModuleName, time.Now(), telemetry.MetricKeyBeginBlocker)
 
 	// fetch stored minter & params
@@ -21,7 +20,7 @@ func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
 	// recalculate inflation rate
 	totalStakingSupply := k.StakingTokenSupply(ctx)
 	bondedRatio := k.BondedRatio(ctx)
-	minter.Inflation = minter.NextInflationRate(params, bondedRatio)
+	minter.Inflation = ic(ctx, minter, params, bondedRatio)
 	minter.AnnualProvisions = minter.NextAnnualProvisions(params, totalStakingSupply)
 	k.SetMinter(ctx, minter)
 

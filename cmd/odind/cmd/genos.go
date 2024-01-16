@@ -7,15 +7,13 @@ import (
 	"path/filepath"
 
 	"github.com/cometbft/cometbft/libs/cli"
-	"github.com/odin-protocol/go-owasm/api"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/odin-protocol/go-owasm/api"
+	"github.com/spf13/cobra"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -25,12 +23,11 @@ import (
 func AddGenesisOracleScriptCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add-oracle-script [name] [description] [schema] [url] [owner] [filepath]",
-		Short: "Add a data source to genesis.json",
+		Short: "Add a oracle script to genesis.json",
 		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
-			depCdc := clientCtx.Codec
-			cdc := depCdc.(codec.Codec)
+			cdc := clientCtx.Codec
 
 			serverCtx := server.GetServerContextFromCmd(cmd)
 			config := serverCtx.Config
