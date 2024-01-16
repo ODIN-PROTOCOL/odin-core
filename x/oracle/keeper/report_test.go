@@ -1,12 +1,13 @@
-package oraclekeeper_test
+package keeper_test
 
 import (
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func defaultRequest() types.Request {
@@ -33,84 +34,84 @@ func TestHasReport(t *testing.T) {
 func TestAddReportSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	k.SetRequest(ctx, 1, defaultRequest())
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		},
-	))
+	)
 	require.NoError(t, err)
 	require.Equal(t, []types.Report{
 		types.NewReport(testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		}),
-	}, k.GetRequestReports(ctx, 1))
+	}, k.GetReports(ctx, 1))
 }
 
 func TestReportOnNonExistingRequest(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		},
-	))
-	require.Error(t, err)
+	)
+	require.ErrorIs(t, err, types.ErrRequestNotFound)
 }
 
 func TestReportByNotRequestedValidator(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	k.SetRequest(ctx, 1, defaultRequest())
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Alice.ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		},
-	))
-	require.Error(t, err)
+	)
+	require.ErrorIs(t, err, types.ErrValidatorNotRequested)
 }
 
 func TestDuplicateReport(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	k.SetRequest(ctx, 1, defaultRequest())
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		},
-	))
+	)
 	require.NoError(t, err)
-	err = k.AddReport(ctx, 1, types.NewReport(
+	err = k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(43, 1, []byte("data2/1")),
 		},
-	))
-	require.Error(t, err)
+	)
+	require.ErrorIs(t, err, types.ErrValidatorAlreadyReported)
 }
 
 func TestReportInvalidDataSourceCount(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	k.SetRequest(ctx, 1, defaultRequest())
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 		},
-	))
-	require.Error(t, err)
+	)
+	require.ErrorIs(t, err, types.ErrInvalidReportSize)
 }
 
 func TestReportInvalidExternalIDs(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	k.SetRequest(ctx, 1, defaultRequest())
-	err := k.AddReport(ctx, 1, types.NewReport(
+	err := k.AddReport(ctx, 1,
 		testapp.Validators[0].ValAddress, true, []types.RawReport{
 			types.NewRawReport(42, 0, []byte("data1/1")),
 			types.NewRawReport(44, 1, []byte("data2/1")), // BAD EXTERNAL ID!
 		},
-	))
-	require.Error(t, err)
+	)
+	require.ErrorIs(t, err, types.ErrRawRequestNotFound)
 }
 
 func TestGetReportCount(t *testing.T) {

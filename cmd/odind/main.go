@@ -12,9 +12,7 @@ import (
 )
 
 func main() {
-	config := sdk.GetConfig()
-	app.SetBech32AddressPrefixesAndBip44CoinType(config)
-	config.Seal()
+	app.SetBech32AddressPrefixesAndBip44CoinTypeAndSeal(sdk.GetConfig())
 	rootCmd, _ := cmd.NewRootCmd()
 
 	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {

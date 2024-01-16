@@ -1,36 +1,34 @@
-package oraclekeeper
+package keeper
 
 import (
 	"bytes"
 
-	"github.com/pkg/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasDataSource checks if the data source of this ID exists in the storage.
-func (k Keeper) HasDataSource(ctx sdk.Context, id oracletypes.DataSourceID) bool {
-	return ctx.KVStore(k.storeKey).Has(oracletypes.DataSourceStoreKey(id))
+func (k Keeper) HasDataSource(ctx sdk.Context, id types.DataSourceID) bool {
+	return ctx.KVStore(k.storeKey).Has(types.DataSourceStoreKey(id))
 }
 
 // GetDataSource returns the data source struct for the given ID or error if not exists.
-func (k Keeper) GetDataSource(ctx sdk.Context, id oracletypes.DataSourceID) (oracletypes.DataSource, error) {
-	bz := ctx.KVStore(k.storeKey).Get(oracletypes.DataSourceStoreKey(id))
+func (k Keeper) GetDataSource(ctx sdk.Context, id types.DataSourceID) (types.DataSource, error) {
+	bz := ctx.KVStore(k.storeKey).Get(types.DataSourceStoreKey(id))
 	if bz == nil {
-		return oracletypes.DataSource{}, sdkerrors.Wrapf(oracletypes.ErrDataSourceNotFound, "id: %d", id)
+		return types.DataSource{}, errors.Wrapf(types.ErrDataSourceNotFound, "id: %d", id)
 	}
-	var dataSource oracletypes.DataSource
+	var dataSource types.DataSource
 	k.cdc.MustUnmarshal(bz, &dataSource)
 	return dataSource, nil
 }
 
 // MustGetDataSource returns the data source struct for the given ID. Panic if not exists.
-func (k Keeper) MustGetDataSource(ctx sdk.Context, id oracletypes.DataSourceID) oracletypes.DataSource {
+func (k Keeper) MustGetDataSource(ctx sdk.Context, id types.DataSourceID) types.DataSource {
 	dataSource, err := k.GetDataSource(ctx, id)
 	if err != nil {
 		panic(err)
@@ -39,37 +37,37 @@ func (k Keeper) MustGetDataSource(ctx sdk.Context, id oracletypes.DataSourceID) 
 }
 
 // SetDataSource saves the given data source to the storage without performing validation.
-func (k Keeper) SetDataSource(ctx sdk.Context, id oracletypes.DataSourceID, dataSource oracletypes.DataSource) {
-	dataSource.ID = id
+func (k Keeper) SetDataSource(ctx sdk.Context, id types.DataSourceID, dataSource types.DataSource) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(oracletypes.DataSourceStoreKey(id), k.cdc.MustMarshal(&dataSource))
+	store.Set(types.DataSourceStoreKey(id), k.cdc.MustMarshal(&dataSource))
 }
 
 // AddDataSource adds the given data source to the storage.
-func (k Keeper) AddDataSource(ctx sdk.Context, dataSource oracletypes.DataSource) oracletypes.DataSourceID {
+func (k Keeper) AddDataSource(ctx sdk.Context, dataSource types.DataSource) types.DataSourceID {
 	id := k.GetNextDataSourceID(ctx)
 	k.SetDataSource(ctx, id, dataSource)
 	return id
 }
 
 // MustEditDataSource edits the given data source by id and flushes it to the storage.
-func (k Keeper) MustEditDataSource(ctx sdk.Context, id oracletypes.DataSourceID, new oracletypes.DataSource) {
+func (k Keeper) MustEditDataSource(ctx sdk.Context, id types.DataSourceID, new types.DataSource) {
 	dataSource := k.MustGetDataSource(ctx, id)
 	dataSource.Owner = new.Owner
 	dataSource.Name = modify(dataSource.Name, new.Name)
 	dataSource.Description = modify(dataSource.Description, new.Description)
 	dataSource.Filename = modify(dataSource.Filename, new.Filename)
-	dataSource.Fee = modifyFee(dataSource.Fee, new.Fee)
+	dataSource.Treasury = new.Treasury
+	dataSource.Fee = new.Fee
 	k.SetDataSource(ctx, id, dataSource)
 }
 
 // GetAllDataSources returns the list of all data sources in the store, or nil if there is none.
-func (k Keeper) GetAllDataSources(ctx sdk.Context) (dataSources []oracletypes.DataSource) {
+func (k Keeper) GetAllDataSources(ctx sdk.Context) (dataSources []types.DataSource) {
 	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, oracletypes.DataSourceStoreKeyPrefix)
+	iterator := sdk.KVStorePrefixIterator(store, types.DataSourceStoreKeyPrefix)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var dataSource oracletypes.DataSource
+		var dataSource types.DataSource
 		k.cdc.MustUnmarshal(iterator.Value(), &dataSource)
 		dataSources = append(dataSources, dataSource)
 	}
@@ -80,9 +78,9 @@ func (k Keeper) GetAllDataSources(ctx sdk.Context) (dataSources []oracletypes.Da
 func (k Keeper) GetPaginatedDataSources(
 	ctx sdk.Context,
 	limit, offset uint64,
-) ([]oracletypes.DataSource, *query.PageResponse, error) {
-	dataSources := make([]oracletypes.DataSource, 0)
-	dataSourcesStore := prefix.NewStore(ctx.KVStore(k.storeKey), oracletypes.DataSourceStoreKeyPrefix)
+) ([]types.DataSource, *query.PageResponse, error) {
+	dataSources := make([]types.DataSource, 0)
+	dataSourcesStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.DataSourceStoreKeyPrefix)
 	pagination := &query.PageRequest{
 		Limit:  limit,
 		Offset: offset,
@@ -92,7 +90,7 @@ func (k Keeper) GetPaginatedDataSources(
 		dataSourcesStore,
 		pagination,
 		func(key []byte, value []byte, accumulate bool) (bool, error) {
-			var dataSource oracletypes.DataSource
+			var dataSource types.DataSource
 			if err := k.cdc.Unmarshal(value, &dataSource); err != nil {
 				return false, err
 			}
@@ -112,8 +110,8 @@ func (k Keeper) GetPaginatedDataSources(
 // AddExecutableFile saves the given executable file to a file to filecahe storage and returns
 // its sha256sum reference name. Returns do-not-modify symbol if the input is do-not-modify.
 func (k Keeper) AddExecutableFile(file []byte) string {
-	if bytes.Equal(file, oracletypes.DoNotModifyBytes) {
-		return oracletypes.DoNotModify
+	if bytes.Equal(file, types.DoNotModifyBytes) {
+		return types.DoNotModify
 	}
 	return k.fileCache.AddFile(file)
 }

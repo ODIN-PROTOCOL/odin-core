@@ -7,12 +7,9 @@ import (
 const (
 	// ModuleName is the name of the module.
 	ModuleName = "oracle"
-	// ModuleVersion defines the current module version
-	ModuleVersion = 1
 
 	// Version defines the current version the IBC oracle module supports
-	// TODO: Using our new version for oracle packet (new ics?)
-	Version = "oracle-1"
+	Version = "odinchain-1"
 
 	// StoreKey to be used when creating the KVStore.
 	StoreKey = ModuleName
@@ -49,8 +46,7 @@ var (
 	// AccumulatedPaymentsForDataStoreKey the key that keeps the accumulated payments for data
 	AccumulatedPaymentsForDataStoreKey = append(GlobalStoreKeyPrefix, []byte("AccumulatedPaymentsForData")...)
 	// OraclePoolStoreKey is the key that keeps the oracle pool
-	OraclePoolStoreKey = append(GlobalStoreKeyPrefix, []byte("OraclePool")...) // key for global oracle pool state
-
+	OraclePoolStoreKey          = append(GlobalStoreKeyPrefix, []byte("OraclePool")...) // key for global oracle pool state
 	OracleModuleCoinsAccountKey = append(GlobalStoreKeyPrefix, []byte("OracleModuleCoinsAccount")...)
 
 	// RequestStoreKeyPrefix is the prefix for request store.
@@ -61,13 +57,11 @@ var (
 	DataSourceStoreKeyPrefix = []byte{0x03}
 	// OracleScriptStoreKeyPrefix is the prefix for oracle script store.
 	OracleScriptStoreKeyPrefix = []byte{0x04}
-	// ReporterStoreKeyPrefix is the prefix for reporter store.
-	ReporterStoreKeyPrefix = []byte{0x05}
 	// ValidatorStatusKeyPrefix is the prefix for validator status store.
-	ValidatorStatusKeyPrefix     = []byte{0x06}
+	ValidatorStatusKeyPrefix = []byte{0x05}
+	// ParamsKeyPrefix is the prefix for the parameters of the module.
+	ParamsKeyPrefix              = []byte{0x06}
 	DataProviderRewardsKeyPrefix = []byte{0x07}
-	// DataRequesterFeesKeyPrefix is the prefix for the data requester address with accumulated fee
-	DataRequesterFeesKeyPrefix = []byte{0x08}
 	// ResultStoreKeyPrefix is the prefix for request result store.
 	ResultStoreKeyPrefix = []byte{0xff}
 
@@ -95,13 +89,6 @@ func OracleScriptStoreKey(oracleScriptID OracleScriptID) []byte {
 	return append(OracleScriptStoreKeyPrefix, sdk.Uint64ToBigEndian(uint64(oracleScriptID))...)
 }
 
-// ReporterStoreKey returns the key to check whether an address is a reporter of a validator.
-func ReporterStoreKey(validatorAddress sdk.ValAddress, reporterAddress sdk.AccAddress) []byte {
-	buf := append(ReporterStoreKeyPrefix, []byte(validatorAddress)...)
-	buf = append(buf, []byte(reporterAddress)...)
-	return buf
-}
-
 // ValidatorStatusStoreKey returns the key to a validator's status.
 func ValidatorStatusStoreKey(v sdk.ValAddress) []byte {
 	return append(ValidatorStatusKeyPrefix, v.Bytes()...)
@@ -117,11 +104,6 @@ func ReportsOfValidatorPrefixKey(reqID RequestID, val sdk.ValAddress) []byte {
 	buf := append(ReportStoreKeyPrefix, sdk.Uint64ToBigEndian(uint64(reqID))...)
 	buf = append(buf, val.Bytes()...)
 	return buf
-}
-
-// ReportersOfValidatorPrefixKey returns the prefix key to get all reporters of a validator.
-func ReportersOfValidatorPrefixKey(val sdk.ValAddress) []byte {
-	return append(ReporterStoreKeyPrefix, val.Bytes()...)
 }
 
 func DataProviderRewardsPrefixKey(acc sdk.AccAddress) []byte {

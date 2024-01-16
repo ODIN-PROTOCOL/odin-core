@@ -7,7 +7,6 @@ import (
 	"time"
 
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -19,19 +18,22 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-// Proto codec for encoding/decoding proto message
-var cdc = app.MakeEncodingConfig().Marshaler
+var (
+	// Proto codec for encoding/decoding proto message
+	cdc = app.MakeEncodingConfig().Marshaler
+)
 
 func signAndBroadcast(
 	c *Context, key *keyring.Record, msgs []sdk.Msg, gasLimit uint64, memo string,
 ) (string, error) {
 	clientCtx := client.Context{
 		Client:            c.client,
+		Codec:             cdc,
 		TxConfig:          app.MakeEncodingConfig().TxConfig,
-		BroadcastMode:     "async",
+		BroadcastMode:     "sync",
 		InterfaceRegistry: app.MakeEncodingConfig().InterfaceRegistry,
 	}
 	acc, err := queryAccount(clientCtx, key)
@@ -110,7 +112,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	// Summarize execute version
 	versionMap := make(map[string]bool)
 	msgs := make([]sdk.Msg, len(reports))
-	ids := make([]oracletypes.RequestID, len(reports))
+	ids := make([]types.RequestID, len(reports))
 	feeEstimations := make([]FeeEstimationData, len(reports))
 
 	for i, report := range reports {
@@ -133,7 +135,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	}
 	memo := fmt.Sprintf("yoda:%s/exec:%s", version.Version, strings.Join(versions, ","))
 	key := c.keys[keyIndex]
-	// cliCtx := sdkCtx.CLIContext{Client: c.client, TrustNode: true, Codec: cdc}
+
 	clientCtx := client.Context{
 		Client:            c.client,
 		TxConfig:          app.MakeEncodingConfig().TxConfig,
@@ -180,7 +182,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 			if txRes.Codespace == sdkerrors.RootCodespace &&
 				txRes.Code == sdkerrors.ErrOutOfGas.ABCICode() {
 				// Increase gas limit and try to broadcast again
-				gasLimit = gasLimit * 130 / 100
+				gasLimit = gasLimit * 110 / 100
 				l.Info(":fuel_pump: Tx(%s) is out of gas and will be rebroadcasted with %d gas", txHash, gasLimit)
 				txFound = true
 				break FindTx
@@ -190,7 +192,11 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 			}
 		}
 		if !txFound {
-			l.Error(":question_mark: Cannot get transaction response from hash: %s transaction might be included in the next few blocks or check your node's health.", c, txHash)
+			l.Error(
+				":question_mark: Cannot get transaction response from hash: %s transaction might be included in the next few blocks or check your node's health.",
+				c,
+				txHash,
+			)
 			return
 		}
 	}
@@ -201,13 +207,22 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
 	resValue, err := c.fileCache.GetFile(hash)
 	if err != nil {
-		l.Debug(":magnifying_glass_tilted_left: Fetching data source hash: %s from bandchain querier", hash)
-		res, err := abciQuery(c, l, fmt.Sprintf("custom/%s/%s/%s", oracletypes.StoreKey, oracletypes.QueryData, hash), nil)
+		l.Debug(":magnifying_glass_tilted_left: Fetching data source hash: %s from odinchain querier", hash)
+		bz := cdc.MustMarshal(&types.QueryDataRequest{
+			DataHash: hash,
+		})
+		res, err := abciQuery(c, l, "/oracle.v1.Query/Data", bz)
 		if err != nil {
 			l.Error(":exploding_head: Failed to get data source with error: %s", c, err.Error())
 			return nil, err
 		}
-		resValue = res.Response.GetValue()
+		var dr types.QueryDataResponse
+		err = cdc.Unmarshal(res.Response.GetValue(), &dr)
+		if err != nil {
+			l.Error(":exploding_head: Failed to unmarshal data source with error: %s", c, err.Error())
+			return nil, err
+		}
+		resValue = dr.Data
 		c.fileCache.AddFile(resValue)
 	} else {
 		l.Debug(":card_file_box: Found data source hash: %s in cache file", hash)
@@ -218,34 +233,34 @@ func GetExecutable(c *Context, l *Logger, hash string) ([]byte, error) {
 }
 
 // GetDataSourceHash fetches data source hash by id
-func GetDataSourceHash(c *Context, l *Logger, id oracletypes.DataSourceID) (string, error) {
-	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.DataSourceStoreKey(id))
+func GetDataSourceHash(c *Context, l *Logger, id types.DataSourceID) (string, error) {
+	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", types.StoreKey), types.DataSourceStoreKey(id))
 	if err != nil {
 		l.Error(":skull: Failed to get data source with error: %s", c, err.Error())
 		return "", err
 	}
 
-	var d oracletypes.DataSource
+	var d types.DataSource
 	cdc.MustUnmarshal(res.Response.Value, &d)
 
 	return d.Filename, nil
 }
 
 // GetRequest fetches request by id
-func GetRequest(c *Context, l *Logger, id oracletypes.RequestID) (oracletypes.Request, error) {
-	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", oracletypes.StoreKey), oracletypes.RequestStoreKey(id))
+func GetRequest(c *Context, l *Logger, id types.RequestID) (types.Request, error) {
+	res, err := abciQuery(c, l, fmt.Sprintf("/store/%s/key", types.StoreKey), types.RequestStoreKey(id))
 	if err != nil {
 		l.Error(":skull: Failed to get request with error: %s", c, err.Error())
-		return oracletypes.Request{}, err
+		return types.Request{}, err
 	}
 
-	var r oracletypes.Request
+	var r types.Request
 	cdc.MustUnmarshal(res.Response.Value, &r)
 
 	return r, nil
 }
 
-// abciQuery will try to query data from BandChain node maxTry time before give up and return error
+// abciQuery will try to query data from OdinChain node maxTry time before give up and return error
 func abciQuery(c *Context, l *Logger, path string, data []byte) (*ctypes.ResultABCIQuery, error) {
 	var lastErr error
 	for try := 0; try < int(c.maxTry); try++ {

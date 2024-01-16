@@ -9,14 +9,13 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	httpclient "github.com/cometbft/cometbft/rpc/client/http"
 	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 )
 
@@ -55,20 +54,20 @@ func runImpl(c *Context, l *Logger) error {
 		waitingMsgs[i] = []ReportMsgWithKey{}
 	}
 
-	bz := cdc.MustMarshal(&oracletypes.QueryPendingRequestsRequest{
+	bz := cdc.MustMarshal(&types.QueryPendingRequestsRequest{
 		ValidatorAddress: c.validator.String(),
 	})
 	resBz, err := c.client.ABCIQuery(context.Background(), "/oracle.v1.Query/PendingRequests", bz)
 	if err != nil {
 		l.Error(":exploding_head: Failed to get pending requests with error: %s", c, err.Error())
 	}
-	pendingRequests := oracletypes.QueryPendingRequestsResponse{}
+	pendingRequests := types.QueryPendingRequestsResponse{}
 	cdc.MustUnmarshal(resBz.Response.Value, &pendingRequests)
 
 	l.Info(":mag: Found %d pending requests", len(pendingRequests.RequestIDs))
 	for _, id := range pendingRequests.RequestIDs {
-		c.pendingRequests[oracletypes.RequestID(id)] = true
-		go handleRequest(c, l.With("rid", id), oracletypes.RequestID(id))
+		c.pendingRequests[types.RequestID(id)] = true
+		go handleRequest(c, l, types.RequestID(id))
 	}
 
 	for {
@@ -107,14 +106,14 @@ func runCmd(c *Context) *cobra.Command {
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cfg.ChainID == "" {
-				return errors.New("Chain ID must not be empty")
+				return errors.New("chain ID must not be empty")
 			}
 			keys, err := kb.List()
 			if err != nil {
 				return err
 			}
 			if len(keys) == 0 {
-				return errors.New("No key available")
+				return errors.New("no key available")
 			}
 			c.keys = keys
 			c.validator, err = sdk.ValAddressFromBech32(cfg.Validator)
@@ -156,7 +155,7 @@ func runCmd(c *Context) *cobra.Command {
 			c.pendingMsgs = make(chan ReportMsgWithKey)
 			c.freeKeys = make(chan int64, len(keys))
 			c.keyRoundRobinIndex = -1
-			c.pendingRequests = make(map[oracletypes.RequestID]bool)
+			c.pendingRequests = make(map[types.RequestID]bool)
 			c.metricsEnabled = cfg.MetricsListenAddr != ""
 			return runImpl(c, l)
 		},

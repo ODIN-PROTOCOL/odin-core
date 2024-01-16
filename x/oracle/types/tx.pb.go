@@ -7,16 +7,17 @@ import (
 	bytes "bytes"
 	context "context"
 	fmt "fmt"
-	_ "github.com/cosmos/cosmos-sdk/codec/types"
+	_ "github.com/cosmos/cosmos-proto"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
+	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
+	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -35,16 +36,16 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // MsgRequestData is a message for sending a data oracle request.
 type MsgRequestData struct {
-	// OracleScriptID is the identifier of the oracle script to call.
+	// OracleScriptID is the identifier of the oracle script to be called.
 	OracleScriptID OracleScriptID `protobuf:"varint,1,opt,name=oracle_script_id,json=oracleScriptId,proto3,casttype=OracleScriptID" json:"oracle_script_id,omitempty"`
-	// Calldata is the OBI encoded call parameters to the oracle script.
+	// Calldata is the OBI-encoded call parameters for the oracle script.
 	Calldata []byte `protobuf:"bytes,2,opt,name=calldata,proto3" json:"calldata,omitempty"`
 	// AskCount is the number of validators to perform the oracle task.
 	AskCount uint64 `protobuf:"varint,3,opt,name=ask_count,json=askCount,proto3" json:"ask_count,omitempty"`
 	// MinCount is the minimum number of validators sufficient to resolve the
-	// tasks.
+	// oracle tasks.
 	MinCount uint64 `protobuf:"varint,4,opt,name=min_count,json=minCount,proto3" json:"min_count,omitempty"`
-	// ClientID is the client-provided unique identifier to tracking the request.
+	// ClientID is the client-provided unique identifier to track the request.
 	ClientID string `protobuf:"bytes,5,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
 	// FeeLimit is the maximum tokens that will be paid to all data source
 	// providers.
@@ -53,7 +54,7 @@ type MsgRequestData struct {
 	PrepareGas uint64 `protobuf:"varint,7,opt,name=prepare_gas,json=prepareGas,proto3" json:"prepare_gas,omitempty"`
 	// ExecuteGas is amount of gas to reserve for executing
 	ExecuteGas uint64 `protobuf:"varint,8,opt,name=execute_gas,json=executeGas,proto3" json:"execute_gas,omitempty"`
-	// Sender is the sender of this message.
+	// Sender is an account address of message sender.
 	Sender string `protobuf:"bytes,9,opt,name=sender,proto3" json:"sender,omitempty"`
 }
 
@@ -153,7 +154,7 @@ func (m *MsgRequestData) GetSender() string {
 	return ""
 }
 
-// MsgRequestDataResponse
+// MsgRequestDataResponse is response data for MsgRequestData message
 type MsgRequestDataResponse struct {
 }
 
@@ -192,16 +193,13 @@ var xxx_messageInfo_MsgRequestDataResponse proto.InternalMessageInfo
 
 // MsgReportData is a message for reporting to a data request by a validator.
 type MsgReportData struct {
-	// RequestID is the identifier of the request to report to.
+	// RequestID is the identifier of the request to be reported to.
 	RequestID RequestID `protobuf:"varint,1,opt,name=request_id,json=requestId,proto3,casttype=RequestID" json:"request_id,omitempty"`
-	// RawReports is the list of report information for each of the request's
-	// external ID.
+	// RawReports is the list of report information provided by data sources
+	// identified by external ID
 	RawReports []RawReport `protobuf:"bytes,2,rep,name=raw_reports,json=rawReports,proto3" json:"raw_reports"`
 	// Validator is the address of the validator that owns this report.
 	Validator string `protobuf:"bytes,3,opt,name=validator,proto3" json:"validator,omitempty"`
-	// Reporter is the message signer who submits this report transaction for the
-	// validator.
-	Reporter string `protobuf:"bytes,4,opt,name=reporter,proto3" json:"reporter,omitempty"`
 }
 
 func (m *MsgReportData) Reset()         { *m = MsgReportData{} }
@@ -258,14 +256,7 @@ func (m *MsgReportData) GetValidator() string {
 	return ""
 }
 
-func (m *MsgReportData) GetReporter() string {
-	if m != nil {
-		return m.Reporter
-	}
-	return ""
-}
-
-// MsgReportDataResponse
+// MsgReportDataResponse is response data for MsgReportData message
 type MsgReportDataResponse struct {
 }
 
@@ -304,21 +295,24 @@ var xxx_messageInfo_MsgReportDataResponse proto.InternalMessageInfo
 
 // MsgCreateDataSource is a message for creating a new data source.
 type MsgCreateDataSource struct {
-	// Name is the name of this data source (optional).
+	// Name is the name of this data source used for display (optional).
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// Description is the description of this data source (optional).
+	// Description is the description of this data source used for display
+	// (optional).
 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// Executable is the executable script or binary to be run by validators upon
-	// execution.
+	// Executable is the content of executable script or binary file to be run by
+	// validators upon execution.
 	Executable []byte `protobuf:"bytes,3,opt,name=executable,proto3" json:"executable,omitempty"`
 	// Fee is the data source fee per ask_count that data provider will receive
 	// from requester.
 	Fee github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,4,rep,name=fee,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee"`
-	// Owner is the address who is allowed to make further changes to the data
-	// source.
-	Owner string `protobuf:"bytes,5,opt,name=owner,proto3" json:"owner,omitempty"`
+	// Treasury is the account address who receive data source fee from requester.
+	Treasury string `protobuf:"bytes,5,opt,name=treasury,proto3" json:"treasury,omitempty"`
+	// Owner is the account address who is allowed to make further changes to the
+	// data source.
+	Owner string `protobuf:"bytes,6,opt,name=owner,proto3" json:"owner,omitempty"`
 	// Sender is the signer of this message.
-	Sender string `protobuf:"bytes,6,opt,name=sender,proto3" json:"sender,omitempty"`
+	Sender string `protobuf:"bytes,7,opt,name=sender,proto3" json:"sender,omitempty"`
 }
 
 func (m *MsgCreateDataSource) Reset()         { *m = MsgCreateDataSource{} }
@@ -382,6 +376,13 @@ func (m *MsgCreateDataSource) GetFee() github_com_cosmos_cosmos_sdk_types.Coins 
 	return nil
 }
 
+func (m *MsgCreateDataSource) GetTreasury() string {
+	if m != nil {
+		return m.Treasury
+	}
+	return ""
+}
+
 func (m *MsgCreateDataSource) GetOwner() string {
 	if m != nil {
 		return m.Owner
@@ -396,7 +397,7 @@ func (m *MsgCreateDataSource) GetSender() string {
 	return ""
 }
 
-// MsgCreateDataSourceResponse
+// MsgCreateDataSourceResponse is response data for MsgCreateDataSource message
 type MsgCreateDataSourceResponse struct {
 }
 
@@ -437,9 +438,10 @@ var xxx_messageInfo_MsgCreateDataSourceResponse proto.InternalMessageInfo
 type MsgEditDataSource struct {
 	// DataSourceID is the unique identifier of the data source to be edited.
 	DataSourceID DataSourceID `protobuf:"varint,1,opt,name=data_source_id,json=dataSourceId,proto3,casttype=DataSourceID" json:"data_source_id,omitempty"`
-	// Name is the name of this data source (optional).
+	// Name is the name of this data source used for display (optional).
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// Description is the description of this data source (optional).
+	// Description is the description of this data source used for display
+	// (optional).
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Executable is the executable script or binary to be run by validators upon
 	// execution.
@@ -447,12 +449,14 @@ type MsgEditDataSource struct {
 	// Fee is the data source fee per ask_count that data provider will receive
 	// from requester.
 	Fee github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,5,rep,name=fee,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"fee"`
+	// Treasury is the address who receive data source fee from requester.
+	Treasury string `protobuf:"bytes,6,opt,name=treasury,proto3" json:"treasury,omitempty"`
 	// Owner is the address who is allowed to make further changes to the data
 	// source.
-	Owner string `protobuf:"bytes,6,opt,name=owner,proto3" json:"owner,omitempty"`
+	Owner string `protobuf:"bytes,7,opt,name=owner,proto3" json:"owner,omitempty"`
 	// Sender is the signer of this message. Must be the current data source's
 	// owner.
-	Sender string `protobuf:"bytes,7,opt,name=sender,proto3" json:"sender,omitempty"`
+	Sender string `protobuf:"bytes,8,opt,name=sender,proto3" json:"sender,omitempty"`
 }
 
 func (m *MsgEditDataSource) Reset()         { *m = MsgEditDataSource{} }
@@ -523,6 +527,13 @@ func (m *MsgEditDataSource) GetFee() github_com_cosmos_cosmos_sdk_types.Coins {
 	return nil
 }
 
+func (m *MsgEditDataSource) GetTreasury() string {
+	if m != nil {
+		return m.Treasury
+	}
+	return ""
+}
+
 func (m *MsgEditDataSource) GetOwner() string {
 	if m != nil {
 		return m.Owner
@@ -537,7 +548,7 @@ func (m *MsgEditDataSource) GetSender() string {
 	return ""
 }
 
-// MsgEditDataSourceResponse
+// MsgEditDataSourceResponse is response data for MsgEditDataSource message
 type MsgEditDataSourceResponse struct {
 }
 
@@ -576,9 +587,10 @@ var xxx_messageInfo_MsgEditDataSourceResponse proto.InternalMessageInfo
 
 // MsgCreateOracleScript is a message for creating an oracle script.
 type MsgCreateOracleScript struct {
-	// Name is the name of this oracle script (optional).
+	// Name is the name of this oracle script used for display (optional).
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// Description is the description of this oracle script (optional).
+	// Description is the description of this oracle script used for display
+	// (optional).
 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	// Schema is the OBI schema of this oracle script (optional).
 	Schema string `protobuf:"bytes,3,opt,name=schema,proto3" json:"schema,omitempty"`
@@ -675,7 +687,8 @@ func (m *MsgCreateOracleScript) GetSender() string {
 	return ""
 }
 
-// MsgCreateOracleScriptResponse
+// MsgCreateOracleScriptResponse is response data for MsgCreateOracleScript
+// message
 type MsgCreateOracleScriptResponse struct {
 }
 
@@ -716,9 +729,10 @@ var xxx_messageInfo_MsgCreateOracleScriptResponse proto.InternalMessageInfo
 type MsgEditOracleScript struct {
 	// OracleScriptID is the unique identifier of the oracle script to be edited.
 	OracleScriptID OracleScriptID `protobuf:"varint,1,opt,name=oracle_script_id,json=oracleScriptId,proto3,casttype=OracleScriptID" json:"oracle_script_id,omitempty"`
-	// Name is the name of this oracle script (optional).
+	// Name is the name of this oracle script used for display (optional).
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// Description is the description of this oracle script (optional).
+	// Description is the description of this oracle script used for display
+	// (optional).
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Schema is the OBI schema of this oracle script (optional).
 	Schema string `protobuf:"bytes,4,opt,name=schema,proto3" json:"schema,omitempty"`
@@ -726,11 +740,11 @@ type MsgEditOracleScript struct {
 	SourceCodeURL string `protobuf:"bytes,5,opt,name=source_code_url,json=sourceCodeUrl,proto3" json:"source_code_url,omitempty"`
 	// Code is the oracle WebAssembly binary code. Can be raw of gzip compressed.
 	Code []byte `protobuf:"bytes,6,opt,name=code,proto3" json:"code,omitempty"`
-	// Owner is new the address who is allowed to make further changes to the
+	// Owner is an account address who is allowed to make further changes to the
 	// oracle script.
 	Owner string `protobuf:"bytes,7,opt,name=owner,proto3" json:"owner,omitempty"`
-	// Sender is the signer of this message. Must be the current oracle script's
-	// owner.
+	// Sender is an account address who sign this message. Must be the current
+	// oracle script's owner.
 	Sender string `protobuf:"bytes,8,opt,name=sender,proto3" json:"sender,omitempty"`
 }
 
@@ -823,7 +837,7 @@ func (m *MsgEditOracleScript) GetSender() string {
 	return ""
 }
 
-// MsgEditOracleScriptResponse
+// MsgEditOracleScriptResponse is response data for MsgEditOracleScript message
 type MsgEditOracleScriptResponse struct {
 }
 
@@ -861,9 +875,11 @@ func (m *MsgEditOracleScriptResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgEditOracleScriptResponse proto.InternalMessageInfo
 
 // MsgEditOracleScript is a message for activating a validator to become an
-// oracle provider.
+// oracle provider. However, the activation can be revoked once the validator
+// is unable to provide data to fulfill requests
 type MsgActivate struct {
-	// Validator is the signer of this message and the validator to be activated.
+	// Validator is the validator address who sign this message and request to be
+	// activated.
 	Validator string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
 }
 
@@ -907,7 +923,7 @@ func (m *MsgActivate) GetValidator() string {
 	return ""
 }
 
-// MsgActivateResponse
+// MsgActivateResponse is response data for MsgActivate message
 type MsgActivateResponse struct {
 }
 
@@ -944,27 +960,30 @@ func (m *MsgActivateResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgActivateResponse proto.InternalMessageInfo
 
-// MsgAddReporter is a message for adding a new reporter for a validator.
-type MsgAddReporter struct {
-	// Validator is the validator that wishes to add a new reporter. This is the
-	// signer.
-	Validator string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
-	// Reporter is the address to be added as a reporter to the validator.
-	Reporter string `protobuf:"bytes,2,opt,name=reporter,proto3" json:"reporter,omitempty"`
+// MsgUpdateParams is the Msg/UpdateParams request type.
+//
+// Since: cosmos-sdk 0.47
+type MsgUpdateParams struct {
+	// authority is the address of the governance account.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// params defines the x/oracle parameters to update.
+	//
+	// NOTE: All parameters must be supplied.
+	Params Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
 }
 
-func (m *MsgAddReporter) Reset()         { *m = MsgAddReporter{} }
-func (m *MsgAddReporter) String() string { return proto.CompactTextString(m) }
-func (*MsgAddReporter) ProtoMessage()    {}
-func (*MsgAddReporter) Descriptor() ([]byte, []int) {
+func (m *MsgUpdateParams) Reset()         { *m = MsgUpdateParams{} }
+func (m *MsgUpdateParams) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParams) ProtoMessage()    {}
+func (*MsgUpdateParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_31571edce0094a5d, []int{14}
 }
-func (m *MsgAddReporter) XXX_Unmarshal(b []byte) error {
+func (m *MsgUpdateParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgAddReporter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgUpdateParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgAddReporter.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgUpdateParams.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -974,48 +993,51 @@ func (m *MsgAddReporter) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return b[:n], nil
 	}
 }
-func (m *MsgAddReporter) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgAddReporter.Merge(m, src)
+func (m *MsgUpdateParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParams.Merge(m, src)
 }
-func (m *MsgAddReporter) XXX_Size() int {
+func (m *MsgUpdateParams) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgAddReporter) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgAddReporter.DiscardUnknown(m)
+func (m *MsgUpdateParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParams.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgAddReporter proto.InternalMessageInfo
+var xxx_messageInfo_MsgUpdateParams proto.InternalMessageInfo
 
-func (m *MsgAddReporter) GetValidator() string {
+func (m *MsgUpdateParams) GetAuthority() string {
 	if m != nil {
-		return m.Validator
+		return m.Authority
 	}
 	return ""
 }
 
-func (m *MsgAddReporter) GetReporter() string {
+func (m *MsgUpdateParams) GetParams() Params {
 	if m != nil {
-		return m.Reporter
+		return m.Params
 	}
-	return ""
+	return Params{}
 }
 
-// MsgAddReporterResponse
-type MsgAddReporterResponse struct {
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+//
+// Since: cosmos-sdk 0.47
+type MsgUpdateParamsResponse struct {
 }
 
-func (m *MsgAddReporterResponse) Reset()         { *m = MsgAddReporterResponse{} }
-func (m *MsgAddReporterResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgAddReporterResponse) ProtoMessage()    {}
-func (*MsgAddReporterResponse) Descriptor() ([]byte, []int) {
+func (m *MsgUpdateParamsResponse) Reset()         { *m = MsgUpdateParamsResponse{} }
+func (m *MsgUpdateParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUpdateParamsResponse) ProtoMessage()    {}
+func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_31571edce0094a5d, []int{15}
 }
-func (m *MsgAddReporterResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgUpdateParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgAddReporterResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgUpdateParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgAddReporterResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgUpdateParamsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -1025,111 +1047,17 @@ func (m *MsgAddReporterResponse) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *MsgAddReporterResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgAddReporterResponse.Merge(m, src)
+func (m *MsgUpdateParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUpdateParamsResponse.Merge(m, src)
 }
-func (m *MsgAddReporterResponse) XXX_Size() int {
+func (m *MsgUpdateParamsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgAddReporterResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgAddReporterResponse.DiscardUnknown(m)
+func (m *MsgUpdateParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUpdateParamsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgAddReporterResponse proto.InternalMessageInfo
-
-// MsgAddReporter is a message for removing an existing reporter from a
-// validator.
-type MsgRemoveReporter struct {
-	// Validator is the validator that wishes to remove an existing reporter. This
-	// is the signer.
-	Validator string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
-	// Reporter is the address to be removed from being the validators' reporter.
-	Reporter string `protobuf:"bytes,2,opt,name=reporter,proto3" json:"reporter,omitempty"`
-}
-
-func (m *MsgRemoveReporter) Reset()         { *m = MsgRemoveReporter{} }
-func (m *MsgRemoveReporter) String() string { return proto.CompactTextString(m) }
-func (*MsgRemoveReporter) ProtoMessage()    {}
-func (*MsgRemoveReporter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_31571edce0094a5d, []int{16}
-}
-func (m *MsgRemoveReporter) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *MsgRemoveReporter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_MsgRemoveReporter.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *MsgRemoveReporter) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRemoveReporter.Merge(m, src)
-}
-func (m *MsgRemoveReporter) XXX_Size() int {
-	return m.Size()
-}
-func (m *MsgRemoveReporter) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRemoveReporter.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_MsgRemoveReporter proto.InternalMessageInfo
-
-func (m *MsgRemoveReporter) GetValidator() string {
-	if m != nil {
-		return m.Validator
-	}
-	return ""
-}
-
-func (m *MsgRemoveReporter) GetReporter() string {
-	if m != nil {
-		return m.Reporter
-	}
-	return ""
-}
-
-// MsgRemoveReporterResponse
-type MsgRemoveReporterResponse struct {
-}
-
-func (m *MsgRemoveReporterResponse) Reset()         { *m = MsgRemoveReporterResponse{} }
-func (m *MsgRemoveReporterResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgRemoveReporterResponse) ProtoMessage()    {}
-func (*MsgRemoveReporterResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_31571edce0094a5d, []int{17}
-}
-func (m *MsgRemoveReporterResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *MsgRemoveReporterResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_MsgRemoveReporterResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *MsgRemoveReporterResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRemoveReporterResponse.Merge(m, src)
-}
-func (m *MsgRemoveReporterResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *MsgRemoveReporterResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRemoveReporterResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_MsgRemoveReporterResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgUpdateParamsResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MsgRequestData)(nil), "oracle.v1.MsgRequestData")
@@ -1146,85 +1074,90 @@ func init() {
 	proto.RegisterType((*MsgEditOracleScriptResponse)(nil), "oracle.v1.MsgEditOracleScriptResponse")
 	proto.RegisterType((*MsgActivate)(nil), "oracle.v1.MsgActivate")
 	proto.RegisterType((*MsgActivateResponse)(nil), "oracle.v1.MsgActivateResponse")
-	proto.RegisterType((*MsgAddReporter)(nil), "oracle.v1.MsgAddReporter")
-	proto.RegisterType((*MsgAddReporterResponse)(nil), "oracle.v1.MsgAddReporterResponse")
-	proto.RegisterType((*MsgRemoveReporter)(nil), "oracle.v1.MsgRemoveReporter")
-	proto.RegisterType((*MsgRemoveReporterResponse)(nil), "oracle.v1.MsgRemoveReporterResponse")
+	proto.RegisterType((*MsgUpdateParams)(nil), "oracle.v1.MsgUpdateParams")
+	proto.RegisterType((*MsgUpdateParamsResponse)(nil), "oracle.v1.MsgUpdateParamsResponse")
 }
 
 func init() { proto.RegisterFile("oracle/v1/tx.proto", fileDescriptor_31571edce0094a5d) }
 
 var fileDescriptor_31571edce0094a5d = []byte{
-	// 1089 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0xcf, 0x53, 0xdb, 0xc6,
-	0x17, 0x47, 0xb6, 0x31, 0xd6, 0xb3, 0xe1, 0x9b, 0xe8, 0x4b, 0xa8, 0x11, 0x89, 0xe4, 0x32, 0x99,
-	0x8c, 0x7b, 0xc0, 0x2a, 0xe9, 0x29, 0xed, 0x29, 0x36, 0xfd, 0xc1, 0x00, 0x21, 0xb3, 0xa4, 0x97,
-	0xcc, 0x74, 0xdc, 0xb5, 0xb4, 0x08, 0x0d, 0x92, 0xd6, 0xd5, 0xca, 0x40, 0xfe, 0x8b, 0xfe, 0x09,
-	0x3d, 0xb7, 0xf7, 0xfe, 0x05, 0x9d, 0x69, 0x8e, 0x39, 0xf6, 0xe4, 0x76, 0xcc, 0x25, 0xf7, 0xde,
-	0x7a, 0xe8, 0x74, 0xb4, 0x2b, 0xcb, 0x92, 0x90, 0x61, 0xca, 0xd0, 0x13, 0x7a, 0xef, 0xf3, 0xf6,
-	0xb3, 0xbb, 0x9f, 0xf7, 0xf6, 0x3d, 0x0c, 0x0a, 0x0d, 0xb0, 0xe9, 0x12, 0xe3, 0x6c, 0xdb, 0x08,
-	0x2f, 0x3a, 0xc3, 0x80, 0x86, 0x54, 0x91, 0x85, 0xaf, 0x73, 0xb6, 0xad, 0xae, 0xda, 0xd4, 0xa6,
-	0xdc, 0x6b, 0x44, 0x5f, 0x22, 0x40, 0xd5, 0x6d, 0x4a, 0x6d, 0x97, 0x18, 0xdc, 0x1a, 0x8c, 0x8e,
-	0x8d, 0xd0, 0xf1, 0x08, 0x0b, 0xb1, 0x37, 0x8c, 0x03, 0xd6, 0xf3, 0x01, 0xd8, 0x7f, 0x13, 0x43,
-	0x6b, 0xb3, 0x0d, 0xe3, 0x6d, 0x84, 0x5f, 0x33, 0x29, 0xf3, 0x28, 0x33, 0x06, 0x98, 0x45, 0xe0,
-	0x80, 0x84, 0x78, 0xdb, 0x30, 0xa9, 0xe3, 0x0b, 0x7c, 0xf3, 0xa7, 0x32, 0xac, 0x1c, 0x30, 0x1b,
-	0x91, 0xef, 0x46, 0x84, 0x85, 0x3b, 0x38, 0xc4, 0xca, 0x0b, 0xb8, 0x27, 0x28, 0xfa, 0xcc, 0x0c,
-	0x9c, 0x61, 0xd8, 0x77, 0xac, 0xa6, 0xd4, 0x92, 0xda, 0xe5, 0xee, 0xe3, 0xc9, 0x58, 0x5f, 0x39,
-	0xe4, 0xd8, 0x11, 0x87, 0x76, 0x77, 0xfe, 0xba, 0xe2, 0x41, 0x2b, 0x34, 0x6d, 0x5b, 0x8a, 0x0a,
-	0x35, 0x13, 0xbb, 0xae, 0x85, 0x43, 0xdc, 0x2c, 0xb5, 0xa4, 0x76, 0x03, 0x25, 0xb6, 0xb2, 0x01,
-	0x32, 0x66, 0xa7, 0x7d, 0x93, 0x8e, 0xfc, 0xb0, 0x59, 0x6e, 0x49, 0xed, 0x0a, 0xaa, 0x61, 0x76,
-	0xda, 0x8b, 0xec, 0x08, 0xf4, 0x1c, 0x3f, 0x06, 0x2b, 0x02, 0xf4, 0x1c, 0x5f, 0x80, 0x1f, 0x81,
-	0x6c, 0xba, 0x0e, 0xf1, 0xf9, 0xf1, 0x16, 0x5b, 0x52, 0x5b, 0xee, 0x36, 0x26, 0x63, 0xbd, 0xd6,
-	0xe3, 0xce, 0xdd, 0x1d, 0x54, 0x13, 0xf0, 0xae, 0xa5, 0x9c, 0x80, 0x7c, 0x4c, 0x48, 0xdf, 0x75,
-	0x3c, 0x27, 0x6c, 0x56, 0x5b, 0xe5, 0x76, 0xfd, 0xe9, 0x7a, 0x47, 0xe8, 0xd2, 0x89, 0x74, 0xe9,
-	0xc4, 0xba, 0x74, 0x7a, 0xd4, 0xf1, 0xbb, 0x1f, 0xbf, 0x1d, 0xeb, 0x0b, 0x3f, 0xfe, 0xae, 0xb7,
-	0x6d, 0x27, 0x3c, 0x19, 0x0d, 0x3a, 0x26, 0xf5, 0x8c, 0x58, 0x44, 0xf1, 0x67, 0x8b, 0x59, 0xa7,
-	0x46, 0xf8, 0x66, 0x48, 0x18, 0x5f, 0xc0, 0x50, 0xed, 0x98, 0x90, 0xfd, 0x88, 0x5c, 0xd1, 0xa1,
-	0x3e, 0x0c, 0xc8, 0x10, 0x07, 0xa4, 0x6f, 0x63, 0xd6, 0x5c, 0xe2, 0x67, 0x86, 0xd8, 0xf5, 0x25,
-	0x66, 0x51, 0x00, 0xb9, 0x20, 0xe6, 0x28, 0x14, 0x01, 0x35, 0x11, 0x10, 0xbb, 0xa2, 0x80, 0x35,
-	0xa8, 0x32, 0xe2, 0x5b, 0x24, 0x68, 0xca, 0xd1, 0x9d, 0x50, 0x6c, 0x7d, 0x5a, 0x79, 0xff, 0x83,
-	0x2e, 0x6d, 0x36, 0x61, 0x2d, 0x9b, 0x2c, 0x44, 0xd8, 0x90, 0xfa, 0x8c, 0x6c, 0xfe, 0x2a, 0xc1,
-	0x32, 0x87, 0x86, 0x34, 0x10, 0x69, 0x7c, 0x06, 0x10, 0x88, 0xc0, 0x59, 0x02, 0xd5, 0xc9, 0x58,
-	0x97, 0xe3, 0xe5, 0x3c, 0x77, 0x33, 0x03, 0xc9, 0x71, 0xf4, 0xae, 0xa5, 0x7c, 0x06, 0xf5, 0x00,
-	0x9f, 0xf7, 0x03, 0x4e, 0xc6, 0x9a, 0x25, 0x2e, 0xd9, 0x6a, 0x27, 0xa9, 0xdf, 0x0e, 0xc2, 0xe7,
-	0x62, 0xa7, 0x6e, 0x25, 0x52, 0x0b, 0x41, 0x30, 0x75, 0x30, 0xe5, 0x21, 0xc8, 0x67, 0xd8, 0x75,
-	0x2c, 0x1c, 0xd2, 0x80, 0xa7, 0x54, 0x46, 0x33, 0x47, 0x54, 0x0c, 0x82, 0x96, 0x04, 0x3c, 0xa5,
-	0x32, 0x4a, 0xec, 0xf8, 0x8e, 0x1f, 0xc0, 0x83, 0xcc, 0x45, 0x92, 0x2b, 0xfe, 0x2d, 0xc1, 0xff,
-	0x0f, 0x98, 0xdd, 0x0b, 0x08, 0x0e, 0x49, 0x84, 0x1c, 0xd1, 0x51, 0x60, 0x12, 0x45, 0x81, 0x8a,
-	0x8f, 0x3d, 0xc2, 0xaf, 0x28, 0x23, 0xfe, 0xad, 0xb4, 0xa0, 0x6e, 0x11, 0x51, 0xbe, 0x0e, 0xf5,
-	0x79, 0xd9, 0xc9, 0x28, 0xed, 0x52, 0x34, 0x88, 0x65, 0xc7, 0x03, 0x97, 0xf0, 0x73, 0x36, 0x50,
-	0xca, 0xa3, 0x7c, 0x03, 0xe5, 0x63, 0x42, 0x9a, 0x95, 0xbb, 0x2f, 0x97, 0x88, 0x57, 0x59, 0x85,
-	0x45, 0x7a, 0xee, 0x93, 0x40, 0x94, 0x2e, 0x12, 0x46, 0x2a, 0xfb, 0xd5, 0x82, 0xec, 0x3f, 0x82,
-	0x8d, 0x82, 0xfb, 0x27, 0xfa, 0xfc, 0x52, 0x82, 0xfb, 0x07, 0xcc, 0xfe, 0xdc, 0x72, 0xc2, 0x94,
-	0x3a, 0x5f, 0xc0, 0x4a, 0xf4, 0xd2, 0xfa, 0x8c, 0x9b, 0xb3, 0x52, 0x68, 0x4d, 0xc6, 0x7a, 0x63,
-	0x16, 0xc7, 0xab, 0x21, 0x63, 0xa3, 0x86, 0x35, 0xb3, 0xac, 0x44, 0xe5, 0xd2, 0x7c, 0x95, 0xcb,
-	0x37, 0xa9, 0x5c, 0x99, 0xa7, 0xf2, 0xe2, 0x7f, 0xad, 0x72, 0xb5, 0x58, 0xe5, 0xa5, 0x02, 0x95,
-	0x37, 0x60, 0xfd, 0x8a, 0x8a, 0x89, 0xc6, 0xef, 0x25, 0x5e, 0x9d, 0x22, 0x07, 0xe9, 0xbe, 0x77,
-	0xcb, 0x2a, 0x8c, 0x8e, 0x62, 0x9e, 0x10, 0x0f, 0xc7, 0xe2, 0xc5, 0x96, 0xf2, 0x0c, 0xfe, 0x17,
-	0x27, 0xcc, 0xa4, 0x16, 0xe9, 0x8f, 0x02, 0x57, 0xbc, 0x96, 0xee, 0xfd, 0xc9, 0x58, 0x5f, 0x16,
-	0x87, 0xea, 0x51, 0x8b, 0x7c, 0x8d, 0xf6, 0xd1, 0x32, 0x9b, 0x99, 0x81, 0x1b, 0x1d, 0x24, 0x5a,
-	0xc3, 0x0b, 0xab, 0x81, 0xf8, 0xf7, 0xad, 0x74, 0xd0, 0xe1, 0x51, 0xe1, 0x4d, 0x13, 0x2d, 0x7e,
-	0x2e, 0xf1, 0xf7, 0x18, 0x29, 0x95, 0x51, 0xe2, 0xae, 0xe7, 0xc7, 0xed, 0x2a, 0x6f, 0xa6, 0x6c,
-	0xe5, 0x26, 0x65, 0x17, 0xff, 0xa5, 0xb2, 0xd5, 0x22, 0x65, 0x97, 0x8a, 0x95, 0xad, 0xcd, 0x7d,
-	0xc7, 0x79, 0xdd, 0x12, 0x5d, 0xb7, 0xa1, 0x7e, 0xc0, 0xec, 0xe7, 0x66, 0xe8, 0x9c, 0xe1, 0x90,
-	0x64, 0xfb, 0xa9, 0x94, 0xeb, 0xa7, 0x31, 0xe3, 0x03, 0x9e, 0x89, 0xe9, 0x92, 0x84, 0xe9, 0x25,
-	0x9f, 0xed, 0xcf, 0x2d, 0x0b, 0xc5, 0x2d, 0xf6, 0x7a, 0xb2, 0x4c, 0x73, 0x2e, 0x15, 0x36, 0x67,
-	0x31, 0x80, 0x52, 0x8c, 0xc9, 0x5e, 0x47, 0xbc, 0xf9, 0x20, 0xe2, 0xd1, 0x33, 0x72, 0x67, 0xdb,
-	0x89, 0xb7, 0x98, 0x25, 0x9d, 0xee, 0xf8, 0xf4, 0xcf, 0x45, 0x28, 0x1f, 0x30, 0x5b, 0xd9, 0x83,
-	0x7a, 0xfa, 0xdf, 0x97, 0xf5, 0xd4, 0x9c, 0xca, 0x0e, 0x4b, 0xf5, 0xc3, 0xb9, 0xd0, 0x94, 0x54,
-	0xf9, 0x0a, 0x20, 0x35, 0x43, 0x9b, 0xf9, 0x05, 0x53, 0x44, 0x6d, 0xcd, 0x43, 0x12, 0xa6, 0xd7,
-	0x70, 0xef, 0xca, 0xa8, 0xd2, 0xb2, 0xab, 0xf2, 0xb8, 0xfa, 0xe4, 0x7a, 0x3c, 0xe1, 0x7e, 0x05,
-	0x2b, 0xb9, 0x36, 0xff, 0x30, 0xbb, 0x32, 0x8b, 0xaa, 0x8f, 0xaf, 0x43, 0x13, 0xd6, 0x6f, 0x41,
-	0x29, 0x68, 0x6c, 0xad, 0xa2, 0x33, 0xa5, 0x23, 0xd4, 0xf6, 0x4d, 0x11, 0x69, 0x4d, 0xae, 0xb4,
-	0x0b, 0xed, 0xea, 0xd9, 0x32, 0xec, 0x4f, 0xae, 0xc7, 0x13, 0xee, 0x2e, 0xd4, 0x92, 0x37, 0xb3,
-	0x96, 0x5d, 0x33, 0xf5, 0xab, 0x5a, 0xb1, 0x3f, 0xe1, 0xd8, 0x83, 0x7a, 0xfa, 0xb5, 0xe4, 0x4a,
-	0x29, 0x05, 0xe5, 0x4b, 0xa9, 0xe0, 0x45, 0x44, 0x49, 0xca, 0x3f, 0x87, 0x7c, 0xd1, 0xa4, 0xd1,
-	0x7c, 0x92, 0x8a, 0xab, 0xbe, 0xbb, 0xf7, 0x76, 0xa2, 0x49, 0xef, 0x26, 0x9a, 0xf4, 0xc7, 0x44,
-	0x93, 0xbe, 0xbf, 0xd4, 0x16, 0xde, 0x5d, 0x6a, 0x0b, 0xbf, 0x5d, 0x6a, 0x0b, 0xaf, 0xb7, 0x53,
-	0xb3, 0xf1, 0x70, 0x67, 0xf7, 0xc5, 0xd6, 0x4b, 0x74, 0xf8, 0xea, 0xb0, 0x77, 0xb8, 0x6f, 0x50,
-	0xcb, 0xf1, 0xb7, 0x4c, 0x1a, 0x10, 0xe3, 0x22, 0xfe, 0x75, 0x20, 0x46, 0xe5, 0xa0, 0xca, 0x7f,
-	0x04, 0x7c, 0xf2, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd2, 0xcb, 0x6e, 0x1d, 0xaf, 0x0c, 0x00,
-	0x00,
+	// 1211 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0x4b, 0x6f, 0xdb, 0x46,
+	0x10, 0xb6, 0x2c, 0x59, 0x16, 0x47, 0xb2, 0x1d, 0x33, 0x7e, 0x50, 0x74, 0x23, 0xa9, 0x82, 0x61,
+	0x28, 0x29, 0x2c, 0xc5, 0x6e, 0x51, 0x20, 0xee, 0x29, 0x92, 0xfb, 0x30, 0x62, 0xd9, 0x01, 0x9d,
+	0x5c, 0x02, 0x14, 0xea, 0x9a, 0x5c, 0xd3, 0x84, 0x45, 0xae, 0xba, 0x4b, 0xf9, 0x71, 0xed, 0xb1,
+	0x97, 0xb6, 0xff, 0x20, 0xe8, 0xb1, 0xa7, 0x1c, 0xfa, 0x17, 0x0a, 0xe4, 0x18, 0xb4, 0x97, 0x9e,
+	0xd4, 0x42, 0x46, 0x91, 0xfe, 0x86, 0x9e, 0x0a, 0x2e, 0x57, 0x14, 0x29, 0x4b, 0x7e, 0x04, 0x49,
+	0x2e, 0x36, 0x67, 0xbe, 0xd9, 0xe1, 0xf0, 0xfb, 0x66, 0x76, 0x57, 0x20, 0x13, 0x8a, 0xf4, 0x26,
+	0xae, 0x1c, 0xaf, 0x55, 0xdc, 0xd3, 0x72, 0x8b, 0x12, 0x97, 0xc8, 0x92, 0xef, 0x2b, 0x1f, 0xaf,
+	0xa9, 0x73, 0x26, 0x31, 0x09, 0xf7, 0x56, 0xbc, 0x27, 0x3f, 0x40, 0x5d, 0xe8, 0x2f, 0x12, 0xa1,
+	0xbe, 0x3f, 0xa7, 0x13, 0x66, 0x13, 0x56, 0xd9, 0x47, 0xcc, 0x03, 0xf7, 0xb1, 0x8b, 0xd6, 0x2a,
+	0x3a, 0xb1, 0x1c, 0x81, 0x67, 0x7d, 0xbc, 0xe1, 0x27, 0xf4, 0x0d, 0x01, 0x2d, 0x8a, 0xa5, 0x36,
+	0x33, 0xbd, 0xb4, 0x36, 0x33, 0x05, 0x30, 0x8b, 0x6c, 0xcb, 0x21, 0x15, 0xfe, 0xd7, 0x77, 0x15,
+	0xcf, 0xe3, 0x30, 0x5d, 0x67, 0xa6, 0x86, 0xbf, 0x6d, 0x63, 0xe6, 0x6e, 0x22, 0x17, 0xc9, 0x3b,
+	0x70, 0xcb, 0xaf, 0xa4, 0xc1, 0x74, 0x6a, 0xb5, 0xdc, 0x86, 0x65, 0x28, 0xb1, 0x42, 0xac, 0x94,
+	0xa8, 0x2e, 0x77, 0x3b, 0xf9, 0xe9, 0x5d, 0x8e, 0xed, 0x71, 0x68, 0x6b, 0xf3, 0xbf, 0x0b, 0x1e,
+	0x6d, 0x9a, 0x84, 0x6d, 0x43, 0x56, 0x21, 0xa5, 0xa3, 0x66, 0xd3, 0x40, 0x2e, 0x52, 0xc6, 0x0b,
+	0xb1, 0x52, 0x46, 0x0b, 0x6c, 0x79, 0x09, 0x24, 0xc4, 0x8e, 0x1a, 0x3a, 0x69, 0x3b, 0xae, 0x12,
+	0xf7, 0x5e, 0xa2, 0xa5, 0x10, 0x3b, 0xaa, 0x79, 0xb6, 0x07, 0xda, 0x96, 0x23, 0xc0, 0x84, 0x0f,
+	0xda, 0x96, 0xe3, 0x83, 0x77, 0x41, 0xd2, 0x9b, 0x16, 0x76, 0x78, 0x79, 0x13, 0x85, 0x58, 0x49,
+	0xaa, 0x66, 0xba, 0x9d, 0x7c, 0xaa, 0xc6, 0x9d, 0x5b, 0x9b, 0x5a, 0xca, 0x87, 0xb7, 0x0c, 0xf9,
+	0x10, 0xa4, 0x03, 0x8c, 0x1b, 0x4d, 0xcb, 0xb6, 0x5c, 0x25, 0x59, 0x88, 0x97, 0xd2, 0xeb, 0xd9,
+	0xb2, 0x60, 0xcc, 0xa3, 0xb7, 0x2c, 0xe8, 0x2d, 0xd7, 0x88, 0xe5, 0x54, 0xef, 0xbf, 0xec, 0xe4,
+	0xc7, 0x7e, 0xf9, 0x2b, 0x5f, 0x32, 0x2d, 0xf7, 0xb0, 0xbd, 0x5f, 0xd6, 0x89, 0x2d, 0xe8, 0x15,
+	0xff, 0x56, 0x99, 0x71, 0x54, 0x71, 0xcf, 0x5a, 0x98, 0xf1, 0x05, 0x4c, 0x4b, 0x1d, 0x60, 0xbc,
+	0xed, 0x25, 0x97, 0xf3, 0x90, 0x6e, 0x51, 0xdc, 0x42, 0x14, 0x37, 0x4c, 0xc4, 0x94, 0x49, 0x5e,
+	0x33, 0x08, 0xd7, 0x97, 0x88, 0x79, 0x01, 0xf8, 0x14, 0xeb, 0x6d, 0xd7, 0x0f, 0x48, 0xf9, 0x01,
+	0xc2, 0xe5, 0x05, 0xdc, 0x87, 0x24, 0xc3, 0x8e, 0x81, 0xa9, 0x22, 0xf1, 0x6f, 0x52, 0x7e, 0xff,
+	0x75, 0x75, 0x4e, 0xd4, 0xfa, 0xd0, 0x30, 0x28, 0x66, 0x6c, 0xcf, 0xa5, 0x96, 0x63, 0x6a, 0x22,
+	0x6e, 0xa3, 0xf8, 0xef, 0xf3, 0x7c, 0xec, 0xbb, 0xd7, 0x2f, 0xee, 0x09, 0xc7, 0xf7, 0xaf, 0x5f,
+	0xdc, 0x13, 0x12, 0x54, 0x84, 0xac, 0x45, 0x05, 0x16, 0xa2, 0x22, 0x6b, 0x98, 0xb5, 0x88, 0xc3,
+	0x70, 0xf1, 0x9f, 0x18, 0x4c, 0x71, 0xa8, 0x45, 0xa8, 0x2f, 0xff, 0x03, 0x00, 0xea, 0x07, 0xf6,
+	0x85, 0x57, 0xbb, 0x9d, 0xbc, 0x24, 0x96, 0x73, 0xcd, 0xfb, 0x86, 0x26, 0x89, 0xe8, 0x2d, 0x43,
+	0xfe, 0x0c, 0xd2, 0x14, 0x9d, 0x34, 0x28, 0x4f, 0xc6, 0x94, 0x71, 0x4e, 0xf5, 0x5c, 0x39, 0x18,
+	0x81, 0xb2, 0x86, 0x4e, 0xfc, 0x37, 0x55, 0x13, 0x1e, 0xcb, 0x1a, 0xd0, 0x9e, 0x83, 0xc9, 0x9f,
+	0x82, 0x74, 0x8c, 0x9a, 0x96, 0x81, 0x5c, 0x42, 0x79, 0x2b, 0x5c, 0xf6, 0xf1, 0xfd, 0xd0, 0x8d,
+	0xe5, 0xde, 0xf7, 0xf7, 0x7d, 0x1e, 0x05, 0x53, 0x01, 0x05, 0x5e, 0xfa, 0xe2, 0x22, 0xcc, 0x47,
+	0x3e, 0x33, 0x20, 0xe0, 0x87, 0x38, 0xdc, 0xae, 0x33, 0xb3, 0x46, 0x31, 0x72, 0xb1, 0x87, 0xec,
+	0x91, 0x36, 0xd5, 0xb1, 0x2c, 0x43, 0xc2, 0x41, 0x36, 0xe6, 0x04, 0x48, 0x1a, 0x7f, 0x96, 0x0b,
+	0x90, 0x36, 0xb0, 0x3f, 0x14, 0x16, 0x71, 0x78, 0x33, 0x4b, 0x5a, 0xd8, 0x25, 0xe7, 0x40, 0x88,
+	0x89, 0xf6, 0x9b, 0x98, 0x7f, 0x45, 0x46, 0x0b, 0x79, 0xe4, 0xaf, 0x21, 0x7e, 0x80, 0xb1, 0x92,
+	0x78, 0xfb, 0x4d, 0xe8, 0xe5, 0x95, 0x3f, 0x81, 0x94, 0x4b, 0x31, 0x62, 0x6d, 0x7a, 0x26, 0x66,
+	0x62, 0x34, 0x85, 0x41, 0xa4, 0x5c, 0x86, 0x09, 0x72, 0xe2, 0x60, 0xaa, 0x24, 0xaf, 0x58, 0xe2,
+	0x87, 0x85, 0x7a, 0x74, 0xf2, 0x9a, 0x3d, 0xfa, 0xd1, 0x90, 0x1e, 0x5d, 0x14, 0x02, 0x0d, 0x32,
+	0x5f, 0xbc, 0x03, 0x4b, 0x43, 0x04, 0x09, 0x04, 0xfb, 0x23, 0x0e, 0xb3, 0x75, 0x66, 0x7e, 0x6e,
+	0x58, 0x6e, 0x48, 0xae, 0x2f, 0x60, 0xda, 0xdb, 0x50, 0x1a, 0x8c, 0x9b, 0xfd, 0xce, 0x2d, 0x74,
+	0x3b, 0xf9, 0x4c, 0x3f, 0x8e, 0x37, 0x6f, 0xc4, 0xd6, 0x32, 0x46, 0xdf, 0x32, 0x02, 0xd9, 0xc7,
+	0x47, 0xcb, 0x1e, 0xbf, 0x4a, 0xf6, 0xc4, 0x28, 0xd9, 0x27, 0xde, 0x83, 0xec, 0xc9, 0x9b, 0xcb,
+	0x3e, 0x79, 0x53, 0xd9, 0x53, 0xd7, 0x94, 0xfd, 0xee, 0x10, 0xd9, 0xe7, 0x85, 0xec, 0x51, 0xfd,
+	0x8a, 0x4b, 0x90, 0xbd, 0x20, 0x6a, 0x20, 0xf9, 0x6f, 0xe3, 0x7c, 0x7a, 0xfd, 0x96, 0x08, 0x9f,
+	0x36, 0x6f, 0x38, 0xa5, 0x0b, 0x90, 0x64, 0xfa, 0x21, 0xb6, 0x91, 0xd0, 0x52, 0x58, 0xf2, 0x03,
+	0x98, 0x11, 0xfd, 0xa3, 0x13, 0x03, 0x37, 0xda, 0xb4, 0xc9, 0xb5, 0x94, 0xaa, 0xb3, 0xdd, 0x4e,
+	0x7e, 0xca, 0x2f, 0xaa, 0x46, 0x0c, 0xfc, 0x54, 0xdb, 0xd6, 0xa6, 0x58, 0xdf, 0xa4, 0x4d, 0xaf,
+	0x10, 0x6f, 0x0d, 0x9f, 0xba, 0x8c, 0xc6, 0x9f, 0xdf, 0xc3, 0x5c, 0xad, 0x0e, 0x21, 0x38, 0x1b,
+	0x99, 0xab, 0x30, 0x5b, 0xc5, 0x3c, 0xdc, 0x19, 0x4a, 0x63, 0x40, 0xf4, 0x4f, 0xfe, 0x66, 0xe8,
+	0xc9, 0x10, 0xa1, 0xf9, 0x6d, 0x5f, 0x09, 0xde, 0x6c, 0xca, 0xfa, 0xb2, 0x25, 0xae, 0x92, 0x6d,
+	0xe2, 0x86, 0xb2, 0x25, 0x87, 0xc9, 0xf6, 0xce, 0xe6, 0xe2, 0xb2, 0xed, 0x70, 0x90, 0x7b, 0xb1,
+	0x1d, 0x0e, 0xba, 0x03, 0xc9, 0x6c, 0x48, 0xd7, 0x99, 0xf9, 0x50, 0x77, 0xad, 0x63, 0xe4, 0xe2,
+	0xe8, 0x29, 0x1a, 0xbb, 0xfe, 0x29, 0xba, 0x32, 0xfc, 0x14, 0x9d, 0x11, 0x55, 0xf5, 0xf2, 0x17,
+	0xe7, 0x79, 0x83, 0xf4, 0xcc, 0xa0, 0x8a, 0x9f, 0x63, 0x30, 0x53, 0x67, 0xe6, 0xd3, 0x96, 0x81,
+	0x5c, 0xfc, 0x18, 0x51, 0x64, 0xf3, 0x03, 0x1d, 0xb5, 0xdd, 0x43, 0x42, 0x2d, 0xf7, 0xec, 0xea,
+	0x52, 0x82, 0x50, 0xb9, 0x02, 0xc9, 0x16, 0xcf, 0xc0, 0xdb, 0x23, 0xbd, 0x3e, 0x1b, 0xba, 0x40,
+	0xf8, 0xa9, 0xc5, 0xed, 0x41, 0x84, 0x6d, 0xac, 0xf0, 0xba, 0x83, 0x04, 0x5e, 0xdd, 0xb7, 0x45,
+	0xdd, 0xe1, 0x82, 0x8a, 0x59, 0x58, 0x1c, 0xa8, 0xb1, 0x57, 0xff, 0xfa, 0xf3, 0x09, 0x88, 0xd7,
+	0x99, 0x29, 0x3f, 0x82, 0x74, 0xf8, 0x2a, 0x9c, 0x0d, 0xbd, 0x3a, 0x7a, 0x81, 0x52, 0x3f, 0x1c,
+	0x09, 0xf5, 0x92, 0xca, 0x5f, 0x01, 0x84, 0xee, 0x55, 0xca, 0xe0, 0x82, 0x1e, 0xa2, 0x16, 0x46,
+	0x21, 0x41, 0xa6, 0x67, 0x70, 0xeb, 0xc2, 0x05, 0x25, 0x17, 0x5d, 0x35, 0x88, 0xab, 0x2b, 0x97,
+	0xe3, 0x41, 0xee, 0x27, 0x30, 0x3d, 0x70, 0x96, 0x7e, 0x10, 0x5d, 0x19, 0x45, 0xd5, 0xe5, 0xcb,
+	0xd0, 0x20, 0xeb, 0x37, 0x20, 0x0f, 0xd9, 0xae, 0x0b, 0xc3, 0x6a, 0x0a, 0x47, 0xa8, 0xa5, 0xab,
+	0x22, 0xc2, 0x9c, 0x5c, 0xd8, 0xa7, 0x72, 0x17, 0x6b, 0x8b, 0x64, 0x5f, 0xb9, 0x1c, 0x0f, 0x72,
+	0x57, 0x21, 0x15, 0x4c, 0xd4, 0x42, 0x74, 0x4d, 0xcf, 0xaf, 0xe6, 0x86, 0xfb, 0x83, 0x1c, 0x3b,
+	0x90, 0x89, 0x8c, 0x83, 0x1a, 0x8d, 0x0f, 0x63, 0x6a, 0x71, 0x34, 0xd6, 0xcb, 0x57, 0x7d, 0xf4,
+	0xb2, 0x9b, 0x8b, 0xbd, 0xea, 0xe6, 0x62, 0x7f, 0x77, 0x73, 0xb1, 0x1f, 0xcf, 0x73, 0x63, 0xaf,
+	0xce, 0x73, 0x63, 0x7f, 0x9e, 0xe7, 0xc6, 0x9e, 0xad, 0x85, 0x6e, 0x0b, 0xbb, 0x9b, 0x5b, 0x3b,
+	0xab, 0x8f, 0xb5, 0xdd, 0x27, 0xbb, 0xb5, 0xdd, 0xed, 0x0a, 0x31, 0x2c, 0x67, 0x55, 0x27, 0x14,
+	0x57, 0x4e, 0xc5, 0xaf, 0x4b, 0xff, 0xf2, 0xb0, 0x9f, 0xe4, 0xbf, 0xfe, 0x3e, 0xfe, 0x3f, 0x00,
+	0x00, 0xff, 0xff, 0xa0, 0x06, 0x4f, 0xe6, 0xb3, 0x0e, 0x00, 0x00,
 }
 
 func (this *MsgRequestData) Equal(that interface{}) bool {
@@ -1313,9 +1246,6 @@ func (this *MsgReportData) Equal(that interface{}) bool {
 	if this.Validator != that1.Validator {
 		return false
 	}
-	if this.Reporter != that1.Reporter {
-		return false
-	}
 	return true
 }
 func (this *MsgCreateDataSource) Equal(that interface{}) bool {
@@ -1353,6 +1283,9 @@ func (this *MsgCreateDataSource) Equal(that interface{}) bool {
 		if !this.Fee[i].Equal(&that1.Fee[i]) {
 			return false
 		}
+	}
+	if this.Treasury != that1.Treasury {
+		return false
 	}
 	if this.Owner != that1.Owner {
 		return false
@@ -1400,6 +1333,9 @@ func (this *MsgEditDataSource) Equal(that interface{}) bool {
 		if !this.Fee[i].Equal(&that1.Fee[i]) {
 			return false
 		}
+	}
+	if this.Treasury != that1.Treasury {
+		return false
 	}
 	if this.Owner != that1.Owner {
 		return false
@@ -1520,60 +1456,6 @@ func (this *MsgActivate) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *MsgAddReporter) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*MsgAddReporter)
-	if !ok {
-		that2, ok := that.(MsgAddReporter)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.Validator != that1.Validator {
-		return false
-	}
-	if this.Reporter != that1.Reporter {
-		return false
-	}
-	return true
-}
-func (this *MsgRemoveReporter) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*MsgRemoveReporter)
-	if !ok {
-		that2, ok := that.(MsgRemoveReporter)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.Validator != that1.Validator {
-		return false
-	}
-	if this.Reporter != that1.Reporter {
-		return false
-	}
-	return true
-}
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
@@ -1587,9 +1469,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	// RequestData defines a method for requesting a new request.
+	// RequestData defines a method for submitting a new request.
 	RequestData(ctx context.Context, in *MsgRequestData, opts ...grpc.CallOption) (*MsgRequestDataResponse, error)
-	// ReportData defines a method for reporting a data to resolving the request.
+	// ReportData defines a method for reporting a data to resolve the request.
 	ReportData(ctx context.Context, in *MsgReportData, opts ...grpc.CallOption) (*MsgReportDataResponse, error)
 	// CreateDataSource defines a method for creating a new data source.
 	CreateDataSource(ctx context.Context, in *MsgCreateDataSource, opts ...grpc.CallOption) (*MsgCreateDataSourceResponse, error)
@@ -1601,10 +1483,11 @@ type MsgClient interface {
 	EditOracleScript(ctx context.Context, in *MsgEditOracleScript, opts ...grpc.CallOption) (*MsgEditOracleScriptResponse, error)
 	// Activate defines a method for applying to be an oracle validator.
 	Activate(ctx context.Context, in *MsgActivate, opts ...grpc.CallOption) (*MsgActivateResponse, error)
-	// AddReporter defines a method for adding a new reporter for a validator.
-	AddReporter(ctx context.Context, in *MsgAddReporter, opts ...grpc.CallOption) (*MsgAddReporterResponse, error)
-	// RemoveReporter defines a method for TODO
-	RemoveReporter(ctx context.Context, in *MsgRemoveReporter, opts ...grpc.CallOption) (*MsgRemoveReporterResponse, error)
+	// UpdateParams defines a governance operation for updating the x/oracle module
+	// parameters.
+	//
+	// Since: cosmos-sdk 0.47
+	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 }
 
 type msgClient struct {
@@ -1678,18 +1561,9 @@ func (c *msgClient) Activate(ctx context.Context, in *MsgActivate, opts ...grpc.
 	return out, nil
 }
 
-func (c *msgClient) AddReporter(ctx context.Context, in *MsgAddReporter, opts ...grpc.CallOption) (*MsgAddReporterResponse, error) {
-	out := new(MsgAddReporterResponse)
-	err := c.cc.Invoke(ctx, "/oracle.v1.Msg/AddReporter", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *msgClient) RemoveReporter(ctx context.Context, in *MsgRemoveReporter, opts ...grpc.CallOption) (*MsgRemoveReporterResponse, error) {
-	out := new(MsgRemoveReporterResponse)
-	err := c.cc.Invoke(ctx, "/oracle.v1.Msg/RemoveReporter", in, out, opts...)
+func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error) {
+	out := new(MsgUpdateParamsResponse)
+	err := c.cc.Invoke(ctx, "/oracle.v1.Msg/UpdateParams", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1698,9 +1572,9 @@ func (c *msgClient) RemoveReporter(ctx context.Context, in *MsgRemoveReporter, o
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	// RequestData defines a method for requesting a new request.
+	// RequestData defines a method for submitting a new request.
 	RequestData(context.Context, *MsgRequestData) (*MsgRequestDataResponse, error)
-	// ReportData defines a method for reporting a data to resolving the request.
+	// ReportData defines a method for reporting a data to resolve the request.
 	ReportData(context.Context, *MsgReportData) (*MsgReportDataResponse, error)
 	// CreateDataSource defines a method for creating a new data source.
 	CreateDataSource(context.Context, *MsgCreateDataSource) (*MsgCreateDataSourceResponse, error)
@@ -1712,10 +1586,11 @@ type MsgServer interface {
 	EditOracleScript(context.Context, *MsgEditOracleScript) (*MsgEditOracleScriptResponse, error)
 	// Activate defines a method for applying to be an oracle validator.
 	Activate(context.Context, *MsgActivate) (*MsgActivateResponse, error)
-	// AddReporter defines a method for adding a new reporter for a validator.
-	AddReporter(context.Context, *MsgAddReporter) (*MsgAddReporterResponse, error)
-	// RemoveReporter defines a method for TODO
-	RemoveReporter(context.Context, *MsgRemoveReporter) (*MsgRemoveReporterResponse, error)
+	// UpdateParams defines a governance operation for updating the x/oracle module
+	// parameters.
+	//
+	// Since: cosmos-sdk 0.47
+	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -1743,11 +1618,8 @@ func (*UnimplementedMsgServer) EditOracleScript(ctx context.Context, req *MsgEdi
 func (*UnimplementedMsgServer) Activate(ctx context.Context, req *MsgActivate) (*MsgActivateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Activate not implemented")
 }
-func (*UnimplementedMsgServer) AddReporter(ctx context.Context, req *MsgAddReporter) (*MsgAddReporterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddReporter not implemented")
-}
-func (*UnimplementedMsgServer) RemoveReporter(ctx context.Context, req *MsgRemoveReporter) (*MsgRemoveReporterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveReporter not implemented")
+func (*UnimplementedMsgServer) UpdateParams(ctx context.Context, req *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -1880,38 +1752,20 @@ func _Msg_Activate_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_AddReporter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgAddReporter)
+func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUpdateParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).AddReporter(ctx, in)
+		return srv.(MsgServer).UpdateParams(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/oracle.v1.Msg/AddReporter",
+		FullMethod: "/oracle.v1.Msg/UpdateParams",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).AddReporter(ctx, req.(*MsgAddReporter))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Msg_RemoveReporter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgRemoveReporter)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MsgServer).RemoveReporter(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/oracle.v1.Msg/RemoveReporter",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).RemoveReporter(ctx, req.(*MsgRemoveReporter))
+		return srv.(MsgServer).UpdateParams(ctx, req.(*MsgUpdateParams))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1949,12 +1803,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_Activate_Handler,
 		},
 		{
-			MethodName: "AddReporter",
-			Handler:    _Msg_AddReporter_Handler,
-		},
-		{
-			MethodName: "RemoveReporter",
-			Handler:    _Msg_RemoveReporter_Handler,
+			MethodName: "UpdateParams",
+			Handler:    _Msg_UpdateParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2087,13 +1937,6 @@ func (m *MsgReportData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Reporter) > 0 {
-		i -= len(m.Reporter)
-		copy(dAtA[i:], m.Reporter)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Reporter)))
-		i--
-		dAtA[i] = 0x22
-	}
 	if len(m.Validator) > 0 {
 		i -= len(m.Validator)
 		copy(dAtA[i:], m.Validator)
@@ -2171,12 +2014,19 @@ func (m *MsgCreateDataSource) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Sender)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x3a
 	}
 	if len(m.Owner) > 0 {
 		i -= len(m.Owner)
 		copy(dAtA[i:], m.Owner)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Owner)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Treasury) > 0 {
+		i -= len(m.Treasury)
+		copy(dAtA[i:], m.Treasury)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Treasury)))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -2266,12 +2116,19 @@ func (m *MsgEditDataSource) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Sender)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
 		i--
-		dAtA[i] = 0x3a
+		dAtA[i] = 0x42
 	}
 	if len(m.Owner) > 0 {
 		i -= len(m.Owner)
 		copy(dAtA[i:], m.Owner)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.Owner)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.Treasury) > 0 {
+		i -= len(m.Treasury)
+		copy(dAtA[i:], m.Treasury)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Treasury)))
 		i--
 		dAtA[i] = 0x32
 	}
@@ -2589,7 +2446,7 @@ func (m *MsgActivateResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgAddReporter) Marshal() (dAtA []byte, err error) {
+func (m *MsgUpdateParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2599,34 +2456,37 @@ func (m *MsgAddReporter) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgAddReporter) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgUpdateParams) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgAddReporter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgUpdateParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Reporter) > 0 {
-		i -= len(m.Reporter)
-		copy(dAtA[i:], m.Reporter)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Reporter)))
-		i--
-		dAtA[i] = 0x12
+	{
+		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
 	}
-	if len(m.Validator) > 0 {
-		i -= len(m.Validator)
-		copy(dAtA[i:], m.Validator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Validator)))
+	i--
+	dAtA[i] = 0x12
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgAddReporterResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgUpdateParamsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2636,72 +2496,12 @@ func (m *MsgAddReporterResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgAddReporterResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgUpdateParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgAddReporterResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *MsgRemoveReporter) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *MsgRemoveReporter) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgRemoveReporter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Reporter) > 0 {
-		i -= len(m.Reporter)
-		copy(dAtA[i:], m.Reporter)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Reporter)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Validator) > 0 {
-		i -= len(m.Validator)
-		copy(dAtA[i:], m.Validator)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Validator)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *MsgRemoveReporterResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *MsgRemoveReporterResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *MsgRemoveReporterResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgUpdateParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -2790,10 +2590,6 @@ func (m *MsgReportData) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.Reporter)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
 	return n
 }
 
@@ -2829,6 +2625,10 @@ func (m *MsgCreateDataSource) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTx(uint64(l))
 		}
+	}
+	l = len(m.Treasury)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
 	}
 	l = len(m.Owner)
 	if l > 0 {
@@ -2876,6 +2676,10 @@ func (m *MsgEditDataSource) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTx(uint64(l))
 		}
+	}
+	l = len(m.Treasury)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
 	}
 	l = len(m.Owner)
 	if l > 0 {
@@ -3014,50 +2818,22 @@ func (m *MsgActivateResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgAddReporter) Size() (n int) {
+func (m *MsgUpdateParams) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Validator)
+	l = len(m.Authority)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = len(m.Reporter)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
+	l = m.Params.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
-func (m *MsgAddReporterResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *MsgRemoveReporter) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Validator)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	l = len(m.Reporter)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	return n
-}
-
-func (m *MsgRemoveReporterResponse) Size() (n int) {
+func (m *MsgUpdateParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3513,38 +3289,6 @@ func (m *MsgReportData) Unmarshal(dAtA []byte) error {
 			}
 			m.Validator = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Reporter", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Reporter = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -3779,6 +3523,38 @@ func (m *MsgCreateDataSource) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Treasury", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Treasury = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
 			}
 			var stringLen uint64
@@ -3809,7 +3585,7 @@ func (m *MsgCreateDataSource) Unmarshal(dAtA []byte) error {
 			}
 			m.Owner = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 6:
+		case 7:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
@@ -4094,6 +3870,38 @@ func (m *MsgEditDataSource) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Treasury", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Treasury = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
 			}
 			var stringLen uint64
@@ -4124,7 +3932,7 @@ func (m *MsgEditDataSource) Unmarshal(dAtA []byte) error {
 			}
 			m.Owner = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 7:
+		case 8:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
@@ -5030,7 +4838,7 @@ func (m *MsgActivateResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgAddReporter) Unmarshal(dAtA []byte) error {
+func (m *MsgUpdateParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5053,15 +4861,15 @@ func (m *MsgAddReporter) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgAddReporter: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgUpdateParams: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgAddReporter: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgUpdateParams: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Validator", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5089,13 +4897,13 @@ func (m *MsgAddReporter) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Validator = string(dAtA[iNdEx:postIndex])
+			m.Authority = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Reporter", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Params", wireType)
 			}
-			var stringLen uint64
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowTx
@@ -5105,23 +4913,24 @@ func (m *MsgAddReporter) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthTx
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthTx
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Reporter = string(dAtA[iNdEx:postIndex])
+			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -5144,7 +4953,7 @@ func (m *MsgAddReporter) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgAddReporterResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgUpdateParamsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -5167,174 +4976,10 @@ func (m *MsgAddReporterResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgAddReporterResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgAddReporterResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *MsgRemoveReporter) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRemoveReporter: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRemoveReporter: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Validator", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Validator = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Reporter", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Reporter = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *MsgRemoveReporterResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRemoveReporterResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRemoveReporterResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgUpdateParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

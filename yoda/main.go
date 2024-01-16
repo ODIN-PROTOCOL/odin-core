@@ -6,13 +6,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
 )
@@ -69,7 +68,7 @@ func init() {
 
 func Main() {
 	appConfig := sdk.GetConfig()
-	app.SetBech32AddressPrefixesAndBip44CoinType(appConfig)
+	app.SetBech32AddressPrefixesAndBip44CoinTypeAndSeal(appConfig)
 
 	ctx := &Context{}
 	rootCmd := &cobra.Command{
@@ -92,7 +91,7 @@ func Main() {
 		if err := os.MkdirAll(home, os.ModePerm); err != nil {
 			return err
 		}
-		kb, err = keyring.New("band", keyring.BackendTest, home, nil, cdc)
+		kb, err = keyring.New("odin", keyring.BackendTest, home, nil, cdc)
 		if err != nil {
 			return err
 		}

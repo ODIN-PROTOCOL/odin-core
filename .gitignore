@@ -12,8 +12,4 @@ vendor
 
 **/target/
 /pkg/owasm/res/*.wasm
-#/docker-config/genesis.json
-config.yaml
-
-# Local
-*_local.*
+/docker-config/genesis.json

@@ -1,14 +1,14 @@
 package types
 
 import (
-	connectiontypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
-
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"context"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/authz"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 )
@@ -34,7 +34,10 @@ type BankKeeper interface {
 // StakingKeeper defines the expected staking keeper.
 type StakingKeeper interface {
 	ValidatorByConsAddr(sdk.Context, sdk.ConsAddress) stakingtypes.ValidatorI
-	IterateBondedValidatorsByPower(ctx sdk.Context, fn func(index int64, validator stakingtypes.ValidatorI) (stop bool))
+	IterateBondedValidatorsByPower(
+		ctx sdk.Context,
+		fn func(index int64, validator stakingtypes.ValidatorI) (stop bool),
+	)
 	Validator(ctx sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI
 }
 
@@ -48,13 +51,6 @@ type DistrKeeper interface {
 }
 
 // ChannelKeeper defines the expected IBC channel keeper
-// type ChannelKeeper interface {
-// 	// GetChannel(ctx sdk.Context, srcPort, srcChan string) (channel channeltypes.Channel, found bool)
-// 	// GetNextSequenceSend(ctx sdk.Context, portID, channelID string) (uint64, bool)
-// 	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
-// 	//ChanCloseInit(ctx sdk.Context, portID, channelID string, chanCap *capabilitytypes.Capability) error
-// }
-
 type ChannelKeeper interface {
 	SendPacket(
 		ctx sdk.Context,
@@ -67,22 +63,27 @@ type ChannelKeeper interface {
 	) (sequence uint64, err error)
 }
 
-// ClientKeeper defines the expected IBC client keeper
-type ClientKeeper interface {
-	GetClientConsensusState(ctx sdk.Context, clientID string) (connection ibcexported.ConsensusState, found bool)
-}
-
-// ConnectionKeeper defines the expected IBC connection keeper
-type ConnectionKeeper interface {
-	GetConnection(ctx sdk.Context, connectionID string) (connection connectiontypes.ConnectionEnd, found bool)
-}
-
 // PortKeeper defines the expected IBC port keeper
 type PortKeeper interface {
 	BindPort(ctx sdk.Context, portID string) *capabilitytypes.Capability
 }
 
-// ICS4Wrapper defines the expected ICS4Wrapper for middleware
-type ICS4Wrapper interface {
-	SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error
+// AuthzKeeper defines the expected authz keeper. for query and testing only don't use to create/remove grant on deliver tx
+type AuthzKeeper interface {
+	DispatchActions(ctx sdk.Context, grantee sdk.AccAddress, msgs []sdk.Msg) ([][]byte, error)
+	GetAuthorization(
+		ctx sdk.Context,
+		grantee sdk.AccAddress,
+		granter sdk.AccAddress,
+		msgType string,
+	) (authz.Authorization, *time.Time)
+	GetAuthorizations(ctx sdk.Context, grantee sdk.AccAddress, granter sdk.AccAddress) ([]authz.Authorization, error)
+	SaveGrant(
+		ctx sdk.Context,
+		grantee, granter sdk.AccAddress,
+		authorization authz.Authorization,
+		expiration *time.Time,
+	) error
+	DeleteGrant(ctx sdk.Context, grantee sdk.AccAddress, granter sdk.AccAddress, msgType string) error
+	GranterGrants(c context.Context, req *authz.QueryGranterGrantsRequest) (*authz.QueryGranterGrantsResponse, error)
 }

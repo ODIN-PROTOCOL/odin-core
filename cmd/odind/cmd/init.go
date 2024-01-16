@@ -16,15 +16,14 @@ import (
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	"github.com/cometbft/cometbft/privval"
 	"github.com/cometbft/cometbft/types"
-	"github.com/cosmos/go-bip39"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/go-bip39"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -39,10 +38,10 @@ const (
 )
 
 type printInfo struct {
-	Moniker    string          `json:"moniker" yaml:"moniker"`
-	ChainID    string          `json:"chain_id" yaml:"chain_id"`
-	NodeID     string          `json:"node_id" yaml:"node_id"`
-	GenTxsDir  string          `json:"gentxs_dir" yaml:"gentxs_dir"`
+	Moniker    string          `json:"moniker"     yaml:"moniker"`
+	ChainID    string          `json:"chain_id"    yaml:"chain_id"`
+	NodeID     string          `json:"node_id"     yaml:"node_id"`
+	GenTxsDir  string          `json:"gentxs_dir"  yaml:"gentxs_dir"`
 	AppMessage json.RawMessage `json:"app_message" yaml:"app_message"`
 }
 
@@ -100,7 +99,7 @@ func genFilePVIfNotExists(keyFilePath, stateFilePath string) error {
 	return nil
 }
 
-// InitCmd returns a command that initializes all files needed for Tendermint and BandChain app.
+// InitCmd returns a command that initializes all files needed for Tendermint and OdinChain app.
 func InitCmd(customAppState map[string]json.RawMessage, defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init [moniker]",
@@ -155,23 +154,11 @@ func InitCmd(customAppState map[string]json.RawMessage, defaultNodeHome string) 
 			if !overwrite && tmos.FileExists(genFile) {
 				return fmt.Errorf("genesis.json file already exists: %v", genFile)
 			}
-			// TODO: remove json.*
 			appState, err := json.MarshalIndent(customAppState, "", "")
 			if err != nil {
 				return err
 			}
-
 			genDoc := &types.GenesisDoc{}
-			genDoc.ChainID = chainID
-			genDoc.Validators = nil
-			genDoc.AppState = appState
-			genDoc.ConsensusParams = types.DefaultConsensusParams()
-			// TODO: Revisit max block size
-			// genDoc.ConsensusParams.Block.MaxBytes = 1000000 // 1M bytes
-			genDoc.ConsensusParams.Block.MaxGas = 40000000  // 40M gas
-			genDoc.ConsensusParams.Block.MaxBytes = 3000000 // 3M bytes
-			genDoc.ConsensusParams.Validator.PubKeyTypes = []string{types.ABCIPubKeyTypeSecp256k1, types.ABCIPubKeyTypeEd25519}
-
 			if _, err := os.Stat(genFile); err != nil {
 				if !os.IsNotExist(err) {
 					return err
@@ -182,7 +169,14 @@ func InitCmd(customAppState map[string]json.RawMessage, defaultNodeHome string) 
 					return err
 				}
 			}
+			genDoc.ChainID = chainID
+			genDoc.Validators = nil
+			genDoc.AppState = appState
+			genDoc.ConsensusParams = types.DefaultConsensusParams()
 
+			genDoc.ConsensusParams.Block.MaxBytes = 3000000 // 3M bytes
+			genDoc.ConsensusParams.Block.MaxGas = 50000000  // 50M gas
+			genDoc.ConsensusParams.Validator.PubKeyTypes = []string{types.ABCIPubKeyTypeSecp256k1}
 			if err = genutil.ExportGenesisFile(genDoc, genFile); err != nil {
 				return err
 			}

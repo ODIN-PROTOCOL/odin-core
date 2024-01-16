@@ -5,8 +5,9 @@ import (
 	gz "compress/gzip"
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/pkg/gzip"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ODIN-PROTOCOL/odin-core/pkg/gzip"
 )
 
 func TestUncompress(t *testing.T) {
@@ -21,11 +22,51 @@ func TestUncompress(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, file1, accFile)
 
-	accFile, err = gzip.Uncompress(gzipFile, 2)
+	_, err = gzip.Uncompress(gzipFile, 2)
 	require.Error(t, err)
 
 	_, err = gzip.Uncompress(file1, 999)
 	require.Error(t, err)
+}
+
+func TestCompress(t *testing.T) {
+	bytes := []byte("file")
+	compressedBytes, err := gzip.Compress(bytes)
+	require.Equal(
+		t,
+		[]byte{
+			0x1f,
+			0x8b,
+			0x8,
+			0x0,
+			0x0,
+			0x0,
+			0x0,
+			0x0,
+			0x0,
+			0xff,
+			0x4a,
+			0xcb,
+			0xcc,
+			0x49,
+			0x5,
+			0x4,
+			0x0,
+			0x0,
+			0xff,
+			0xff,
+			0x10,
+			0x36,
+			0x9f,
+			0x8c,
+			0x4,
+			0x0,
+			0x0,
+			0x0,
+		},
+		compressedBytes,
+	)
+	require.NoError(t, err)
 }
 
 func TestIsGzip(t *testing.T) {

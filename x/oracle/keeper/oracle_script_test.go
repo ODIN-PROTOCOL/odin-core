@@ -1,12 +1,13 @@
-package oraclekeeper_test
+package keeper_test
 
 import (
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func TestHasOracleScript(t *testing.T) {
@@ -24,7 +25,7 @@ func TestSetterGetterOracleScript(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// Getting a non-existent oracle script should return error.
 	_, err := k.GetOracleScript(ctx, 42)
-	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrOracleScriptNotFound)
 	require.Panics(t, func() { _ = k.MustGetOracleScript(ctx, 42) })
 	// Creates some basic oracle scripts.
 	oracleScript1 := types.NewOracleScript(
@@ -34,10 +35,8 @@ func TestSetterGetterOracleScript(t *testing.T) {
 		testapp.Bob.Address, "NAME2", "DESCRIPTION2", "FILENAME2", BasicSchema, BasicSourceCodeURL,
 	)
 	// Sets id 42 with oracle script 1 and id 42 with oracle script 2.
-	oracleScript1.ID = 42
-	k.SetOracleScript(ctx, oracleScript1.ID, oracleScript1)
-	oracleScript2.ID = 43
-	k.SetOracleScript(ctx, oracleScript2.ID, oracleScript2)
+	k.SetOracleScript(ctx, 42, oracleScript1)
+	k.SetOracleScript(ctx, 43, oracleScript2)
 	// Checks that Get and MustGet perform correctly.
 	oracleScript1Res, err := k.GetOracleScript(ctx, 42)
 	require.Nil(t, err)
@@ -48,8 +47,7 @@ func TestSetterGetterOracleScript(t *testing.T) {
 	require.Equal(t, oracleScript2, oracleScript2Res)
 	require.Equal(t, oracleScript2, k.MustGetOracleScript(ctx, 43))
 	// Replaces id 42 with another oracle script.
-	oracleScript2.ID = 42
-	k.SetOracleScript(ctx, oracleScript2.ID, oracleScript2)
+	k.SetOracleScript(ctx, 42, oracleScript2)
 	require.NotEqual(t, oracleScript1, k.MustGetOracleScript(ctx, 42))
 	require.Equal(t, oracleScript2, k.MustGetOracleScript(ctx, 42))
 }
@@ -63,9 +61,8 @@ func TestAddEditOracleScriptBasic(t *testing.T) {
 	oracleScript2 := types.NewOracleScript(
 		testapp.Bob.Address, "NAME2", "DESCRIPTION2", "FILENAME2", BasicSchema, BasicSourceCodeURL,
 	)
-	// Adds a new oracle script to the store. We should be able to retreive it back.
+	// Adds a new oracle script to the store. We should be able to retrieve it back.
 	id := k.AddOracleScript(ctx, oracleScript1)
-	oracleScript1.ID = id
 	require.Equal(t, oracleScript1, k.MustGetOracleScript(ctx, id))
 	require.NotEqual(t, oracleScript2, k.MustGetOracleScript(ctx, id))
 	// Edits the oracle script. We should get the updated oracle script.
@@ -77,7 +74,6 @@ func TestAddEditOracleScriptBasic(t *testing.T) {
 			oracleScript2.Schema, oracleScript2.SourceCodeURL,
 		))
 	})
-	oracleScript2.ID = id
 	require.NotEqual(t, oracleScript1, k.MustGetOracleScript(ctx, id))
 	require.Equal(t, oracleScript2, k.MustGetOracleScript(ctx, id))
 }
@@ -92,9 +88,8 @@ func TestAddEditOracleScriptDoNotModify(t *testing.T) {
 		testapp.Bob.Address, types.DoNotModify, types.DoNotModify, "FILENAME2",
 		types.DoNotModify, types.DoNotModify,
 	)
-	// Adds a new oracle script to the store. We should be able to retreive it back.
+	// Adds a new oracle script to the store. We should be able to retrieve it back.
 	id := k.AddOracleScript(ctx, oracleScript1)
-	oracleScript1.ID = id
 	require.Equal(t, oracleScript1, k.MustGetOracleScript(ctx, id))
 	require.NotEqual(t, oracleScript2, k.MustGetOracleScript(ctx, id))
 	// Edits the oracle script. We should get the updated oracle script.
@@ -113,7 +108,7 @@ func TestAddEditOracleScriptDoNotModify(t *testing.T) {
 func TestAddOracleScriptMustReturnCorrectID(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// Initially we expect the oracle script count to be what we have on genesis state.
-	genesisCount := int64(len(testapp.OracleScripts)) - 1
+	genesisCount := uint64(len(testapp.OracleScripts)) - 1
 	require.Equal(t, genesisCount, k.GetOracleScriptCount(ctx))
 	// Every new oracle script we add should return a new ID.
 	id1 := k.AddOracleScript(ctx, types.NewOracleScript(
@@ -126,7 +121,7 @@ func TestAddOracleScriptMustReturnCorrectID(t *testing.T) {
 	))
 	require.Equal(t, types.OracleScriptID(genesisCount+2), id2)
 	// Finally we expect the oracle script to increase as well.
-	require.Equal(t, int64(genesisCount+2), k.GetOracleScriptCount(ctx))
+	require.Equal(t, uint64(genesisCount+2), k.GetOracleScriptCount(ctx))
 }
 
 func TestEditNonExistentOracleScript(t *testing.T) {
@@ -161,5 +156,5 @@ func TestAddOracleScriptFile(t *testing.T) {
 	require.Equal(t, types.DoNotModify, filename)
 	// We should not be able to add a non-wasm file.
 	_, err = k.AddOracleScriptFile([]byte("code"))
-	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrOwasmCompilation)
 }

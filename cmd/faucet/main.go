@@ -30,8 +30,7 @@ type Faucet struct {
 
 func main() {
 	appConfig := sdk.GetConfig()
-	odin.SetBech32AddressPrefixesAndBip44CoinType(appConfig)
-	appConfig.Seal()
+	odin.SetBech32AddressPrefixesAndBip44CoinTypeAndSeal(appConfig)
 
 	rootCmd := &cobra.Command{
 		Use:   "faucet",

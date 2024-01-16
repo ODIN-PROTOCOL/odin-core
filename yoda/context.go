@@ -5,12 +5,11 @@ import (
 	"time"
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
-
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	"github.com/ODIN-PROTOCOL/odin-core/yoda/executor"
 )
 
@@ -23,7 +22,7 @@ type FeeEstimationData struct {
 }
 
 type ReportMsgWithKey struct {
-	msg               *oracletypes.MsgReportData
+	msg               *types.MsgReportData
 	execVersion       []string
 	keyIndex          int64
 	feeEstimationData FeeEstimationData
@@ -45,7 +44,7 @@ type Context struct {
 	freeKeys           chan int64
 	keyRoundRobinIndex int64 // Must use in conjunction with sync/atomic
 
-	pendingRequests map[oracletypes.RequestID]bool
+	pendingRequests map[types.RequestID]bool
 
 	metricsEnabled bool
 	handlingGauge  int64

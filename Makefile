@@ -3,30 +3,48 @@ VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
 BINDIR ?= $(GOPATH)/bin
-DOCKER := docker
-DOCKER_BUF := docker run --rm -v $(cwd):/workspace --workdir /workspace bufbuild/buf
+
+DOCKER := $(shell which docker)
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
+
+export GO111MODULE = on
 
 DEB_BIN_DIR ?= /usr/local/bin
 DEB_LIB_DIR ?= /usr/lib
 
+build_tags = netgo
 ifeq ($(LEDGER_ENABLED),true)
 	build_tags += ledger
 endif
 
+build_tags += $(BUILD_TAGS)
+build_tags := $(strip $(build_tags))
+
+whitespace :=
+empty = $(whitespace) $(whitespace)
+comma := ,
+build_tags_comma_sep := $(subst $(empty),$(comma),$(build_tags))
+
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=odinchain \
-	-X github.com/cosmos/cosmos-sdk/version.ServerName=odind \
+	-X github.com/cosmos/cosmos-sdk/version.AppName=odind \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags)"
+	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
+ldflags += $(LDFLAGS)
+ldflags := $(strip $(ldflags))
+
+BUILD_FLAGS := -tags "$(build_tags_comma_sep)" -ldflags '$(ldflags)'
 
 all: install
 
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
-	
+
 install-yoda: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
 
@@ -84,7 +102,6 @@ proto-swagger-gen:
 proto-format:
 	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
 
-# This generates the SDK's custom wrapper for google.protobuf.Any. It should only be run manually when needed
 proto-gen-any:
 	$(DOCKER) run --rm -v $(pwd):/workspace --workdir /workspace tendermintdev/sdk-proto-gen sh ./scripts/protocgen-any.sh
 
@@ -93,24 +110,6 @@ proto-lint:
 
 proto-check-breaking:
 	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=main
-
-
-TM_URL              = https://raw.githubusercontent.com/cometbft/cometbft/v0.37.4/proto/tendermint
-
-GOGO_PROTO_URL      = https://raw.githubusercontent.com/regen-network/protobuf/cosmos
-COSMOS_PROTO_URL    = https://raw.githubusercontent.com/regen-network/cosmos-proto/master
-CONFIO_URL          = https://raw.githubusercontent.com/cosmos/ics23/master/proto/cosmos/ics23/v1
-IBC_URL 			= https://raw.githubusercontent.com/cosmos/ibc-go/v7.3.1/proto
-TM_CRYPTO_TYPES     = third_party/proto/tendermint/crypto
-TM_ABCI_TYPES       = third_party/proto/tendermint/abci
-TM_TYPES            = third_party/proto/tendermint/types
-TM_VERSION          = third_party/proto/tendermint/version
-TM_LIBS             = third_party/proto/tendermint/libs/bits
-TM_P2P              = third_party/proto/tendermint/p2p
-
-GOGO_PROTO_TYPES    = third_party/proto/gogoproto
-COSMOS_PROTO_TYPES  = third_party/proto/cosmos_proto
-CONFIO_TYPES        = third_party/proto/confio
 
 deb:
 	rm -rf /tmp/GeoDB
@@ -137,41 +136,4 @@ deb:
 	-rm -rf /tmp/GeoDB
 	cp ./odinprotocol_$(VERSION)_amd64.deb ./odinprotocol_v$(VERSION)_amd64.deb
 
-proto-update-deps:
-	# @mkdir -p $(GOGO_PROTO_TYPES)
-	# @curl -sSL $(GOGO_PROTO_URL)/gogoproto/gogo.proto > $(GOGO_PROTO_TYPES)/gogo_1.proto
-
-	# @mkdir -p $(COSMOS_PROTO_TYPES)
-	# @curl -sSL $(COSMOS_PROTO_URL)/cosmos.proto > $(COSMOS_PROTO_TYPES)/cosmos.proto
-
-## Importing of cometbft protobuf definitions currently requires the
-## use of `sed` in order to build properly with cosmos-sdk's proto file layout
-## (which is the standard Buf.build FILE_LAYOUT)
-## Issue link: https://github.com/cometbft/cometbft/issues/5021
-	# @mkdir -p $(TM_ABCI_TYPES)
-	# @curl -sSL $(TM_URL)/abci/types.proto > $(TM_ABCI_TYPES)/types.proto
-
-	# @mkdir -p $(TM_VERSION)
-	# @curl -sSL $(TM_URL)/version/types.proto > $(TM_VERSION)/types.proto
-
-	# @mkdir -p $(TM_TYPES)
-	# @curl -sSL $(TM_URL)/types/types.proto > $(TM_TYPES)/types.proto
-	# @curl -sSL $(TM_URL)/types/evidence.proto > $(TM_TYPES)/evidence.proto
-	# @curl -sSL $(TM_URL)/types/params.proto > $(TM_TYPES)/params.proto
-	# @curl -sSL $(TM_URL)/types/validator.proto > $(TM_TYPES)/validator.proto
-	# @curl -sSL $(TM_URL)/types/block.proto > $(TM_TYPES)/block.proto
-
-	# @mkdir -p $(TM_CRYPTO_TYPES)
-	# @curl -sSL $(TM_URL)/crypto/proof.proto > $(TM_CRYPTO_TYPES)/proof.proto
-	# @curl -sSL $(TM_URL)/crypto/keys.proto > $(TM_CRYPTO_TYPES)/keys.proto
-
-	# @mkdir -p $(TM_LIBS)
-	# @curl -sSL $(TM_URL)/libs/bits/types.proto > $(TM_LIBS)/types.proto
-
-	# @mkdir -p $(TM_P2P)
-	# @curl -sSL $(TM_URL)/p2p/types.proto > $(TM_P2P)/types.proto
-
-	@mkdir -p $(CONFIO_TYPES)
-	@curl -sSL $(CONFIO_URL)/proofs.proto > $(CONFIO_TYPES)/proofs.proto
-
-.PHONY: proto-all proto-gen proto-gen-any proto-swagger-gen proto-format proto-lint proto-check-breaking proto-update-deps
+.PHONY: proto-all proto-gen proto-swagger-gen proto-format proto-gen-any proto-lint proto-check-breaking

@@ -1,13 +1,11 @@
-package oraclekeeper
+package keeper
 
 import (
 	"time"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-
-	distr "github.com/cosmos/cosmos-sdk/x/distribution/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -26,10 +24,6 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) {
 	totalPower := int64(0)
 	for _, vote := range previousVotes {
 		val := k.stakingKeeper.ValidatorByConsAddr(ctx, vote.Validator.Address)
-		if val == nil {
-			continue
-		}
-
 		if k.GetValidatorStatus(ctx, val.GetOperator()).IsActive {
 			toReward = append(toReward, valWithPower{val: val, power: vote.Validator.Power})
 			totalPower += vote.Validator.Power
@@ -39,13 +33,13 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) {
 		// No active validators performing oracle tasks, nothing needs to be done here.
 		return
 	}
-	feeCollector := k.authKeeper.GetModuleAccount(ctx, k.feeCollectorName)
-	totalFee := sdk.NewDecCoinsFromCoins(k.bankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())...)
+	feeCollector := k.AuthKeeper.GetModuleAccount(ctx, k.feeCollectorName)
+	totalFee := sdk.NewDecCoinsFromCoins(k.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())...)
 	// Compute the fee allocated for oracle module to distribute to active validators.
-	oracleRewardRatio := sdk.NewDecWithPrec(int64(k.GetParamUint64(ctx, types.KeyOracleRewardPercentage)), 2)
+	oracleRewardRatio := sdk.NewDecWithPrec(int64(k.GetParams(ctx).OracleRewardPercentage), 2)
 	oracleRewardInt, _ := totalFee.MulDecTruncate(oracleRewardRatio).TruncateDecimal()
 	// Transfer the oracle reward portion from fee collector to distr module.
-	err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, k.feeCollectorName, distr.ModuleName, oracleRewardInt)
+	err := k.BankKeeper.SendCoinsFromModuleToModule(ctx, k.feeCollectorName, distr.ModuleName, oracleRewardInt)
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +84,7 @@ func (k Keeper) Activate(ctx sdk.Context, val sdk.ValAddress) error {
 	if status.IsActive {
 		return types.ErrValidatorAlreadyActive
 	}
-	penaltyDuration := time.Duration(k.GetParamUint64(ctx, types.KeyInactivePenaltyDuration))
+	penaltyDuration := time.Duration(k.GetParams(ctx).InactivePenaltyDuration)
 	if !status.Since.IsZero() && status.Since.Add(penaltyDuration).After(ctx.BlockHeader().Time) {
 		return types.ErrTooSoonToActivate
 	}

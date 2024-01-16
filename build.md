@@ -2,7 +2,7 @@
 
 ## Building the `odin` application
 
-If you want to build the `odin` application in this repo to see the functionalities, **Go 1.18.0+** is required .
+If you want to build the `odin` application in this repo to see the functionalities, **Go 1.19.0+** is required .
 
 Add some parameters to environment is necessary if you have never used the `go mod` before.
 
@@ -21,7 +21,9 @@ Now, you can install and run the application.
 # Clone the source of the tutorial repository
 git clone https://github.com/ODIN-PROTOCOL/odin-core
 cd odin-core
+```
 
+```bash
 # Install the app into your $GOBIN
 make install
 
@@ -32,7 +34,7 @@ odind help
 
 ## Running test application locally
 
-You can use the following script to generate a test environment to run BandChain locally. This will create the default genesis file with one validator, as well as some test accounts.
+You can use the following script to generate a test environment to run OdinChain locally. This will create the default genesis file with one validator, as well as some test accounts.
 
 ```bash
 ./scripts/generate_genesis.sh
@@ -43,8 +45,8 @@ cp ./docker-config/single-validator/node_key.json ~/.odin/config/node_key.json
 Once done, you can optionally add data sources or oracle scripts to the genesis file using `odind`.
 
 ```bash
-odind add-data-source ...
-odind add-oracle-script ...
+odind genesis add-data-source ...
+odind genesis add-oracle-script ...
 ```
 
 You can now start the chain with `odind`.

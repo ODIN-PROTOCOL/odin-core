@@ -1,77 +1,93 @@
-package oraclekeeper
+package keeper
 
 import (
-	"github.com/pkg/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasReport checks if the report of this ID triple exists in the storage.
-func (k Keeper) HasReport(ctx sdk.Context, rid oracletypes.RequestID, val sdk.ValAddress) bool {
-	return ctx.KVStore(k.storeKey).Has(oracletypes.ReportsOfValidatorPrefixKey(rid, val))
+func (k Keeper) HasReport(ctx sdk.Context, rid types.RequestID, val sdk.ValAddress) bool {
+	return ctx.KVStore(k.storeKey).Has(types.ReportsOfValidatorPrefixKey(rid, val))
 }
 
-// SetReport saves the report to the storage without performing validation.
-func (k Keeper) SetReport(ctx sdk.Context, rid oracletypes.RequestID, rep oracletypes.Report) {
+// SetDataReport saves the report to the storage without performing validation.
+func (k Keeper) SetReport(ctx sdk.Context, rid types.RequestID, rep types.Report) {
 	val, _ := sdk.ValAddressFromBech32(rep.Validator)
-	key := oracletypes.ReportsOfValidatorPrefixKey(rid, val)
+	key := types.ReportsOfValidatorPrefixKey(rid, val)
 	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(&rep))
 }
 
-// AddReport performs sanity checks and adds a new batch from one validator to one request
+// AddReports performs sanity checks and adds a new batch from one validator to one request
 // to the store. Note that we expect each validator to report to all raw data requests at once.
-func (k Keeper) AddReport(ctx sdk.Context, rid oracletypes.RequestID, rep oracletypes.Report) error {
+func (k Keeper) AddReport(
+	ctx sdk.Context,
+	rid types.RequestID,
+	val sdk.ValAddress,
+	reportInTime bool,
+	rawReports []types.RawReport,
+) error {
+	if err := k.CheckValidReport(ctx, rid, val, rawReports); err != nil {
+		return err
+	}
+	k.SetReport(ctx, rid, types.NewReport(val, reportInTime, rawReports))
+	return nil
+}
+
+func (k Keeper) CheckValidReport(
+	ctx sdk.Context,
+	rid types.RequestID,
+	val sdk.ValAddress,
+	rawReports []types.RawReport,
+) error {
 	req, err := k.GetRequest(ctx, rid)
 	if err != nil {
 		return err
 	}
-	val, err := sdk.ValAddressFromBech32(rep.Validator)
-	if err != nil {
-		return err
-	}
-	reqVals := make([]sdk.ValAddress, len(req.RequestedValidators))
-	for idx, reqVal := range req.RequestedValidators {
+	found := false
+	for _, reqVal := range req.RequestedValidators {
 		v, err := sdk.ValAddressFromBech32(reqVal)
 		if err != nil {
 			return err
 		}
-		reqVals[idx] = v
+		if v.Equals(val) {
+			found = true
+			break
+		}
 	}
-	if !ContainsVal(reqVals, val) {
+	if !found {
 		return sdkerrors.Wrapf(
-			oracletypes.ErrValidatorNotRequested, "reqID: %d, val: %s", rid, rep.Validator)
+			types.ErrValidatorNotRequested, "reqID: %d, val: %s", rid, val.String())
 	}
 	if k.HasReport(ctx, rid, val) {
 		return sdkerrors.Wrapf(
-			oracletypes.ErrValidatorAlreadyReported, "reqID: %d, val: %s", rid, rep.Validator)
+			types.ErrValidatorAlreadyReported, "reqID: %d, val: %s", rid, val.String())
 	}
-	if len(rep.RawReports) != len(req.RawRequests) {
-		return oracletypes.ErrInvalidReportSize
+	if len(rawReports) != len(req.RawRequests) {
+		return types.ErrInvalidReportSize
 	}
-	for _, rep := range rep.RawReports {
+	for _, rep := range rawReports {
 		// Here we can safely assume that external IDs are unique, as this has already been
 		// checked by ValidateBasic performed in baseapp's runTx function.
 		if !ContainsEID(req.RawRequests, rep.ExternalID) {
 			return sdkerrors.Wrapf(
-				oracletypes.ErrRawRequestNotFound, "reqID: %d, extID: %d", rid, rep.ExternalID)
+				types.ErrRawRequestNotFound, "reqID: %d, extID: %d", rid, rep.ExternalID)
 		}
 	}
-	k.SetReport(ctx, rid, rep)
 	return nil
 }
 
 // GetReportIterator returns the iterator for all reports of the given request ID.
-func (k Keeper) GetReportIterator(ctx sdk.Context, rid oracletypes.RequestID) sdk.Iterator {
-	return sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), oracletypes.ReportStoreKey(rid))
+func (k Keeper) GetReportIterator(ctx sdk.Context, rid types.RequestID) sdk.Iterator {
+	return sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.ReportStoreKey(rid))
 }
 
 // GetReportCount returns the number of reports for the given request ID.
-func (k Keeper) GetReportCount(ctx sdk.Context, rid oracletypes.RequestID) (count uint64) {
+func (k Keeper) GetReportCount(ctx sdk.Context, rid types.RequestID) (count uint64) {
 	iterator := k.GetReportIterator(ctx, rid)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
@@ -80,12 +96,12 @@ func (k Keeper) GetReportCount(ctx sdk.Context, rid oracletypes.RequestID) (coun
 	return count
 }
 
-// GetRequestReports returns all reports for the given request ID, or nil if there is none.
-func (k Keeper) GetRequestReports(ctx sdk.Context, rid oracletypes.RequestID) (reports []oracletypes.Report) {
+// GetReports returns all reports for the given request ID, or nil if there is none.
+func (k Keeper) GetReports(ctx sdk.Context, rid types.RequestID) (reports []types.Report) {
 	iterator := k.GetReportIterator(ctx, rid)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var rep oracletypes.Report
+		var rep types.Report
 		k.cdc.MustUnmarshal(iterator.Value(), &rep)
 		reports = append(reports, rep)
 	}
@@ -95,11 +111,11 @@ func (k Keeper) GetRequestReports(ctx sdk.Context, rid oracletypes.RequestID) (r
 // GetPaginatedRequestReports returns all reports for the given request ID with pagination.
 func (k Keeper) GetPaginatedRequestReports(
 	ctx sdk.Context,
-	rid oracletypes.RequestID,
+	rid types.RequestID,
 	limit, offset uint64,
-) ([]oracletypes.Report, *query.PageResponse, error) {
-	reports := make([]oracletypes.Report, 0)
-	reportsStore := prefix.NewStore(ctx.KVStore(k.storeKey), oracletypes.ReportStoreKey(rid))
+) ([]types.Report, *query.PageResponse, error) {
+	reports := make([]types.Report, 0)
+	reportsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ReportStoreKey(rid))
 	pagination := &query.PageRequest{
 		Limit:  limit,
 		Offset: offset,
@@ -109,7 +125,7 @@ func (k Keeper) GetPaginatedRequestReports(
 		reportsStore,
 		pagination,
 		func(key []byte, value []byte, accumulate bool) (bool, error) {
-			var report oracletypes.Report
+			var report types.Report
 			if err := k.cdc.Unmarshal(value, &report); err != nil {
 				return false, err
 			}
@@ -127,7 +143,7 @@ func (k Keeper) GetPaginatedRequestReports(
 }
 
 // DeleteReports removes all reports for the given request ID.
-func (k Keeper) DeleteReports(ctx sdk.Context, rid oracletypes.RequestID) {
+func (k Keeper) DeleteReports(ctx sdk.Context, rid types.RequestID) {
 	var keys [][]byte
 	iterator := k.GetReportIterator(ctx, rid)
 	defer iterator.Close()

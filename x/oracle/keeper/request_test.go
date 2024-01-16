@@ -1,13 +1,14 @@
-package oraclekeeper_test
+package keeper_test
 
 import (
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
-	keeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func testRequest(
@@ -62,9 +63,7 @@ func TestSetterGetterRequest(t *testing.T) {
 	require.Panics(t, func() { _ = k.MustGetRequest(ctx, 42) })
 	// Creates some basic requests.
 	req1 := types.NewRequest(1, BasicCalldata, nil, 1, 1, testapp.ParseTime(0), "", nil, nil, 0)
-	req1.ID = 42
 	req2 := types.NewRequest(2, BasicCalldata, nil, 1, 1, testapp.ParseTime(0), "", nil, nil, 0)
-	req2.ID = 43
 	// Sets id 42 with request 1 and id 42 with request 2.
 	k.SetRequest(ctx, 42, req1)
 	k.SetRequest(ctx, 43, req2)
@@ -79,7 +78,6 @@ func TestSetterGetterRequest(t *testing.T) {
 	require.Equal(t, req2, k.MustGetRequest(ctx, 43))
 	// Replaces id 42 with another request.
 	k.SetRequest(ctx, 42, req2)
-	req2.ID = 42
 	require.NotEqual(t, req1, k.MustGetRequest(ctx, 42))
 	require.Equal(t, req2, k.MustGetRequest(ctx, 42))
 }
@@ -156,13 +154,14 @@ func TestProcessExpiredRequests(t *testing.T) {
 
 	// Validator 1 reports all requests. Validator 2 misses request#3.
 	rawReports := []types.RawReport{types.NewRawReport(42, 0, BasicReport), types.NewRawReport(43, 0, BasicReport)}
-	k.AddReport(ctx, 1, types.NewReport(testapp.Validators[0].ValAddress, false, rawReports))
-	k.AddReport(ctx, 2, types.NewReport(testapp.Validators[0].ValAddress, true, rawReports))
-	k.AddReport(ctx, 3, types.NewReport(testapp.Validators[0].ValAddress, false, rawReports))
-	k.AddReport(ctx, 4, types.NewReport(testapp.Validators[0].ValAddress, true, rawReports))
-	k.AddReport(ctx, 1, types.NewReport(testapp.Validators[1].ValAddress, true, rawReports))
-	k.AddReport(ctx, 2, types.NewReport(testapp.Validators[1].ValAddress, true, rawReports))
-	k.AddReport(ctx, 4, types.NewReport(testapp.Validators[1].ValAddress, true, rawReports))
+	k.AddReport(ctx, 1, testapp.Validators[0].ValAddress, false, rawReports)
+	k.AddReport(ctx, 2, testapp.Validators[0].ValAddress, true, rawReports)
+	k.AddReport(ctx, 3, testapp.Validators[0].ValAddress, false, rawReports)
+	k.AddReport(ctx, 4, testapp.Validators[0].ValAddress, true, rawReports)
+	k.AddReport(ctx, 1, testapp.Validators[1].ValAddress, true, rawReports)
+	k.AddReport(ctx, 2, testapp.Validators[1].ValAddress, true, rawReports)
+	k.AddReport(ctx, 4, testapp.Validators[1].ValAddress, true, rawReports)
+
 	// Request 1, 2 and 4 gets resolved. Request 3 does not.
 	k.ResolveSuccess(ctx, 1, BasicResult, 1234)
 	k.ResolveFailure(ctx, 2, "ARBITRARY_REASON")
@@ -177,6 +176,10 @@ func TestProcessExpiredRequests(t *testing.T) {
 	require.Equal(t, types.RequestID(0), k.GetRequestLastExpired(ctx))
 	require.True(t, k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress).IsActive)
 	require.True(t, k.GetValidatorStatus(ctx, testapp.Validators[1].ValAddress).IsActive)
+	testRequest(t, k, ctx, types.RequestID(1), types.RESOLVE_STATUS_SUCCESS, 2, true)
+	testRequest(t, k, ctx, types.RequestID(2), types.RESOLVE_STATUS_FAILURE, 2, true)
+	testRequest(t, k, ctx, types.RequestID(3), types.RESOLVE_STATUS_OPEN, 1, true)
+	testRequest(t, k, ctx, types.RequestID(4), types.RESOLVE_STATUS_SUCCESS, 2, true)
 
 	// At block 8, now last request ID should move to 1. No events should be emitted.
 	ctx = ctx.WithBlockHeight(8).WithBlockTime(testapp.ParseTime(8000)).WithEventManager(sdk.NewEventManager())
@@ -185,6 +188,10 @@ func TestProcessExpiredRequests(t *testing.T) {
 	require.Equal(t, types.RequestID(1), k.GetRequestLastExpired(ctx))
 	require.True(t, k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress).IsActive)
 	require.True(t, k.GetValidatorStatus(ctx, testapp.Validators[1].ValAddress).IsActive)
+	testRequest(t, k, ctx, types.RequestID(1), types.RESOLVE_STATUS_SUCCESS, 0, false)
+	testRequest(t, k, ctx, types.RequestID(2), types.RESOLVE_STATUS_FAILURE, 2, true)
+	testRequest(t, k, ctx, types.RequestID(3), types.RESOLVE_STATUS_OPEN, 1, true)
+	testRequest(t, k, ctx, types.RequestID(4), types.RESOLVE_STATUS_SUCCESS, 2, true)
 
 	// At block 9, request#3 is expired and validator 2 becomes inactive.
 	ctx = ctx.WithBlockHeight(9).WithBlockTime(testapp.ParseTime(9000)).WithEventManager(sdk.NewEventManager())
@@ -205,16 +212,28 @@ func TestProcessExpiredRequests(t *testing.T) {
 		3, 1, int64(req3.RequestTime), testapp.ParseTime(9000).Unix(),
 		types.RESOLVE_STATUS_EXPIRED, nil,
 	), k.MustGetResult(ctx, 3))
+	testRequest(t, k, ctx, types.RequestID(1), types.RESOLVE_STATUS_SUCCESS, 0, false)
+	testRequest(t, k, ctx, types.RequestID(2), types.RESOLVE_STATUS_FAILURE, 0, false)
+	testRequest(t, k, ctx, types.RequestID(3), types.RESOLVE_STATUS_EXPIRED, 0, false)
+	testRequest(t, k, ctx, types.RequestID(4), types.RESOLVE_STATUS_SUCCESS, 2, true)
 
 	// At block 10, nothing should happen
 	ctx = ctx.WithBlockHeight(10).WithBlockTime(testapp.ParseTime(10000)).WithEventManager(sdk.NewEventManager())
 	k.ProcessExpiredRequests(ctx)
 	require.Equal(t, sdk.Events{}, ctx.EventManager().Events())
 	require.Equal(t, types.RequestID(3), k.GetRequestLastExpired(ctx))
+	testRequest(t, k, ctx, types.RequestID(1), types.RESOLVE_STATUS_SUCCESS, 0, false)
+	testRequest(t, k, ctx, types.RequestID(2), types.RESOLVE_STATUS_FAILURE, 0, false)
+	testRequest(t, k, ctx, types.RequestID(3), types.RESOLVE_STATUS_EXPIRED, 0, false)
+	testRequest(t, k, ctx, types.RequestID(4), types.RESOLVE_STATUS_SUCCESS, 2, true)
 
 	// At block 13, last expired request becomes 4.
 	ctx = ctx.WithBlockHeight(13).WithBlockTime(testapp.ParseTime(13000)).WithEventManager(sdk.NewEventManager())
 	k.ProcessExpiredRequests(ctx)
 	require.Equal(t, sdk.Events{}, ctx.EventManager().Events())
 	require.Equal(t, types.RequestID(4), k.GetRequestLastExpired(ctx))
+	testRequest(t, k, ctx, types.RequestID(1), types.RESOLVE_STATUS_SUCCESS, 0, false)
+	testRequest(t, k, ctx, types.RequestID(2), types.RESOLVE_STATUS_FAILURE, 0, false)
+	testRequest(t, k, ctx, types.RequestID(3), types.RESOLVE_STATUS_EXPIRED, 0, false)
+	testRequest(t, k, ctx, types.RequestID(4), types.RESOLVE_STATUS_SUCCESS, 0, false)
 }

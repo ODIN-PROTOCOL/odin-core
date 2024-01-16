@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	_ RequestSpec = &OracleRequestPacketData{}
 	_ RequestSpec = &MsgRequestData{}
+	_ RequestSpec = &OracleRequestPacketData{}
 )
 
 // RequestSpec captures the essence of what it means to be a request-making object.
@@ -61,7 +61,7 @@ func NewRequest(
 		RequestedValidators: requestedVals,
 		MinCount:            minCount,
 		RequestHeight:       requestHeight,
-		RequestTime:         uint64(requestTime.Unix()),
+		RequestTime:         requestTime.Unix(),
 		ClientID:            clientID,
 		RawRequests:         rawRequests,
 		IBCChannel:          ibcChannel,

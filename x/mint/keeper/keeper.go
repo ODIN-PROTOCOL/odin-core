@@ -1,54 +1,59 @@
 package keeper
 
 import (
+	"cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 
+	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-
-	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
 
 // Keeper of the mint store
 type Keeper struct {
 	cdc              codec.BinaryCodec
 	storeKey         storetypes.StoreKey
-	paramSpace       paramtypes.Subspace
 	stakingKeeper    minttypes.StakingKeeper
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
 	feeCollectorName string
+
+	// the address capable of executing a MsgUpdateParams message. Typically, this
+	// should be the x/gov module account.
+	authority string
 }
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace,
-	sk minttypes.StakingKeeper, ak minttypes.AccountKeeper, bk minttypes.BankKeeper,
+	cdc codec.BinaryCodec,
+	key storetypes.StoreKey,
+	sk minttypes.StakingKeeper,
+	ak minttypes.AccountKeeper,
+	bk minttypes.BankKeeper,
 	feeCollectorName string,
+	authority string,
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
 		panic("the mint module account has not been set")
 	}
 
-	// set KeyTable if it has not already been set
-	if !paramSpace.HasKeyTable() {
-		paramSpace = paramSpace.WithKeyTable(minttypes.ParamKeyTable())
-	}
-
 	return Keeper{
 		cdc:              cdc,
 		storeKey:         key,
-		paramSpace:       paramSpace,
 		stakingKeeper:    sk,
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
+		authority:        authority,
 	}
+}
+
+// GetAuthority returns the x/mint module's authority.
+func (k Keeper) GetAuthority() string {
+	return k.authority
 }
 
 // Logger returns a module-specific logger.
@@ -112,13 +117,27 @@ func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
 
 // GetParams returns the total set of minting parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params minttypes.Params) {
-	k.paramSpace.GetParamSet(ctx, &params)
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(minttypes.ParamsKey)
+	if bz == nil {
+		return params
+	}
+
+	k.cdc.MustUnmarshal(bz, &params)
 	return params
 }
 
 // SetParams sets the total set of minting parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params minttypes.Params) {
-	k.paramSpace.SetParamSet(ctx, &params)
+func (k Keeper) SetParams(ctx sdk.Context, params minttypes.Params) error {
+	if err := params.Validate(); err != nil {
+		return err
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	bz := k.cdc.MustMarshal(&params)
+	store.Set(minttypes.ParamsKey, bz)
+
+	return nil
 }
 
 // GetMintAccount returns the mint ModuleAccount
@@ -184,7 +203,7 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 	mintPool := k.GetMintPool(ctx)
 
 	if amount.IsAllGT(mintPool.TreasuryPool) {
-		return sdkerrors.Wrapf(
+		return errors.Wrapf(
 			minttypes.ErrWithdrawalAmountExceedsModuleBalance,
 			"withdrawal amount: %s exceeds %s module balance",
 			amount.String(),
@@ -193,7 +212,7 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 	}
 
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, receiver, amount); err != nil {
-		return sdkerrors.Wrapf(
+		return errors.Wrapf(
 			err,
 			"failed to withdraw %s from %s module account",
 			amount.String(),
@@ -250,7 +269,7 @@ func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 	minter := k.GetMinter(ctx)
 
 	if err := k.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
-		return sdkerrors.Wrapf(
+		return errors.Wrapf(
 			err,
 			"failed to mint %s new coins",
 			amount.String(),

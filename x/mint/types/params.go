@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/errors"
+	"sigs.k8s.io/yaml"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
@@ -132,20 +134,8 @@ func (p Params) Validate() error {
 
 // String implements the Stringer interface.
 func (p Params) String() string {
-	return fmt.Sprintf(`Minting Params:
-  Mint Denom:             	%s
-  Inflation Rate Change:  	%s
-  Inflation Max:          	%s
-  Inflation Min:          	%s
-  Goal Bonded:            	%s
-  Blocks Per Year:        	%d
-  Integration Addresses: 	%s
-  Max Withdrawal Per Time:	%s
-  Eligible Accounts Pool: 	%s
-`,
-		p.MintDenom, p.InflationRateChange, p.InflationMax, p.InflationMin, p.GoalBonded,
-		p.BlocksPerYear, p.IntegrationAddresses, p.MaxWithdrawalPerTime, p.EligibleAccountsPool,
-	)
+	out, _ := yaml.Marshal(p)
+	return string(out)
 }
 
 // Implements params.ParamSet
@@ -174,7 +164,7 @@ func validateMintDenom(i interface{}) error {
 	}
 
 	if strings.TrimSpace(v) == "" {
-		return sdkerrors.Wrap(ErrInvalidMintDenom, "mint denom cannot be blank")
+		return errors.Wrap(ErrInvalidMintDenom, "mint denom cannot be blank")
 	}
 	if err := sdk.ValidateDenom(v); err != nil {
 		return err
