@@ -17,14 +17,14 @@ type BaseEnv struct {
 	maxSpanSize int64
 }
 
-// GetCalldata implements Owasm ExecEnv interface.
-func (env *BaseEnv) GetCalldata() []byte {
-	return env.request.Calldata
-}
-
 // GetSpanSize implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetSpanSize() int64 {
 	return env.maxSpanSize
+}
+
+// GetCalldata implements Owasm ExecEnv interface.
+func (env *BaseEnv) GetCalldata() []byte {
+	return env.request.Calldata
 }
 
 // SetReturnData implements Owasm ExecEnv interface.

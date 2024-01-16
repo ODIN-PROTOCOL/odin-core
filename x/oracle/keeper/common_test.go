@@ -1,4 +1,4 @@
-package oraclekeeper_test
+package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,7 +15,7 @@ var (
 	BasicReport        = []byte("BASIC_REPORT")
 	BasicResult        = []byte("BASIC_RESULT")
 	CoinsZero          = sdk.NewCoins()
-	Coins10odin        = sdk.NewCoins(sdk.NewInt64Coin("odin", 10))
-	Coins20odin        = sdk.NewCoins(sdk.NewInt64Coin("odin", 20))
-	Coins1000000odin   = sdk.NewCoins(sdk.NewInt64Coin("odin", 1000000))
+	Coins10loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 10))
+	Coins20loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 20))
+	Coins1000000loki   = sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000))
 )

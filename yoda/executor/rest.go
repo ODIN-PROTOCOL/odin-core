@@ -41,6 +41,7 @@ func (e *RestExec) Exec(code []byte, arg string, env interface{}) (ExecResult, e
 			RequestTimeout: e.timeout,
 		},
 	)
+
 	if err != nil {
 		urlErr, ok := err.(*url.Error)
 		if !ok || !urlErr.Timeout() {

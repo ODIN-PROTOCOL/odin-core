@@ -1,13 +1,14 @@
-package oraclekeeper
+package keeper
 
 import (
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
+// OnRecvPacket processes a cross chain oracle request. Data source fees
+// are collected from the relayer account.
 func (k Keeper) OnRecvPacket(
 	ctx sdk.Context,
 	packet channeltypes.Packet,
@@ -17,7 +18,7 @@ func (k Keeper) OnRecvPacket(
 	if err := data.ValidateBasic(); err != nil {
 		return 0, err
 	}
-	ibcSource := types.NewIBCChannel(packet.DestinationPort, packet.DestinationChannel)
+	ibcChannel := types.NewIBCChannel(packet.DestinationPort, packet.DestinationChannel)
 
-	return k.PrepareRequest(ctx, &data, relayer, &ibcSource)
+	return k.PrepareRequest(ctx, &data, relayer, &ibcChannel)
 }

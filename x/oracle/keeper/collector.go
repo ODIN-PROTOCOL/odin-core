@@ -1,4 +1,4 @@
-package oraclekeeper
+package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,38 +18,11 @@ type RewardCollector interface {
 	Collected() sdk.Coins
 }
 
-// CollectFee subtract fee from fee payer and send them to treasury
-func (k Keeper) CollectFee(
-	ctx sdk.Context, payer sdk.AccAddress, feeLimit sdk.Coins, askCount uint64, rawRequests []oracletypes.RawRequest,
-) (sdk.Coins, error) {
-	collector := newFeeCollector(k.distrKeeper, k, feeLimit, payer)
-
-	for _, r := range rawRequests {
-
-		ds := k.MustGetDataSource(ctx, r.DataSourceID)
-		if ds.Fee.Empty() {
-			continue
-		}
-
-		fee := sdk.NewCoins()
-		for _, c := range ds.Fee {
-			c.Amount = c.Amount.Mul(sdk.NewInt(int64(askCount)))
-			fee = fee.Add(c)
-		}
-
-		if err := collector.Collect(ctx, fee); err != nil {
-			return nil, err
-		}
-	}
-
-	return collector.Collected(), nil
-}
-
 // CollectReward subtract reward from fee pool and sends it to the data providers for reporting data
 func (k Keeper) CollectReward(
 	ctx sdk.Context, rawReports []oracletypes.RawReport, rawRequests []oracletypes.RawRequest,
 ) (sdk.Coins, error) {
-	collector := newRewardCollector(k, k.bankKeeper)
+	collector := newRewardCollector(k, k.BankKeeper)
 	oracleParams := k.GetParams(ctx)
 
 	rawReportsMap := make(map[oracletypes.ExternalID]oracletypes.RawReport)

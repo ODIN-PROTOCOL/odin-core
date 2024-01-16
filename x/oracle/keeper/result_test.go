@@ -1,12 +1,13 @@
-package oraclekeeper_test
+package keeper_test
 
 import (
 	"testing"
 
-	"github.com/ODIN-PROTOCOL/odin-core/x/common/testapp"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 func TestResultBasicFunctions(t *testing.T) {

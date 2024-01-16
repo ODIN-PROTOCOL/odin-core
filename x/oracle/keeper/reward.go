@@ -1,4 +1,4 @@
-package oraclekeeper
+package keeper
 
 import (
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -63,7 +63,7 @@ func (k Keeper) AllocateRewardsToDataProviders(ctx sdk.Context, rid oracletypes.
 		}
 		feePool.CommunityPool = diff
 
-		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, distrtypes.ModuleName, ownerAccAddr, reward)
+		err = k.BankKeeper.SendCoinsFromModuleToAccount(ctx, distrtypes.ModuleName, ownerAccAddr, reward)
 		if err != nil {
 			panic(err)
 		}

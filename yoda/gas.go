@@ -3,7 +3,7 @@ package yoda
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // Constant used to estimate gas price of reports transaction.
@@ -35,7 +35,7 @@ const (
 	baseAuthAnteGas              = readParamGas*4 + readAccountGas*4 + writeAccountGas + signatureVerificationGasCost + readAccountWithoutPublicKeyGas + writeAccountGas
 	payingFeeGasCost             = uint64(19834)
 	baseTransactionSize          = uint64(253)
-	txCostPerByte                = uint64(5)    // Using DefaultTxSizeCostPerByte of BandChain
+	txCostPerByte                = uint64(5)    // Using DefaultTxSizeCostPerByte of OdinChain
 	signatureVerificationGasCost = uint64(1000) // for secp256k1 signature, which more than ed21559
 
 	// Report Data byte lengths
@@ -54,7 +54,7 @@ func getTxByteLength(msgs []sdk.Msg) uint64 {
 	size := baseTransactionSize
 
 	for _, msg := range msgs {
-		msg, ok := msg.(*oracletypes.MsgReportData)
+		msg, ok := msg.(*types.MsgReportData)
 		if !ok {
 			panic("Don't support non-report data message")
 		}
@@ -79,8 +79,8 @@ func getRequestByteLength(f FeeEstimationData) uint64 {
 	return size
 }
 
-func getReportByteLength(msg *oracletypes.MsgReportData) uint64 {
-	report := oracletypes.NewReport(
+func getReportByteLength(msg *types.MsgReportData) uint64 {
+	report := types.NewReport(
 		sdk.ValAddress(msg.Validator),
 		true,
 		msg.RawReports,
@@ -88,7 +88,7 @@ func getReportByteLength(msg *oracletypes.MsgReportData) uint64 {
 	return uint64(len(cdc.MustMarshal(&report)))
 }
 
-func estimateReportHandlerGas(msg *oracletypes.MsgReportData, f FeeEstimationData) uint64 {
+func estimateReportHandlerGas(msg *types.MsgReportData, f FeeEstimationData) uint64 {
 	reportByteLength := getReportByteLength(msg)
 	requestByteLength := getRequestByteLength(f)
 
@@ -120,10 +120,11 @@ func estimateAuthAnteHandlerGas(c *Context, msgs []sdk.Msg) uint64 {
 }
 
 func estimateGas(c *Context, l *Logger, msgs []sdk.Msg, feeEstimations []FeeEstimationData) uint64 {
+	// TODO: Add authz validation / remove check reporter base gas
 	gas := estimateAuthAnteHandlerGas(c, msgs)
 
 	for i, msg := range msgs {
-		msg, ok := msg.(*oracletypes.MsgReportData)
+		msg, ok := msg.(*types.MsgReportData)
 		if !ok {
 			panic("Don't support non-report data message")
 		}

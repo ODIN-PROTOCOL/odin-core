@@ -14,8 +14,7 @@ const (
 	MaxWasmCodeSize         = 512 * 1024      // 512kB
 	MaxCompiledWasmCodeSize = 1 * 1024 * 1024 // 1MB
 
-	WasmPrepareGas = 1000000
-	WasmExecuteGas = 5000000
+	MaximumOwasmGas = 8000000
 )
 
 // nolint

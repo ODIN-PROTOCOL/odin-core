@@ -13,12 +13,12 @@ RUN cp wabt-1.0.17/bin/wat2wasm /usr/local/bin
 
 RUN make install && make faucet
 
-COPY ./docker-config/validator1/ validator1/
-COPY ./docker-config/validator2/ validator2/
-COPY ./docker-config/validator3/ validator3/
-COPY ./docker-config/validator4/ validator4/
+#COPY ./docker-config/validator1/ validator1/
+#COPY ./docker-config/validator2/ validator2/
+#COPY ./docker-config/validator3/ validator3/
+#COPY ./docker-config/validator4/ validator4/
 
 # generated genesis
-COPY ./docker-config/genesis.json genesis.json
+#COPY ./docker-config/genesis.json genesis.json
 
 CMD ["odind", "--help"]

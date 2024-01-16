@@ -18,6 +18,7 @@ const (
 	TypeMsgActivate           = "activate"
 	TypeMsgAddReporter        = "add_reporter"
 	TypeMsgRemoveReporter     = "remove_reporter"
+	TypeMsgUpdateParams       = "update_params"
 )
 
 var (
@@ -28,8 +29,7 @@ var (
 	_ sdk.Msg = &MsgCreateOracleScript{}
 	_ sdk.Msg = &MsgEditOracleScript{}
 	_ sdk.Msg = &MsgActivate{}
-	_ sdk.Msg = &MsgAddReporter{}
-	_ sdk.Msg = &MsgRemoveReporter{}
+	_ sdk.Msg = &MsgUpdateParams{}
 )
 
 // NewMsgRequestData creates a new MsgRequestData instance.
@@ -85,6 +85,14 @@ func (msg MsgRequestData) ValidateBasic() error {
 	if msg.ExecuteGas <= 0 {
 		return sdkerrors.Wrapf(ErrInvalidOwasmGas, "invalid execute gas: %d", msg.ExecuteGas)
 	}
+	if msg.PrepareGas+msg.ExecuteGas > MaximumOwasmGas {
+		return sdkerrors.Wrapf(
+			ErrInvalidOwasmGas,
+			"sum of prepare gas and execute gas (%d) exceed %d",
+			msg.PrepareGas+msg.ExecuteGas,
+			MaximumOwasmGas,
+		)
+	}
 	if !msg.FeeLimit.IsValid() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.FeeLimit.String())
 	}
@@ -99,20 +107,10 @@ func (msg MsgRequestData) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgRequestData) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgReportData creates a new MsgReportData instance
-// func NewMsgReportData(requestID RequestID, rawReports []RawReport, validator sdk.ValAddress, reporter sdk.AccAddress) *MsgReportData {
-// 	return &MsgReportData{
-// 		RequestID:  requestID,
-// 		RawReports: rawReports,
-// 		Validator:  validator.String(),
-// 		Reporter:   reporter.String(),
-// 	}
-// }
-
 func NewMsgReportData(requestID RequestID, rawReports []RawReport, validator sdk.ValAddress) *MsgReportData {
 	return &MsgReportData{
 		RequestID:  requestID,
@@ -133,15 +131,8 @@ func (msg MsgReportData) ValidateBasic() error {
 	if err != nil {
 		return err
 	}
-	repAddr, err := sdk.AccAddressFromBech32(msg.Reporter)
-	if err != nil {
-		return err
-	}
 	if err := sdk.VerifyAddressFormat(valAddr); err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "validator: %s", msg.Validator)
-	}
-	if err := sdk.VerifyAddressFormat(repAddr); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "reporter: %s", msg.Reporter)
 	}
 	if len(msg.RawReports) == 0 {
 		return ErrEmptyReport
@@ -158,25 +149,25 @@ func (msg MsgReportData) ValidateBasic() error {
 
 // GetSigners returns the required signers for the given MsgReportData (sdk.Msg interface).
 func (msg MsgReportData) GetSigners() []sdk.AccAddress {
-	reporter, _ := sdk.AccAddressFromBech32(msg.Reporter)
-	return []sdk.AccAddress{reporter}
+	validator, _ := sdk.ValAddressFromBech32(msg.Validator)
+	return []sdk.AccAddress{sdk.AccAddress(validator)}
 }
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgReportData) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgCreateDataSource creates a new MsgCreateDataSource instance
 func NewMsgCreateDataSource(
-	name, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress,
+	name, description string, executable []byte, fee sdk.Coins, treasury, owner, sender sdk.AccAddress,
 ) *MsgCreateDataSource {
 	return &MsgCreateDataSource{
 		Name:        name,
 		Description: description,
 		Executable:  executable,
 		Fee:         fee,
+		Treasury:    treasury.String(),
 		Owner:       owner.String(),
 		Sender:      sender.String(),
 	}
@@ -190,6 +181,10 @@ func (msg MsgCreateDataSource) Type() string { return TypeMsgCreateDataSource }
 
 // ValidateBasic checks whether the given MsgCreateDataSource instance (sdk.Msg interface).
 func (msg MsgCreateDataSource) ValidateBasic() error {
+	treasury, err := sdk.AccAddressFromBech32(msg.Treasury)
+	if err != nil {
+		return err
+	}
 	owner, err := sdk.AccAddressFromBech32(msg.Owner)
 	if err != nil {
 		return err
@@ -197,6 +192,9 @@ func (msg MsgCreateDataSource) ValidateBasic() error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return err
+	}
+	if err := sdk.VerifyAddressFormat(treasury); err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "treasury: %s", msg.Treasury)
 	}
 	if err := sdk.VerifyAddressFormat(owner); err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "owner: %s", msg.Owner)
@@ -233,13 +231,17 @@ func (msg MsgCreateDataSource) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgCreateDataSource) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgEditDataSource creates a new MsgEditDataSource instance
 func NewMsgEditDataSource(
-	dataSourceID DataSourceID, name string, description string, executable []byte, fee sdk.Coins, owner, sender sdk.AccAddress,
+	dataSourceID DataSourceID,
+	name string,
+	description string,
+	executable []byte,
+	fee sdk.Coins,
+	treasury, owner, sender sdk.AccAddress,
 ) *MsgEditDataSource {
 	return &MsgEditDataSource{
 		DataSourceID: dataSourceID,
@@ -247,6 +249,7 @@ func NewMsgEditDataSource(
 		Description:  description,
 		Executable:   executable,
 		Fee:          fee,
+		Treasury:     treasury.String(),
 		Owner:        owner.String(),
 		Sender:       sender.String(),
 	}
@@ -260,6 +263,10 @@ func (msg MsgEditDataSource) Type() string { return TypeMsgEditDataSource }
 
 // ValidateBasic checks whether the given MsgEditDataSource instance (sdk.Msg interface).
 func (msg MsgEditDataSource) ValidateBasic() error {
+	treasury, err := sdk.AccAddressFromBech32(msg.Treasury)
+	if err != nil {
+		return err
+	}
 	owner, err := sdk.AccAddressFromBech32(msg.Owner)
 	if err != nil {
 		return err
@@ -267,6 +274,9 @@ func (msg MsgEditDataSource) ValidateBasic() error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return err
+	}
+	if err := sdk.VerifyAddressFormat(treasury); err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "treasury: %s", msg.Treasury)
 	}
 	if err := sdk.VerifyAddressFormat(owner); err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "owner: %s", msg.Owner)
@@ -300,8 +310,7 @@ func (msg MsgEditDataSource) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgEditDataSource) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgCreateOracleScript creates a new MsgCreateOracleScript instance
@@ -373,13 +382,15 @@ func (msg MsgCreateOracleScript) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgCreateOracleScript) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgEditOracleScript creates a new MsgEditOracleScript instance
 func NewMsgEditOracleScript(
-	oracleScriptID OracleScriptID, name, description, schema, sourceCodeURL string, code []byte, owner, sender sdk.AccAddress,
+	oracleScriptID OracleScriptID,
+	name, description, schema, sourceCodeURL string,
+	code []byte,
+	owner, sender sdk.AccAddress,
 ) *MsgEditOracleScript {
 	return &MsgEditOracleScript{
 		OracleScriptID: oracleScriptID,
@@ -444,8 +455,7 @@ func (msg MsgEditOracleScript) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgEditOracleScript) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
 // NewMsgActivate creates a new MsgActivate instance
@@ -481,102 +491,43 @@ func (msg MsgActivate) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
 func (msg MsgActivate) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(AminoCdc.MustMarshalJSON(&msg))
 }
 
-// NewMsgAddReporter creates a new MsgAddReporter instance
-func NewMsgAddReporter(validator sdk.ValAddress, reporter sdk.AccAddress) *MsgAddReporter {
-	return &MsgAddReporter{
-		Validator: validator.String(),
-		Reporter:  reporter.String(),
+// NewMsgActivate creates a new MsgActivate instance
+func NewMsgUpdateParams(authority string, params Params) *MsgUpdateParams {
+	return &MsgUpdateParams{
+		Authority: authority,
+		Params:    params,
 	}
 }
 
-// Route returns the route of MsgAddReporter - "oracle" (sdk.Msg interface).
-func (msg MsgAddReporter) Route() string { return RouterKey }
+// GetSignBytes implements the LegacyMsg interface.
+func (m MsgUpdateParams) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&m))
+}
 
-// Type returns the message type of MsgAddReporter (sdk.Msg interface).
-func (msg MsgAddReporter) Type() string { return TypeMsgAddReporter }
+// GetSigners returns the expected signers for a MsgUpdateParams message.
+func (m *MsgUpdateParams) GetSigners() []sdk.AccAddress {
+	addr, _ := sdk.AccAddressFromBech32(m.Authority)
+	return []sdk.AccAddress{addr}
+}
 
-// ValidateBasic checks whether the given MsgAddReporter instance (sdk.Msg interface).
-func (msg MsgAddReporter) ValidateBasic() error {
-	val, err := sdk.ValAddressFromBech32(msg.Validator)
-	if err != nil {
+// ValidateBasic does a sanity check on the provided data.
+func (m *MsgUpdateParams) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(m.Authority); err != nil {
+		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+
+	if err := m.Params.Validate(); err != nil {
 		return err
 	}
-	rep, err := sdk.AccAddressFromBech32(msg.Reporter)
-	if err != nil {
-		return err
-	}
-	if err := sdk.VerifyAddressFormat(val); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "validator: %s", msg.Validator)
-	}
-	if err := sdk.VerifyAddressFormat(rep); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "reporter: %s", msg.Reporter)
-	}
-	if sdk.ValAddress(rep).Equals(val) {
-		return ErrSelfReferenceAsReporter
-	}
+
 	return nil
 }
 
-// GetSigners returns the required signers for the given MsgAddReporter (sdk.Msg interface).
-func (msg MsgAddReporter) GetSigners() []sdk.AccAddress {
-	val, _ := sdk.ValAddressFromBech32(msg.Validator)
-	return []sdk.AccAddress{sdk.AccAddress(val)}
-}
+// Route returns the route of MsgUpdateParams - "oracle" (sdk.Msg interface).
+func (msg MsgUpdateParams) Route() string { return RouterKey }
 
-// GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
-func (msg MsgAddReporter) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
-// NewMsgRemoveReporter creates a new MsgRemoveReporter instance
-func NewMsgRemoveReporter(validator sdk.ValAddress, reporter sdk.AccAddress) *MsgRemoveReporter {
-	return &MsgRemoveReporter{
-		Validator: validator.String(),
-		Reporter:  reporter.String(),
-	}
-}
-
-// Route returns the route of MsgRemoveReporter - "oracle" (sdk.Msg interface).
-func (msg MsgRemoveReporter) Route() string { return RouterKey }
-
-// Type returns the message type of MsgRemoveReporter (sdk.Msg interface).
-func (msg MsgRemoveReporter) Type() string { return TypeMsgRemoveReporter }
-
-// ValidateBasic checks whether the given MsgRemoveReporter instance (sdk.Msg interface).
-func (msg MsgRemoveReporter) ValidateBasic() error {
-	val, err := sdk.ValAddressFromBech32(msg.Validator)
-	if err != nil {
-		return err
-	}
-	rep, err := sdk.AccAddressFromBech32(msg.Reporter)
-	if err != nil {
-		return err
-	}
-	if err := sdk.VerifyAddressFormat(val); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "validator: %s", msg.Validator)
-	}
-	if err := sdk.VerifyAddressFormat(rep); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "reporter: %s", msg.Reporter)
-	}
-	if sdk.ValAddress(rep).Equals(val) {
-		return ErrSelfReferenceAsReporter
-	}
-	return nil
-}
-
-// GetSigners returns the required signers for the given MsgRemoveReporter (sdk.Msg interface).
-func (msg MsgRemoveReporter) GetSigners() []sdk.AccAddress {
-	val, _ := sdk.ValAddressFromBech32(msg.Validator)
-	return []sdk.AccAddress{sdk.AccAddress(val)}
-}
-
-// GetSignBytes returns raw JSON bytes to be signed by the signers (sdk.Msg interface).
-func (msg MsgRemoveReporter) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
+// Type returns the message type of MsgUpdateParams (sdk.Msg interface).
+func (msg MsgUpdateParams) Type() string { return TypeMsgUpdateParams }

@@ -5,18 +5,17 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	bip39 "github.com/cosmos/go-bip39"
 	"github.com/kyokomi/emoji"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/hd"
-
 	app "github.com/ODIN-PROTOCOL/odin-core/app"
-	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 const (
@@ -89,6 +88,7 @@ func keysAddCmd(c *Context) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			address, err := info.GetAddress()
 			if err != nil {
 				return err
@@ -157,22 +157,18 @@ func keysListCmd(c *Context) *cobra.Command {
 			}
 			isShowAddr := viper.GetBool(flagAddress)
 			for _, key := range keys {
-
 				address, err := key.GetAddress()
 				if err != nil {
 					return err
 				}
 
 				if isShowAddr {
-
-					fmt.Printf("Address: %s\n", address.String())
-
+					fmt.Printf("%s ", address.String())
 				} else {
-					queryClient := oracletypes.NewQueryClient(clientCtx)
-
+					queryClient := types.NewQueryClient(clientCtx)
 					r, err := queryClient.IsReporter(
 						context.Background(),
-						&oracletypes.QueryIsReporterRequest{ValidatorAddress: cfg.Validator, ReporterAddress: address.String()},
+						&types.QueryIsReporterRequest{ValidatorAddress: cfg.Validator, ReporterAddress: address.String()},
 					)
 					s := ":question:"
 					if err == nil {
@@ -182,16 +178,18 @@ func keysListCmd(c *Context) *cobra.Command {
 							s = ":x:"
 						}
 					}
-
 					emoji.Printf("%s%s => %s\n", s, key.Name, address.String())
 				}
 			}
+
 			return nil
 		},
 	}
 	cmd.Flags().BoolP(flagAddress, "a", false, "Output the address only")
 	viper.BindPFlag(flagAddress, cmd.Flags().Lookup(flagAddress))
+
 	flags.AddQueryFlagsToCmd(cmd)
+
 	return cmd
 }
 
@@ -208,11 +206,11 @@ func keysShowCmd(c *Context) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			address, err := key.GetAddress()
 			if err != nil {
 				return err
 			}
-
 			fmt.Println(address.String())
 			return nil
 		},
