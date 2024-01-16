@@ -408,6 +408,13 @@ func CreateTestInput(params ...bool) (*TestingApp, sdk.Context, keeper.Keeper) {
 
 		ctx = app.NewContext(false, tmproto.Header{})
 	}
+
+	if len(params) > 2 && params[2] {
+		mintParams := app.MintKeeper.GetParams(ctx)
+		mintParams.MintAir = true
+		app.MintKeeper.SetParams(ctx, mintParams)
+	}
+
 	return app, ctx, app.OracleKeeper
 }
 

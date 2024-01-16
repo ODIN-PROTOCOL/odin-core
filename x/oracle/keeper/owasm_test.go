@@ -1066,7 +1066,7 @@ func TestCollectFeeWithEnoughFeeButInsufficientBalance(t *testing.T) {
 }
 
 func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
-	app, ctx, k := testapp.CreateTestInput(true)
+	app, ctx, k := testapp.CreateTestInput(true, false, true)
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
@@ -1126,7 +1126,7 @@ func TestCollectFeeWithWithManyUnitSuccess(t *testing.T) {
 }
 
 func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
-	app, ctx, k := testapp.CreateTestInput(true)
+	app, ctx, k := testapp.CreateTestInput(true, false, true)
 
 	raws := rawRequestsFromFees(ctx, k, []sdk.Coins{
 		testapp.EmptyCoins,
@@ -1136,11 +1136,12 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 		testapp.EmptyCoins,
 	})
 
-	app.BankKeeper.MintCoins(
+	err := app.BankKeeper.MintCoins(
 		ctx,
 		minttypes.ModuleName,
 		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000000)), sdk.NewCoin("minigeo", sdk.NewInt(2000000))),
 	)
+	require.NoError(t, err)
 	// Alice have no enough loki and don't have uabc so don't top up
 	// Bob have enough loki and have some but not enough uabc so add some
 	app.BankKeeper.SendCoinsFromModuleToAccount(
@@ -1164,7 +1165,7 @@ func TestCollectFeeWithWithManyUnitFail(t *testing.T) {
 	)
 
 	// Alice
-	_, err := k.CollectFee(
+	_, err = k.CollectFee(
 		ctx,
 		testapp.Alice.Address,
 		testapp.MustGetBalances(ctx, app.BankKeeper, testapp.Alice.Address),

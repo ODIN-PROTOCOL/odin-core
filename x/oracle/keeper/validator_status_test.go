@@ -41,13 +41,19 @@ func defaultVotes() []abci.VoteInfo {
 func SetupFeeCollector(app *testapp.TestingApp, ctx sdk.Context, k keeper.Keeper) authtypes.ModuleAccountI {
 	// Set collected fee to 1000000loki and 70% oracle reward proportion.
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
-	app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, Coins1000000loki)
-	app.BankKeeper.SendCoinsFromModuleToModule(
+	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, Coins1000000loki)
+	if err != nil {
+		panic(err)
+	}
+	err = app.BankKeeper.SendCoinsFromModuleToModule(
 		ctx,
 		minttypes.ModuleName,
 		authtypes.FeeCollectorName,
 		Coins1000000loki,
 	)
+	if err != nil {
+		panic(err)
+	}
 	app.AccountKeeper.SetAccount(ctx, feeCollector)
 
 	params := k.GetParams(ctx)
@@ -58,7 +64,7 @@ func SetupFeeCollector(app *testapp.TestingApp, ctx sdk.Context, k keeper.Keeper
 }
 
 func TestAllocateTokenNoActiveValidators(t *testing.T) {
-	app, ctx, k := testapp.CreateTestInput(false)
+	app, ctx, k := testapp.CreateTestInput(false, false, true)
 	feeCollector := SetupFeeCollector(app, ctx, k)
 
 	require.Equal(t, Coins1000000loki, app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()))
@@ -71,7 +77,7 @@ func TestAllocateTokenNoActiveValidators(t *testing.T) {
 }
 
 func TestAllocateTokensOneActive(t *testing.T) {
-	app, ctx, k := testapp.CreateTestInput(false)
+	app, ctx, k := testapp.CreateTestInput(false, false, true)
 	feeCollector := SetupFeeCollector(app, ctx, k)
 
 	require.Equal(t, Coins1000000loki, app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()))
@@ -105,7 +111,7 @@ func TestAllocateTokensOneActive(t *testing.T) {
 }
 
 func TestAllocateTokensAllActive(t *testing.T) {
-	app, ctx, k := testapp.CreateTestInput(true)
+	app, ctx, k := testapp.CreateTestInput(true, false, true)
 	feeCollector := SetupFeeCollector(app, ctx, k)
 
 	require.Equal(t, Coins1000000loki, app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress()))
