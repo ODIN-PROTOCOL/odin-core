@@ -1099,8 +1099,8 @@ func AllCapabilities() []string {
 	}
 }
 
-func GetWasmOpts(appOpts servertypes.AppOptions) []wasm.Option {
-	var wasmOpts []wasm.Option
+func GetWasmOpts(appOpts servertypes.AppOptions) []wasmkeeper.Option {
+	var wasmOpts []wasmkeeper.Option
 	if cast.ToBool(appOpts.Get("telemetry.enabled")) {
 		wasmOpts = append(wasmOpts, wasmkeeper.WithVMCacheMetrics(prometheus.DefaultRegisterer))
 	}

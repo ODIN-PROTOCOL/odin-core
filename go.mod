@@ -199,7 +199,6 @@ require (
 )
 
 replace (
-	github.com/CosmWasm/wasmvm => github.com/CosmWasm/wasmvm v1.5.2
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	google.golang.org/grpc => google.golang.org/grpc v1.53.0
 )
