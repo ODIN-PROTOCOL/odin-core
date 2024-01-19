@@ -110,5 +110,6 @@ func NewDefaultGenesisState() GenesisState {
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
 		coinswaptypes.ModuleName:     coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:      auction.AppModuleBasic{}.DefaultGenesis(cdc),
+		//wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }

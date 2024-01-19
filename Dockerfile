@@ -13,4 +13,7 @@ RUN apt-get update && \
     make faucet && rm -rf /core/* \
     && rm -rf /var/lib/apt/lists/*
 
+COPY docker/* /core/
+RUN chmod +x /core/*.sh
+
 CMD ["odind", "--help"]
