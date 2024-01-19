@@ -1,7 +1,7 @@
 <p>&nbsp;</p>
 <p align="center">
 
-<img src="odinprotocol_logo.svg" width=500>
+<img src="odinprotocol_logo.png" width=500>
 
 </p>
 
