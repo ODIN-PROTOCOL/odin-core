@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/CosmWasm/wasmd/x/wasm"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
 	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
@@ -110,5 +112,6 @@ func NewDefaultGenesisState() GenesisState {
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
 		coinswaptypes.ModuleName:     coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
 		auctiontypes.ModuleName:      auction.AppModuleBasic{}.DefaultGenesis(cdc),
+		wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
