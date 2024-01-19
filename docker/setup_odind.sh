@@ -13,7 +13,7 @@ if ! odind keys show val1; then
   (echo $PASSWORD; echo $PASSWORD) | odind keys add val1
 fi
 # hardcode the val1 account for this instance
-echo $PASSWORD | odind genesis add-genesis-account val1 100000000000$STAKE
+echo $PASSWORD | odind genesis add-genesis-account val1 10000000000000$STAKE
 
 # (optionally) add a few more genesis accounts
 for addr in $@; do
@@ -23,5 +23,5 @@ done
 
 # submit a genesis val1 tx
 ## Workraround for https://github.com/cosmos/cosmos-sdk/issues/8251
-(echo $PASSWORD; echo $PASSWORD; echo $PASSWORD) | odind genesis gentx val1 250000000000$STAKE --chain-id=$CHAIN_ID
+(echo $PASSWORD; echo $PASSWORD; echo $PASSWORD) | odind genesis gentx val1 1000000000000$STAKE --chain-id=$CHAIN_ID
 odind genesis collect-gentxs
