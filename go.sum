@@ -428,8 +428,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d h1:nalkkPQcITbvhmL4+C4cKA87NW0tfm3Kl9VXRoPywFg=
-github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d/go.mod h1:URdX5+vg25ts3aCh8H5IFZybJYKWhJHYMTnf+ULtoC4=
+github.com/ChainSafe/go-schnorrkel v0.0.0-20210914153726-f0f74112c979 h1:d2XBLQUeUvftO+npl0PnRrzS0FRS0W7XctfFCag9F/M=
+github.com/ChainSafe/go-schnorrkel v0.0.0-20210914153726-f0f74112c979/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
 github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/ComposableFi/go-subkey/v2 v2.0.0-tm03420 h1:oknQF/iIhf5lVjbwjsVDzDByupRhga8nhA3NAmwyHDA=
@@ -1407,8 +1407,6 @@ github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DM
 github.com/spf13/viper v1.16.0 h1:rGGH0XDZhdUOryiDWjmIvUSWpbNqisK8Wk0Vyefw8hc=
 github.com/spf13/viper v1.16.0/go.mod h1:yg78JgCJcbrQOvV9YLXgkLaZqUidkY9K+Dd1FofRzQg=
 github.com/status-im/keycard-go v0.0.0-20190316090335-8537d3370df4/go.mod h1:RZLeN1LMWmRsyYjvAu+I6Dm9QmlDaIIt+Y+4Kd7Tp+Q=
-github.com/strangelove-ventures/interchaintest/v7 v7.0.0 h1:fp7uXptYP6+8rRklBtUvIHlo507TNzMenQQJvvfDjQI=
-github.com/strangelove-ventures/interchaintest/v7 v7.0.0/go.mod h1:mkkCds7NaVUK8Bu1rmMHdkZYHmTAlICnjg/s+qQBO4A=
 github.com/strangelove-ventures/interchaintest/v7 v7.0.1-0.20231214191540-4513200b3ab4 h1:mc/Yoex/tXVKy45Fn02LeEcPp0h01fmqoZhwrXaof1M=
 github.com/strangelove-ventures/interchaintest/v7 v7.0.1-0.20231214191540-4513200b3ab4/go.mod h1:mkkCds7NaVUK8Bu1rmMHdkZYHmTAlICnjg/s+qQBO4A=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
