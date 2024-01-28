@@ -50,6 +50,23 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 			Version:   initialVersion,
 			ChainConfig: ibc.ChainConfig{
 				ModifyGenesis: cosmos.ModifyGenesis(shortVoteGenesis),
+				Type:          "cosmos",
+				Name:          "odin",
+				ChainID:       "odin-mainnet-freya",
+				Images: []ibc.DockerImage{
+					{
+						Repository: "odinprotocol/core", // FOR LOCAL IMAGE USE: Docker Image Name
+						Version:    "v0.7.9",            // FOR LOCAL IMAGE USE: Docker Image Tag
+						UidGid:     "1025:1025",
+					},
+				},
+				Bin:            "odind",
+				Bech32Prefix:   "odin",
+				Denom:          "loki",
+				GasPrices:      "0.00loki",
+				GasAdjustment:  1.3,
+				TrustingPeriod: "508h",
+				NoHostMount:    false,
 			},
 		},
 		{
