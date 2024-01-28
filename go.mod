@@ -253,11 +253,11 @@ require (
 )
 
 replace (
-	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20210914153726-f0f74112c979
+	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/vedhavyas/go-subkey => github.com/strangelove-ventures/go-subkey v1.0.7
-	github.com/vedhavyas/go-subkey/v2 => github.com/ComposableFi/go-subkey/v2 v2.0.0
+	//github.com/vedhavyas/go-subkey/v2 => github.com/ComposableFi/go-subkey/v2 v2.0.0
 	google.golang.org/grpc => google.golang.org/grpc v1.53.0
 )
