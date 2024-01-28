@@ -31,7 +31,7 @@ const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
 
 // PubKeys
 const DefiantLabsValPubKey = "+hZsfi4r1OdyIgkZBbQgCDiADkQWlzN0iQ3Szr9+Dp8="
-const OdinMainnet3ValPubKey = "AgDCT69kjqdPVFSluW23HFIpqQi7bknscN3y1YA9EB57"
+const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s="
 
 
 func getBalance(
