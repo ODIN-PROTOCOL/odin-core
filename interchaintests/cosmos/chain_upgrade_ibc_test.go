@@ -26,7 +26,7 @@ const (
 )
 
 func TestOdinUpgradeIBC(t *testing.T) {
-	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "odinprotocol/core", "v0.7.10", "multiverse")
+	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "multiverse")
 }
 
 func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion string, upgradeName string) {
@@ -55,8 +55,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 				ChainID:       "odin-mainnet-freya",
 				Images: []ibc.DockerImage{
 					{
-						Repository: "odinprotocol/core", // FOR LOCAL IMAGE USE: Docker Image Name
-						Version:    "v0.7.9",            // FOR LOCAL IMAGE USE: Docker Image Tag
+						Repository: upgradeContainerRepo, // FOR LOCAL IMAGE USE: Docker Image Name
+						Version:    initialVersion,            // FOR LOCAL IMAGE USE: Docker Image Tag
 						UidGid:     "1025:1025",
 					},
 				},
