@@ -55,8 +55,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 				ChainID:       "odin-mainnet-freya",
 				Images: []ibc.DockerImage{
 					{
-						Repository: "odinprotocol/core", // FOR LOCAL IMAGE USE: Docker Image Name
-						Version:    "v0.7.9",            // FOR LOCAL IMAGE USE: Docker Image Tag
+						Repository: upgradeContainerRepo, // FOR LOCAL IMAGE USE: Docker Image Name
+						Version:    initialVersion,            // FOR LOCAL IMAGE USE: Docker Image Tag
 						UidGid:     "1025:1025",
 					},
 				},
