@@ -26,7 +26,7 @@ const (
 )
 
 func TestOdinUpgradeIBC(t *testing.T) {
-	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "odinprotocol/core", "v0.7.10", "multiverse")
+	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "multiverse")
 }
 
 func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion string, upgradeName string) {
