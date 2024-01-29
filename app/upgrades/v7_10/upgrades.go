@@ -85,12 +85,13 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
 }
 
 
-func addrToValAddr(address string) sdk.ValAddress {
+func addrToValAddr(address string) (sdk.ValAddress, error) {
 	valAddr, err := sdk.ValAddressFromBech32(address)
 	if err != nil {
-		panic(fmt.Sprintf("account address is not valid bech32: %s", valAddr))
+		log.Printf("account address is not valid bech32: %s", valAddr)
+		return nil, err
 	}
-	return valAddr
+	return valAddr, nil
 }
 
 func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
@@ -118,15 +119,17 @@ func sendCoins(
 	fromAddr sdk.AccAddress,
 	toAddr sdk.AccAddress,
 	coins sdk.Coins,
-) {
+) (error) {
 	//send coins to new address
 	err := bankkeeper.SendCoins(ctx, fromAddr, toAddr, coins)
 	if err != nil {
-		panic(fmt.Sprintf("Could not send coins from: %s, to: %s, error: %s", fromAddr, toAddr, err))
+		log.Printf("Could not send coins from: %s, to: %s, error: %s", fromAddr, toAddr, err)
+		return err
 	}
+	return nil
 }
 
-func getAddresses() [][]sdk.AccAddress {
+func getAddresses() ([][]sdk.AccAddress, error) {
 	var addresses [][]string
 	addresses = append(addresses, []string{DefiantLabOldAccAddress, DefiantLabNewAccAddress})
 	addresses = append(addresses, []string{OdinMainnet3OldAccAddress, OdinMainnet3NewAccAddress})
@@ -138,13 +141,14 @@ func getAddresses() [][]sdk.AccAddress {
 		for _, addr := range addrs {
 			accAddr, err := sdk.AccAddressFromBech32(addr)
 			if err != nil {
-				panic(fmt.Sprintf("account address is not valid bech32: %s", accAddr))
+				log.Printf("account address is not valid bech32: %s", accAddr)
+				return nil, err
 			}
 			accaddrs = append(accaddrs, accAddr)
 		}
 		accAddresses = append(accAddresses, accaddrs)
 	}
-	return accAddresses
+	return accAddresses, nil
 }
 
 
@@ -157,46 +161,75 @@ func CreateUpgradeHandler(
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running v7_10 upgrade handler")
 
-		addresses := getAddresses()
+		addresses, err := getAddresses()
+		if err != nil {
+			return nil, err
+		}
 
 		ctx.Logger().Info("sending coins from addresses to new address")
-
+		
 		// Creating DefiantLabs validator
+		DanOldValAddress, err := addrToValAddr(DefiantLabOldAccAddress)
+		if err != nil {
+			return nil, err
+		}
+		DanOldVal, found := keepers.StakingKeeper.GetValidator(ctx, DanOldValAddress)
+		if !found {
+			log.Printf("Validator with %v has not been found", DanOldValAddress)
+			return nil, err
+		}
+
 		DanPubKeyBytes, err := base64.StdEncoding.DecodeString(DefiantLabsValPubKey)
 		if err != nil {
-			log.Fatalf("Failed to decode base64 string: %v", err)
+			log.Printf("Failed to decode base64 string: %v", err)
+			return nil, err
 		}
 		
 		DanPubKey := ed25519.PubKey{
 			Key: DanPubKeyBytes,
 		}
 		
-		DanValDescription := stakingtypes.NewDescription("defiantlabs", "", "https://defiantlabs.net", "", "")
-		DanValComission := stakingtypes.NewCommission(sdk.MustNewDecFromStr("0.100000000000000000"), sdk.MustNewDecFromStr("0.200000000000000000"), sdk.MustNewDecFromStr("0.010000000000000000"))
-		createValidator(ctx, *keepers.StakingKeeper, string(addrToValAddr(DefiantLabNewAccAddress)), &DanPubKey, DanValDescription, DanValComission)
+		DanValAddr, err := addrToValAddr(DefiantLabNewAccAddress)
+		if err != nil {
+			log.Printf("%v", err)
+			return nil, err
+		}
+		createValidator(ctx, *keepers.StakingKeeper, string(DanValAddr), &DanPubKey, DanOldVal.Description, DanOldVal.Commission)
 
 		// Creating new Mainnet3 validator
+		Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
+		if err != nil {
+			return nil, err
+		}
+		Odin3OldVal, found := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
+		if !found {
+			log.Printf("Validator with %v has not been found", Odin3OldValAddress)
+			return nil, err
+		}
+
 		Odin3PubKeyBytes, err := base64.StdEncoding.DecodeString(OdinMainnet3ValPubKey)
 		if err != nil {
-			log.Fatalf("Failed to decode base64 string: %v", err)
+			log.Printf("%v", err)
+			return nil, err
 		}
 		
 		Odin3PubKey := ed25519.PubKey{
 			Key: Odin3PubKeyBytes,
 		}
-		
-		Odin3ValDescription := stakingtypes.NewDescription("Odin Maiinet-3", "", "https://odinprotocol.io", "", "")
-		Odin3ValComission := stakingtypes.NewCommission(sdk.MustNewDecFromStr("0.050000000000000000"), sdk.MustNewDecFromStr("0.100000000000000000"), sdk.MustNewDecFromStr("0.050000000000000000"))
-		createValidator(ctx, *keepers.StakingKeeper, string(addrToValAddr(OdinMainnet3NewAccAddress)), &Odin3PubKey, Odin3ValDescription, Odin3ValComission)
+		Odin3ValAddr, err := addrToValAddr(OdinMainnet3NewAccAddress)
+		if err != nil {
+			log.Printf("%v", err)
+			return nil, err
+		}
 
-
+		createValidator(ctx, *keepers.StakingKeeper, string(Odin3ValAddr), &Odin3PubKey, Odin3OldVal.Description, Odin3OldVal.Commission)
 		for _, addrs := range addresses {
 
 			ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", addrs[0], addrs[1]))
 			balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, addrs[0])
 
 			if err != nil {
-				panic("Could not send coins")
+				return nil, err
 			}
 			
 			// sending balances
@@ -206,8 +239,15 @@ func CreateUpgradeHandler(
 			ctx.Logger().Info(fmt.Sprintf("Moving account  delegations from %s to %s", addrs[0], addrs[1]))
 			moveDelegations(ctx, *keepers.StakingKeeper, addrs[0], addrs[1])
 
-			currentValidatorAddress := addrToValAddr(addrs[0].String())
-			newValidatorAddress := addrToValAddr(addrs[1].String())
+			currentValidatorAddress, err := addrToValAddr(addrs[0].String())
+			if err != nil {
+				return nil, err
+			}
+
+			newValidatorAddress, err := addrToValAddr(addrs[1].String())
+			if err != nil {
+				return nil, err
+			}
 
 			ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", currentValidatorAddress, newValidatorAddress))
 			moveValidatorDelegations(ctx, *keepers.StakingKeeper, currentValidatorAddress, newValidatorAddress)
