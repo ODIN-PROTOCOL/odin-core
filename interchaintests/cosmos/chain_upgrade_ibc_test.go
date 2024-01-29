@@ -2,11 +2,13 @@ package cosmos_test
 
 import (
 	"context"
+	"encoding/base64"
+	"strconv"
 	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/conformance"
@@ -38,9 +40,9 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 
 	// SDK v45 params for Juno genesis
 	shortVoteGenesis := []cosmos.GenesisKV{
-		cosmos.NewGenesisKV("app_state.gov.voting_params.voting_period", votingPeriod),
-		cosmos.NewGenesisKV("app_state.gov.deposit_params.max_deposit_period", maxDepositPeriod),
-		cosmos.NewGenesisKV("app_state.gov.deposit_params.min_deposit.0.denom", "loki"),
+		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "20s"),      //votingPeriod),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "20s"), //maxDepositPeriod),
+		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", "loki"),
 	}
 
 	chains := interchaintest.CreateChainsWithChainSpecs(t, []*interchaintest.ChainSpec{
@@ -56,7 +58,7 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 				Images: []ibc.DockerImage{
 					{
 						Repository: upgradeContainerRepo, // FOR LOCAL IMAGE USE: Docker Image Name
-						Version:    initialVersion,            // FOR LOCAL IMAGE USE: Docker Image Tag
+						Version:    initialVersion,       // FOR LOCAL IMAGE USE: Docker Image Tag
 						UidGid:     "1025:1025",
 					},
 				},
@@ -138,15 +140,49 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 		Name:        upgradeName,
 		Description: "First chain software upgrade",
 		Height:      haltHeight,
+		Info:        "{}",
 	}
 
-	upgradeTx, err := chain.UpgradeProposal(ctx, chainUser.KeyName(), proposal)
+	command := []string{
+		"gov", "submit-legacy-proposal",
+		"software-upgrade", proposal.Name,
+		"--upgrade-height", strconv.FormatUint(proposal.Height, 10),
+		"--title", proposal.Title,
+		"--description", proposal.Description,
+		"--deposit", proposal.Deposit,
+		"--no-validate",
+	}
+
+	if proposal.Info != "" {
+		command = append(command, "--upgrade-info", proposal.Info)
+	}
+
+	proposalTxHash, err := chain.FullNodes[0].ExecTx(ctx, chainUser.KeyName(), command...)
 	require.NoError(t, err, "error submitting software upgrade proposal tx")
 
-	err = chain.VoteOnProposalAllValidators(ctx, upgradeTx.ProposalID, cosmos.ProposalVoteYes)
+	txResp, err := chain.GetTransaction(proposalTxHash)
+	require.NoError(t, err, "failed to receive tx")
+
+	events := txResp.Events
+	evtSubmitProp := "submit_proposal"
+	proposalID, _ := AttributeValue(events, evtSubmitProp, "proposal_id")
+
+	//upgradeTx, err := chain.UpgradeProposal(ctx, chainUser.KeyName(), proposal)
+	//require.NoError(t, err, "error submitting software upgrade proposal tx")
+
+	//for i := 0; i < 5; i++ {
+	//	res, _, err := chain.FullNodes[0].ExecQuery(ctx, "gov", "proposals")
+	//	fmt.Println(res)
+	//	proposal, err := chain.QueryProposal(ctx, proposalID)
+	//	fmt.Println(proposal)
+	//	fmt.Println(err)
+	//	time.Sleep(5 * time.Second)
+	//}
+
+	err = chain.VoteOnProposalAllValidators(ctx, proposalID, cosmos.ProposalVoteYes)
 	require.NoError(t, err, "failed to submit votes")
 
-	_, err = cosmos.PollForProposalStatus(ctx, chain, height, height+haltHeightDelta, upgradeTx.ProposalID, cosmos.ProposalStatusPassed)
+	_, err = cosmos.PollForProposalStatus(ctx, chain, height, height+haltHeightDelta, proposalID, cosmos.ProposalStatusPassed)
 	require.NoError(t, err, "proposal status did not change to passed in expected number of blocks")
 
 	height, err = chain.Height(ctx)
@@ -185,4 +221,31 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 
 	// test IBC conformance after chain upgrade on same path
 	conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
+}
+
+func AttributeValue(events []abcitypes.Event, eventType, attrKey string) (string, bool) {
+	for _, event := range events {
+		if event.Type != eventType {
+			continue
+		}
+		for _, attr := range event.Attributes {
+			if attr.Key == attrKey {
+				return attr.Value, true
+			}
+
+			// tendermint < v0.37-alpha returns base64 encoded strings in events.
+			key, err := base64.StdEncoding.DecodeString(attr.Key)
+			if err != nil {
+				continue
+			}
+			if string(key) == attrKey {
+				value, err := base64.StdEncoding.DecodeString(attr.Value)
+				if err != nil {
+					continue
+				}
+				return string(value), true
+			}
+		}
+	}
+	return "", false
 }
