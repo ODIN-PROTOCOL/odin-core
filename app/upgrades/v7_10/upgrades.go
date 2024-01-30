@@ -86,7 +86,7 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
 }
 
 
-func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk distrbutionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) (error) {
+func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk distrbutionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
 	oldValAccAddress := sdk.AccAddress(oldValAddress)
 	newValAccAddress := sdk.AccAddress(newValAddress)
 
@@ -109,7 +109,6 @@ func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk d
 	// explicitly setting validator withdrawal address, in case it has no self-delegation in the loop above
 	dk.SetDelegatorWithdrawAddr(ctx, oldValAccAddress, newValAccAddress)
 	dk.WithdrawValidatorCommission(ctx, oldValAddress)
-	return nil 
 }
 
 func addrToValAddr(address string) (sdk.ValAddress, error) {
