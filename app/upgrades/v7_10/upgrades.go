@@ -17,6 +17,7 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	distrbutionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -85,6 +86,32 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
 }
 
 
+func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk distrbutionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) (error) {
+	oldValAccAddress := sdk.AccAddress(oldValAddress)
+	newValAccAddress := sdk.AccAddress(newValAddress)
+
+	// withdrawing all rewards, self-delegation rewards mapped to new account
+	for _, delegation := range sk.GetValidatorDelegations(ctx, oldValAddress) {
+		withdrawAddress := dk.GetDelegatorWithdrawAddr(ctx, sdk.AccAddress(delegation.DelegatorAddress))
+		delegatorAddress := delegation.GetDelegatorAddr()
+		
+		// we suppose that old Odin accounts are unavailable, so we're routing rewards to new addresses and proceeding wit hwithdraws
+		if withdrawAddress.String() == oldValAccAddress.String() {
+			log.Printf("Found delegation which withdrawal address is the old one: %v. Setting withdrawal address to new account: %v", oldValAccAddress.String(), newValAccAddress.String())
+			dk.SetDelegatorWithdrawAddr(ctx, delegatorAddress, newValAccAddress)
+		}
+		
+		log.Printf("Withdrawing reward for %v delegator address from %v", delegatorAddress.String(), oldValAddress.String())
+		dk.WithdrawDelegationRewards(ctx, delegatorAddress, oldValAddress)
+	}
+
+	// Comission
+	// explicitly setting validator withdrawal address, in case it has no self-delegation in the loop above
+	dk.SetDelegatorWithdrawAddr(ctx, oldValAccAddress, newValAccAddress)
+	dk.WithdrawValidatorCommission(ctx, oldValAddress)
+	return nil 
+}
+
 func addrToValAddr(address string) (sdk.ValAddress, error) {
 	valAddr, err := sdk.ValAddressFromBech32(address)
 	if err != nil {
@@ -102,7 +129,6 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAdd
 		k.RemoveDelegation(ctx, delegation)
 	}
 }
-
 
 func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newAccAddress sdk.AccAddress) {
 	for _, delegation := range getDelegations(ctx, k, oldAddress) {
@@ -223,6 +249,11 @@ func CreateUpgradeHandler(
 		}
 
 		createValidator(ctx, *keepers.StakingKeeper, string(Odin3ValAddr), &Odin3PubKey, Odin3OldVal.Description, Odin3OldVal.Commission)
+		
+		// rewards and comission
+		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, DanOldValAddress, DanValAddr)
+		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
+
 		for _, addrs := range addresses {
 
 			ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", addrs[0], addrs[1]))
