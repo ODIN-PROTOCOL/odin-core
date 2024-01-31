@@ -75,6 +75,7 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
     // Create the validator
     validator, err := stakingtypes.NewValidator(valAddr, pubKey, description)
 	if err != nil {
+		log.Printf("Error when creating a validator %v: %s", valAddr, err)
 		return err
 	}
 
@@ -112,11 +113,13 @@ func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk d
 }
 
 func addrToValAddr(address string) (sdk.ValAddress, error) {
-	valAddr, err := sdk.ValAddressFromBech32(address)
+	bytes, err := sdk.GetFromBech32(address, "odinvaloper")
 	if err != nil {
-		log.Printf("account address is not valid bech32: %s", valAddr)
+		log.Printf("account address %s is not valid bech32: %s", address, err)
 		return nil, err
 	}
+
+	valAddr := sdk.ValAddress(bytes)
 	return valAddr, nil
 }
 
@@ -166,7 +169,7 @@ func getAddresses() ([][]sdk.AccAddress, error) {
 		for _, addr := range addrs {
 			accAddr, err := sdk.AccAddressFromBech32(addr)
 			if err != nil {
-				log.Printf("account address is not valid bech32: %s", accAddr)
+				log.Printf("account address is not valid bech32: %s: %s", accAddr, err)
 				return nil, err
 			}
 			accaddrs = append(accaddrs, accAddr)
@@ -188,6 +191,7 @@ func CreateUpgradeHandler(
 
 		addresses, err := getAddresses()
 		if err != nil {
+			log.Printf("Error when retrieving addresses from getAddresses: %s", err)
 			return nil, err
 		}
 
@@ -216,7 +220,6 @@ func CreateUpgradeHandler(
 		
 		DanValAddr, err := addrToValAddr(DefiantLabNewAccAddress)
 		if err != nil {
-			log.Printf("%v", err)
 			return nil, err
 		}
 		createValidator(ctx, *keepers.StakingKeeper, string(DanValAddr), &DanPubKey, DanOldVal.Description, DanOldVal.Commission)
@@ -234,7 +237,7 @@ func CreateUpgradeHandler(
 
 		Odin3PubKeyBytes, err := base64.StdEncoding.DecodeString(OdinMainnet3ValPubKey)
 		if err != nil {
-			log.Printf("%v", err)
+			log.Printf("Error whend decoding public key from string %v", err)
 			return nil, err
 		}
 		
@@ -243,7 +246,6 @@ func CreateUpgradeHandler(
 		}
 		Odin3ValAddr, err := addrToValAddr(OdinMainnet3NewAccAddress)
 		if err != nil {
-			log.Printf("%v", err)
 			return nil, err
 		}
 
@@ -259,6 +261,7 @@ func CreateUpgradeHandler(
 			balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, addrs[0])
 
 			if err != nil {
+				log.Printf("Error when retrieving balance for address %s: %s",  addrs[0], err)
 				return nil, err
 			}
 			
@@ -285,6 +288,7 @@ func CreateUpgradeHandler(
 
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {
+			log.Printf("Error when running migrations: %s", err)
 			return nil, err
 		}
 		return newVM, err
