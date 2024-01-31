@@ -113,7 +113,7 @@ func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk d
 }
 
 func addrToValAddr(address string) (sdk.ValAddress, error) {
-	bytes, err := sdk.GetFromBech32(address, "odinvaloper")
+	bytes, err := sdk.GetFromBech32(address, "odin")
 	if err != nil {
 		log.Printf("account address %s is not valid bech32: %s", address, err)
 		return nil, err
