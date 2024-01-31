@@ -17,6 +17,7 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	distrbutionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -74,6 +75,7 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
     // Create the validator
     validator, err := stakingtypes.NewValidator(valAddr, pubKey, description)
 	if err != nil {
+		log.Printf("Error when creating a validator %v: %s", valAddr, err)
 		return err
 	}
 
@@ -85,12 +87,39 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
 }
 
 
+func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk distrbutionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
+	oldValAccAddress := sdk.AccAddress(oldValAddress)
+	newValAccAddress := sdk.AccAddress(newValAddress)
+
+	// withdrawing all rewards, self-delegation rewards mapped to new account
+	for _, delegation := range sk.GetValidatorDelegations(ctx, oldValAddress) {
+		withdrawAddress := dk.GetDelegatorWithdrawAddr(ctx, sdk.AccAddress(delegation.DelegatorAddress))
+		delegatorAddress := delegation.GetDelegatorAddr()
+		
+		// we suppose that old Odin accounts are unavailable, so we're routing rewards to new addresses and proceeding wit hwithdraws
+		if withdrawAddress.String() == oldValAccAddress.String() {
+			log.Printf("Found delegation which withdrawal address is the old one: %v. Setting withdrawal address to new account: %v", oldValAccAddress.String(), newValAccAddress.String())
+			dk.SetDelegatorWithdrawAddr(ctx, delegatorAddress, newValAccAddress)
+		}
+		
+		log.Printf("Withdrawing reward for %v delegator address from %v", delegatorAddress.String(), oldValAddress.String())
+		dk.WithdrawDelegationRewards(ctx, delegatorAddress, oldValAddress)
+	}
+
+	// Comission
+	// explicitly setting validator withdrawal address, in case it has no self-delegation in the loop above
+	dk.SetDelegatorWithdrawAddr(ctx, oldValAccAddress, newValAccAddress)
+	dk.WithdrawValidatorCommission(ctx, oldValAddress)
+}
+
 func addrToValAddr(address string) (sdk.ValAddress, error) {
-	valAddr, err := sdk.ValAddressFromBech32(address)
+	bytes, err := sdk.GetFromBech32(address, "odinvaloper")
 	if err != nil {
-		log.Printf("account address is not valid bech32: %s", valAddr)
+		log.Printf("account address %s is not valid bech32: %s", address, err)
 		return nil, err
 	}
+
+	valAddr := sdk.ValAddress(bytes)
 	return valAddr, nil
 }
 
@@ -102,7 +131,6 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAdd
 		k.RemoveDelegation(ctx, delegation)
 	}
 }
-
 
 func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newAccAddress sdk.AccAddress) {
 	for _, delegation := range getDelegations(ctx, k, oldAddress) {
@@ -141,7 +169,7 @@ func getAddresses() ([][]sdk.AccAddress, error) {
 		for _, addr := range addrs {
 			accAddr, err := sdk.AccAddressFromBech32(addr)
 			if err != nil {
-				log.Printf("account address is not valid bech32: %s", accAddr)
+				log.Printf("account address is not valid bech32: %s: %s", accAddr, err)
 				return nil, err
 			}
 			accaddrs = append(accaddrs, accAddr)
@@ -163,6 +191,7 @@ func CreateUpgradeHandler(
 
 		addresses, err := getAddresses()
 		if err != nil {
+			log.Printf("Error when retrieving addresses from getAddresses: %s", err)
 			return nil, err
 		}
 
@@ -191,7 +220,6 @@ func CreateUpgradeHandler(
 		
 		DanValAddr, err := addrToValAddr(DefiantLabNewAccAddress)
 		if err != nil {
-			log.Printf("%v", err)
 			return nil, err
 		}
 		createValidator(ctx, *keepers.StakingKeeper, string(DanValAddr), &DanPubKey, DanOldVal.Description, DanOldVal.Commission)
@@ -209,7 +237,7 @@ func CreateUpgradeHandler(
 
 		Odin3PubKeyBytes, err := base64.StdEncoding.DecodeString(OdinMainnet3ValPubKey)
 		if err != nil {
-			log.Printf("%v", err)
+			log.Printf("Error whend decoding public key from string %v", err)
 			return nil, err
 		}
 		
@@ -218,17 +246,22 @@ func CreateUpgradeHandler(
 		}
 		Odin3ValAddr, err := addrToValAddr(OdinMainnet3NewAccAddress)
 		if err != nil {
-			log.Printf("%v", err)
 			return nil, err
 		}
 
 		createValidator(ctx, *keepers.StakingKeeper, string(Odin3ValAddr), &Odin3PubKey, Odin3OldVal.Description, Odin3OldVal.Commission)
+		
+		// rewards and comission
+		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, DanOldValAddress, DanValAddr)
+		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
+
 		for _, addrs := range addresses {
 
 			ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", addrs[0], addrs[1]))
 			balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, addrs[0])
 
 			if err != nil {
+				log.Printf("Error when retrieving balance for address %s: %s",  addrs[0], err)
 				return nil, err
 			}
 			
@@ -255,6 +288,7 @@ func CreateUpgradeHandler(
 
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {
+			log.Printf("Error when running migrations: %s", err)
 			return nil, err
 		}
 		return newVM, err
