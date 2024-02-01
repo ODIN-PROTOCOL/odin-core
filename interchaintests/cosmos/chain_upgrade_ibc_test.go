@@ -398,7 +398,7 @@ func AttributeValue(events []abcitypes.Event, eventType, attrKey string) (string
 func DownloadGenesis() error {
 
 	// Get the data
-	resp, err := http.Get("https://storage.googleapis.com/odin-mainnet-freya/genesis-4.1.json ")
+	resp, err := http.Get("https://storage.googleapis.com/odin-mainnet-freya/genesis-4.1.json")
 	if err != nil {
 		return err
 	}
