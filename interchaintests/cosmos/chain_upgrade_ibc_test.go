@@ -9,13 +9,13 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	abcitypes "github.com/cometbft/cometbft/abci/types"
-	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
-	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v7/conformance"
-	"github.com/strangelove-ventures/interchaintest/v7/ibc"
-	"github.com/strangelove-ventures/interchaintest/v7/relayer"
-	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
+	interchaintest "github.com/odin-protocol/interchaintest/v7"
+	"github.com/odin-protocol/interchaintest/v7/chain/cosmos"
+	"github.com/odin-protocol/interchaintest/v7/conformance"
+	"github.com/odin-protocol/interchaintest/v7/ibc"
+	"github.com/odin-protocol/interchaintest/v7/relayer"
+	"github.com/odin-protocol/interchaintest/v7/testreporter"
+	"github.com/odin-protocol/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zaptest"
 )
@@ -28,7 +28,7 @@ const (
 )
 
 func TestOdinUpgradeIBC(t *testing.T) {
-	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "multiverse")
+	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "v7_10")
 }
 
 func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion string, upgradeName string) {
@@ -40,8 +40,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 
 	// SDK v45 params for Juno genesis
 	shortVoteGenesis := []cosmos.GenesisKV{
-		cosmos.NewGenesisKV("app_state.gov.params.voting_period", "20s"),      //votingPeriod),
-		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", "20s"), //maxDepositPeriod),
+		cosmos.NewGenesisKV("app_state.gov.params.voting_period", votingPeriod),
+		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", maxDepositPeriod),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", "loki"),
 	}
 
@@ -69,6 +69,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 				GasAdjustment:  1.3,
 				TrustingPeriod: "508h",
 				NoHostMount:    false,
+				//SkipGenTx:      true,
+				GenesisPath: "genesis.json",
 			},
 		},
 		{
@@ -135,7 +137,7 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	haltHeight := height + haltHeightDelta
 
 	proposal := cosmos.SoftwareUpgradeProposal{
-		Deposit:     "500000000" + chain.Config().Denom, // greater than min deposit
+		Deposit:     "1000000000" + chain.Config().Denom, // greater than min deposit
 		Title:       "Chain Upgrade 1",
 		Name:        upgradeName,
 		Description: "First chain software upgrade",
@@ -171,7 +173,7 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	//require.NoError(t, err, "error submitting software upgrade proposal tx")
 
 	//for i := 0; i < 5; i++ {
-	//	res, _, err := chain.FullNodes[0].ExecQuery(ctx, "gov", "proposals")
+	//	res, _, err := chain.Validators[0].ExecQuery(ctx, "gov", "proposals")
 	//	fmt.Println(res)
 	//	proposal, err := chain.QueryProposal(ctx, proposalID)
 	//	fmt.Println(proposal)
@@ -222,6 +224,143 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	// test IBC conformance after chain upgrade on same path
 	conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
 }
+
+//
+//func StartWithGenesisFile(
+//	ctx context.Context,
+//	testName string,
+//	client *client.Client,
+//	network string,
+//	genesisFilePath string,
+//	c *cosmos.CosmosChain,
+//) error {
+//	genBz, err := os.ReadFile(genesisFilePath)
+//	if err != nil {
+//		return fmt.Errorf("failed to read genesis file: %w", err)
+//	}
+//
+//	chainCfg := c.Config()
+//
+//	var genesisFile cosmos.GenesisFile
+//	if err := json.Unmarshal(genBz, &genesisFile); err != nil {
+//		return err
+//	}
+//
+//	genesisValidators := genesisFile.Validators
+//	totalPower := int64(0)
+//
+//	validatorsWithPower := make([]cosmos.ValidatorWithIntPower, 0)
+//
+//	for _, genesisValidator := range genesisValidators {
+//		power, err := strconv.ParseInt(genesisValidator.Power, 10, 64)
+//		if err != nil {
+//			return err
+//		}
+//		totalPower += power
+//		validatorsWithPower = append(validatorsWithPower, cosmos.ValidatorWithIntPower{
+//			Address:      genesisValidator.Address,
+//			Power:        power,
+//			PubKeyBase64: genesisValidator.PubKey.Value,
+//		})
+//	}
+//
+//	sort.Slice(validatorsWithPower, func(i, j int) bool {
+//		return validatorsWithPower[i].Power > validatorsWithPower[j].Power
+//	})
+//
+//	var eg errgroup.Group
+//	var mu sync.Mutex
+//	genBzReplace := func(find, replace []byte) {
+//		mu.Lock()
+//		defer mu.Unlock()
+//		genBz = bytes.ReplaceAll(genBz, find, replace)
+//	}
+//
+//	twoThirdsConsensus := int64(math.Ceil(float64(totalPower) * 2 / 3))
+//	totalConsensus := int64(0)
+//
+//	var activeVals []cosmos.ValidatorWithIntPower
+//	for _, validator := range validatorsWithPower {
+//		activeVals = append(activeVals, validator)
+//
+//		totalConsensus += validator.Power
+//
+//		if totalConsensus > twoThirdsConsensus {
+//			break
+//		}
+//	}
+//
+//	c.numValidators = len(activeVals)
+//
+//	if err := c.initializeChainNodes(ctx, testName, client, network); err != nil {
+//		return err
+//	}
+//
+//	if err := c.prepNodes(ctx, true, nil, types.Coin{}); err != nil {
+//		return err
+//	}
+//
+//	if c.cfg.PreGenesis != nil {
+//		err := c.cfg.PreGenesis(chainCfg)
+//		if err != nil {
+//			return err
+//		}
+//	}
+//
+//	for i, validator := range activeVals {
+//		v := c.Validators[i]
+//		validator := validator
+//		eg.Go(func() error {
+//			testNodePubKeyJsonBytes, err := v.ReadFile(ctx, "config/priv_validator_key.json")
+//			if err != nil {
+//				return fmt.Errorf("failed to read priv_validator_key.json: %w", err)
+//			}
+//
+//			var testNodePrivValFile PrivValidatorKeyFile
+//			if err := json.Unmarshal(testNodePubKeyJsonBytes, &testNodePrivValFile); err != nil {
+//				return fmt.Errorf("failed to unmarshal priv_validator_key.json: %w", err)
+//			}
+//
+//			// modify genesis file overwriting validators address with the one generated for this test node
+//			genBzReplace([]byte(validator.Address), []byte(testNodePrivValFile.Address))
+//
+//			// modify genesis file overwriting validators base64 pub_key.value with the one generated for this test node
+//			genBzReplace([]byte(validator.PubKeyBase64), []byte(testNodePrivValFile.PubKey.Value))
+//
+//			existingValAddressBytes, err := hex.DecodeString(validator.Address)
+//			if err != nil {
+//				return err
+//			}
+//
+//			testNodeAddressBytes, err := hex.DecodeString(testNodePrivValFile.Address)
+//			if err != nil {
+//				return err
+//			}
+//
+//			valConsPrefix := fmt.Sprintf("%svalcons", chainCfg.Bech32Prefix)
+//
+//			existingValBech32ValConsAddress, err := bech32.ConvertAndEncode(valConsPrefix, existingValAddressBytes)
+//			if err != nil {
+//				return err
+//			}
+//
+//			testNodeBech32ValConsAddress, err := bech32.ConvertAndEncode(valConsPrefix, testNodeAddressBytes)
+//			if err != nil {
+//				return err
+//			}
+//
+//			genBzReplace([]byte(existingValBech32ValConsAddress), []byte(testNodeBech32ValConsAddress))
+//
+//			return nil
+//		})
+//	}
+//
+//	if err := eg.Wait(); err != nil {
+//		return err
+//	}
+//
+//	return c.startWithFinalGenesis(ctx, genBz)
+//}
 
 func AttributeValue(events []abcitypes.Event, eventType, attrKey string) (string, bool) {
 	for _, event := range events {
