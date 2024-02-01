@@ -1226,8 +1226,8 @@ github.com/oasisprotocol/oasis-core/go v0.2202.7 h1:BAaqQMc474ctQeith+vkckPXi7Lp
 github.com/oasisprotocol/oasis-core/go v0.2202.7/go.mod h1:hKUgtuPPq371HokUQL5ashT5MZLZxK/VkWNKRLb9m+w=
 github.com/odin-protocol/go-owasm v0.2.7 h1:Ert7YQzmDwUviwo2aQn51b2tbeblxuUCOtfmOzQMgWY=
 github.com/odin-protocol/go-owasm v0.2.7/go.mod h1:X7+reM/OtPVX8hso8sPumh/yxhkU7Pkyv+NS/faDpJY=
-github.com/odin-protocol/interchaintest/v7 v7.0.10 h1:eJfn1CGpuaJ3EGD5qbLw2Jl4f77Hvx//Ksa4P+w8HDw=
-github.com/odin-protocol/interchaintest/v7 v7.0.10/go.mod h1:GQe9JFZ82TrcMbuD0MHDYtqphpv6O1sNU66c/bwPlGE=
+github.com/odin-protocol/interchaintest/v7 v7.0.11 h1:mc03oQluZEEqYg5/zKXpgUy+94G/ArAHrpJXuuqgL0U=
+github.com/odin-protocol/interchaintest/v7 v7.0.11/go.mod h1:GQe9JFZ82TrcMbuD0MHDYtqphpv6O1sNU66c/bwPlGE=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=

@@ -3,6 +3,9 @@ package cosmos_test
 import (
 	"context"
 	"encoding/base64"
+	"io"
+	"net/http"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -37,6 +40,9 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	}
 
 	t.Parallel()
+
+	err := DownloadGenesis()
+	require.NoError(t, err)
 
 	// SDK v45 params for Juno genesis
 	shortVoteGenesis := []cosmos.GenesisKV{
@@ -387,4 +393,25 @@ func AttributeValue(events []abcitypes.Event, eventType, attrKey string) (string
 		}
 	}
 	return "", false
+}
+
+func DownloadGenesis() error {
+
+	// Get the data
+	resp, err := http.Get("https://storage.googleapis.com/odin-mainnet-freya/genesis-4.1.json ")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Create the file
+	out, err := os.Create("genesis.json")
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
 }
