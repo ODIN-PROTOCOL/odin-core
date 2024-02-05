@@ -67,7 +67,7 @@ func getDelegations(
 }
 
 
-func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, address string, pubKey cryptotypes.PubKey, description stakingtypes.Description, comission stakingtypes.Commission) (error){
+func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, address string, pubKey cryptotypes.PubKey, description stakingtypes.Description, comission stakingtypes.Commission) (stakingtypes.Validator,  error){
 
     valAddr := sdk.ValAddress(address)
     minSelfDelegation := sdk.OneInt()
@@ -76,14 +76,14 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
     validator, err := stakingtypes.NewValidator(valAddr, pubKey, description)
 	if err != nil {
 		log.Printf("Error when creating a validator %v: %s", valAddr, err)
-		return err
+		return stakingtypes.Validator{}, err
 	}
 
     validator.MinSelfDelegation = minSelfDelegation
 
     // Set the validator in the store
     stakingkeeper.SetValidator(ctx, validator)
-	return nil
+	return validator, nil
 }
 
 
@@ -126,7 +126,8 @@ func addrToValAddr(address string) (sdk.ValAddress, error) {
 func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
 	for _, delegation := range k.GetValidatorDelegations(ctx, oldValAddress) {
 		newDelegation := stakingtypes.Delegation{DelegatorAddress: delegation.DelegatorAddress, ValidatorAddress: newValAddress.String(), Shares: delegation.Shares}
-
+		log.Printf("Moving validator delegation from %v to %v", oldValAddress,  newDelegation.ValidatorAddress)
+		
 		k.SetDelegation(ctx, newDelegation)
 		k.RemoveDelegation(ctx, delegation)
 	}
@@ -135,7 +136,8 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAdd
 func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newAccAddress sdk.AccAddress) {
 	for _, delegation := range getDelegations(ctx, k, oldAddress) {
 		newDelegation := stakingtypes.Delegation{DelegatorAddress: newAccAddress.String(), ValidatorAddress: delegation.ValidatorAddress, Shares: delegation.Shares}
-
+		log.Printf("Moving validator delegation from %v to %v", delegation.ValidatorAddress, newDelegation.ValidatorAddress)
+		
 		k.SetDelegation(ctx, newDelegation)
 		k.RemoveDelegation(ctx, delegation)
 	}
@@ -222,7 +224,15 @@ func CreateUpgradeHandler(
 		if err != nil {
 			return nil, err
 		}
-		createValidator(ctx, *keepers.StakingKeeper, string(DanValAddr), &DanPubKey, DanOldVal.Description, DanOldVal.Commission)
+
+		DanNewVal, err := createValidator(ctx, *keepers.StakingKeeper, string(DanValAddr), &DanPubKey, DanOldVal.Description, DanOldVal.Commission)
+		if err != nil {
+			return nil, err
+		}
+
+		ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", DanOldValAddress, DanValAddr))
+		moveValidatorDelegations(ctx, *keepers.StakingKeeper, DanOldValAddress, DanValAddr)
+		DanNewVal.UpdateStatus(stakingtypes.Bonded)
 
 		// Creating new Mainnet3 validator
 		Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
@@ -249,8 +259,15 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
-		createValidator(ctx, *keepers.StakingKeeper, string(Odin3ValAddr), &Odin3PubKey, Odin3OldVal.Description, Odin3OldVal.Commission)
-		
+		Odin3Val, err := createValidator(ctx, *keepers.StakingKeeper, string(Odin3ValAddr), &Odin3PubKey, Odin3OldVal.Description, Odin3OldVal.Commission)
+		if err != nil {
+			return nil, err
+		}
+
+		ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s",  Odin3OldValAddress, Odin3ValAddr))
+		moveValidatorDelegations(ctx, *keepers.StakingKeeper, Odin3OldValAddress, Odin3ValAddr)
+		Odin3Val.UpdateStatus(stakingtypes.Bonded)
+
 		// rewards and comission
 		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, DanOldValAddress, DanValAddr)
 		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
@@ -267,24 +284,14 @@ func CreateUpgradeHandler(
 			
 			// sending balances
 			sendCoins(ctx, keepers.BankKeeper, addrs[0], addrs[1], balance)
-			
+						
 			// moving delegations
 			ctx.Logger().Info(fmt.Sprintf("Moving account  delegations from %s to %s", addrs[0], addrs[1]))
 			moveDelegations(ctx, *keepers.StakingKeeper, addrs[0], addrs[1])
-
-			currentValidatorAddress, err := addrToValAddr(addrs[0].String())
-			if err != nil {
-				return nil, err
-			}
-
-			newValidatorAddress, err := addrToValAddr(addrs[1].String())
-			if err != nil {
-				return nil, err
-			}
-
-			ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", currentValidatorAddress, newValidatorAddress))
-			moveValidatorDelegations(ctx, *keepers.StakingKeeper, currentValidatorAddress, newValidatorAddress)
 		}
+		
+		DanOldVal.UpdateStatus(stakingtypes.Unbonded)
+		Odin3OldVal.UpdateStatus(stakingtypes.Unbonded)
 
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {
@@ -297,7 +304,7 @@ func CreateUpgradeHandler(
 
 
 var Upgrade = upgrades.Upgrade{
-	UpgradeName:          "v7_10",
+	UpgradeName:          "v0.7.10",
 	CreateUpgradeHandler: CreateUpgradeHandler,
 
 }
