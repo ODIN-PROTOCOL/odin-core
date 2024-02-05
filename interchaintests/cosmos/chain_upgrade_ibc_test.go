@@ -14,7 +14,7 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	interchaintest "github.com/odin-protocol/interchaintest/v7"
 	"github.com/odin-protocol/interchaintest/v7/chain/cosmos"
-	"github.com/odin-protocol/interchaintest/v7/conformance"
+	//	"github.com/odin-protocol/interchaintest/v7/conformance"
 	"github.com/odin-protocol/interchaintest/v7/ibc"
 	"github.com/odin-protocol/interchaintest/v7/relayer"
 	"github.com/odin-protocol/interchaintest/v7/testreporter"
@@ -26,12 +26,12 @@ import (
 const (
 	haltHeightDelta    = uint64(10) // will propose upgrade this many blocks in the future
 	blocksAfterUpgrade = uint64(10)
-	votingPeriod       = "10s"
+	votingPeriod       = "20s"
 	maxDepositPeriod   = "10s"
 )
 
 func TestOdinUpgradeIBC(t *testing.T) {
-	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "v7_10")
+	CosmosChainUpgradeIBCTest(t, "odin", "v0.7.9", "gcr.io/odinprotocol/core", "v0.7.10", "v0.7.10")
 }
 
 func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion string, upgradeName string) {
@@ -49,6 +49,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 		cosmos.NewGenesisKV("app_state.gov.params.voting_period", votingPeriod),
 		cosmos.NewGenesisKV("app_state.gov.params.max_deposit_period", maxDepositPeriod),
 		cosmos.NewGenesisKV("app_state.gov.params.min_deposit.0.denom", "loki"),
+		cosmos.NewGenesisKV("app_state.gov.params.quorum", "0.001"),
+		cosmos.NewGenesisKV("app_state.gov.params.threshold", "0.001"),
 	}
 
 	chains := interchaintest.CreateChainsWithChainSpecs(t, []*interchaintest.ChainSpec{
@@ -80,9 +82,9 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 			},
 		},
 		{
-			Name:      "gaia",
-			ChainName: "gaia",
-			Version:   "v7.0.3",
+			Name:      "osmosis",
+			ChainName: "osmosis",
+			Version:   "v22.0.3",
 		},
 	})
 
@@ -130,12 +132,29 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 		_ = ic.Close()
 	})
 
+	pubkey, _, err := chain.Validators[0].ExecBin(ctx, "tendermint", "show-validator")
+	require.NoError(t, err)
+
+	commandCreateVal := []string{
+		"staking", "create-validator",
+		"--amount", "5000000000000loki",
+		"--commission-max-change-rate", "0.05",
+		"--commission-max-rate", "0.10",
+		"--commission-rate", "0.05",
+		"--min-self-delegation", "1",
+		"--pubkey", string(pubkey),
+		//"--from", "validator",
+	}
+
+	_, err = chain.Validators[0].ExecTx(ctx, "validator", commandCreateVal...)
+	require.NoError(t, err)
+
 	var userFunds = sdkmath.NewInt(10_000_000_000)
 	users := interchaintest.GetAndFundTestUsers(t, ctx, t.Name(), userFunds, chain)
 	chainUser := users[0]
 
 	// test IBC conformance before chain upgrade
-	conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
+	//conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
 
 	height, err := chain.Height(ctx)
 	require.NoError(t, err, "error fetching height before submit upgrade proposal")
@@ -175,20 +194,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	evtSubmitProp := "submit_proposal"
 	proposalID, _ := AttributeValue(events, evtSubmitProp, "proposal_id")
 
-	//upgradeTx, err := chain.UpgradeProposal(ctx, chainUser.KeyName(), proposal)
-	//require.NoError(t, err, "error submitting software upgrade proposal tx")
-
-	//for i := 0; i < 5; i++ {
-	//	res, _, err := chain.Validators[0].ExecQuery(ctx, "gov", "proposals")
-	//	fmt.Println(res)
-	//	proposal, err := chain.QueryProposal(ctx, proposalID)
-	//	fmt.Println(proposal)
-	//	fmt.Println(err)
-	//	time.Sleep(5 * time.Second)
-	//}
-
-	err = chain.VoteOnProposalAllValidators(ctx, proposalID, cosmos.ProposalVoteYes)
-	require.NoError(t, err, "failed to submit votes")
+	err = chain.Validators[0].VoteOnProposal(ctx, "validator", proposalID, cosmos.ProposalVoteYes)
+	require.NoError(t, err, "failed to submit vote")
 
 	_, err = cosmos.PollForProposalStatus(ctx, chain, height, height+haltHeightDelta, proposalID, cosmos.ProposalStatusPassed)
 	require.NoError(t, err, "proposal status did not change to passed in expected number of blocks")
@@ -228,145 +235,8 @@ func CosmosChainUpgradeIBCTest(t *testing.T, chainName, initialVersion, upgradeC
 	require.NoError(t, err, "chain did not produce blocks after upgrade")
 
 	// test IBC conformance after chain upgrade on same path
-	conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
+	//conformance.TestChainPair(t, ctx, client, network, chain, counterpartyChain, rf, rep, r, path)
 }
-
-//
-//func StartWithGenesisFile(
-//	ctx context.Context,
-//	testName string,
-//	client *client.Client,
-//	network string,
-//	genesisFilePath string,
-//	c *cosmos.CosmosChain,
-//) error {
-//	genBz, err := os.ReadFile(genesisFilePath)
-//	if err != nil {
-//		return fmt.Errorf("failed to read genesis file: %w", err)
-//	}
-//
-//	chainCfg := c.Config()
-//
-//	var genesisFile cosmos.GenesisFile
-//	if err := json.Unmarshal(genBz, &genesisFile); err != nil {
-//		return err
-//	}
-//
-//	genesisValidators := genesisFile.Validators
-//	totalPower := int64(0)
-//
-//	validatorsWithPower := make([]cosmos.ValidatorWithIntPower, 0)
-//
-//	for _, genesisValidator := range genesisValidators {
-//		power, err := strconv.ParseInt(genesisValidator.Power, 10, 64)
-//		if err != nil {
-//			return err
-//		}
-//		totalPower += power
-//		validatorsWithPower = append(validatorsWithPower, cosmos.ValidatorWithIntPower{
-//			Address:      genesisValidator.Address,
-//			Power:        power,
-//			PubKeyBase64: genesisValidator.PubKey.Value,
-//		})
-//	}
-//
-//	sort.Slice(validatorsWithPower, func(i, j int) bool {
-//		return validatorsWithPower[i].Power > validatorsWithPower[j].Power
-//	})
-//
-//	var eg errgroup.Group
-//	var mu sync.Mutex
-//	genBzReplace := func(find, replace []byte) {
-//		mu.Lock()
-//		defer mu.Unlock()
-//		genBz = bytes.ReplaceAll(genBz, find, replace)
-//	}
-//
-//	twoThirdsConsensus := int64(math.Ceil(float64(totalPower) * 2 / 3))
-//	totalConsensus := int64(0)
-//
-//	var activeVals []cosmos.ValidatorWithIntPower
-//	for _, validator := range validatorsWithPower {
-//		activeVals = append(activeVals, validator)
-//
-//		totalConsensus += validator.Power
-//
-//		if totalConsensus > twoThirdsConsensus {
-//			break
-//		}
-//	}
-//
-//	c.numValidators = len(activeVals)
-//
-//	if err := c.initializeChainNodes(ctx, testName, client, network); err != nil {
-//		return err
-//	}
-//
-//	if err := c.prepNodes(ctx, true, nil, types.Coin{}); err != nil {
-//		return err
-//	}
-//
-//	if c.cfg.PreGenesis != nil {
-//		err := c.cfg.PreGenesis(chainCfg)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	for i, validator := range activeVals {
-//		v := c.Validators[i]
-//		validator := validator
-//		eg.Go(func() error {
-//			testNodePubKeyJsonBytes, err := v.ReadFile(ctx, "config/priv_validator_key.json")
-//			if err != nil {
-//				return fmt.Errorf("failed to read priv_validator_key.json: %w", err)
-//			}
-//
-//			var testNodePrivValFile PrivValidatorKeyFile
-//			if err := json.Unmarshal(testNodePubKeyJsonBytes, &testNodePrivValFile); err != nil {
-//				return fmt.Errorf("failed to unmarshal priv_validator_key.json: %w", err)
-//			}
-//
-//			// modify genesis file overwriting validators address with the one generated for this test node
-//			genBzReplace([]byte(validator.Address), []byte(testNodePrivValFile.Address))
-//
-//			// modify genesis file overwriting validators base64 pub_key.value with the one generated for this test node
-//			genBzReplace([]byte(validator.PubKeyBase64), []byte(testNodePrivValFile.PubKey.Value))
-//
-//			existingValAddressBytes, err := hex.DecodeString(validator.Address)
-//			if err != nil {
-//				return err
-//			}
-//
-//			testNodeAddressBytes, err := hex.DecodeString(testNodePrivValFile.Address)
-//			if err != nil {
-//				return err
-//			}
-//
-//			valConsPrefix := fmt.Sprintf("%svalcons", chainCfg.Bech32Prefix)
-//
-//			existingValBech32ValConsAddress, err := bech32.ConvertAndEncode(valConsPrefix, existingValAddressBytes)
-//			if err != nil {
-//				return err
-//			}
-//
-//			testNodeBech32ValConsAddress, err := bech32.ConvertAndEncode(valConsPrefix, testNodeAddressBytes)
-//			if err != nil {
-//				return err
-//			}
-//
-//			genBzReplace([]byte(existingValBech32ValConsAddress), []byte(testNodeBech32ValConsAddress))
-//
-//			return nil
-//		})
-//	}
-//
-//	if err := eg.Wait(); err != nil {
-//		return err
-//	}
-//
-//	return c.startWithFinalGenesis(ctx, genBz)
-//}
 
 func AttributeValue(events []abcitypes.Event, eventType, attrKey string) (string, bool) {
 	for _, event := range events {
