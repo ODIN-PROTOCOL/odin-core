@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -80,9 +81,11 @@ func createValidator(ctx sdk.Context, stakingkeeper stakingkeeper.Keeper, addres
 	}
 
     validator.MinSelfDelegation = minSelfDelegation
+	validator.Status = stakingtypes.Bonded
+    validator.Tokens = sdk.ZeroInt()
+	validator.DelegatorShares = sdk.ZeroDec()
+	validator.Commission = comission
 
-    // Set the validator in the store
-    stakingkeeper.SetValidator(ctx, validator)
 	return validator, nil
 }
 
@@ -123,23 +126,51 @@ func addrToValAddr(address string) (sdk.ValAddress, error) {
 	return valAddr, nil
 }
 
-func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
-	for _, delegation := range k.GetValidatorDelegations(ctx, oldValAddress) {
-		newDelegation := stakingtypes.Delegation{DelegatorAddress: delegation.DelegatorAddress, ValidatorAddress: newValAddress.String(), Shares: delegation.Shares}
-		log.Printf("Moving validator delegation from %v to %v", oldValAddress,  newDelegation.ValidatorAddress)
+func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldVal stakingtypes.Validator, newVal stakingtypes.Validator) {
+	cumOldValShares := math.LegacyZeroDec()
+
+	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
 		
-		k.SetDelegation(ctx, newDelegation)
+		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress,  newVal.OperatorAddress)
+
+		// Remove the delegation to the old validator
 		k.RemoveDelegation(ctx, delegation)
+
+		// Create a new delegation to the new validator
+		newDelegation := stakingtypes.Delegation{
+			DelegatorAddress: delegation.DelegatorAddress,
+			ValidatorAddress: newVal.OperatorAddress,
+			Shares:           delegation.Shares,
+		}
+		k.SetDelegation(ctx, newDelegation)
+		cumOldValShares = cumOldValShares.Add(delegation.Shares)
 	}
+	
+	// tokens
+	tokens := oldVal.TokensFromShares(cumOldValShares) 
+	oldVal.Tokens = oldVal.Tokens.Sub(tokens.TruncateInt())
+	newVal.Tokens = oldVal.Tokens.Add(tokens.TruncateInt())
+
+	// shares 
+	oldVal.DelegatorShares = sdk.ZeroDec()
+	newVal.DelegatorShares = cumOldValShares
+
+	// Update validators in the store
+	k.SetValidator(ctx, oldVal)
+	k.SetValidator(ctx, newVal)
+
+	k.SetValidatorByConsAddr(ctx, oldVal)
+	k.SetValidatorByConsAddr(ctx, newVal)
+
+	k.SetValidatorByPowerIndex(ctx, oldVal)
+	k.SetValidatorByPowerIndex(ctx, newVal)
 }
 
-func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newAccAddress sdk.AccAddress) {
+func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newVal stakingtypes.Validator) {
 	for _, delegation := range getDelegations(ctx, k, oldAddress) {
-		newDelegation := stakingtypes.Delegation{DelegatorAddress: newAccAddress.String(), ValidatorAddress: delegation.ValidatorAddress, Shares: delegation.Shares}
-		log.Printf("Moving validator delegation from %v to %v", delegation.ValidatorAddress, newDelegation.ValidatorAddress)
-		
-		k.SetDelegation(ctx, newDelegation)
-		k.RemoveDelegation(ctx, delegation)
+		delegation.ValidatorAddress = newVal.OperatorAddress
+		log.Printf("Moving delegation from %v to %v", delegation.DelegatorAddress,  newVal.GetMoniker())
+		k.SetDelegation(ctx, delegation)
 	}
 }
 
@@ -230,9 +261,24 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
+		for _, addrs := range addresses {
+
+			ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", addrs[0], addrs[1]))
+			balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, addrs[0])
+
+			if err != nil {
+				log.Printf("Error when retrieving balance for address %s: %s",  addrs[0], err)
+				return nil, err
+			}
+			
+			// sending balances
+			sendCoins(ctx, keepers.BankKeeper, addrs[0], addrs[1], balance)
+		}
+
 		ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", DanOldValAddress, DanValAddr))
-		moveValidatorDelegations(ctx, *keepers.StakingKeeper, DanOldValAddress, DanValAddr)
-		DanNewVal.UpdateStatus(stakingtypes.Bonded)
+		
+		moveValidatorDelegations(ctx, *keepers.StakingKeeper, DanOldVal, DanNewVal)
+		moveDelegations(ctx, *keepers.StakingKeeper, sdk.AccAddress(DefiantLabOldAccAddress), DanNewVal)
 
 		// Creating new Mainnet3 validator
 		Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
@@ -265,30 +311,15 @@ func CreateUpgradeHandler(
 		}
 
 		ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s",  Odin3OldValAddress, Odin3ValAddr))
-		moveValidatorDelegations(ctx, *keepers.StakingKeeper, Odin3OldValAddress, Odin3ValAddr)
-		Odin3Val.UpdateStatus(stakingtypes.Bonded)
 		
+		moveValidatorDelegations(ctx, *keepers.StakingKeeper, Odin3OldVal, Odin3Val)
+		moveDelegations(ctx, *keepers.StakingKeeper, sdk.AccAddress(OdinMainnet3OldAccAddress), Odin3Val)
+
+		Odin3Val.UpdateStatus(stakingtypes.Bonded)
+
 		// rewards and comission
 		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, DanOldValAddress, DanValAddr)
 		withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
-
-		for _, addrs := range addresses {
-
-			ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", addrs[0], addrs[1]))
-			balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, addrs[0])
-
-			if err != nil {
-				log.Printf("Error when retrieving balance for address %s: %s",  addrs[0], err)
-				return nil, err
-			}
-			
-			// sending balances
-			sendCoins(ctx, keepers.BankKeeper, addrs[0], addrs[1], balance)
-						
-			// moving delegations
-			ctx.Logger().Info(fmt.Sprintf("Moving account  delegations from %s to %s", addrs[0], addrs[1]))
-			moveDelegations(ctx, *keepers.StakingKeeper, addrs[0], addrs[1])
-		}
 		
 		DanOldVal.UpdateStatus(stakingtypes.Unbonded)
 		Odin3OldVal.UpdateStatus(stakingtypes.Unbonded)
