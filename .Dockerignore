@@ -1,0 +1,7 @@
+local_test/*
+*.
+docker-compose.yml
+Dockerfile
+LICENSE
+README.md
+title.svg
