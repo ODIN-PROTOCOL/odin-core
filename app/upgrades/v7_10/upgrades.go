@@ -212,6 +212,53 @@ func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sd
 	return nil
 }
 
+
+func forceCompleteUnbonding(ctx sdk.Context, keepers *keepers.AppKeepers, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (sdk.Coins, error) {
+	ubd, found := keepers.StakingKeeper.GetUnbondingDelegation(ctx, delAddr, valAddr)
+	if !found {
+		return nil, stakingtypes.ErrNoUnbondingDelegation
+	}
+
+	bondDenom := keepers.StakingKeeper.GetParams(ctx).BondDenom
+	balances := sdk.NewCoins()
+
+	delegatorAddress, err := sdk.AccAddressFromBech32(ubd.DelegatorAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	// loop through all the entries and complete unbonding mature entries
+	for i := 0; i < len(ubd.Entries); i++ {
+		entry := ubd.Entries[i]
+		if !entry.OnHold() {
+			ubd.RemoveEntry(int64(i))
+			i--
+			keepers.StakingKeeper.DeleteUnbondingIndex(ctx, entry.UnbondingId)
+
+			// track undelegation only when remaining or truncated shares are non-zero
+			if !entry.Balance.IsZero() {
+				amt := sdk.NewCoin(bondDenom, entry.Balance)
+				if err := keepers.BankKeeper.UndelegateCoinsFromModuleToAccount(
+					ctx, stakingtypes.NotBondedPoolName, delegatorAddress, sdk.NewCoins(amt),
+				); err != nil {
+					return nil, err
+				}
+
+				balances = balances.Add(amt)
+			}
+		}
+	}
+
+	// set the unbonding delegation or remove it if there are no more entries
+	if len(ubd.Entries) == 0 {
+		keepers.StakingKeeper.RemoveUnbondingDelegation(ctx, ubd)
+	} else {
+		keepers.StakingKeeper.SetUnbondingDelegation(ctx, ubd)
+	}
+
+	return balances, nil
+}
+
 func moveSelfDelegation(ctx sdk.Context, keepers  *keepers.AppKeepers, oldDelegatorAddress sdk.AccAddress, newDelegatorAddress sdk.AccAddress, validatorAddr sdk.ValAddress) error {
     stakingKeeper := keepers.StakingKeeper
 	
@@ -221,16 +268,34 @@ func moveSelfDelegation(ctx sdk.Context, keepers  *keepers.AppKeepers, oldDelega
 		log.Printf("self delegation not found: %s", oldDelegatorAddress)
         return fmt.Errorf("self delegation not found")
     }
+	
+	// stakingKeeper.RemoveDelegation(ctx, delegation)
 
-    // Remove delegation from the old validator
-    stakingKeeper.RemoveDelegation(ctx, delegation)
+	// Unbonding
+	tm, err := stakingKeeper.Undelegate(ctx, oldDelegatorAddress, validatorAddr, delegation.Shares)
+	// amt, err := stakingKeeper.Unbond(ctx, oldDelegatorAddress, validatorAddr, delegation.Shares) 
+	log.Printf("Unbonding time from %v: %v", tm, oldDelegatorAddress)
+	if err != nil{
+		log.Printf("Error when unbonding %v: %v",  oldDelegatorAddress, err)
+		return err
+	}
+
+	selfBond, err := forceCompleteUnbonding(ctx, keepers, oldDelegatorAddress,  validatorAddr)
+	log.Printf("Unbonding finished with amount from %v: %v", selfBond, oldDelegatorAddress)
+
+	if err != nil{
+		log.Printf("Error when unbonding %v: %v",  oldDelegatorAddress, err)
+		return err
+	}
 
 	balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, oldDelegatorAddress)
+	
 	if err != nil {
 		log.Printf("Error when retrieving balance for address %s: %s",  oldDelegatorAddress, err)
 		return err
 	}
 
+	log.Printf("Balance after unbonding %s: %s",  oldDelegatorAddress, balance)
 	log.Printf("Sending coins from %v to %v (%v)", oldDelegatorAddress, newDelegatorAddress, balance)
 
 	err = sendCoins(ctx, keepers.BankKeeper, oldDelegatorAddress, newDelegatorAddress, balance)
@@ -239,29 +304,34 @@ func moveSelfDelegation(ctx sdk.Context, keepers  *keepers.AppKeepers, oldDelega
 		return err
 	}
 
-    // Assuming you've calculated or know the amount to redelegate
-    amount := delegation.Shares
-
-    // Create a new delegation to the new validator
-    newDelegation := stakingtypes.Delegation{
-        DelegatorAddress: newDelegatorAddress.String(),
-        ValidatorAddress: validatorAddr.String(),
-        Shares:           amount,
-    }
-	
-	err = stakingKeeper.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), validatorAddr) 
-	if err != nil {
-		log.Printf("Error when running hook before adding delegation %v to %v", delegation.GetDelegatorAddr(), validatorAddr)
-		return err
-	}
-    // Save the new delegation
-    stakingKeeper.SetDelegation(ctx, newDelegation)
-
-    // Update the old validator's and new validator's tokens and delegator shares
     validator, found := stakingKeeper.GetValidator(ctx, validatorAddr)
     if !found {
         return fmt.Errorf("old validator not found")
     }
+	
+ 	SelfDelegate(ctx, *keepers.StakingKeeper, keepers.BankKeeper, newDelegatorAddress, validator, selfBond)
+	if err != nil {
+		log.Printf("Error when self delegating to %v", newDelegatorAddress)
+		return err
+	}
+
+
+    // // Create a new delegation to the new validator
+    // newDelegation := stakingtypes.Delegation{
+    //     DelegatorAddress: newDelegatorAddress.String(),
+    //     ValidatorAddress: validatorAddr.String(),
+    //     Shares:           amount,
+    // }
+	
+	// err = stakingKeeper.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), validatorAddr) 
+	// if err != nil {
+	// 	log.Printf("Error when running hook before adding delegation %v to %v", delegation.GetDelegatorAddr(), validatorAddr)
+	// 	return err
+	// }
+    // // Save the new delegation
+    // stakingKeeper.SetDelegation(ctx, newDelegation)
+
+    // Update the old validator's and new validator's tokens and delegator shares
 
     // Convert shares to tokens if necessary. This example assumes `amount` is already in tokens.
     // You might need to adjust based on your actual data and the SDK's version.
@@ -300,23 +370,26 @@ func sendCoins(
 }
 
 
-func SelfDelegate(ctx sdk.Context, stakingKeeper stakingkeeper.Keeper, bankKeeper bankkeeper.Keeper, delegatorAddr sdk.AccAddress, validator stakingtypes.Validator, amount sdk.Coin) error {
-    // Ensure the delegator (validator account) has enough balance for the delegation
-    if !bankKeeper.HasBalance(ctx, delegatorAddr, amount) {
-        return sdkerrors.Wrapf(errortypes.ErrInsufficientFunds, "not enough balance to self-delegate to validator: %s", validator.OperatorAddress)
-    }
-
-    // Send coins from the delegator's account to the module account (staking module account) as part of delegation
-    err := bankKeeper.SendCoinsFromAccountToModule(ctx, delegatorAddr, stakingtypes.NotBondedPoolName, sdk.NewCoins(amount))
-    if err != nil {
-        return err
-    }
-
+func SelfDelegate(ctx sdk.Context, stakingKeeper stakingkeeper.Keeper, bankKeeper bankkeeper.Keeper, delegatorAddr sdk.AccAddress, validator stakingtypes.Validator, amount sdk.Coins) error {
     // Delegate tokens to the validator
-    _, err = stakingKeeper.Delegate(ctx, delegatorAddr, amount.Amount, stakingtypes.Unbonded, validator, true)
-    if err != nil {
-        return err
-    }
+	for _, balance := range amount {
+		
+		// Ensure the delegator (validator account) has enough balance for the delegation		
+		if !bankKeeper.HasBalance(ctx, delegatorAddr, balance) {
+			return sdkerrors.Wrapf(errortypes.ErrInsufficientFunds, "not enough balance to self-delegate to validator: %s", validator.OperatorAddress)
+		}
+		
+		// Send coins from the delegator's account to the module account (staking module account) as part of delegation
+		err := bankKeeper.SendCoinsFromAccountToModule(ctx, delegatorAddr, stakingtypes.NotBondedPoolName, amount)
+		if err != nil {
+			return err
+		}
+
+		_, err = stakingKeeper.Delegate(ctx, delegatorAddr, balance.Amount, stakingtypes.Unbonded, validator, true)
+		if err != nil {
+			return err
+		}
+	}
     return nil
 }
 
