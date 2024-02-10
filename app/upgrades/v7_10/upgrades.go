@@ -12,15 +12,14 @@ import (
 
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	sdkerrors "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
-	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
@@ -31,17 +30,20 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
-const DefiantLabOldAccAddress = "odin1dnmz4yzv73lr3lmauuaa0wpwn8zm8s20fyv396"
-// Prod: const DefiantLabAccAddress = "odin16dcwlyrwx8duucsr363zqqsf2prc5gv52uv6zk" 
-const DefiantLabAccAddress = "odin1t6hn2c9hrc33fa5slh9wtvv4ew2qhygl0rmc4q"
+const DefiantLabOldAccAddress = "odin1dnmz4yzv73lr3lmauuaa0wpwn8zm8s20fyv396"  
+const DefiantLabAccAddress = "odin16dcwlyrwx8duucsr363zqqsf2prc5gv52uv6zk" // Prod
+// const DefiantLabAccAddress = "odin1t6hn2c9hrc33fa5slh9wtvv4ew2qhygl0rmc4q" 
 
 //const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
 const OdinMainnet3OldAccAddress = "odin1s0p07h5n4v2nqh0jr2gprq5cphv2mgs9twppcx"
 const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
 
 // PubKeys
-// Prod: const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s="
-const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs="
+const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // Prod
+//const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs="  // Test
+
+const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
+// const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
 
 
 func getBalance(
@@ -65,23 +67,25 @@ func getBalance(
 	}
 }
 
-func CreateNewAccount(ctx sdk.Context, authKeeper keeper.AccountKeeper, address sdk.AccAddress) error {
+func CreateNewAccount(ctx sdk.Context, authKeeper keeper.AccountKeeper, address sdk.AccAddress, secpPubKey []byte) error {
     // Check if the account already exists
     account := authKeeper.GetAccount(ctx, address)
     if account != nil {
         return fmt.Errorf("account %s already exists", address.String())
     }
 
-    // Create a new account with the address
-    newAccount := authKeeper.NewAccountWithAddress(ctx, address)
-	
-	log.Printf("New account created %v: %v", address.String(), newAccount.GetAddress().String()) 
+    // Optionally, set any initial values or parameters for the new account
+    // For example, you might want to set an initial balance using the bank module
+	var pubkey cryptotypes.PubKey = &secp256k1.PubKey{Key: secpPubKey}
+
+    // Create a new account with the address and public key
+	newAccount := authKeeper.NewAccountWithAddress(ctx, address)
     if newAccount == nil {
         return fmt.Errorf("failed to create new account for address %s", address.String())
     }
-
-    // Optionally, set any initial values or parameters for the new account
-    // For example, you might want to set an initial balance using the bank module
+	
+	newAccount.SetPubKey(pubkey)
+	log.Printf("New account created %v: %v", address.String(), pubkey.String()) 
 
     // Save the new account to the state
     authKeeper.SetAccount(ctx, newAccount)
@@ -111,18 +115,17 @@ func InitializeValidatorSigningInfo(ctx sdk.Context, slashingKeeper slashingkeep
 
 func InitializeValidatorDistributionInfo(ctx sdk.Context, keepers *keepers.AppKeepers, validatorAddr sdk.ValAddress) {
 	// Initialize distribution information for the validator
-	// This might involve setting up initial values for the validator's historical rewards, current rewards, and so on.
+	// set initial historical rewards (period 0) with reference count of 1
+	keepers.DistrKeeper.SetValidatorHistoricalRewards(ctx, validatorAddr, 0, distrtypes.NewValidatorHistoricalRewards(sdk.DecCoins{}, 1))
 
-	initialRewards := distrtypes.NewValidatorHistoricalRewards(sdk.NewDecCoins(sdk.NewDecCoin("loki", sdk.ZeroInt())), 0)
-	keepers.DistrKeeper.SetValidatorHistoricalRewards(ctx, validatorAddr, 0, initialRewards)
+	// set current rewards (starting at period 1)
+	keepers.DistrKeeper.SetValidatorCurrentRewards(ctx, validatorAddr, distrtypes.NewValidatorCurrentRewards(sdk.DecCoins{}, 1))
 
-	// Initialize Validator Current Rewards
-	keepers.DistrKeeper.SetValidatorCurrentRewards(ctx, validatorAddr, distrtypes.NewValidatorCurrentRewards(sdk.NewDecCoins(sdk.NewDecCoin("loki", sdk.ZeroInt())), 0))
-
-	// Initialize Validator Accumulated Commission (if necessary)
+	// set accumulated commission
 	keepers.DistrKeeper.SetValidatorAccumulatedCommission(ctx, validatorAddr, distrtypes.InitialValidatorAccumulatedCommission())
 
-	// Note: The actual initialization might require more or different steps depending on your version of the Cosmos SDK.
+	// set outstanding rewards
+	keepers.DistrKeeper.SetValidatorOutstandingRewards(ctx, validatorAddr, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.DecCoins{}})
 }
 
 func createValidator(ctx sdk.Context, keeppers *keepers.AppKeepers, address string, pubKey cryptotypes.PubKey, description stakingtypes.Description, comission stakingtypes.Commission) (stakingtypes.Validator,  error){
@@ -248,14 +251,6 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 	return nil
 }
 
-// func moveDelegations(ctx sdk.Context, k stakingkeeper.Keeper, oldAddress sdk.AccAddress, newVal stakingtypes.Validator) {
-// 	for _, delegation := range getDelegations(ctx, k, oldAddress) {
-// 		delegation.ValidatorAddress = newVal.OperatorAddress
-// 		log.Printf("Moving delegation from %v to %v", delegation.DelegatorAddress,  newVal.GetMoniker())
-// 		k.SetDelegation(ctx, delegation)
-// 	}
-// }
-
 
 func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sdk.AccAddress, newVal stakingtypes.Validator) error {
 	for _, delegation := range getDelegations(ctx, *keepers.StakingKeeper, oldAddress) {
@@ -273,13 +268,13 @@ func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sd
 			log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
-		keepers.StakingKeeper.SetDelegation(ctx, newDelegation)	
-
+		
 		err = keepers.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
 		if err != nil {
 			log.Printf("Error when running hook after addig delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
+		keepers.StakingKeeper.SetDelegation(ctx, newDelegation)	
 	}
 	return nil
 }
@@ -334,27 +329,6 @@ func sendCoins(
 }
 
 
-func SelfDelegate(ctx sdk.Context, stakingKeeper stakingkeeper.Keeper, bankKeeper bankkeeper.Keeper, delegatorAddr sdk.AccAddress, validator stakingtypes.Validator, amount sdk.Coin) error {
-    // Ensure the delegator (validator account) has enough balance for the delegation
-    if !bankKeeper.HasBalance(ctx, delegatorAddr, amount) {
-        return sdkerrors.Wrapf(errortypes.ErrInsufficientFunds, "not enough balance to self-delegate to validator: %s", validator.OperatorAddress)
-    }
-
-    // Send coins from the delegator's account to the module account (staking module account) as part of delegation
-    err := bankKeeper.SendCoinsFromAccountToModule(ctx, delegatorAddr, stakingtypes.NotBondedPoolName, sdk.NewCoins(amount))
-    if err != nil {
-        return err
-    }
-
-    // Delegate tokens to the validator
-    _, err = stakingKeeper.Delegate(ctx, delegatorAddr, amount.Amount, stakingtypes.Unbonded, validator, true)
-    if err != nil {
-        return err
-    }
-    return nil
-}
-
-
 func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) (error) {
 
 	// Fixing self delegation
@@ -381,21 +355,16 @@ func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) (error) {
 		return err
 	}
 	
-	err = CreateNewAccount(ctx, keepers.AccountKeeper, DefiantLabsAcc) 
+	PubKeyBytes, err := base64.StdEncoding.DecodeString(DefiantLabPubKey)
+	if err != nil {
+		log.Printf("Error whend decoding public key from string %v", err)
+		return err
+	}
+	
+	err = CreateNewAccount(ctx, keepers.AccountKeeper, DefiantLabsAcc, PubKeyBytes) 
 	if err != nil {
 		log.Printf("Error when creating new account for %v: %s", DefiantLabsAcc, err)
 	}	
-
-	// Donating 10K loki to DefiantLab to automate his self-delegation process
-	
-	OdinMainnet3DonorAddr, err := sdk.AccAddressFromBech32(OdinMainnet3OldAccAddress)
-	if err != nil {
-		log.Printf("account address is not valid bech32: %s: %s", OdinMainnet3OldAccAddress, err)
-		return err
-	}
-
-	log.Printf("Donating coins for self-delegation %v", DefiantLabsValAddress)
-	sendCoins(ctx, keepers.BankKeeper, OdinMainnet3DonorAddr, DefiantLabsAcc, sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(10000))))
 	
 	keepers.DistrKeeper.SetWithdrawAddr(ctx, DefiantLabsAcc, DefiantLabsAcc)
 	
@@ -410,17 +379,9 @@ func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) (error) {
 	sendCoins(ctx, keepers.BankKeeper, DefiantLabsOldAcc, DefiantLabsAcc, balance)
 
 	// Moving delegations
+	moveSelfDelegation(ctx, keepers, DefiantLabsOldAcc, DefiantLabsAcc, DefiantLabsValAddress)
 	moveDelegations(ctx, keepers, DefiantLabsOldAcc, DanVal)
 	
-	// Self delegating to new validator
-	selfDel := keepers.StakingKeeper.Delegation(ctx, DefiantLabsAcc, DefiantLabsValAddress)
-	if selfDel == nil {
-		err := SelfDelegate(ctx, *keepers.StakingKeeper, keepers.BankKeeper, DefiantLabsAcc, DanVal, sdk.NewCoin("loki", math.NewInt(1000)))
-		if err != nil {
-			log.Printf("Error when self delegating to %v", DefiantLabsValAddress)
-			return err
-		}
-	}
 	return nil
 }
 
@@ -485,6 +446,8 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) (error) {
 	if err != nil {
 		return err
 	}
+
+	moveSelfDelegation(ctx, keepers, OldMainnet3Addr, NewMainnet3Addr, Odin3ValAddr)
 	moveDelegations(ctx, keepers, sdk.AccAddress(OdinMainnet3OldAccAddress), Odin3Val)
 
 	Odin3Val.UpdateStatus(stakingtypes.Bonded)
