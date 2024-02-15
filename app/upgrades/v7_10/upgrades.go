@@ -34,20 +34,20 @@ import (
 
 const DefiantLabOldAccAddress = "odin1dnmz4yzv73lr3lmauuaa0wpwn8zm8s20fyv396"
 
-// const DefiantLabAccAddress = "odin16dcwlyrwx8duucsr363zqqsf2prc5gv52uv6zk" // Prod
-const DefiantLabAccAddress = "odin1t6hn2c9hrc33fa5slh9wtvv4ew2qhygl0rmc4q"
+const DefiantLabAccAddress = "odin16dcwlyrwx8duucsr363zqqsf2prc5gv52uv6zk" // Prod
+//const DefiantLabAccAddress = "odin1t6hn2c9hrc33fa5slh9wtvv4ew2qhygl0rmc4q"
 
-const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas" // Test
+// const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas" // Test
 const OdinMainnet3OldAccAddress = "odin1s0p07h5n4v2nqh0jr2gprq5cphv2mgs9twppcx"
 
-// const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
+const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
 
 // PubKeys
-// const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // Prod
-const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs=" // Test
+const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // Prod
+// const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs=" // Test
 
-// const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
-const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
+const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
+// const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
 
 func getBalance(
 	ctx sdk.Context,
