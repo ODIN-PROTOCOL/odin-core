@@ -428,7 +428,6 @@ func moveSelfDelegation(ctx sdk.Context, keepers *keepers.AppKeepers, oldDelegat
 func fixUnbondingHeight(ctx sdk.Context, keepers *keepers.AppKeepers, validator stakingtypes.Validator) error {
 	validator.UnbondingHeight = 0
 	validator.UnbondingTime = time.Unix(0, 0)
-	validator.Jailed = false
 	validator.Status = stakingtypes.Bonded
 	keepers.StakingKeeper.SetValidator(ctx, validator)
 	return nil
