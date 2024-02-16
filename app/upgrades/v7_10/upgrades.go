@@ -215,7 +215,7 @@ func selfDelegate(ctx sdk.Context, stakingKeeper stakingkeeper.Keeper, bankKeepe
 	}
 
 	// Delegate tokens to the validator
-	_, err = stakingKeeper.Delegate(ctx, delegatorAddr, amount.Amount, stakingtypes.Unbonded, validator, false)
+	_, err = stakingKeeper.Delegate(ctx, delegatorAddr, amount.Amount, stakingtypes.Unbonded, validator, true)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func addrToValAddr(address string) (sdk.ValAddress, error) {
 	return valAddr, nil
 }
 
-func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distributionkeeper.Keeper, b bankkeeper.Keeper, oldVal stakingtypes.Validator, newVal stakingtypes.Validator) error {
+func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distributionkeeper.Keeper, b bankkeeper.Keeper, oldVal stakingtypes.Validator, newVal stakingtypes.Validator, selfDelegationTokens math.Int) error {
 	// Retrieving self-delegation address
 	validatorDelegatorAddr := sdk.AccAddress(oldVal.GetOperator())
 	newValidatorDelegatorAddr := sdk.AccAddress(newVal.GetOperator())
@@ -253,12 +253,12 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 	_, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
 	if !found {
-		log.Printf("%s self delegation not found: %s", validatorDelegatorAddr)
-		selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", sdk.NewInt(minSelfDelegation.Int64())))
+		log.Printf("%s self delegation not found, self delegating 100 Odin", validatorDelegatorAddr)
+		selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", selfDelegationTokens))
 	}
 
 	k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
-	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt())
+	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
 
 	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
 		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
@@ -335,13 +335,6 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 		log.Printf("New delegation amount: %s", newDelegationAmt)
 
 		k.SetDelegation(ctx, newDelegation)
-		// tokens := oldVal.TokensFromShares(delegation.Shares)
-		// k.AddValidatorTokensAndShares(ctx, newVal, tokens.TruncateInt())
-		// err = k.Hooks().AfterDelegationModified(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
-		// if err != nil {
-		// 	log.Printf("Error when running hook after adding delegation %v to %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator())
-		// 	return err
-		// }
 
 		err = k.Hooks().AfterDelegationModified(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
 		if err != nil {
@@ -359,8 +352,6 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 		if !found {
 			return fmt.Errorf("delegator starting info not found")
 		}
-
-		// cumOldValShares = cumOldValShares.Add(newDelegationAmt)
 	}
 
 	return nil
@@ -436,7 +427,9 @@ func moveSelfDelegation(ctx sdk.Context, keepers *keepers.AppKeepers, oldDelegat
 
 func fixUnbondingHeight(ctx sdk.Context, keepers *keepers.AppKeepers, validator stakingtypes.Validator) error {
 	validator.UnbondingHeight = 0
-	validator.UpdateStatus(stakingtypes.Bonded)
+	validator.UnbondingTime = time.Unix(0, 0)
+	validator.Jailed = false
+	validator.Status = stakingtypes.Bonded
 	keepers.StakingKeeper.SetValidator(ctx, validator)
 	return nil
 }
@@ -579,7 +572,7 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 
 	ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", Odin3OldValAddress, Odin3ValAddr))
 
-	err = moveValidatorDelegations(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, keepers.BankKeeper, Odin3OldVal, Odin3Val)
+	err = moveValidatorDelegations(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, keepers.BankKeeper, Odin3OldVal, Odin3Val, math.NewInt(100000000))
 	if err != nil {
 		return err
 	}
