@@ -132,7 +132,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
-	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_10"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_11"
 	nodeservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/node"
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -208,7 +208,7 @@ var (
 	Upgrades = []upgrades.Upgrade{
 		v2_6.Upgrade,
 		// Added 7_10 upgrade
-		v7_10.Upgrade,
+		v7_11.Upgrade,
 	}
 )
 

@@ -1,4 +1,4 @@
-package v7_10
+package v7_11
 
 import (
 	"encoding/base64"
@@ -48,6 +48,20 @@ const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // 
 
 const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
 // const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
+
+func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
+	// Get the IBC module's keeper
+	ibcKeeper := keepers.IBCKeeper
+
+	for _, packetAck := range ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx) {
+		if packetAck.ChannelId == "07-tendermint-10 " && packetAck.PortId == "connection-9" {
+			packetAck.Reset()
+
+			// Setting packet acknowledgement state
+			ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, packetAck.ChannelId, packetAck.PortId, packetAck.Sequence, packetAck.Data)
+		}
+	}
+}
 
 func getBalance(
 	ctx sdk.Context,
@@ -615,6 +629,10 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
+		log.Printf("Flushing IBC packets...")
+		FlushIBCPackets(ctx, keepers)
+		log.Printf("Flushing IBC packets complete")
+
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {
 			log.Printf("Error when running migrations: %s", err)
@@ -625,6 +643,6 @@ func CreateUpgradeHandler(
 }
 
 var Upgrade = upgrades.Upgrade{
-	UpgradeName:          "v0.7.10",
+	UpgradeName:          "v0.7.11",
 	CreateUpgradeHandler: CreateUpgradeHandler,
 }
