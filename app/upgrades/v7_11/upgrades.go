@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
@@ -30,6 +31,7 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 )
 
 const DefiantLabOldAccAddress = "odin1dnmz4yzv73lr3lmauuaa0wpwn8zm8s20fyv396"
@@ -49,6 +51,12 @@ const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // 
 const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
 // const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
 
+func deletePacketCommitment(ctx sdk.Context, keepers *keepers.AppKeepers, portID, channelID string, sequence uint64) {
+	storeKey := sdk.NewKVStoreKey(ibcexported.StoreKey)
+	store := ctx.KVStore(storeKey)
+	store.Delete(host.PacketCommitmentKey(portID, channelID, sequence))
+}
+
 func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 	// Get the IBC module's keeper
 	ibcKeeper := keepers.IBCKeeper
@@ -59,6 +67,9 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 
 			// Setting packet acknowledgement state
 			ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, packetAck.ChannelId, packetAck.PortId, packetAck.Sequence, packetAck.Data)
+
+			// Write the acknowledgment to the store, effectively marking the packet as acknowledged
+			deletePacketCommitment(ctx, keepers, packetAck.PortId, packetAck.ChannelId, packetAck.Sequence)
 		}
 	}
 }
