@@ -66,10 +66,18 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 			packetAck.Reset()
 
 			// Setting packet acknowledgement state
+			log.Printf("Resetting packet acknowledgement for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
 			ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, packetAck.ChannelId, packetAck.PortId, packetAck.Sequence, packetAck.Data)
 
 			// Write the acknowledgment to the store, effectively marking the packet as acknowledged
+			log.Printf("Deleting packet commitment for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
 			deletePacketCommitment(ctx, keepers, packetAck.PortId, packetAck.ChannelId, packetAck.Sequence)
+
+			if ibcKeeper.ChannelKeeper.HasPacketCommitment(ctx, packetAck.PortId, packetAck.ChannelId, packetAck.Sequence) {
+				log.Printf("Packet commitment for channel %v, %v, %v has not been deleted", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
+			} else {
+				log.Printf("Packet commitment for channel %v, %v, %v has been deleted", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
+			}
 		}
 	}
 }
