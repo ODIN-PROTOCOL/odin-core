@@ -14,6 +14,7 @@ import (
 	"github.com/odin-protocol/interchaintest/v7/conformance"
 	"github.com/odin-protocol/interchaintest/v7/ibc"
 	"github.com/odin-protocol/interchaintest/v7/relayer"
+	"github.com/odin-protocol/interchaintest/v7/relayer/rly"
 	"github.com/odin-protocol/interchaintest/v7/testreporter"
 	"github.com/odin-protocol/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
@@ -368,18 +369,27 @@ func CosmosChainFlushIBCTest(t *testing.T, chainName, initialVersion, upgradeCon
 	//})
 	//require.NoError(t, err)
 	//
+
+	createClientCmd := []string{
+		"rly", "tx", "client", odinChainID, counterpartyChain.Config().ChainID, path, "--client-tp", "0",
+		"--home", r.(*rly.CosmosRelayer).HomeDir(), "--override",
+	}
+
+	createClientRes := r.Exec(ctx, rep.RelayerExecReporter(t), createClientCmd, nil)
+	require.NoError(t, createClientRes.Err)
+
 	//err = r.CreateClient(ctx, rep.RelayerExecReporter(t), odinChainID, counterpartyChain.Config().ChainID, path, ibc.CreateClientOptions{TrustingPeriod: "0"})
 	//require.NoError(t, err)
 	//
 	//r.StartRelayer(ctx, rep.RelayerExecReporter(t), path)
-	//
-	//conn := "connection-0"
-	//oldClient := "07-tendermint-0"
-	//
-	//err = r.UpdatePath(ctx, rep.RelayerExecReporter(t), path, ibc.PathUpdateOptions{
-	//	SrcClientID: &oldClient,
-	//	SrcConnID:   &conn,
-	//})
+
+	conn := "connection-0"
+	oldClient := "07-tendermint-0"
+
+	err = r.UpdatePath(ctx, rep.RelayerExecReporter(t), path, ibc.PathUpdateOptions{
+		SrcClientID: &oldClient,
+		SrcConnID:   &conn,
+	})
 
 	//proposalContent := clienttypes.NewClientUpdateProposal("Update client", "Update client", "07-tendermint-0", "07-tendermint-1")
 
