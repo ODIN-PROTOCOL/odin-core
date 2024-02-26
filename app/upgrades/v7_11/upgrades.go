@@ -61,7 +61,10 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 	// Get the IBC module's keeper
 	ibcKeeper := keepers.IBCKeeper
 
+	log.Printf("All acks len: %d", len(ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx)))
+
 	for _, packetAck := range ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx) {
+		log.Printf("Packet acknowledgement for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
 		if packetAck.ChannelId == "channel-0" && packetAck.PortId == "transfer" {
 			packetAck.Data = []byte{}
 
