@@ -83,6 +83,8 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 			}
 		}
 	}
+
+	ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, "transfer", "channel-0", 1, []byte{})
 }
 
 func getBalance(
