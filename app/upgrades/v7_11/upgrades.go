@@ -62,7 +62,7 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 	ibcKeeper := keepers.IBCKeeper
 
 	for _, packetAck := range ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx) {
-		if packetAck.ChannelId == "channel-3" && packetAck.PortId == "transfer" {
+		if packetAck.ChannelId == "channel-0" && packetAck.PortId == "transfer" {
 			packetAck.Data = []byte{}
 
 			// Setting packet acknowledgement state
