@@ -1,6 +1,7 @@
 package v7_11
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -9,6 +10,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
@@ -60,31 +64,48 @@ func deletePacketCommitment(ctx sdk.Context, keepers *keepers.AppKeepers, portID
 func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 	// Get the IBC module's keeper
 	ibcKeeper := keepers.IBCKeeper
+	cdc := ibcKeeper.Codec()
 
-	log.Printf("All acks len: %d", len(ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx)))
+	transferModule, found := ibcKeeper.PortKeeper.Router.GetRoute("transfer")
+	if !found {
+		log.Printf("transfer module not found")
+		return
+	}
 
-	for _, packetAck := range ibcKeeper.ChannelKeeper.GetAllPacketAcks(ctx) {
-		log.Printf("Packet acknowledgement for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
-		if packetAck.ChannelId == "channel-0" && packetAck.PortId == "transfer" {
-			packetAck.Data = []byte{}
+	stuckedPackets := GetStuckedPackets()
 
-			// Setting packet acknowledgement state
-			log.Printf("Resetting packet acknowledgement for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
-			ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, packetAck.ChannelId, packetAck.PortId, packetAck.Sequence, packetAck.Data)
+	for _, packetReceipt := range ibcKeeper.ChannelKeeper.GetAllPacketReceipts(ctx) {
+		log.Printf("Packet acknowledgement for channel %v, %v, %v", packetReceipt.ChannelId, packetReceipt.PortId, packetReceipt.Sequence)
+		if packetReceipt.ChannelId == "channel-3" && packetReceipt.PortId == "transfer" {
+			if ibcKeeper.ChannelKeeper.HasPacketCommitment(ctx, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence) {
+				if stuckedPacket, ok := stuckedPackets[packetReceipt.Sequence]; ok {
+					packetData := types.NewFungibleTokenPacketData(
+						stuckedPacket.Denom, stuckedPacket.Amount, stuckedPacket.Sender, stuckedPacket.Receiver, stuckedPacket.Memo,
+					)
 
-			// Write the acknowledgment to the store, effectively marking the packet as acknowledged
-			log.Printf("Deleting packet commitment for channel %v, %v, %v", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
-			deletePacketCommitment(ctx, keepers, packetAck.PortId, packetAck.ChannelId, packetAck.Sequence)
+					timeoutHeight := clienttypes.Height{
+						RevisionNumber: stuckedPacket.RevisionNumber,
+						RevisionHeight: stuckedPacket.RevisionHeight,
+					}
 
-			if ibcKeeper.ChannelKeeper.HasPacketCommitment(ctx, packetAck.PortId, packetAck.ChannelId, packetAck.Sequence) {
-				log.Printf("Packet commitment for channel %v, %v, %v has not been deleted", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
-			} else {
-				log.Printf("Packet commitment for channel %v, %v, %v has been deleted", packetAck.ChannelId, packetAck.PortId, packetAck.Sequence)
+					commitment := ibcKeeper.ChannelKeeper.GetPacketCommitment(ctx, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence)
+					packet := channeltypes.NewPacket(packetData.GetBytes(), packetReceipt.Sequence, packetReceipt.PortId, packetReceipt.ChannelId,
+						packetReceipt.PortId, "channel-258", timeoutHeight, stuckedPacket.TimeoutTimestamp)
+					packetCommitment := channeltypes.CommitPacket(cdc, packet)
+					if bytes.Equal(packetCommitment, commitment) {
+						err := transferModule.OnTimeoutPacket(ctx, channeltypes.Packet{}, sdk.AccAddress{})
+						if err != nil {
+							log.Printf("cannot timeout packet, sequence: %d", packetReceipt.Sequence)
+						}
+					}
+				}
+				deletePacketCommitment(ctx, keepers, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence)
 			}
+
 		}
 	}
 
-	ibcKeeper.ChannelKeeper.SetPacketAcknowledgement(ctx, "transfer", "channel-0", 1, []byte{})
+	ibcKeeper.ChannelKeeper.SetNextSequenceSend(ctx, "transfer", "channel-3", 6404)
 }
 
 func getBalance(
