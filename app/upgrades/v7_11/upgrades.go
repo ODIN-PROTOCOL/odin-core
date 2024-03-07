@@ -5,8 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
+	"unsafe"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -35,7 +38,6 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 )
 
 const DefiantLabOldAccAddress = "odin1dnmz4yzv73lr3lmauuaa0wpwn8zm8s20fyv396"
@@ -55,10 +57,14 @@ const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // 
 const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
 // const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
 
-func deletePacketCommitment(ctx sdk.Context, keepers *keepers.AppKeepers, portID, channelID string, sequence uint64) {
-	storeKey := sdk.NewKVStoreKey(ibcexported.StoreKey)
+func deletePacketCommitment(ctx sdk.Context, storeKey storetypes.StoreKey, portID, channelID string, sequence uint64) {
+	//storeKey := sdk.NewKVStoreKey(ibcexported.StoreKey)
 	store := ctx.KVStore(storeKey)
 	store.Delete(host.PacketCommitmentKey(portID, channelID, sequence))
+}
+
+func GetUnexportedField(field reflect.Value) interface{} {
+	return reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Interface()
 }
 
 func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
@@ -72,37 +78,37 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 		return
 	}
 
+	ibcStoreKey := GetUnexportedField(reflect.ValueOf(&ibcKeeper.ChannelKeeper).Elem().FieldByName("storeKey"))
+
 	stuckedPackets := GetStuckedPackets()
 
-	for _, packetReceipt := range ibcKeeper.ChannelKeeper.GetAllPacketReceipts(ctx) {
-		log.Printf("Packet acknowledgement for channel %v, %v, %v", packetReceipt.ChannelId, packetReceipt.PortId, packetReceipt.Sequence)
-		if packetReceipt.ChannelId == "channel-3" && packetReceipt.PortId == "transfer" {
-			if ibcKeeper.ChannelKeeper.HasPacketCommitment(ctx, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence) {
-				if stuckedPacket, ok := stuckedPackets[packetReceipt.Sequence]; ok {
-					packetData := types.NewFungibleTokenPacketData(
-						stuckedPacket.Denom, stuckedPacket.Amount, stuckedPacket.Sender, stuckedPacket.Receiver, stuckedPacket.Memo,
-					)
+	for _, packetCommitment := range ibcKeeper.ChannelKeeper.GetAllPacketCommitmentsAtChannel(ctx, "transfer", "channel-3") { //.GetAllPacketReceipts(ctx) {
+		log.Printf("Packet commitment for channel %v, %v, %v", packetCommitment.ChannelId, packetCommitment.PortId, packetCommitment.Sequence)
+		if stuckedPacket, ok := stuckedPackets[packetCommitment.Sequence]; ok {
+			packetData := types.NewFungibleTokenPacketData(
+				stuckedPacket.Denom, stuckedPacket.Amount, stuckedPacket.Sender, stuckedPacket.Receiver, stuckedPacket.Memo,
+			)
 
-					timeoutHeight := clienttypes.Height{
-						RevisionNumber: stuckedPacket.RevisionNumber,
-						RevisionHeight: stuckedPacket.RevisionHeight,
-					}
-
-					commitment := ibcKeeper.ChannelKeeper.GetPacketCommitment(ctx, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence)
-					packet := channeltypes.NewPacket(packetData.GetBytes(), packetReceipt.Sequence, packetReceipt.PortId, packetReceipt.ChannelId,
-						packetReceipt.PortId, "channel-258", timeoutHeight, stuckedPacket.TimeoutTimestamp)
-					packetCommitment := channeltypes.CommitPacket(cdc, packet)
-					if bytes.Equal(packetCommitment, commitment) {
-						err := transferModule.OnTimeoutPacket(ctx, channeltypes.Packet{}, sdk.AccAddress{})
-						if err != nil {
-							log.Printf("cannot timeout packet, sequence: %d", packetReceipt.Sequence)
-						}
-					}
-				}
-				deletePacketCommitment(ctx, keepers, packetReceipt.PortId, packetReceipt.ChannelId, packetReceipt.Sequence)
+			timeoutHeight := clienttypes.Height{
+				RevisionNumber: stuckedPacket.RevisionNumber,
+				RevisionHeight: stuckedPacket.RevisionHeight,
 			}
 
+			//commitment := ibcKeeper.ChannelKeeper.GetPacketCommitment(ctx, packetCommitment.PortId, packetCommitment.ChannelId, packetCommitment.Sequence)
+			packet := channeltypes.NewPacket(packetData.GetBytes(), packetCommitment.Sequence, packetCommitment.PortId, packetCommitment.ChannelId,
+				packetCommitment.PortId, "channel-258", timeoutHeight, stuckedPacket.TimeoutTimestamp)
+			commitment := channeltypes.CommitPacket(cdc, packet)
+			if bytes.Equal(commitment, packetCommitment.Data) {
+				log.Printf("refund packet with sequence %d", packetCommitment.Sequence)
+				err := transferModule.OnTimeoutPacket(ctx, packet, sdk.AccAddress{})
+				if err != nil {
+					log.Printf("cannot timeout packet, sequence: %d", packetCommitment.Sequence)
+					panic(err)
+				}
+			}
 		}
+
+		deletePacketCommitment(ctx, ibcStoreKey.(storetypes.StoreKey), packetCommitment.PortId, packetCommitment.ChannelId, packetCommitment.Sequence)
 	}
 
 	ibcKeeper.ChannelKeeper.SetNextSequenceSend(ctx, "transfer", "channel-3", 6404)
@@ -657,7 +663,7 @@ func CreateUpgradeHandler(
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running v7_10 upgrade handler")
-
+		am.GetSubspace("")
 		log.Printf("Validator power before update:")
 		for _, validator := range keepers.StakingKeeper.GetAllValidators(ctx) {
 			log.Printf("%v: %v", validator.OperatorAddress, validator.ConsensusPower(keepers.StakingKeeper.PowerReduction(ctx)))
