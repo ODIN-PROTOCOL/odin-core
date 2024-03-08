@@ -1,4 +1,4 @@
-local_test/*
+local_test/.*
 *.
 docker-compose.yml
 Dockerfile

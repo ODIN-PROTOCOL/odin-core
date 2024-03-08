@@ -1,14 +1,22 @@
-package v7_10
+package v7_11
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"log"
+	"reflect"
 	"time"
+	"unsafe"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	"github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
 
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
@@ -48,6 +56,63 @@ const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // 
 
 const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
 // const DefiantLabPubKey = "A8gI+6AHMv9Tg37JyrxSP16hUH76Umr4krXfIEqOQJMo" // Test
+
+func deletePacketCommitment(ctx sdk.Context, storeKey storetypes.StoreKey, portID, channelID string, sequence uint64) {
+	//storeKey := sdk.NewKVStoreKey(ibcexported.StoreKey)
+	store := ctx.KVStore(storeKey)
+	store.Delete(host.PacketCommitmentKey(portID, channelID, sequence))
+}
+
+func GetUnexportedField(field reflect.Value) interface{} {
+	return reflect.NewAt(field.Type(), unsafe.Pointer(field.UnsafeAddr())).Elem().Interface()
+}
+
+func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
+	// Get the IBC module's keeper
+	ibcKeeper := keepers.IBCKeeper
+	cdc := ibcKeeper.Codec()
+
+	transferModule, found := ibcKeeper.PortKeeper.Router.GetRoute("transfer")
+	if !found {
+		log.Printf("transfer module not found")
+		return
+	}
+
+	ibcStoreKey := GetUnexportedField(reflect.ValueOf(&ibcKeeper.ChannelKeeper).Elem().FieldByName("storeKey"))
+
+	stuckedPackets := GetStuckedPackets()
+
+	for _, packetCommitment := range ibcKeeper.ChannelKeeper.GetAllPacketCommitmentsAtChannel(ctx, "transfer", "channel-3") { //.GetAllPacketReceipts(ctx) {
+		log.Printf("Packet commitment for channel %v, %v, %v", packetCommitment.ChannelId, packetCommitment.PortId, packetCommitment.Sequence)
+		if stuckedPacket, ok := stuckedPackets[packetCommitment.Sequence]; ok {
+			packetData := types.NewFungibleTokenPacketData(
+				stuckedPacket.Denom, stuckedPacket.Amount, stuckedPacket.Sender, stuckedPacket.Receiver, stuckedPacket.Memo,
+			)
+
+			timeoutHeight := clienttypes.Height{
+				RevisionNumber: stuckedPacket.RevisionNumber,
+				RevisionHeight: stuckedPacket.RevisionHeight,
+			}
+
+			//commitment := ibcKeeper.ChannelKeeper.GetPacketCommitment(ctx, packetCommitment.PortId, packetCommitment.ChannelId, packetCommitment.Sequence)
+			packet := channeltypes.NewPacket(packetData.GetBytes(), packetCommitment.Sequence, packetCommitment.PortId, packetCommitment.ChannelId,
+				packetCommitment.PortId, "channel-258", timeoutHeight, stuckedPacket.TimeoutTimestamp)
+			commitment := channeltypes.CommitPacket(cdc, packet)
+			if bytes.Equal(commitment, packetCommitment.Data) {
+				log.Printf("refund packet with sequence %d", packetCommitment.Sequence)
+				err := transferModule.OnTimeoutPacket(ctx, packet, sdk.AccAddress{})
+				if err != nil {
+					log.Printf("cannot timeout packet, sequence: %d", packetCommitment.Sequence)
+					panic(err)
+				}
+			}
+		}
+
+		deletePacketCommitment(ctx, ibcStoreKey.(storetypes.StoreKey), packetCommitment.PortId, packetCommitment.ChannelId, packetCommitment.Sequence)
+	}
+
+	ibcKeeper.ChannelKeeper.SetNextSequenceSend(ctx, "transfer", "channel-3", 6404)
+}
 
 func getBalance(
 	ctx sdk.Context,
@@ -251,16 +316,19 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 	totalSharesToMove := oldVal.DelegatorShares.Sub(minDelegationShares)
 	tokensToMove := oldVal.TokensFromShares(totalSharesToMove)
 
-	_, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
+	selfDelegation, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
 	if !found {
 		log.Printf("%s self delegation not found, self delegating 100 Odin", validatorDelegatorAddr)
 		selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", selfDelegationTokens))
+	} else {
+		log.Printf("Self delegation found %s, %s, %s", selfDelegation.DelegatorAddress, selfDelegation.Shares.String(), selfDelegation.ValidatorAddress)
 	}
 
 	k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
 	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
-
+	
 	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
+
 		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
 
 		withdrawAddress := d.GetDelegatorWithdrawAddr(ctx, delegation.GetDelegatorAddr())
@@ -271,7 +339,10 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 		// Processing self-delergation, keeping old validator's self-delegation min amount ot make it survive the upgrade
 		log.Printf("Withdraw address and validator delegator %s VS %s", withdrawAddress.String(), validatorDelegatorAddr.String())
-		if withdrawAddress.String() == validatorDelegatorAddr.String() {
+		
+		if delegation.DelegatorAddress == selfDelegation.DelegatorAddress && delegation.ValidatorAddress == selfDelegation.ValidatorAddress {
+			log.Printf("Processing self delegation")
+
 			newDelegationAmt = delegation.Shares.Sub(minDelegationShares)
 
 			// Create a new delegation to the new validator
@@ -286,18 +357,22 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			log.Printf("New delegator address for self delegation: %s", newDelegatorAddress)
 			log.Printf("Old delegation amount: %s", minDelegationShares)
 
-			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
 				return err
 			}
-
+			
 			// Creating old validator's new self-delegation
 			k.SetDelegation(ctx, oldDelegationReplacement)
-
-			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())	
 			if err != nil {
-				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
+				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
+				return err
+			}
+			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+			if err != nil {
+				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
 			}
 
@@ -598,7 +673,7 @@ func CreateUpgradeHandler(
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("running v7_10 upgrade handler")
-
+		am.GetSubspace("")
 		log.Printf("Validator power before update:")
 		for _, validator := range keepers.StakingKeeper.GetAllValidators(ctx) {
 			log.Printf("%v: %v", validator.OperatorAddress, validator.ConsensusPower(keepers.StakingKeeper.PowerReduction(ctx)))
@@ -615,6 +690,10 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
+		log.Printf("Flushing IBC packets...")
+		FlushIBCPackets(ctx, keepers)
+		log.Printf("Flushing IBC packets complete")
+
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)
 		if err != nil {
 			log.Printf("Error when running migrations: %s", err)
@@ -625,6 +704,6 @@ func CreateUpgradeHandler(
 }
 
 var Upgrade = upgrades.Upgrade{
-	UpgradeName:          "v0.7.10",
+	UpgradeName:          "v0.7.11",
 	CreateUpgradeHandler: CreateUpgradeHandler,
 }
