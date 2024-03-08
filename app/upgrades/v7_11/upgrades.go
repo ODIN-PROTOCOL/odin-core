@@ -316,16 +316,19 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 	totalSharesToMove := oldVal.DelegatorShares.Sub(minDelegationShares)
 	tokensToMove := oldVal.TokensFromShares(totalSharesToMove)
 
-	_, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
+	selfDelegation, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
 	if !found {
 		log.Printf("%s self delegation not found, self delegating 100 Odin", validatorDelegatorAddr)
 		selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", selfDelegationTokens))
+	} else {
+		log.Printf("Self delegation found %s, %s, %s", selfDelegation.DelegatorAddress, selfDelegation.Shares.String(), selfDelegation.ValidatorAddress)
 	}
 
 	k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
 	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
-
+	
 	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
+
 		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
 
 		withdrawAddress := d.GetDelegatorWithdrawAddr(ctx, delegation.GetDelegatorAddr())
@@ -336,7 +339,10 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 		// Processing self-delergation, keeping old validator's self-delegation min amount ot make it survive the upgrade
 		log.Printf("Withdraw address and validator delegator %s VS %s", withdrawAddress.String(), validatorDelegatorAddr.String())
-		if withdrawAddress.String() == validatorDelegatorAddr.String() {
+		
+		if delegation.DelegatorAddress == selfDelegation.DelegatorAddress && delegation.ValidatorAddress == selfDelegation.ValidatorAddress {
+			log.Printf("Processing self delegation")
+
 			newDelegationAmt = delegation.Shares.Sub(minDelegationShares)
 
 			// Create a new delegation to the new validator
@@ -351,18 +357,22 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			log.Printf("New delegator address for self delegation: %s", newDelegatorAddress)
 			log.Printf("Old delegation amount: %s", minDelegationShares)
 
-			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
 				return err
 			}
-
+			
 			// Creating old validator's new self-delegation
 			k.SetDelegation(ctx, oldDelegationReplacement)
-
-			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())	
 			if err != nil {
-				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
+				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
+				return err
+			}
+			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+			if err != nil {
+				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
 			}
 
