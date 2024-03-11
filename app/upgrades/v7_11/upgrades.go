@@ -52,7 +52,7 @@ const OdinMainnet3OldAccAddress = "odin1s0p07h5n4v2nqh0jr2gprq5cphv2mgs9twppcx"
 const OdinMainnet3NewAccAddress = "odin1hgdq6yekx3hpz5mhph660el664pc02a4npxdas"
 
 // PubKeys
-const OdinMainnet3ValPubKey = "FQf4cxaS5XNv+mFEi6dtDQDOLUWVWfEyh8SqljsJz1s=" // Prod
+const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs=" // Prod
 // const OdinMainnet3ValPubKey = "f7pqqa+1Rkl+5j13R6iBnnKAR7bhNrOV8Cc0RfpSzjs=" // Test
 
 const DefiantLabPubKey = "Aw22yXnDmYKzQ1CeHh6A+PD1043vsbSBH5FmuAWIlkS7" // Prod
