@@ -680,17 +680,6 @@ func CreateUpgradeHandler(
 			log.Printf("%v: %v", validator.OperatorAddress, validator.ConsensusPower(keepers.StakingKeeper.PowerReduction(ctx)))
 		}
 
-		// Fixinng Dan's validator account association
-		err := fixDefiantLabs(ctx, keepers)
-		if err != nil {
-			return nil, err
-		}
-
-		err = fixMainnet3(ctx, keepers)
-		if err != nil {
-			return nil, err
-		}
-
 		Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
 		if err != nil {
 			return nil, err
@@ -705,6 +694,17 @@ func CreateUpgradeHandler(
 		oldMainmet3Val.Jailed = true
 
 		keepers.StakingKeeper.SetValidator(ctx, oldMainmet3Val)
+
+		// Fixinng Dan's validator account association
+		err = fixDefiantLabs(ctx, keepers)
+		if err != nil {
+			return nil, err
+		}
+
+		err = fixMainnet3(ctx, keepers)
+		if err != nil {
+			return nil, err
+		}
 
 		log.Printf("Flushing IBC packets...")
 		FlushIBCPackets(ctx, keepers)
