@@ -357,7 +357,7 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			log.Printf("New delegator address for self delegation: %s", newDelegatorAddress)
 			log.Printf("Old delegation amount: %s", minDelegationShares)
 
-			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
 				return err
@@ -365,12 +365,12 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 			// Creating old validator's new self-delegation
 			k.SetDelegation(ctx, oldDelegationReplacement)
-			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
 			}
-			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
