@@ -3,6 +3,7 @@ package v7_11
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -689,6 +690,21 @@ func CreateUpgradeHandler(
 		if err != nil {
 			return nil, err
 		}
+
+		Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		oldMainmet3Val, found := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
+		if !found {
+			log.Printf("failed to find old mainnet3 validator")
+			return nil, errors.New("failed to find old mainnet3 validator")
+		}
+
+		oldMainmet3Val.Jailed = true
+
+		keepers.StakingKeeper.SetValidator(ctx, oldMainmet3Val)
 
 		log.Printf("Flushing IBC packets...")
 		FlushIBCPackets(ctx, keepers)
