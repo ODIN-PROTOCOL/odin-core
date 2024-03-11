@@ -326,7 +326,7 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 	k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
 	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
-	
+
 	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
 
 		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
@@ -339,7 +339,7 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 
 		// Processing self-delergation, keeping old validator's self-delegation min amount ot make it survive the upgrade
 		log.Printf("Withdraw address and validator delegator %s VS %s", withdrawAddress.String(), validatorDelegatorAddr.String())
-		
+
 		if delegation.DelegatorAddress == selfDelegation.DelegatorAddress && delegation.ValidatorAddress == selfDelegation.ValidatorAddress {
 			log.Printf("Processing self delegation")
 
@@ -348,7 +348,7 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			// Create a new delegation to the new validator
 			oldDelegationReplacement := stakingtypes.Delegation{
 				DelegatorAddress: delegation.DelegatorAddress,
-				ValidatorAddress: newVal.OperatorAddress,
+				ValidatorAddress: oldVal.OperatorAddress,
 				Shares:           minDelegationShares,
 			}
 
@@ -362,10 +362,10 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
 				return err
 			}
-			
+
 			// Creating old validator's new self-delegation
 			k.SetDelegation(ctx, oldDelegationReplacement)
-			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())	
+			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
