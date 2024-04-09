@@ -6,7 +6,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
@@ -22,12 +22,12 @@ func CreateUpgradeHandler(
 		accAddressWithTokensToBurn := sdk.MustAccAddressFromBech32("odin1y6lz8fy3krg377kht8yugjg5uunn84nf4ux8d6")
 		bankKeeper := keepers.BankKeeper
 		coinsToBurn := bankKeeper.GetAllBalances(ctx, accAddressWithTokensToBurn)
-		err := bankKeeper.SendCoinsFromAccountToModule(ctx, accAddressWithTokensToBurn, banktypes.ModuleName, coinsToBurn)
+		err := bankKeeper.SendCoinsFromAccountToModule(ctx, accAddressWithTokensToBurn, govtypes.ModuleName, coinsToBurn)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to send tokens to bank module")
 		}
 
-		err = bankKeeper.Keeper.BurnCoins(ctx, banktypes.ModuleName, coinsToBurn)
+		err = bankKeeper.Keeper.BurnCoins(ctx, govtypes.ModuleName, coinsToBurn)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to burn tokens")
 		}
