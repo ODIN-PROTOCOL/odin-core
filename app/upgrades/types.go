@@ -1,12 +1,12 @@
 package upgrades
 
 import (
+	store "cosmossdk.io/store/types"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	store "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 )

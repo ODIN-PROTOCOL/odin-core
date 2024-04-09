@@ -8,10 +8,10 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	connectiontypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	commitmenttypes "github.com/cosmos/ibc-go/v7/modules/core/23-commitment/types"
-	ibctmtypes "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
-	"github.com/cosmos/ibc-go/v7/testing/mock"
+	connectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
+	commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
+	ibctmtypes "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+	"github.com/cosmos/ibc-go/v8/testing/mock"
 
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )

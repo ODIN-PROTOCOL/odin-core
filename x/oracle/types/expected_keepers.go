@@ -7,10 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 )
 
 // AccountKeeper defines the expected account keeper.

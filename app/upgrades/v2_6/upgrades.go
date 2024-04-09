@@ -1,6 +1,7 @@
 package v2_6
 
 import (
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,9 +15,8 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"

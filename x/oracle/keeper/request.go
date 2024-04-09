@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"cosmossdk.io/errors"
+	"cosmossdk.io/store/prefix"
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
