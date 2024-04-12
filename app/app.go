@@ -11,6 +11,7 @@ import (
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_12"
 
 	//"github.com/CosmWasm/wasmd/x/wasm"
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
@@ -209,6 +210,7 @@ var (
 		v2_6.Upgrade,
 		// Added 7_10 upgrade
 		v7_11.Upgrade,
+		v7_12.Upgrade,
 	}
 )
 
