@@ -226,4 +226,12 @@ func CosmosChainUpgradeBurnTokensTest(t *testing.T, chainName, initialVersion, u
 	balance, err = chain.GetBalance(ctx, govModule, "umyrk")
 	require.NoError(t, err)
 	require.Equal(t, balance, math.NewInt(0))
+
+	balance, err = chain.GetBalance(ctx, randomWallet1.FormattedAddress(), "udoki")
+	require.NoError(t, err)
+	require.Equal(t, balance, math.NewInt(1_000_000_000))
+
+	balance, err = chain.GetBalance(ctx, randomWallet2.FormattedAddress(), "umyrk")
+	require.NoError(t, err)
+	require.Equal(t, balance, math.NewInt(1_000_000_000))
 }

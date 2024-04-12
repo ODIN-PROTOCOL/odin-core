@@ -10,18 +10,22 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 )
 
-var AddressWithTokensToBurn = "odin1y6lz8fy3krg377kht8yugjg5uunn84nf4ux8d6"
+const AddressWithTokensToBurn = "odin1y6lz8fy3krg377kht8yugjg5uunn84nf4ux8d6"
 
 func CreateUpgradeHandler(
-	mm *module.Manager,
-	configurator module.Configurator,
-	am upgrades.AppManager,
+	_ *module.Manager,
+	_ module.Configurator,
+	_ upgrades.AppManager,
 	keepers *keepers.AppKeepers,
 ) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
-		accAddressWithTokensToBurn := sdk.MustAccAddressFromBech32("odin1y6lz8fy3krg377kht8yugjg5uunn84nf4ux8d6")
+		accAddressWithTokensToBurn := sdk.MustAccAddressFromBech32(AddressWithTokensToBurn)
 		bankKeeper := keepers.BankKeeper
-		coinsToBurn := bankKeeper.GetAllBalances(ctx, accAddressWithTokensToBurn)
+
+		dokiToBurn := bankKeeper.GetBalance(ctx, accAddressWithTokensToBurn, "udoki")
+		myrkToBurn := bankKeeper.GetBalance(ctx, accAddressWithTokensToBurn, "umyrk")
+		coinsToBurn := sdk.NewCoins(dokiToBurn, myrkToBurn)
+
 		err := bankKeeper.SendCoinsFromAccountToModule(ctx, accAddressWithTokensToBurn, govtypes.ModuleName, coinsToBurn)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to send tokens to bank module")
