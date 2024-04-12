@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
@@ -9,12 +8,12 @@ import (
 )
 
 // handleBeginBlock re-calculates and saves the rolling seed value based on block hashes.
-func handleBeginBlock(ctx sdk.Context, req abci.RequestBeginBlock, k keeper.Keeper) {
+func handleBeginBlock(ctx sdk.Context, k keeper.Keeper) {
 	// Update rolling seed used for pseudorandom oracle provider selection.
 	rollingSeed := k.GetRollingSeed(ctx)
-	k.SetRollingSeed(ctx, append(rollingSeed[1:], req.GetHash()[0]))
+	k.SetRollingSeed(ctx, append(rollingSeed[1:], ctx.HeaderHash()[0]))
 	// Reward a portion of block rewards (inflation + tx fee) to active oracle validators.
-	k.AllocateTokens(ctx, req.LastCommitInfo.GetVotes())
+	k.AllocateTokens(ctx, ctx.VoteInfos())
 	params := k.GetParams(ctx)
 	// Reset the price to the original price if a new boundary period has begun
 	rewardThresholdBlocks := params.DataProviderRewardThreshold.Blocks

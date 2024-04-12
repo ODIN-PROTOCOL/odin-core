@@ -2,7 +2,8 @@ package keeper
 
 import (
 	"cosmossdk.io/errors"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 
 	storetypes "cosmossdk.io/store/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -152,13 +153,13 @@ func (k Keeper) SetMintAccount(ctx sdk.Context, moduleAcc authtypes.ModuleAccoun
 
 // StakingTokenSupply implements an alias call to the underlying staking keeper's
 // StakingTokenSupply to be used in BeginBlocker.
-func (k Keeper) StakingTokenSupply(ctx sdk.Context) sdk.Int {
+func (k Keeper) StakingTokenSupply(ctx sdk.Context) (math.Int, error) {
 	return k.stakingKeeper.StakingTokenSupply(ctx)
 }
 
 // BondedRatio implements an alias call to the underlying staking keeper's
 // BondedRatio to be used in BeginBlocker.
-func (k Keeper) BondedRatio(ctx sdk.Context) sdk.Dec {
+func (k Keeper) BondedRatio(ctx sdk.Context) (math.LegacyDec, error) {
 	return k.stakingKeeper.BondedRatio(ctx)
 }
 

@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	errortypes "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -53,7 +54,7 @@ func (k WrappedBankKeeper) Logger(ctx sdk.Context) log.Logger {
 
 // BurnCoins moves the specified amount of coins from the given module name to
 // the community pool. The total bank of the coins will not change.
-func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k WrappedBankKeeper) BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	// If distrKeeper is not set OR we want to burn coins in distr itself, we will
 	// just use the original BurnCoins function.
 
@@ -92,7 +93,7 @@ func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk
 }
 
 // MintCoins does not create any new coins, just gets them from the community pull
-func (k WrappedBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k WrappedBankKeeper) MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	if k.distrKeeper == nil || moduleName == distrtypes.ModuleName {
 		return k.Keeper.MintCoins(ctx, moduleName, amt)
 	}
