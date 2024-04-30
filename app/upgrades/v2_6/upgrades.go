@@ -1,6 +1,8 @@
 package v2_6
 
 import (
+	"context"
+
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -28,7 +30,8 @@ func CreateUpgradeHandler(
 	am upgrades.AppManager,
 	keepers *keepers.AppKeepers,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		goCtx := sdk.UnwrapSDKContext(ctx)
 		// Set param key table for params module migration
 		for _, subspace := range keepers.ParamsKeeper.GetSubspaces() {
 			subspace := subspace
@@ -72,7 +75,7 @@ func CreateUpgradeHandler(
 			// specifying the whole list instead of adding and removing. Less fragile.
 			AllowMessages: ICAAllowMessages,
 		}
-		keepers.ICAHostKeeper.SetParams(ctx, hostParams)
+		keepers.ICAHostKeeper.SetParams(goCtx, hostParams)
 
 		vm, err := mm.RunMigrations(ctx, configurator, fromVM)
 		if err != nil {

@@ -7,30 +7,22 @@ import (
 	"os"
 	"path/filepath"
 
-	//"strings"
-
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	//"github.com/CosmWasm/wasmd/x/wasm"
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	//wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
+	"cosmossdk.io/log"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
-	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/cometbft/cometbft/libs/log"
 	tmos "github.com/cometbft/cometbft/libs/os"
+	dbm "github.com/cosmos/cosmos-db"
 
-	//tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	storetypes "cosmossdk.io/store/types"
 	"cosmossdk.io/x/evidence"
 	evidencekeeper "cosmossdk.io/x/evidence/keeper"
@@ -140,9 +132,13 @@ import (
 )
 
 const (
-	appName          = "OdinApp"
-	Bech32MainPrefix = "odin"
-	Bip44CoinType    = 118
+	appName              = "OdinApp"
+	Bech32MainPrefix     = "odin"
+	Bip44CoinType        = 118
+	Bech32PrefixValAddr  = Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixOperator
+	Bech32PrefixValPub   = Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+	Bech32PrefixConsAddr = Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	Bech32PrefixConsPub  = Bech32MainPrefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
 )
 
 var (
@@ -180,8 +176,6 @@ var (
 		consensus.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		oracle.AppModuleBasic{},
-		coinswap.AppModuleBasic{},
-		auction.AppModuleBasic{},
 		//wasm.AppModuleBasic{},
 	)
 	// module account permissions
@@ -279,7 +273,7 @@ func NewOdinApp(
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 	bApp.SetTxEncoder(encodingConfig.TxConfig.TxEncoder())
 
-	keys := sdk.NewKVStoreKeys(
+	keys := storetypes.NewKVStoreKeys(
 		authtypes.StoreKey,
 		banktypes.StoreKey,
 		stakingtypes.StoreKey,
@@ -300,12 +294,10 @@ func NewOdinApp(
 		icahosttypes.StoreKey,
 		group.StoreKey,
 		oracletypes.StoreKey,
-		coinswaptypes.StoreKey,
-		auctiontypes.StoreKey,
 		//wasmtypes.StoreKey,
 	)
-	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
+	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
 	app := &OdinApp{
 		BaseApp:           bApp,
@@ -331,10 +323,11 @@ func NewOdinApp(
 	// set the BaseApp's parameter store
 	app.ConsensusParamsKeeper = consensusparamkeeper.NewKeeper(
 		appCodec,
-		keys[consensusparamtypes.StoreKey],
+		runtime.NewKVStoreService(keys[consensusparamtypes.StoreKey]),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		runtime.EventService{},
 	)
-	bApp.SetParamStore(&app.ConsensusParamsKeeper)
+	bApp.SetParamStore(app.ConsensusParamsKeeper.ParamsStore)
 
 	// add capability keeper and ScopeToModule for ibc module
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
@@ -352,9 +345,10 @@ func NewOdinApp(
 	// Add keepers.
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
-		keys[authtypes.StoreKey],
+		runtime.NewKVStoreService(keys[authtypes.StoreKey]),
 		authtypes.ProtoBaseAccount,
 		maccPerms,
+		authcodec.NewBech32Codec(sdk.Bech32MainPrefix),
 		Bech32MainPrefix,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
@@ -362,23 +356,25 @@ func NewOdinApp(
 	app.BankKeeper = odinbankkeeper.NewWrappedBankKeeperBurnToCommunityPool(
 		bankkeeper.NewBaseKeeper(
 			appCodec,
-			keys[banktypes.StoreKey],
+			runtime.NewKVStoreService(keys[banktypes.StoreKey]),
 			app.AccountKeeper,
 			BlockedAddresses(),
 			authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+			logger,
 		),
 		app.AccountKeeper,
 	)
 	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
-		keys[stakingtypes.StoreKey],
+		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
 		app.AccountKeeper,
 		app.BankKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		authcodec.NewBech32Codec(Bech32PrefixValAddr), authcodec.NewBech32Codec(Bech32PrefixConsAddr),
 	)
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
-		keys[minttypes.StoreKey],
+		runtime.NewKVStoreService(keys[minttypes.StoreKey]),
 		app.StakingKeeper,
 		app.AccountKeeper,
 		app.BankKeeper,
@@ -387,7 +383,7 @@ func NewOdinApp(
 	)
 	app.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec,
-		keys[distrtypes.StoreKey],
+		runtime.NewKVStoreService(keys[distrtypes.StoreKey]),
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.StakingKeeper,
@@ -401,7 +397,7 @@ func NewOdinApp(
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		legacyAmino,
-		keys[slashingtypes.StoreKey],
+		runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
 		app.StakingKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
@@ -409,19 +405,24 @@ func NewOdinApp(
 	invCheckPeriod := cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod))
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
 		appCodec,
-		keys[crisistypes.StoreKey],
+		runtime.NewKVStoreService(keys[crisistypes.StoreKey]),
 		invCheckPeriod,
 		app.BankKeeper,
 		authtypes.FeeCollectorName,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		app.AccountKeeper.AddressCodec(),
 	)
 
-	app.FeegrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
+	app.FeegrantKeeper = feegrantkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[feegrant.StoreKey]),
+		app.AccountKeeper,
+	)
 
 	homePath := cast.ToString(appOpts.Get(flags.FlagHome))
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(
 		skipUpgradeHeights,
-		keys[upgradetypes.StoreKey],
+		runtime.NewKVStoreService(keys[upgradetypes.StoreKey]),
 		appCodec,
 		homePath,
 		app.BaseApp,
@@ -444,7 +445,7 @@ func NewOdinApp(
 	)
 
 	app.AuthzKeeper = authzkeeper.NewKeeper(
-		keys[authzkeeper.StoreKey],
+		runtime.NewKVStoreService(keys[authzkeeper.StoreKey]),
 		appCodec,
 		app.MsgServiceRouter(),
 		app.AccountKeeper,
@@ -468,15 +469,15 @@ func NewOdinApp(
 	govRouter.
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
-		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
 	govConfig := govtypes.DefaultConfig()
 	govKeeper := govkeeper.NewKeeper(
 		appCodec,
-		keys[govtypes.StoreKey],
+		runtime.NewKVStoreService(keys[govtypes.StoreKey]),
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.StakingKeeper,
+		app.DistrKeeper,
 		app.MsgServiceRouter(),
 		govConfig,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
@@ -493,7 +494,7 @@ func NewOdinApp(
 
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+		app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper, app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
@@ -505,7 +506,7 @@ func NewOdinApp(
 		app.GetSubspace(icahosttypes.SubModuleName),
 		app.IBCKeeper.ChannelKeeper,
 		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
+		app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
 		scopedICAHostKeeper,
 		app.MsgServiceRouter(),
@@ -547,7 +548,7 @@ func NewOdinApp(
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
-		keys[oracletypes.StoreKey],
+		runtime.NewKVStoreService(keys[oracletypes.StoreKey]),
 		filepath.Join(homePath, "files"),
 		authtypes.FeeCollectorName,
 		app.AccountKeeper,
@@ -556,26 +557,10 @@ func NewOdinApp(
 		app.DistrKeeper,
 		app.AuthzKeeper,
 		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
+		app.IBCKeeper.PortKeeper,
 		scopedOracleKeeper,
 		owasmVM,
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-
-	app.CoinswapKeeper = coinswapkeeper.NewKeeper(
-		appCodec,
-		keys[coinswaptypes.StoreKey],
-		app.GetSubspace(coinswaptypes.ModuleName),
-		app.BankKeeper,
-		app.DistrKeeper,
-		app.OracleKeeper,
-	)
-	app.AuctionKeeper = auctionkeeper.NewKeeper(
-		appCodec,
-		keys[auctiontypes.StoreKey],
-		app.GetSubspace(auctiontypes.ModuleName),
-		app.OracleKeeper,
-		app.CoinswapKeeper,
 	)
 
 	oracleModule := oracle.NewAppModule(app.OracleKeeper, app.GetSubspace(oracletypes.ModuleName))
@@ -596,7 +581,12 @@ func NewOdinApp(
 
 	// create evidence keeper with router
 	evidenceKeeper := evidencekeeper.NewKeeper(
-		appCodec, keys[evidencetypes.StoreKey], app.StakingKeeper, app.SlashingKeeper,
+		appCodec,
+		runtime.NewKVStoreService(keys[evidencetypes.StoreKey]),
+		app.StakingKeeper,
+		app.SlashingKeeper,
+		app.AccountKeeper.AddressCodec(),
+		runtime.ProvideCometInfoService(),
 	)
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
@@ -609,7 +599,10 @@ func NewOdinApp(
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 	app.mm = module.NewManager(
-		genutil.NewAppModule(app.AccountKeeper, app.StakingKeeper, app.BaseApp.DeliverTx, encodingConfig.TxConfig),
+		genutil.NewAppModule(
+			app.AccountKeeper, app.StakingKeeper, app,
+			encodingConfig.TxConfig,
+		),
 		auth.NewAppModule(
 			appCodec,
 			app.AccountKeeper,
@@ -642,6 +635,7 @@ func NewOdinApp(
 			app.BankKeeper,
 			app.StakingKeeper,
 			app.GetSubspace(slashingtypes.ModuleName),
+			app.interfaceRegistry,
 		),
 		distr.NewAppModule(
 			appCodec,
@@ -658,7 +652,7 @@ func NewOdinApp(
 			app.BankKeeper,
 			app.GetSubspace(stakingtypes.ModuleName),
 		),
-		upgrade.NewAppModule(app.UpgradeKeeper),
+		upgrade.NewAppModule(app.UpgradeKeeper, app.AccountKeeper.AddressCodec()),
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
@@ -668,8 +662,6 @@ func NewOdinApp(
 		transferModule,
 		icaModule,
 		oracleModule,
-		coinswap.NewAppModule(app.CoinswapKeeper),
-		auction.NewAppModule(app.AuctionKeeper),
 		//wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
 	)
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
@@ -700,8 +692,6 @@ func NewOdinApp(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		coinswaptypes.ModuleName,
-		auctiontypes.ModuleName,
 		//wasmtypes.ModuleName,
 	)
 	app.mm.SetOrderEndBlockers(
@@ -727,8 +717,6 @@ func NewOdinApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		coinswaptypes.ModuleName,
-		auctiontypes.ModuleName,
 		//wasmtypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -760,8 +748,6 @@ func NewOdinApp(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		oracletypes.ModuleName,
-		coinswaptypes.ModuleName,
-		auctiontypes.ModuleName,
 		//wasmtypes.ModuleName,
 	)
 
@@ -868,29 +854,24 @@ func MakeCodecs() (codec.Codec, *codec.LegacyAmino) {
 func (app *OdinApp) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker application updates every begin block.
-func (app *OdinApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	res := app.mm.BeginBlock(ctx, req)
-
-	return res
+func (app *OdinApp) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
+	return app.mm.BeginBlock(ctx)
 }
 
 // EndBlocker application updates every end block.
-func (app *OdinApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	res := app.mm.EndBlock(ctx, req)
-
-	return res
+func (app *OdinApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
+	return app.mm.EndBlock(ctx)
 }
 
 // InitChainer application update at chain initialization
-func (app *OdinApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *OdinApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 	var genesisState GenesisState
 	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
 	}
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
-	res := app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 
-	return res
+	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
 // LoadHeight loads a particular height
@@ -991,14 +972,19 @@ func (app *OdinApp) RegisterTxService(clientCtx client.Context) {
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
 func (app *OdinApp) RegisterTendermintService(clientCtx client.Context) {
-	cmtservice.RegisterTendermintService(clientCtx, app.BaseApp.GRPCQueryRouter(), app.interfaceRegistry, app.Query)
+	cmtservice.RegisterTendermintService(
+		clientCtx,
+		app.BaseApp.GRPCQueryRouter(),
+		app.interfaceRegistry,
+		server.NewCometABCIWrapper(app).Query,
+	)
 }
 
 // RegisterNodeService registers all additional services.
-func (app *OdinApp) RegisterNodeService(clientCtx client.Context) {
+func (app *OdinApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
 	proofservice.RegisterProofService(clientCtx, app.GRPCQueryRouter())
-	cosmosnodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
+	cosmosnodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }
 
 // RegisterSwaggerAPI registers swagger route with API Server
@@ -1054,8 +1040,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
-	paramsKeeper.Subspace(coinswaptypes.ModuleName)
-	paramsKeeper.Subspace(auctiontypes.ModuleName)
 	//paramsKeeper.Subspace(wasmtypes.ModuleName)
 
 	return paramsKeeper

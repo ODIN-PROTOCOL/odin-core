@@ -2,6 +2,7 @@ package v7_11
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -31,6 +32,7 @@ import (
 
 	"github.com/ODIN-PROTOCOL/odin-core/app/keepers"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
+	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	distributionkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
@@ -116,12 +118,13 @@ func FlushIBCPackets(ctx sdk.Context, keepers *keepers.AppKeepers) {
 }
 
 func getBalance(
-	ctx sdk.Context,
-	sk stakingkeeper.Keeper,
+	ctx context.Context,
 	ak keeper.AccountKeeper,
 	bk bankkeeper.Keeper,
 	addr sdk.AccAddress,
 ) (sdk.Coins, error) {
+	goCtx := sdk.UnwrapSDKContext(ctx)
+
 	// Get all delegator delegations for address
 	account := ak.GetAccount(ctx, addr)
 	vestingAccount, ok := account.(*vestingtypes.BaseVestingAccount)
@@ -130,13 +133,13 @@ func getBalance(
 	} else {
 		//If the account is a vesting account, create a copy of the account
 		//and vest all coins with the current block header time
-		newVestingAcc := vestingtypes.NewContinuousVestingAccountRaw(vestingAccount, ctx.BlockHeader().Time.Unix())
+		newVestingAcc := vestingtypes.NewContinuousVestingAccountRaw(vestingAccount, goCtx.BlockHeader().Time.Unix())
 		ak.SetAccount(ctx, newVestingAcc)
-		return newVestingAcc.GetVestedCoins(ctx.BlockTime()), nil
+		return newVestingAcc.GetVestedCoins(goCtx.BlockTime()), nil
 	}
 }
 
-func CreateNewAccount(ctx sdk.Context, authKeeper keeper.AccountKeeper, address sdk.AccAddress, secpPubKey []byte) error {
+func CreateNewAccount(ctx context.Context, authKeeper keeper.AccountKeeper, address sdk.AccAddress, secpPubKey []byte) error {
 	// Check if the account already exists
 	account := authKeeper.GetAccount(ctx, address)
 	if account != nil {
@@ -153,7 +156,10 @@ func CreateNewAccount(ctx sdk.Context, authKeeper keeper.AccountKeeper, address 
 		return fmt.Errorf("failed to create new account for address %s", address.String())
 	}
 
-	newAccount.SetPubKey(pubkey)
+	err := newAccount.SetPubKey(pubkey)
+	if err != nil {
+		return err
+	}
 	log.Printf("New account created %v: %v", address.String(), pubkey.String())
 
 	// Save the new account to the state
@@ -162,47 +168,62 @@ func CreateNewAccount(ctx sdk.Context, authKeeper keeper.AccountKeeper, address 
 }
 
 func getDelegations(
-	ctx sdk.Context,
+	ctx context.Context,
 	stakingKeeper stakingkeeper.Keeper,
 	delegatorAddr sdk.AccAddress,
-) []stakingtypes.Delegation {
-	delegations := stakingKeeper.GetAllDelegatorDelegations(ctx, delegatorAddr)
-	return delegations
+) ([]stakingtypes.Delegation, error) {
+	return stakingKeeper.GetAllDelegatorDelegations(ctx, delegatorAddr)
 }
 
-func InitializeValidatorSigningInfo(ctx sdk.Context, slashingKeeper slashingkeeper.Keeper, stakingKeeper stakingkeeper.Keeper, consAddr sdk.ConsAddress) error {
+func InitializeValidatorSigningInfo(ctx context.Context, slashingKeeper slashingkeeper.Keeper, consAddr sdk.ConsAddress) error {
+	goCtx := sdk.UnwrapSDKContext(ctx)
 	// Check if signing info already exists to avoid overwriting it
-	_, found := slashingKeeper.GetValidatorSigningInfo(ctx, consAddr)
-	if !found {
-		startHeight := ctx.BlockHeight()
+	_, err := slashingKeeper.GetValidatorSigningInfo(ctx, consAddr)
+	if err == slashingtypes.ErrNoSigningInfoFound {
+		startHeight := goCtx.BlockHeight()
 		signingInfo := slashingtypes.NewValidatorSigningInfo(consAddr, startHeight, 0, time.Unix(0, 0), false, 0)
-		slashingKeeper.SetValidatorSigningInfo(ctx, consAddr, signingInfo)
+		err := slashingKeeper.SetValidatorSigningInfo(ctx, consAddr, signingInfo)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
-	return nil
+
+	return err
 }
 
-func InitializeValidatorDistributionInfo(ctx sdk.Context, keepers *keepers.AppKeepers, validatorAddr sdk.ValAddress) {
+func InitializeValidatorDistributionInfo(ctx context.Context, keepers *keepers.AppKeepers, validatorAddr sdk.ValAddress) error {
 	// Initialize distribution information for the validator
 	// set initial historical rewards (period 0) with reference count of 1
-	keepers.DistrKeeper.SetValidatorHistoricalRewards(ctx, validatorAddr, 0, distrtypes.NewValidatorHistoricalRewards(sdk.DecCoins{}, 1))
+	err := keepers.DistrKeeper.SetValidatorHistoricalRewards(ctx, validatorAddr, 0, distrtypes.NewValidatorHistoricalRewards(sdk.DecCoins{}, 1))
+	if err != nil {
+		return err
+	}
 
 	// set current rewards (starting at period 1)
-	keepers.DistrKeeper.SetValidatorCurrentRewards(ctx, validatorAddr, distrtypes.NewValidatorCurrentRewards(sdk.DecCoins{}, 1))
+	err = keepers.DistrKeeper.SetValidatorCurrentRewards(ctx, validatorAddr, distrtypes.NewValidatorCurrentRewards(sdk.DecCoins{}, 1))
+	if err != nil {
+		return err
+	}
 
 	// set accumulated commission
-	keepers.DistrKeeper.SetValidatorAccumulatedCommission(ctx, validatorAddr, distrtypes.InitialValidatorAccumulatedCommission())
+	err = keepers.DistrKeeper.SetValidatorAccumulatedCommission(ctx, validatorAddr, distrtypes.InitialValidatorAccumulatedCommission())
+	if err != nil {
+		return err
+	}
 
 	// set outstanding rewards
-	keepers.DistrKeeper.SetValidatorOutstandingRewards(ctx, validatorAddr, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.DecCoins{}})
+	return keepers.DistrKeeper.SetValidatorOutstandingRewards(ctx, validatorAddr, distrtypes.ValidatorOutstandingRewards{Rewards: sdk.DecCoins{}})
 }
 
-func createValidator(ctx sdk.Context, keeppers *keepers.AppKeepers, address string, pubKey cryptotypes.PubKey, description stakingtypes.Description, comission stakingtypes.Commission) (stakingtypes.Validator, error) {
+func createValidator(ctx context.Context, keeppers *keepers.AppKeepers, address string, pubKey cryptotypes.PubKey, description stakingtypes.Description, comission stakingtypes.Commission) (stakingtypes.Validator, error) {
 
 	valAddr := sdk.ValAddress(address)
-	minSelfDelegation := sdk.OneInt()
+	minSelfDelegation := math.OneInt()
 
 	// Create the validator
-	validator, err := stakingtypes.NewValidator(valAddr, pubKey, description)
+	validator, err := stakingtypes.NewValidator(address, pubKey, description)
 	if err != nil {
 		log.Printf("Error when creating a validator %v: %s", valAddr, err)
 		return stakingtypes.Validator{}, err
@@ -210,12 +231,15 @@ func createValidator(ctx sdk.Context, keeppers *keepers.AppKeepers, address stri
 
 	validator.MinSelfDelegation = minSelfDelegation
 	validator.Status = stakingtypes.Bonded
-	validator.Tokens = sdk.ZeroInt()
-	validator.DelegatorShares = sdk.ZeroDec()
+	validator.Tokens = math.ZeroInt()
+	validator.DelegatorShares = math.LegacyZeroDec()
 	validator.Commission = comission
 
 	// Update validators in the store
-	keeppers.StakingKeeper.SetValidator(ctx, validator)
+	err = keeppers.StakingKeeper.SetValidator(ctx, validator)
+	if err != nil {
+		return stakingtypes.Validator{}, err
+	}
 
 	consAddr := sdk.ConsAddress(pubKey.Address())
 	valconsAddr, err := validator.GetConsAddr()
@@ -226,9 +250,20 @@ func createValidator(ctx sdk.Context, keeppers *keepers.AppKeepers, address stri
 
 	log.Printf("Created validator %v (%v:%v)", valAddr.String(), consAddr.String(), valconsAddr)
 
-	keeppers.StakingKeeper.SetValidatorByConsAddr(ctx, validator)
-	InitializeValidatorSigningInfo(ctx, keeppers.SlashingKeeper, *keeppers.StakingKeeper, consAddr)
-	InitializeValidatorDistributionInfo(ctx, keeppers, valAddr)
+	err = keeppers.StakingKeeper.SetValidatorByConsAddr(ctx, validator)
+	if err != nil {
+		return stakingtypes.Validator{}, err
+	}
+
+	err = InitializeValidatorSigningInfo(ctx, keeppers.SlashingKeeper, consAddr)
+	if err != nil {
+		return stakingtypes.Validator{}, err
+	}
+
+	err = InitializeValidatorDistributionInfo(ctx, keeppers, valAddr)
+	if err != nil {
+		return stakingtypes.Validator{}, err
+	}
 
 	err = keeppers.StakingKeeper.Hooks().AfterValidatorCreated(ctx, valAddr)
 	if err != nil {
@@ -243,32 +278,59 @@ func createValidator(ctx sdk.Context, keeppers *keepers.AppKeepers, address stri
 	return validator, nil
 }
 
-func withdrawRewardsAndCommission(ctx sdk.Context, sk stakingkeeper.Keeper, dk distributionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) {
+func withdrawRewardsAndCommission(ctx context.Context, ak authkeeper.AccountKeeper, sk stakingkeeper.Keeper, dk distributionkeeper.Keeper, oldValAddress sdk.ValAddress, newValAddress sdk.ValAddress) error {
 	oldValAccAddress := sdk.AccAddress(oldValAddress)
 	newValAccAddress := sdk.AccAddress(newValAddress)
 
+	delegations, err := sk.GetValidatorDelegations(ctx, oldValAddress)
+	if err != nil {
+		return err
+	}
+
 	// withdrawing all rewards, self-delegation rewards mapped to new account
-	for _, delegation := range sk.GetValidatorDelegations(ctx, oldValAddress) {
-		withdrawAddress := dk.GetDelegatorWithdrawAddr(ctx, sdk.AccAddress(delegation.DelegatorAddress))
-		delegatorAddress := delegation.GetDelegatorAddr()
+	for _, delegation := range delegations {
+		withdrawAddress, err := dk.GetDelegatorWithdrawAddr(ctx, sdk.AccAddress(delegation.DelegatorAddress))
+		if err != nil {
+			return err
+		}
+
+		delegatorAccAddress, err := ak.AddressCodec().StringToBytes(delegation.GetDelegatorAddr())
+		if err != nil {
+			return err
+		}
 
 		// we suppose that old Odin accounts are unavailable, so we're routing rewards to new addresses and proceeding wit hwithdraws
 		if withdrawAddress.String() == oldValAccAddress.String() {
 			log.Printf("Found delegation which withdrawal address is the old one: %v. Setting withdrawal address to new account: %v", oldValAccAddress.String(), newValAccAddress.String())
-			dk.SetDelegatorWithdrawAddr(ctx, delegatorAddress, newValAccAddress)
+			err = dk.SetDelegatorWithdrawAddr(ctx, delegatorAccAddress, newValAccAddress)
+			if err != nil {
+				return err
+			}
 		}
 
-		log.Printf("Withdrawing reward for %v delegator address from %v", delegatorAddress.String(), oldValAddress.String())
-		dk.WithdrawDelegationRewards(ctx, delegatorAddress, oldValAddress)
+		log.Printf("Withdrawing reward for %v delegator address from %v", string(delegatorAccAddress), oldValAddress.String())
+		_, err = dk.WithdrawDelegationRewards(ctx, delegatorAccAddress, oldValAddress)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Comission
 	// explicitly setting validator withdrawal address, in case it has no self-delegation in the loop above
-	dk.SetDelegatorWithdrawAddr(ctx, oldValAccAddress, newValAccAddress)
-	dk.WithdrawValidatorCommission(ctx, oldValAddress)
+	err = dk.SetDelegatorWithdrawAddr(ctx, oldValAccAddress, newValAccAddress)
+	if err != nil {
+		return err
+	}
+
+	_, err = dk.WithdrawValidatorCommission(ctx, oldValAddress)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func selfDelegate(ctx sdk.Context, stakingKeeper stakingkeeper.Keeper, bankKeeper bankkeeper.Keeper, delegatorAddr sdk.AccAddress, validator stakingtypes.Validator, amount sdk.Coin) error {
+func selfDelegate(ctx context.Context, stakingKeeper stakingkeeper.Keeper, bankKeeper bankkeeper.Keeper, delegatorAddr sdk.AccAddress, validator stakingtypes.Validator, amount sdk.Coin) error {
 	// Ensure the delegator (validator account) has enough balance for the delegation
 	if !bankKeeper.HasBalance(ctx, delegatorAddr, amount) {
 		return sdkerrors.Wrapf(errortypes.ErrInsufficientFunds, "not enough balance to self-delegate to validator: %s", validator.OperatorAddress)
@@ -299,7 +361,7 @@ func addrToValAddr(address string) (sdk.ValAddress, error) {
 	return valAddr, nil
 }
 
-func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distributionkeeper.Keeper, b bankkeeper.Keeper, oldVal stakingtypes.Validator, newVal stakingtypes.Validator, selfDelegationTokens math.Int) error {
+func moveValidatorDelegations(ctx context.Context, ak authkeeper.AccountKeeper, k stakingkeeper.Keeper, d distributionkeeper.Keeper, b bankkeeper.Keeper, oldVal stakingtypes.Validator, newVal stakingtypes.Validator, selfDelegationTokens math.Int) error {
 	// Retrieving self-delegation address
 	validatorDelegatorAddr := sdk.AccAddress(oldVal.GetOperator())
 	newValidatorDelegatorAddr := sdk.AccAddress(newVal.GetOperator())
@@ -317,22 +379,57 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 	totalSharesToMove := oldVal.DelegatorShares.Sub(minDelegationShares)
 	tokensToMove := oldVal.TokensFromShares(totalSharesToMove)
 
-	selfDelegation, found := k.GetDelegation(ctx, validatorDelegatorAddr, oldVal.GetOperator())
-	if !found {
+	oldValBz, err := k.ValidatorAddressCodec().StringToBytes(oldVal.GetOperator())
+	if err != nil {
+		return err
+	}
+
+	newValBz, err := k.ValidatorAddressCodec().StringToBytes(newVal.GetOperator())
+	if err != nil {
+		return err
+	}
+
+	selfDelegation, err := k.GetDelegation(ctx, validatorDelegatorAddr, oldValBz)
+	if err == stakingtypes.ErrNoDelegation {
 		log.Printf("%s self delegation not found, self delegating 100 Odin", validatorDelegatorAddr)
-		selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", selfDelegationTokens))
+		err = selfDelegate(ctx, k, b, newValidatorDelegatorAddr, newVal, sdk.NewCoin("loki", selfDelegationTokens))
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
 	} else {
 		log.Printf("Self delegation found %s, %s, %s", selfDelegation.DelegatorAddress, selfDelegation.Shares.String(), selfDelegation.ValidatorAddress)
 	}
 
-	k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
-	k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
+	_, _, err = k.RemoveValidatorTokensAndShares(ctx, oldVal, totalSharesToMove)
+	if err != nil {
+		return err
+	}
 
-	for _, delegation := range k.GetValidatorDelegations(ctx, oldVal.GetOperator()) {
+	_, _, err = k.AddValidatorTokensAndShares(ctx, newVal, tokensToMove.TruncateInt().Add(selfDelegationTokens)) // Adding new self-delegation
+	if err != nil {
+		return err
+	}
+
+	delegations, err := k.GetValidatorDelegations(ctx, oldValBz)
+	if err != nil {
+		return err
+	}
+
+	for _, delegation := range delegations {
+		delegatorAccAddress, err := ak.AddressCodec().StringToBytes(delegation.GetDelegatorAddr())
+		if err != nil {
+			return err
+		}
 
 		log.Printf("Moving validator delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
 
-		withdrawAddress := d.GetDelegatorWithdrawAddr(ctx, delegation.GetDelegatorAddr())
+		withdrawAddress, err := d.GetDelegatorWithdrawAddr(ctx, delegatorAccAddress)
+		if err != nil {
+			return err
+		}
+
 		log.Printf("Delegator withdraw address: %v", validatorDelegatorAddr)
 
 		var newDelegationAmt math.LegacyDec
@@ -358,20 +455,24 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			log.Printf("New delegator address for self delegation: %s", newDelegatorAddress)
 			log.Printf("Old delegation amount: %s", minDelegationShares)
 
-			err := k.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err := k.Hooks().BeforeDelegationCreated(ctx, delegatorAccAddress, oldValBz)
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), oldVal.GetOperator())
 				return err
 			}
 
 			// Creating old validator's new self-delegation
-			k.SetDelegation(ctx, oldDelegationReplacement)
-			err = k.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err = k.SetDelegation(ctx, oldDelegationReplacement)
+			if err != nil {
+				return err
+			}
+
+			err = k.Hooks().AfterDelegationModified(ctx, delegatorAccAddress, oldValBz)
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
 			}
-			err = d.Hooks().AfterDelegationModified(ctx, delegation.GetDelegatorAddr(), oldVal.GetOperator())
+			err = d.Hooks().AfterDelegationModified(ctx, delegatorAccAddress, oldValBz)
 			if err != nil {
 				log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 				return err
@@ -383,13 +484,16 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 		}
 
 		// Remove the delegation to the old validator
-		err = d.Hooks().BeforeDelegationRemoved(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = d.Hooks().BeforeDelegationRemoved(ctx, delegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook before adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
 
-		k.RemoveDelegation(ctx, delegation)
+		err = k.RemoveDelegation(ctx, delegation)
+		if err != nil {
+			return err
+		}
 
 		newDelegation := stakingtypes.Delegation{
 			DelegatorAddress: newDelegatorAddress,
@@ -397,34 +501,46 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 			Shares:           newDelegationAmt,
 		}
 
-		err := k.Hooks().BeforeDelegationCreated(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		newDelegatorAccAddress, err := ak.AddressCodec().StringToBytes(newDelegation.GetDelegatorAddr())
+		if err != nil {
+			return err
+		}
+
+		err = k.Hooks().BeforeDelegationCreated(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook before adding delegation %v to %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
 
-		err = d.Hooks().BeforeDelegationCreated(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = d.Hooks().BeforeDelegationCreated(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook before adding delegation %v to %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
 		log.Printf("New delegation amount: %s", newDelegationAmt)
 
-		k.SetDelegation(ctx, newDelegation)
+		err = k.SetDelegation(ctx, newDelegation)
+		if err != nil {
+			return err
+		}
 
-		err = k.Hooks().AfterDelegationModified(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = k.Hooks().AfterDelegationModified(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook after adding delegation %v to %v. %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator(), err)
 			return err
 		}
-		err = d.Hooks().AfterDelegationModified(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = d.Hooks().AfterDelegationModified(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook after adding delegation %v to %v: %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator(), err)
 			return err
 		}
 
 		// Double checking if the delegation has been added
-		found := d.HasDelegatorStartingInfo(ctx, newVal.GetOperator(), newDelegation.GetDelegatorAddr())
+		found, err := d.HasDelegatorStartingInfo(ctx, newValBz, newDelegatorAccAddress)
+		if err != nil {
+			return err
+		}
+
 		if !found {
 			return fmt.Errorf("delegator starting info not found")
 		}
@@ -433,10 +549,23 @@ func moveValidatorDelegations(ctx sdk.Context, k stakingkeeper.Keeper, d distrib
 	return nil
 }
 
-func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sdk.AccAddress, newVal stakingtypes.Validator) error {
-	for _, delegation := range getDelegations(ctx, *keepers.StakingKeeper, oldAddress) {
+func moveDelegations(ctx context.Context, keepers *keepers.AppKeepers, oldAddress sdk.AccAddress, newVal stakingtypes.Validator) error {
+	newValBz, err := keepers.StakingKeeper.ValidatorAddressCodec().StringToBytes(newVal.GetOperator())
+	if err != nil {
+		return err
+	}
+
+	delegations, err := getDelegations(ctx, *keepers.StakingKeeper, oldAddress)
+	if err != nil {
+		return err
+	}
+
+	for _, delegation := range delegations {
 		log.Printf("Moving delegation from %v to %v", delegation.DelegatorAddress, newVal.OperatorAddress)
-		keepers.StakingKeeper.RemoveDelegation(ctx, delegation)
+		err := keepers.StakingKeeper.RemoveDelegation(ctx, delegation)
+		if err != nil {
+			return err
+		}
 
 		newDelegation := stakingtypes.Delegation{
 			DelegatorAddress: delegation.DelegatorAddress,
@@ -444,20 +573,29 @@ func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sd
 			Shares:           delegation.Shares,
 		}
 
-		err := keepers.StakingKeeper.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), newVal.GetOperator())
+		newDelegatorAccAddress, err := keepers.AccountKeeper.AddressCodec().StringToBytes(newDelegation.GetDelegatorAddr())
+		if err != nil {
+			return err
+		}
+
+		err = keepers.StakingKeeper.Hooks().BeforeDelegationCreated(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook after adding delegation %v to %v", delegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
 
-		err = keepers.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = keepers.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook before adding delegation %v to %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
 		}
 
-		keepers.StakingKeeper.SetDelegation(ctx, newDelegation)
-		err = keepers.DistrKeeper.Hooks().AfterDelegationModified(ctx, newDelegation.GetDelegatorAddr(), newVal.GetOperator())
+		err = keepers.StakingKeeper.SetDelegation(ctx, newDelegation)
+		if err != nil {
+			return err
+		}
+
+		err = keepers.DistrKeeper.Hooks().AfterDelegationModified(ctx, newDelegatorAccAddress, newValBz)
 		if err != nil {
 			log.Printf("Error when running hook after addig delegation %v to %v", newDelegation.GetDelegatorAddr(), newVal.GetOperator())
 			return err
@@ -466,18 +604,25 @@ func moveDelegations(ctx sdk.Context, keepers *keepers.AppKeepers, oldAddress sd
 	return nil
 }
 
-func moveSelfDelegation(ctx sdk.Context, keepers *keepers.AppKeepers, oldDelegatorAddress sdk.AccAddress, newDelegatorAddress sdk.AccAddress, validatorAddr sdk.ValAddress) error {
+func moveSelfDelegation(ctx context.Context, keepers *keepers.AppKeepers, oldDelegatorAddress sdk.AccAddress, newDelegatorAddress sdk.AccAddress, validatorAddr sdk.ValAddress) error {
 	stakingKeeper := keepers.StakingKeeper
 
 	// Get the delegation from the old validator
-	delegation, found := stakingKeeper.GetDelegation(ctx, oldDelegatorAddress, validatorAddr)
-	if !found {
+	delegation, err := stakingKeeper.GetDelegation(ctx, oldDelegatorAddress, validatorAddr)
+	if err == stakingtypes.ErrNoDelegation {
 		log.Printf("self delegation not found: %s", oldDelegatorAddress)
 		return fmt.Errorf("self delegation not found")
 	}
+	if err != nil {
+		return err
+	}
+
 	amount := delegation.Shares
 
-	stakingKeeper.RemoveDelegation(ctx, delegation)
+	err = stakingKeeper.RemoveDelegation(ctx, delegation)
+	if err != nil {
+		return err
+	}
 
 	// Create a new delegation to the new validator
 	newDelegation := stakingtypes.Delegation{
@@ -486,13 +631,22 @@ func moveSelfDelegation(ctx sdk.Context, keepers *keepers.AppKeepers, oldDelegat
 		Shares:           amount,
 	}
 
-	err := stakingKeeper.Hooks().BeforeDelegationCreated(ctx, delegation.GetDelegatorAddr(), validatorAddr)
+	delegatorAccAddress, err := keepers.AccountKeeper.AddressCodec().StringToBytes(delegation.GetDelegatorAddr())
+	if err != nil {
+		return err
+	}
+
+	err = stakingKeeper.Hooks().BeforeDelegationCreated(ctx, delegatorAccAddress, validatorAddr)
 	if err != nil {
 		log.Printf("Error when running hook before adding delegation %v to %v", delegation.GetDelegatorAddr(), validatorAddr)
 		return err
 	}
 	// Save the new delegation
-	stakingKeeper.SetDelegation(ctx, newDelegation)
+	err = stakingKeeper.SetDelegation(ctx, newDelegation)
+	if err != nil {
+		return err
+	}
+
 	err = keepers.DistrKeeper.Hooks().AfterDelegationModified(ctx, newDelegatorAddress, validatorAddr)
 	if err != nil {
 		log.Printf("Error when running hook before adding delegation %v to %v", delegation.GetDelegatorAddr(), validatorAddr)
@@ -501,16 +655,15 @@ func moveSelfDelegation(ctx sdk.Context, keepers *keepers.AppKeepers, oldDelegat
 	return nil
 }
 
-func fixUnbondingHeight(ctx sdk.Context, keepers *keepers.AppKeepers, validator stakingtypes.Validator) error {
+func fixUnbondingHeight(ctx context.Context, keepers *keepers.AppKeepers, validator stakingtypes.Validator) error {
 	validator.UnbondingHeight = 0
 	validator.UnbondingTime = time.Unix(0, 0)
 	validator.Status = stakingtypes.Bonded
-	keepers.StakingKeeper.SetValidator(ctx, validator)
-	return nil
+	return keepers.StakingKeeper.SetValidator(ctx, validator)
 }
 
 func sendCoins(
-	ctx sdk.Context,
+	ctx context.Context,
 	bankkeeper bankkeeper.Keeper,
 	fromAddr sdk.AccAddress,
 	toAddr sdk.AccAddress,
@@ -525,7 +678,8 @@ func sendCoins(
 	return nil
 }
 
-func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) error {
+func fixDefiantLabs(ctx context.Context, keepers *keepers.AppKeepers) error {
+	goCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Fixing self delegation
 	DefiantLabsValAddress, err := addrToValAddr(DefiantLabAccAddress)
@@ -533,9 +687,12 @@ func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 		return err
 	}
 
-	DanVal, found := keepers.StakingKeeper.GetValidator(ctx, DefiantLabsValAddress)
-	if !found {
+	DanVal, err := keepers.StakingKeeper.GetValidator(ctx, DefiantLabsValAddress)
+	if err == stakingtypes.ErrNoValidatorFound {
 		log.Printf("Validator with %v has not been found", DefiantLabsValAddress)
+		return err
+	}
+	if err != nil {
 		return err
 	}
 
@@ -562,21 +719,35 @@ func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 		log.Printf("Error when creating new account for %v: %s", DefiantLabsAcc, err)
 	}
 
-	keepers.DistrKeeper.SetWithdrawAddr(ctx, DefiantLabsAcc, DefiantLabsAcc)
+	err = keepers.DistrKeeper.SetWithdrawAddr(ctx, DefiantLabsAcc, DefiantLabsAcc)
+	if err != nil {
+		return err
+	}
 
 	// sending balances
-	ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", DefiantLabOldAccAddress, DefiantLabAccAddress))
+	goCtx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", DefiantLabOldAccAddress, DefiantLabAccAddress))
 
-	balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, DefiantLabsOldAcc)
+	balance, err := getBalance(ctx, keepers.AccountKeeper, keepers.BankKeeper, DefiantLabsOldAcc)
 	if err != nil {
 		log.Printf("Error when retrieving balance for address %s: %s", DefiantLabOldAccAddress, err)
 		return err
 	}
-	sendCoins(ctx, keepers.BankKeeper, DefiantLabsOldAcc, DefiantLabsAcc, balance)
+
+	err = sendCoins(ctx, keepers.BankKeeper, DefiantLabsOldAcc, DefiantLabsAcc, balance)
+	if err != nil {
+		return err
+	}
 
 	// Moving delegations
-	moveSelfDelegation(ctx, keepers, DefiantLabsOldAcc, DefiantLabsAcc, DefiantLabsValAddress)
-	moveDelegations(ctx, keepers, DefiantLabsOldAcc, DanVal)
+	err = moveSelfDelegation(ctx, keepers, DefiantLabsOldAcc, DefiantLabsAcc, DefiantLabsValAddress)
+	if err != nil {
+		return err
+	}
+
+	err = moveDelegations(ctx, keepers, DefiantLabsOldAcc, DanVal)
+	if err != nil {
+		return err
+	}
 
 	err = fixUnbondingHeight(ctx, keepers, DanVal)
 	if err != nil {
@@ -586,7 +757,8 @@ func fixDefiantLabs(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 	return nil
 }
 
-func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
+func fixMainnet3(ctx context.Context, keepers *keepers.AppKeepers) error {
+	goCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Showing all validator powers
 	OldMainnet3Addr, err := sdk.AccAddressFromBech32(OdinMainnet3OldAccAddress)
@@ -601,14 +773,15 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 		return err
 	}
 
-	ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", OldMainnet3Addr, NewMainnet3Addr))
+	goCtx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", OldMainnet3Addr, NewMainnet3Addr))
 	// Creating new Mainnet3 validator
 	Odin3OldValAddress, err := addrToValAddr(OdinMainnet3OldAccAddress)
 	if err != nil {
 		return err
 	}
-	Odin3OldVal, found := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
-	if !found {
+
+	Odin3OldVal, err := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
+	if err != nil {
 		log.Printf("Validator with %v has not been found", Odin3OldValAddress)
 		return err
 	}
@@ -619,16 +792,23 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 	}
 
 	// rewards and comission
-	withdrawRewardsAndCommission(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
-	ctx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", OldMainnet3Addr, NewMainnet3Addr))
-	balance, err := getBalance(ctx, *keepers.StakingKeeper, keepers.AccountKeeper, keepers.BankKeeper, OldMainnet3Addr)
+	err = withdrawRewardsAndCommission(ctx, keepers.AccountKeeper, *keepers.StakingKeeper, keepers.DistrKeeper, Odin3OldValAddress, Odin3ValAddr)
+	if err != nil {
+		return err
+	}
+
+	goCtx.Logger().Info(fmt.Sprintf("Sending tokens from %s to %s", OldMainnet3Addr, NewMainnet3Addr))
+	balance, err := getBalance(ctx, keepers.AccountKeeper, keepers.BankKeeper, OldMainnet3Addr)
 	if err != nil {
 		log.Printf("Error when retrieving balance for address %s: %s", OldMainnet3Addr, err)
 		return err
 	}
 
 	// sending balances
-	sendCoins(ctx, keepers.BankKeeper, OldMainnet3Addr, NewMainnet3Addr, balance)
+	err = sendCoins(ctx, keepers.BankKeeper, OldMainnet3Addr, NewMainnet3Addr, balance)
+	if err != nil {
+		return err
+	}
 
 	Odin3PubKeyBytes, err := base64.StdEncoding.DecodeString(OdinMainnet3ValPubKey)
 	if err != nil {
@@ -645,21 +825,29 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 		return err
 	}
 
-	ctx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", Odin3OldValAddress, Odin3ValAddr))
+	goCtx.Logger().Info(fmt.Sprintf("Moving validator delegations from %s to %s", Odin3OldValAddress, Odin3ValAddr))
 
-	err = moveValidatorDelegations(ctx, *keepers.StakingKeeper, keepers.DistrKeeper, keepers.BankKeeper, Odin3OldVal, Odin3Val, math.NewInt(100000000))
+	err = moveValidatorDelegations(ctx, keepers.AccountKeeper, *keepers.StakingKeeper, keepers.DistrKeeper, keepers.BankKeeper, Odin3OldVal, Odin3Val, math.NewInt(100000000))
 	if err != nil {
 		return err
 	}
 
 	// moveSelfDelegation(ctx, keepers, OldMainnet3Addr, NewMainnet3Addr, Odin3ValAddr)
-	moveDelegations(ctx, keepers, sdk.AccAddress(OdinMainnet3OldAccAddress), Odin3Val)
+	err = moveDelegations(ctx, keepers, sdk.AccAddress(OdinMainnet3OldAccAddress), Odin3Val)
+	if err != nil {
+		return err
+	}
 
 	Odin3Val.UpdateStatus(stakingtypes.Bonded)
 
 	// Showing all validator powers
 	log.Printf("Validator power after update:")
-	for _, validator := range keepers.StakingKeeper.GetAllValidators(ctx) {
+	validators, err := keepers.StakingKeeper.GetAllValidators(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, validator := range validators {
 		log.Printf("%v: %v", validator.OperatorAddress, validator.ConsensusPower(keepers.StakingKeeper.PowerReduction(ctx)))
 	}
 
@@ -669,14 +857,20 @@ func fixMainnet3(ctx sdk.Context, keepers *keepers.AppKeepers) error {
 func CreateUpgradeHandler(
 	mm *module.Manager,
 	configurator module.Configurator,
-	am upgrades.AppManager,
+	_ upgrades.AppManager,
 	keepers *keepers.AppKeepers,
 ) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
-		ctx.Logger().Info("running v7_10 upgrade handler")
-		am.GetSubspace("")
+	return func(ctx context.Context, plan upgradetypes.Plan, vm module.VersionMap) (module.VersionMap, error) {
+		goCtx := sdk.UnwrapSDKContext(ctx)
+		goCtx.Logger().Info("running v7_10 upgrade handler")
+
 		log.Printf("Validator power before update:")
-		for _, validator := range keepers.StakingKeeper.GetAllValidators(ctx) {
+		validators, err := keepers.StakingKeeper.GetAllValidators(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, validator := range validators {
 			log.Printf("%v: %v", validator.OperatorAddress, validator.ConsensusPower(keepers.StakingKeeper.PowerReduction(ctx)))
 		}
 
@@ -685,15 +879,18 @@ func CreateUpgradeHandler(
 			return nil, err
 		}
 
-		oldMainmet3Val, found := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
-		if !found {
+		oldMainmet3Val, err := keepers.StakingKeeper.GetValidator(ctx, Odin3OldValAddress)
+		if err != nil {
 			log.Printf("failed to find old mainnet3 validator")
 			return nil, errors.New("failed to find old mainnet3 validator")
 		}
 
 		oldMainmet3Val.Jailed = true
 
-		keepers.StakingKeeper.SetValidator(ctx, oldMainmet3Val)
+		err = keepers.StakingKeeper.SetValidator(ctx, oldMainmet3Val)
+		if err != nil {
+			return nil, err
+		}
 
 		// Fixinng Dan's validator account association
 		err = fixDefiantLabs(ctx, keepers)
@@ -707,7 +904,7 @@ func CreateUpgradeHandler(
 		}
 
 		log.Printf("Flushing IBC packets...")
-		FlushIBCPackets(ctx, keepers)
+		FlushIBCPackets(goCtx, keepers)
 		log.Printf("Flushing IBC packets complete")
 
 		newVM, err := mm.RunMigrations(ctx, configurator, vm)

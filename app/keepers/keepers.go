@@ -5,8 +5,6 @@ import (
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
@@ -49,8 +47,6 @@ type AppKeepers struct {
 	AuthzKeeper           authzkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
-	CoinswapKeeper        coinswapkeeper.Keeper
-	AuctionKeeper         auctionkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	//WasmKeeper            wasmkeeper.Keeper
 

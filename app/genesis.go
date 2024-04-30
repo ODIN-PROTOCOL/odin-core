@@ -4,16 +4,13 @@ import (
 	"encoding/json"
 	"time"
 
+	"cosmossdk.io/math"
 	"cosmossdk.io/x/evidence"
 	evidencetypes "cosmossdk.io/x/evidence/types"
 	"cosmossdk.io/x/feegrant"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
 	"cosmossdk.io/x/upgrade"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/auction"
-	auctiontypes "github.com/ODIN-PROTOCOL/odin-core/x/auction/types"
-	"github.com/ODIN-PROTOCOL/odin-core/x/coinswap"
-	coinswaptypes "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -67,25 +64,22 @@ func NewDefaultGenesisState() GenesisState {
 	authGenesis.Params.TxSizeCostPerByte = 5
 	stakingGenesis.Params.BondDenom = denom
 	stakingGenesis.Params.HistoricalEntries = 1000
-	distrGenesis.Params.BaseProposerReward = sdk.NewDecWithPrec(3, 2)   // 3%
-	distrGenesis.Params.BonusProposerReward = sdk.NewDecWithPrec(12, 2) // 12%
-	mintGenesis.Params.BlocksPerYear = 10519200                         // target 3-second block time
+	mintGenesis.Params.BlocksPerYear = 10519200 // target 3-second block time
 	mintGenesis.Params.MintDenom = denom
 	govGenesis.Params.MinDeposit = sdk.NewCoins(
 		sdk.NewCoin(denom, sdk.TokensFromConsensusPower(1000, sdk.DefaultPowerReduction)),
 	)
 	crisisGenesis.ConstantFee = sdk.NewCoin(denom, sdk.TokensFromConsensusPower(10000, sdk.DefaultPowerReduction))
-	slashingGenesis.Params.SignedBlocksWindow = 30000                         // approximately 1 day
-	slashingGenesis.Params.MinSignedPerWindow = sdk.NewDecWithPrec(5, 2)      // 5%
-	slashingGenesis.Params.DowntimeJailDuration = 60 * 10 * time.Second       // 10 minutes
-	slashingGenesis.Params.SlashFractionDoubleSign = sdk.NewDecWithPrec(5, 2) // 5%
-	slashingGenesis.Params.SlashFractionDowntime = sdk.NewDecWithPrec(1, 4)   // 0.01%
+	slashingGenesis.Params.SignedBlocksWindow = 30000                                // approximately 1 day
+	slashingGenesis.Params.MinSignedPerWindow = math.LegacyNewDecWithPrec(5, 2)      // 5%
+	slashingGenesis.Params.DowntimeJailDuration = 60 * 10 * time.Second              // 10 minutes
+	slashingGenesis.Params.SlashFractionDoubleSign = math.LegacyNewDecWithPrec(5, 2) // 5%
+	slashingGenesis.Params.SlashFractionDowntime = math.LegacyNewDecWithPrec(1, 4)   // 0.01%
 
 	icaGenesis.HostGenesisState.Params = icahosttypes.Params{
 		HostEnabled:   true,
 		AllowMessages: v2_6.ICAAllowMessages,
 	}
-	mintGenesis.ModuleCoinsAccount = "odin13jp4udqlxknzrpsk9jkr3hpmp6gy242xm0s2kq"
 	oracleGenesis.ModuleCoinsAccount = "odin1lqf6hm3nfunmhppmjhgrme9jp9d8vle90hjy5m"
 
 	return GenesisState{
@@ -108,8 +102,6 @@ func NewDefaultGenesisState() GenesisState {
 		ibctransafertypes.ModuleName: ibctransfer.AppModuleBasic{}.DefaultGenesis(cdc),
 		icatypes.ModuleName:          cdc.MustMarshalJSON(icaGenesis),
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
-		coinswaptypes.ModuleName:     coinswap.AppModuleBasic{}.DefaultGenesis(cdc),
-		auctiontypes.ModuleName:      auction.AppModuleBasic{}.DefaultGenesis(cdc),
 		//wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
