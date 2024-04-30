@@ -4,11 +4,13 @@ import (
 	"errors"
 	"io"
 
+	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	snapshot "cosmossdk.io/store/snapshots/types"
-	"github.com/cometbft/cometbft/libs/log"
+	storetypes "cosmossdk.io/store/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/gzip"
@@ -22,10 +24,10 @@ const SnapshotFormat = 1
 
 type OracleSnapshotter struct {
 	keeper *Keeper
-	cms    sdk.MultiStore
+	cms    storetypes.MultiStore
 }
 
-func NewOracleSnapshotter(cms sdk.MultiStore, keeper *Keeper) *OracleSnapshotter {
+func NewOracleSnapshotter(cms storetypes.MultiStore, keeper *Keeper) *OracleSnapshotter {
 	return &OracleSnapshotter{
 		keeper: keeper,
 		cms:    cms,
@@ -54,7 +56,11 @@ func (os *OracleSnapshotter) SnapshotExtension(height uint64, payloadWriter snap
 	seenBefore := make(map[string]bool)
 
 	// write all oracle scripts to snapshot
-	oracleScripts := os.keeper.GetAllOracleScripts(ctx)
+	oracleScripts, err := os.keeper.GetAllOracleScripts(ctx)
+	if err != nil {
+		return err
+	}
+
 	for _, oracleScript := range oracleScripts {
 		if err := writeFileToSnapshot(payloadWriter, oracleScript.Filename, os.keeper, seenBefore); err != nil {
 			return err
@@ -62,7 +68,11 @@ func (os *OracleSnapshotter) SnapshotExtension(height uint64, payloadWriter snap
 	}
 
 	// write all data sources to snapshot
-	dataSources := os.keeper.GetAllDataSources(ctx)
+	dataSources, err := os.keeper.GetAllDataSources(ctx)
+	if err != nil {
+		return err
+	}
+
 	for _, dataSource := range dataSources {
 		if err := writeFileToSnapshot(payloadWriter, dataSource.Filename, os.keeper, seenBefore); err != nil {
 			return err
@@ -70,14 +80,6 @@ func (os *OracleSnapshotter) SnapshotExtension(height uint64, payloadWriter snap
 	}
 
 	return nil
-}
-
-// No need to do anything
-func (os *OracleSnapshotter) PruneSnapshotHeight(height int64) {
-}
-
-// No need to do anything
-func (os *OracleSnapshotter) SetSnapshotInterval(snapshotInterval uint64) {
 }
 
 func (os *OracleSnapshotter) RestoreExtension(
@@ -99,11 +101,19 @@ func (os *OracleSnapshotter) processAllItems(
 
 	// get all filename that we need to find and construct a map to store found status
 	foundCode := make(map[string]bool)
-	oracleScripts := os.keeper.GetAllOracleScripts(ctx)
+	oracleScripts, err := os.keeper.GetAllOracleScripts(ctx)
+	if err != nil {
+		return err
+	}
+
 	for _, oracleScript := range oracleScripts {
 		foundCode[oracleScript.Filename] = false
 	}
-	dataSources := os.keeper.GetAllDataSources(ctx)
+	dataSources, err := os.keeper.GetAllDataSources(ctx)
+	if err != nil {
+		return err
+	}
+
 	for _, dataSource := range dataSources {
 		foundCode[dataSource.Filename] = false
 	}
@@ -156,11 +166,11 @@ func writeFileToSnapshot(
 	return nil
 }
 
-func restoreV1(ctx sdk.Context, k *Keeper, compressedCode []byte, foundCode map[string]bool) error {
+func restoreV1(_ sdk.Context, k *Keeper, compressedCode []byte, foundCode map[string]bool) error {
 	// uncompress code
 	code, err := gzip.Uncompress(
 		compressedCode,
-		max(types.MaxExecutableSize, types.MaxWasmCodeSize, types.MaxCompiledWasmCodeSize),
+		int64(math.Max(types.MaxExecutableSize, types.MaxWasmCodeSize, types.MaxCompiledWasmCodeSize)),
 	)
 	if err != nil {
 		return sdkerrors.Wrapf(types.ErrUncompressionFailed, err.Error())
@@ -183,7 +193,7 @@ func restoreV1(ctx sdk.Context, k *Keeper, compressedCode []byte, foundCode map[
 	return nil
 }
 
-func finalizeV1(ctx sdk.Context, k *Keeper, foundCode map[string]bool) error {
+func finalizeV1(_ sdk.Context, _ *Keeper, foundCode map[string]bool) error {
 	// check if there is any required code that we can't find in restore process
 	for _, found := range foundCode {
 		if !found {
@@ -191,15 +201,4 @@ func finalizeV1(ctx sdk.Context, k *Keeper, foundCode map[string]bool) error {
 		}
 	}
 	return nil
-}
-
-func max(arr ...int64) int64 {
-	var maximum int64 = 0
-	for _, value := range arr {
-		if value > maximum {
-			maximum = value
-		}
-	}
-
-	return maximum
 }

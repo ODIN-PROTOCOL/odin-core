@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -8,8 +9,10 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
+type Handler = func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error)
+
 // NewHandler creates the msg handler of this module, as required by Cosmos-SDK standard.
-func NewHandler(k keeper.Keeper) sdk.Handler {
+func NewHandler(k keeper.Keeper) Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		msgServer := keeper.NewMsgServerImpl(k)
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
@@ -39,7 +42,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			res, err := msgServer.UpdateParams(sdk.WrapSDKContext(ctx), msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		default:
-			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", types.ModuleName, msg)
+			return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", types.ModuleName, msg)
 		}
 	}
 }

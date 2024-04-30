@@ -130,7 +130,10 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 
 // ExportGenesis returns the current state as genesis raw bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	gs := ExportGenesis(ctx, am.keeper)
+	gs, err := ExportGenesis(ctx, am.keeper)
+	if err != nil {
+		panic(err)
+	}
 	return cdc.MustMarshalJSON(gs)
 }
 
@@ -146,13 +149,11 @@ func (am AppModule) IsAppModule() {}
 // BeginBlock processes ABCI begin block message for this oracle module (SDK AppModule interface).
 func (am AppModule) BeginBlock(ctx context.Context) error {
 	c := sdk.UnwrapSDKContext(ctx)
-	handleBeginBlock(c, am.keeper)
-	return nil
+	return handleBeginBlock(c, am.keeper)
 }
 
 // EndBlock processes ABCI end block message for this oracle module (SDK AppModule interface).
 func (am AppModule) EndBlock(ctx context.Context) error {
 	c := sdk.UnwrapSDKContext(ctx)
-	handleEndBlock(c, am.keeper)
-	return nil
+	return handleEndBlock(c, am.keeper)
 }

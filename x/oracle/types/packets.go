@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -31,22 +32,22 @@ func NewOracleRequestPacketData(
 // ValidateBasic is used for validating the request.
 func (p OracleRequestPacketData) ValidateBasic() error {
 	if p.MinCount <= 0 {
-		return sdkerrors.Wrapf(ErrInvalidMinCount, "got: %d", p.MinCount)
+		return errors.Wrapf(ErrInvalidMinCount, "got: %d", p.MinCount)
 	}
 	if p.AskCount < p.MinCount {
-		return sdkerrors.Wrapf(ErrInvalidAskCount, "got: %d, min count: %d", p.AskCount, p.MinCount)
+		return errors.Wrapf(ErrInvalidAskCount, "got: %d, min count: %d", p.AskCount, p.MinCount)
 	}
 	if len(p.ClientID) > MaxClientIDLength {
 		return WrapMaxError(ErrTooLongClientID, len(p.ClientID), MaxClientIDLength)
 	}
 	if p.PrepareGas <= 0 {
-		return sdkerrors.Wrapf(ErrInvalidOwasmGas, "invalid prepare gas: %d", p.PrepareGas)
+		return errors.Wrapf(ErrInvalidOwasmGas, "invalid prepare gas: %d", p.PrepareGas)
 	}
 	if p.ExecuteGas <= 0 {
-		return sdkerrors.Wrapf(ErrInvalidOwasmGas, "invalid execute gas: %d", p.ExecuteGas)
+		return errors.Wrapf(ErrInvalidOwasmGas, "invalid execute gas: %d", p.ExecuteGas)
 	}
 	if p.PrepareGas+p.ExecuteGas > MaximumOwasmGas {
-		return sdkerrors.Wrapf(
+		return errors.Wrapf(
 			ErrInvalidOwasmGas,
 			"sum of prepare gas and execute gas (%d) exceed %d",
 			p.PrepareGas+p.ExecuteGas,
@@ -54,7 +55,7 @@ func (p OracleRequestPacketData) ValidateBasic() error {
 		)
 	}
 	if !p.FeeLimit.IsValid() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, p.FeeLimit.String())
+		return errors.Wrap(sdkerrors.ErrInvalidCoins, p.FeeLimit.String())
 	}
 	return nil
 }

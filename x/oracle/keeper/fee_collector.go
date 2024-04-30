@@ -1,10 +1,9 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type feeCollector struct {
@@ -32,7 +31,7 @@ func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins) error {
 	for _, c := range coll.collected {
 		limitAmt := coll.limit.AmountOf(c.Denom)
 		if c.Amount.GT(limitAmt) {
-			return sdkerrors.Wrapf(
+			return errors.Wrapf(
 				types.ErrNotEnoughFee,
 				"require: %s, max: %s%s",
 				c.String(),
@@ -45,10 +44,17 @@ func (coll *feeCollector) Collect(ctx sdk.Context, coins sdk.Coins) error {
 	// Actual send coins
 	err := coll.distrKeeper.FundCommunityPool(ctx, coins, coll.payer)
 	if err == nil {
-		accumulatedPaymentsForData := coll.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData, err := coll.oracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		if err != nil {
+			return err
+		}
+
 		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(coins...)
 
-		coll.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+		err = coll.oracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+		if err != nil {
+			return err
+		}
 	}
 
 	return err

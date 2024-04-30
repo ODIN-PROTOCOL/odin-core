@@ -23,13 +23,27 @@ type Querier struct {
 var _ types.QueryServer = Querier{}
 
 // Counts queries the number of data sources, oracle scripts, and requests.
-func (k Querier) Counts(c context.Context, req *types.QueryCountsRequest) (*types.QueryCountsResponse, error) {
-	ctx := sdk.UnwrapSDKContext(c)
+func (k Querier) Counts(ctx context.Context, req *types.QueryCountsRequest) (*types.QueryCountsResponse, error) {
+	dataSourceCount, err := k.GetDataSourceCount(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	oracleScriptsCount, err := k.GetOracleScriptCount(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	requestsCount, err := k.GetRequestCount(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	return &types.QueryCountsResponse{
-			DataSourceCount:   k.GetDataSourceCount(ctx),
-			OracleScriptCount: k.GetOracleScriptCount(ctx),
-			RequestCount:      k.GetRequestCount(ctx)},
-		nil
+		DataSourceCount:   dataSourceCount,
+		OracleScriptCount: oracleScriptsCount,
+		RequestCount:      requestsCount,
+	}, nil
 }
 
 // Data queries the data source or oracle script script for given file hash.
@@ -115,7 +129,10 @@ func (k Querier) Request(c context.Context, req *types.QueryRequestRequest) (*ty
 
 	request, err := k.GetRequest(ctx, rid)
 	if err != nil {
-		lastExpired := k.GetRequestLastExpired(ctx)
+		lastExpired, err := k.GetRequestLastExpired(ctx)
+		if err != nil {
+			return nil, err
+		}
 		if rid > lastExpired {
 			return nil, status.Error(
 				codes.NotFound,
@@ -130,8 +147,17 @@ func (k Querier) Request(c context.Context, req *types.QueryRequestRequest) (*ty
 		return &types.QueryRequestResponse{Request: nil, Reports: nil, Result: &result}, nil
 	}
 
-	reports := k.GetReports(ctx, rid)
-	if !k.HasResult(ctx, rid) {
+	reports, err := k.GetReports(ctx, rid)
+	if err != nil {
+		return nil, err
+	}
+
+	hasResult, err := k.HasResult(ctx, rid)
+	if err != nil {
+		return nil, err
+	}
+
+	if !hasResult {
 		return &types.QueryRequestResponse{Request: &request, Reports: reports, Result: nil}, nil
 	}
 
@@ -186,15 +212,25 @@ func (k Querier) PendingRequests(
 		)
 	}
 
-	lastExpired := k.GetRequestLastExpired(ctx)
-	requestCount := k.GetRequestCount(ctx)
+	lastExpired, err := k.GetRequestLastExpired(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	requestCount, err := k.GetRequestCount(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	var pendingIDs []uint64
 	for id := lastExpired + 1; uint64(id) <= requestCount; id++ {
 		oracleReq := k.MustGetRequest(ctx, id)
 
 		// If all validators reported on this request, then skip it.
-		reports := k.GetReports(ctx, id)
+		reports, err := k.GetReports(ctx, id)
+		if err != nil {
+			return nil, err
+		}
 		if len(reports) == len(oracleReq.RequestedValidators) {
 			continue
 		}
@@ -258,11 +294,11 @@ func (k Querier) Validator(
 	if err != nil {
 		return nil, err
 	}
-	status := k.GetValidatorStatus(ctx, val)
+	validatorStatus, err := k.GetValidatorStatus(ctx, val)
 	if err != nil {
 		return nil, err
 	}
-	return &types.QueryValidatorResponse{Status: &status}, nil
+	return &types.QueryValidatorResponse{Status: &validatorStatus}, nil
 }
 
 // IsReporter queries grant of account on this validator
@@ -325,16 +361,29 @@ func (k Querier) ActiveValidators(
 	}
 	ctx := sdk.UnwrapSDKContext(c)
 	result := types.QueryActiveValidatorsResponse{}
-	k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
+	err := k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
 		func(idx int64, val stakingtypes.ValidatorI) (stop bool) {
-			if k.GetValidatorStatus(ctx, val.GetOperator()).IsActive {
+			valAddr, err := sdk.ValAddressFromBech32(val.GetOperator())
+			if err != nil {
+				return false
+			}
+
+			validatorStatus, err := k.GetValidatorStatus(ctx, valAddr)
+			if err != nil {
+				return false
+			}
+
+			if validatorStatus.IsActive {
 				result.Validators = append(result.Validators, &types.ActiveValidator{
-					Address: val.GetOperator().String(),
+					Address: val.GetOperator(),
 					Power:   val.GetTokens().Uint64(),
 				})
 			}
 			return false
 		})
+	if err != nil {
+		return nil, err
+	}
 	return &result, nil
 }
 
@@ -344,7 +393,11 @@ func (k Querier) Params(c context.Context, req *types.QueryParamsRequest) (*type
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	params := k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.QueryParamsResponse{Params: params}, nil
 }
 
@@ -429,8 +482,12 @@ func (k Querier) RequestVerification(
 	// Provided request should exist on chain
 	request, err := k.GetRequest(ctx, types.RequestID(req.RequestId))
 	if err != nil {
+		requestCount, err1 := k.GetRequestCount(ctx)
+		if err1 != nil {
+			return nil, err1
+		}
 		// return uncertain result if request id is in range of max delay
-		if req.RequestId-k.GetRequestCount(ctx) > 0 && req.RequestId-k.GetRequestCount(ctx) <= req.MaxDelay {
+		if req.RequestId-requestCount > 0 && req.RequestId-requestCount <= req.MaxDelay {
 			return &types.QueryRequestVerificationResponse{
 				ChainId:      req.ChainId,
 				Validator:    req.Validator,
@@ -489,7 +546,11 @@ func (k Querier) RequestVerification(
 	}
 
 	// Provided validator should not have reported data for the request
-	reports := k.GetReports(ctx, types.RequestID(req.RequestId))
+	reports, err := k.GetReports(ctx, types.RequestID(req.RequestId))
+	if err != nil {
+		return nil, err
+	}
+
 	isValidatorReported := false
 	for _, report := range reports {
 		reportVal, _ := sdk.ValAddressFromBech32(report.Validator)
@@ -505,8 +566,13 @@ func (k Querier) RequestVerification(
 		)
 	}
 
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// The request should not be expired
-	if request.RequestHeight+int64(k.GetParams(ctx).ExpirationBlockCount) < ctx.BlockHeader().Height {
+	if request.RequestHeight+int64(params.ExpirationBlockCount) < ctx.BlockHeader().Height {
 		return nil, status.Error(
 			codes.DeadlineExceeded,
 			fmt.Sprintf("Request with ID %d is already expired", req.RequestId),
@@ -523,20 +589,16 @@ func (k Querier) RequestVerification(
 	}, nil
 }
 
-func (k Querier) DataProvidersPool(c context.Context, req *types.QueryDataProvidersPoolRequest) (*types.QueryDataProvidersPoolResponse, error) {
-	ctx := sdk.UnwrapSDKContext(c)
-
-	return &types.QueryDataProvidersPoolResponse{
-		Pool: k.GetOraclePool(ctx).DataProvidersPool,
-	}, nil
-}
-
 // DataProviderReward returns current reward per byte for data providers
 func (k Querier) DataProviderReward(
 	c context.Context, _ *types.QueryDataProviderRewardRequest,
 ) (*types.QueryDataProviderRewardResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	accumulatedRewards := k.GetAccumulatedDataProvidersRewards(ctx)
+	accumulatedRewards, err := k.GetAccumulatedDataProvidersRewards(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.QueryDataProviderRewardResponse{RewardPerByte: accumulatedRewards.CurrentRewardPerByte}, nil
 }
 
@@ -550,6 +612,9 @@ func (k Querier) DataProviderAccumulatedReward(c context.Context, req *types.Que
 	if err != nil {
 		return nil, err
 	}
-	accumulatedReward := k.GetDataProviderAccumulatedReward(ctx, addr)
+	accumulatedReward, err := k.GetDataProviderAccumulatedReward(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
 	return &types.QueryDataProviderAccumulatedRewardResponse{AccumulatedReward: accumulatedReward}, nil
 }

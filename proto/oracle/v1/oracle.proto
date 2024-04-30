@@ -7,6 +7,9 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
+
 // DataSource is the data structure for storing data sources in the storage.
 message DataSource {
   option (gogoproto.equal) = true;
@@ -44,7 +47,7 @@ message OracleScript {
   // "{symbol:string,multiplier:u64}/{px:u64}"
   string schema = 5;
   // SourceCodeURL is the URL of oracle script's source code.
-  // It is recommendded to store source code on IPFS and get its URL to preserve
+  // It is recommended to store source code on IPFS and get its URL to preserve
   // decentralization.
   string source_code_url = 6 [(gogoproto.customname) = "SourceCodeURL"];
 }
@@ -295,19 +298,18 @@ message Params {
   bool ibc_request_enabled = 11 [(gogoproto.customname) = "IBCRequestEnabled"];
   // DataProviderRewardPerByte is the amount of tokens, user gets for the byte
   // of data provided
-  repeated cosmos.base.v1beta1.Coin data_provider_reward_per_byte = 12 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin data_provider_reward_per_byte = 12
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
   // DataProviderRewardThreshold is the maximum amount of tokens that can be
   // paid for data per time
-  RewardThreshold data_provider_reward_threshold = 13
-  [ (gogoproto.nullable) = false ];
+  RewardThreshold data_provider_reward_threshold = 13 [(gogoproto.nullable) = false];
   // RewardDecreasingFraction is the percentage by which the cost of data per
   // byte is reduced when the limit is reached
   bytes reward_decreasing_fraction = 14 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false,
+    (amino.dont_omitempty) = true
   ];
   // Denominations that can be used for withdrawing fee from data requesters
   repeated string data_requester_fee_denoms = 15;
@@ -366,64 +368,48 @@ message PriceResult {
   int64 resolve_time = 5;
 }
 
-message OraclePool {
-  option (gogoproto.equal) = true;
-  option (gogoproto.goproto_stringer) = true;
-
-  repeated cosmos.base.v1beta1.Coin data_providers_pool = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
-}
-
+// DataProviderAccumulatedReward
 message DataProviderAccumulatedReward {
   option (gogoproto.equal) = false;
 
-  string data_provider = 1;
-  repeated cosmos.base.v1beta1.Coin data_provider_reward = 2 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  string   data_provider                                 = 1;
+  repeated cosmos.base.v1beta1.Coin data_provider_reward = 2
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
+// DataProvidersAccumulatedRewards
 message DataProvidersAccumulatedRewards {
   option (gogoproto.equal) = false;
 
-  repeated cosmos.base.v1beta1.Coin current_reward_per_byte = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
-  repeated cosmos.base.v1beta1.Coin accumulated_amount = 2 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin current_reward_per_byte = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin accumulated_amount = 2
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
+// AccumulatedPaymentsForData
 message AccumulatedPaymentsForData {
   option (gogoproto.equal) = false;
 
-  repeated cosmos.base.v1beta1.Coin accumulated_amount = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin accumulated_amount = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
 // RewardThreshold
 message RewardThreshold {
   option (gogoproto.equal) = true;
   // Amount is the maximum amount of tokens that can be paid for data
-  repeated cosmos.base.v1beta1.Coin amount = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin amount = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
   // Blocks is the number of blocks during which the sum of the reward should
   // not exceed total_reward_amount
   uint64 blocks = 2;
 }
 
+// RequestResult
 message RequestResult {
   option (gogoproto.equal) = true;
-  Request request = 1;
-  Result result = 2;
-  repeated Report reports = 3 [ (gogoproto.nullable) = false ];
+  Request         request  = 1;
+  Result          result   = 2;
+  repeated Report reports  = 3 [(gogoproto.nullable) = false];
 }
