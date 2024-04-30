@@ -11,14 +11,11 @@ import "amino/amino.proto";
 // GenesisState defines the mint module's genesis state.
 message GenesisState {
   // minter is a space for holding current inflation information.
-  Minter minter = 1 [ (gogoproto.nullable) = false,  (amino.dont_omitempty) = true ];
+  Minter minter = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 
   // params defines all the paramaters of the module.
-  Params params = 2 [ (gogoproto.nullable) = false,  (amino.dont_omitempty) = true ];
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 
   // mint_pool defines the pool of eligible accounts and treasury pool
-  MintPool mint_pool = 3 [ (gogoproto.nullable) = false,  (amino.dont_omitempty) = true ];
-
-  string module_coins_account = 4
-      [ (gogoproto.moretags) = "yaml:\"module_coins_account\"" ];
+  MintPool mint_pool = 3 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 }

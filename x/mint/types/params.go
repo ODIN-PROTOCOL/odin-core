@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	"sigs.k8s.io/yaml"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +21,6 @@ var (
 	KeyGoalBonded           = []byte("GoalBonded")
 	KeyBlocksPerYear        = []byte("BlocksPerYear")
 	KeyMintAir              = []byte("MintAir")
-	KeyIntegrationAddresses = []byte("IntegrationAddresses")
 	KeyMaxWithdrawalPerTime = []byte("MaxWithdrawalPerTime")
 	KeyEligibleAccountsPool = []byte("EligibleAccountsPool")
 	KeyMaxAllowedMintVolume = []byte("MaxAllowedMintVolume")
@@ -35,11 +35,10 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 func NewParams(
 	mintDenom string,
-	inflationRateChange, inflationMax, inflationMin, goalBonded sdk.Dec,
+	inflationRateChange, inflationMax, inflationMin, goalBonded math.LegacyDec,
 	MaxWithdrawalPerTime sdk.Coins,
 	blocksPerYear uint64,
 	mintAir bool,
-	integrationAddresses map[string]string,
 	eligibleAccountsPool []string,
 	maxAllowedMintVolume sdk.Coins,
 	allowedMintDenoms []*AllowedDenom,
@@ -53,7 +52,6 @@ func NewParams(
 		GoalBonded:           goalBonded,
 		BlocksPerYear:        blocksPerYear,
 		MintAir:              mintAir,
-		IntegrationAddresses: integrationAddresses,
 		MaxWithdrawalPerTime: MaxWithdrawalPerTime,
 		EligibleAccountsPool: eligibleAccountsPool,
 		MaxAllowedMintVolume: maxAllowedMintVolume,
@@ -66,16 +64,15 @@ func NewParams(
 func DefaultParams() Params {
 	return Params{
 		MintDenom:            sdk.DefaultBondDenom,
-		InflationRateChange:  sdk.NewDecWithPrec(13, 2),
-		InflationMax:         sdk.NewDecWithPrec(20, 2),
-		InflationMin:         sdk.NewDecWithPrec(7, 2),
-		GoalBonded:           sdk.NewDecWithPrec(67, 2),
+		InflationRateChange:  math.LegacyNewDecWithPrec(13, 2),
+		InflationMax:         math.LegacyNewDecWithPrec(20, 2),
+		InflationMin:         math.LegacyNewDecWithPrec(7, 2),
+		GoalBonded:           math.LegacyNewDecWithPrec(67, 2),
 		BlocksPerYear:        uint64(60 * 60 * 8766 / 5), // assuming 5 second block times
 		MintAir:              false,
-		IntegrationAddresses: map[string]string{}, // default value (might be invalid for actual use)
-		MaxWithdrawalPerTime: sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(100))},
+		MaxWithdrawalPerTime: sdk.Coins{sdk.NewCoin("loki", math.NewInt(100))},
 		EligibleAccountsPool: []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
-		MaxAllowedMintVolume: sdk.Coins{sdk.NewCoin("minigeo", sdk.NewInt(100000000))},
+		MaxAllowedMintVolume: sdk.Coins{sdk.NewCoin("minigeo", math.NewInt(100000000))},
 		AllowedMintDenoms:    []*AllowedDenom{{"loki", "odin"}, {"minigeo", "geo"}},
 		AllowedMinter:        []string{"odin1cgfdwtrqfdrzh4z8rkcyx8g4jv22v8wgs39amj"},
 	}
@@ -102,9 +99,6 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateMintAir(p.MintAir); err != nil {
-		return err
-	}
-	if err := validateIntegrationAddresses(p.IntegrationAddresses); err != nil {
 		return err
 	}
 	if err := validateMaxWithdrawalPerTime(p.MaxWithdrawalPerTime); err != nil {
@@ -148,7 +142,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyGoalBonded, &p.GoalBonded, validateGoalBonded),
 		paramtypes.NewParamSetPair(KeyBlocksPerYear, &p.BlocksPerYear, validateBlocksPerYear),
 		paramtypes.NewParamSetPair(KeyMintAir, &p.MintAir, validateMintAir),
-		paramtypes.NewParamSetPair(KeyIntegrationAddresses, &p.IntegrationAddresses, validateIntegrationAddresses),
 		paramtypes.NewParamSetPair(KeyMaxWithdrawalPerTime, &p.MaxWithdrawalPerTime, validateMaxWithdrawalPerTime),
 		paramtypes.NewParamSetPair(KeyEligibleAccountsPool, &p.EligibleAccountsPool, validateEligibleAccountsPool),
 		paramtypes.NewParamSetPair(KeyMaxAllowedMintVolume, &p.MaxAllowedMintVolume, validateMaxAllowedMintVolume),
@@ -174,7 +167,7 @@ func validateMintDenom(i interface{}) error {
 }
 
 func validateInflationRateChange(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -182,7 +175,7 @@ func validateInflationRateChange(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("inflation rate change cannot be negative: %s", v)
 	}
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("inflation rate change too large: %s", v)
 	}
 
@@ -199,7 +192,7 @@ func validateEligibleAccountsPool(i interface{}) error {
 }
 
 func validateInflationMax(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -207,7 +200,7 @@ func validateInflationMax(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("max inflation cannot be negative: %s", v)
 	}
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("max inflation too large: %s", v)
 	}
 
@@ -215,7 +208,7 @@ func validateInflationMax(i interface{}) error {
 }
 
 func validateInflationMin(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -223,7 +216,7 @@ func validateInflationMin(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("min inflation cannot be negative: %s", v)
 	}
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("min inflation too large: %s", v)
 	}
 
@@ -231,7 +224,7 @@ func validateInflationMin(i interface{}) error {
 }
 
 func validateGoalBonded(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -239,7 +232,7 @@ func validateGoalBonded(i interface{}) error {
 	if v.IsNegative() {
 		return fmt.Errorf("goal bonded cannot be negative: %s", v)
 	}
-	if v.GT(sdk.OneDec()) {
+	if v.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("goal bonded too large: %s", v)
 	}
 
@@ -269,15 +262,6 @@ func validateMaxWithdrawalPerTime(i interface{}) error {
 	}
 	if v.IsAnyNegative() {
 		return fmt.Errorf("max withdrawal per time cannot be negative: %s", v)
-	}
-
-	return nil
-}
-
-func validateIntegrationAddresses(i interface{}) error {
-	_, ok := i.(map[string]string)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
 	return nil

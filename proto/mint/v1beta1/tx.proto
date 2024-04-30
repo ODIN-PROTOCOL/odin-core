@@ -4,9 +4,6 @@ package mint.v1beta1;
 option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/mint/types";
 
 import "gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
-import "mint/v1beta1/mint.proto";
 import "mint/v1beta1/params.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "amino/amino.proto";
@@ -22,6 +19,10 @@ service Msg {
   // MintCoins defines a method for minting from mint module.
   rpc MintCoins(MsgMintCoins) returns (MsgMintCoinsResponse);
 
+  // UpdateParams defines a governance operation for updating the x/mint module
+  // parameters. The authority is defaults to the x/gov module account.
+  //
+  // Since: cosmos-sdk 0.47
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
 }
 
@@ -31,10 +32,8 @@ message MsgWithdrawCoinsToAccFromTreasury {
   option (gogoproto.equal) = true;
 
   // Amount is the amoutn of coins to withdraw
-  repeated cosmos.base.v1beta1.Coin amount = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
-  ];
+  repeated cosmos.base.v1beta1.Coin amount = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
   // Receiver is for whom withdraw coins
   string receiver = 2;
   // Sender is the message signer who submits this report transaction
@@ -49,10 +48,8 @@ message MsgMintCoins {
   option (gogoproto.equal) = true;
 
   // Amount is the amount of coins to mint
-  repeated cosmos.base.v1beta1.Coin amount = 1 [
-    (gogoproto.nullable) = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
-  ];
+  repeated cosmos.base.v1beta1.Coin amount = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
   // Sender is the message signer who submits this report transaction
   string sender = 2;
 }

@@ -1,6 +1,8 @@
 package v2
 
 import (
+	storetypes "cosmossdk.io/core/store"
+
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/exported"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,7 +21,7 @@ var ParamsKey = []byte{0x01}
 // module state.
 func Migrate(
 	ctx sdk.Context,
-	store sdk.KVStore,
+	store storetypes.KVStore,
 	legacySubspace exported.Subspace,
 	cdc codec.BinaryCodec,
 ) error {
@@ -31,7 +33,5 @@ func Migrate(
 	}
 
 	bz := cdc.MustMarshal(&currParams)
-	store.Set(ParamsKey, bz)
-
-	return nil
+	return store.Set(ParamsKey, bz)
 }

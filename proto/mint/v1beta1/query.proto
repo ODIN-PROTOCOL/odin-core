@@ -6,8 +6,10 @@ option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/mint/types";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/v1beta1/coin.proto";
-import "mint/v1beta1/mint.proto";
 import "mint/v1beta1/params.proto";
+
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
 
 // Query defines the gRPC querier service.
 service Query {
@@ -20,23 +22,15 @@ service Query {
     option (google.api.http).get = "/mint/parameters";
   }
   // Inflation returns current annual provisions.
-  rpc AnnualProvisions(QueryAnnualProvisionsRequest)
-      returns (QueryAnnualProvisionsResponse) {
+  rpc AnnualProvisions(QueryAnnualProvisionsRequest) returns (QueryAnnualProvisionsResponse) {
     option (google.api.http).get = "/mint/annual_provisions";
   }
-  // Inflation returns integration address.
-  rpc IntegrationAddress(QueryIntegrationAddressRequest)
-      returns (QueryIntegrationAddressResponse) {
-    option (google.api.http).get = "/mint/integration_addresses/{network_name}";
-  }
   // Inflation returns current treasury pool.
-  rpc TreasuryPool(QueryTreasuryPoolRequest)
-      returns (QueryTreasuryPoolResponse) {
+  rpc TreasuryPool(QueryTreasuryPoolRequest) returns (QueryTreasuryPoolResponse) {
     option (google.api.http).get = "/mint/treasury_pool";
   }
   // CurrentMintVolume returns current minted coins volume.
-  rpc CurrentMintVolume(QueryCurrentMintVolumeRequest)
-      returns (QueryCurrentMintVolumeResponse) {
+  rpc CurrentMintVolume(QueryCurrentMintVolumeRequest) returns (QueryCurrentMintVolumeResponse) {
     option (google.api.http).get = "/mint/current_mint_volume";
   }
 }
@@ -47,7 +41,7 @@ message QueryParamsRequest {}
 // QueryParamsResponse is response type for the Query/QueryParams RPC
 // method.
 message QueryParamsResponse {
-  Params params = 1 [ (gogoproto.nullable) = false ];
+  Params params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryInflationRequest is request type for the Query/QueryInflation RPC
@@ -57,8 +51,10 @@ message QueryInflationRequest {}
 // method.
 message QueryInflationResponse {
   string inflation = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false,
+    (amino.dont_omitempty) = true
   ];
 }
 
@@ -69,17 +65,12 @@ message QueryAnnualProvisionsRequest {}
 // Query/QueryAnnualProvisions RPC method.
 message QueryAnnualProvisionsResponse {
   string annual_provisions = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false,
+    (amino.dont_omitempty) = true
   ];
 }
-
-// QueryIntegrationAddressRequest is request type for the
-// Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressRequest { string network_name = 1; }
-// QueryIntegrationAddressResponse is response type for the
-// Query/QueryEthIntegrationAddress RPC method.
-message QueryIntegrationAddressResponse { string integration_address = 1; }
 
 // QueryTreasuryPoolRequest is request type for the Query/QueryTreasuryPool RPC
 // method.
@@ -87,10 +78,8 @@ message QueryTreasuryPoolRequest {}
 // QueryTreasuryPoolResponse is response type for the Query/QueryTreasuryPool
 // RPC method.
 message QueryTreasuryPoolResponse {
-  repeated cosmos.base.v1beta1.Coin treasury_pool = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin treasury_pool = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }
 
 // QueryCurrentMintVolumeRequest is request type for the
@@ -99,8 +88,6 @@ message QueryCurrentMintVolumeRequest {}
 // QueryCurrentMintVolumeResponse is response type for the
 // Query/QueryCurrentMintVolume RPC method.
 message QueryCurrentMintVolumeResponse {
-  repeated cosmos.base.v1beta1.Coin current_mint_volume = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
-  ];
+  repeated cosmos.base.v1beta1.Coin current_mint_volume = 1
+      [(gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins", (gogoproto.nullable) = false];
 }

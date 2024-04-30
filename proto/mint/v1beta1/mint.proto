@@ -4,21 +4,20 @@ package mint.v1beta1;
 option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/mint/types";
 
 import "gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/any.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "amino/amino.proto";
 import "cosmos_proto/cosmos.proto";
 
+// MintPool represents minted coins.
 message MintPool {
-  option (gogoproto.equal) = true;
+  option (gogoproto.equal)            = true;
   option (gogoproto.goproto_stringer) = true;
 
   // treasury pool
   repeated cosmos.base.v1beta1.Coin treasury_pool = 1 [
-    (gogoproto.moretags) = "yaml:\"treasury_pool\"",
+    (gogoproto.moretags)     = "yaml:\"treasury_pool\"",
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)     = false
   ];
 }
 
@@ -29,21 +28,23 @@ message Minter {
   // current annual inflation rate
   string inflation = 1 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false,
+    (amino.dont_omitempty) = true
   ];
   // current annual expected provisions
   string annual_provisions = 2 [
+    (gogoproto.moretags)   = "yaml:\"annual_provisions\"",
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.moretags) = "yaml:\"annual_provisions\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable) = false
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false,
+    (amino.dont_omitempty) = true
   ];
   // current mint volume
   repeated cosmos.base.v1beta1.Coin current_mint_volume = 3 [
-    (gogoproto.moretags) = "yaml:\"current_mint_volume\"",
+    (gogoproto.moretags)     = "yaml:\"current_mint_volume\"",
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
-    (gogoproto.nullable) = false
+    (gogoproto.nullable)     = false
   ];
 }
 
@@ -52,8 +53,7 @@ message AllowedDenom {
   option (gogoproto.equal) = true;
 
   // little version of coin
-  string token_unit_denom = 1
-      [ (gogoproto.moretags) = "yaml:\"token_unit_denom\"" ];
+  string token_unit_denom = 1 [(gogoproto.moretags) = "yaml:\"token_unit_denom\""];
   // large version of coin
-  string token_denom = 2 [ (gogoproto.moretags) = "yaml:\"token_denom\"" ];
+  string token_denom = 2 [(gogoproto.moretags) = "yaml:\"token_denom\""];
 }
