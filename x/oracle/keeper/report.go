@@ -68,7 +68,7 @@ func (k Keeper) CheckValidReport(
 		return err
 	}
 
-	if !hasReport {
+	if hasReport {
 		return errors.Wrapf(
 			types.ErrValidatorAlreadyReported, "reqID: %d, val: %s", rid, val.String())
 	}

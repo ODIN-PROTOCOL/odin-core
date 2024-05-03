@@ -40,10 +40,10 @@ func NewQueryServer(clientCtx client.Context) ServiceServer {
 }
 
 // ChainID returns QueryChainIDResponse that has chain id from ctx
-func (s queryServer) ChainID(ctx context.Context, _ *QueryChainIDRequest) (*QueryChainIDResponse, error) {
+func (s queryServer) ChainID(ctx context.Context, _ *QueryChainIDRequest) (*ServiceChainIDResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	return &QueryChainIDResponse{
+	return &ServiceChainIDResponse{
 		ChainID: sdkCtx.ChainID(),
 	}, nil
 }
@@ -52,7 +52,7 @@ func (s queryServer) ChainID(ctx context.Context, _ *QueryChainIDRequest) (*Quer
 func (s queryServer) EVMValidators(
 	ctx context.Context,
 	_ *QueryEVMValidatorsRequest,
-) (*QueryEVMValidatorsResponse, error) {
+) (*ServiceEVMValidatorsResponse, error) {
 	node, err := s.clientCtx.GetNode()
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (s queryServer) EVMValidators(
 		return nil, err
 	}
 
-	evmValidatorsResponse := QueryEVMValidatorsResponse{}
+	evmValidatorsResponse := ServiceEVMValidatorsResponse{}
 	evmValidatorsResponse.BlockHeight = validators.BlockHeight
 	evmValidatorsResponse.Validators = []ValidatorMinimal{}
 

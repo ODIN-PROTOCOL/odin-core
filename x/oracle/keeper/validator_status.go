@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"time"
 
+	"cosmossdk.io/collections"
 	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,6 +49,7 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) e
 	}
 
 	feeCollector := k.AuthKeeper.GetModuleAccount(ctx, k.feeCollectorName)
+	distrModule := k.AuthKeeper.GetModuleAccount(ctx, distr.ModuleName)
 	totalFee := sdk.NewDecCoinsFromCoins(k.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())...)
 
 	params, err := k.GetParams(ctx)
@@ -85,14 +88,26 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) e
 
 	// Allocate the remaining coins to the community pool.
 	remainingNormalized := sdk.NormalizeCoins(remaining)
-	return k.distrKeeper.FundCommunityPool(ctx, remainingNormalized, feeCollector.GetAddress())
+	return k.distrKeeper.FundCommunityPool(ctx, remainingNormalized, distrModule.GetAddress())
 
 }
 
 // GetValidatorStatus returns the validator status for the given validator. Note that validator
 // status is default to [inactive, 0], so new validators start with inactive state.
 func (k Keeper) GetValidatorStatus(ctx context.Context, val sdk.ValAddress) (types.ValidatorStatus, error) {
-	return k.ValidatorStatuses.Get(ctx, val)
+	validatorStatus, err := k.ValidatorStatuses.Get(ctx, val)
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.ValidatorStatus{IsActive: false}, nil
+		}
+		return validatorStatus, err
+	}
+
+	return validatorStatus, nil
+}
+
+func (k Keeper) HasValidatorStatus(ctx context.Context, val sdk.ValAddress) (bool, error) {
+	return k.ValidatorStatuses.Has(ctx, val)
 }
 
 // SetValidatorStatus sets the validator status for the given validator.
@@ -104,23 +119,31 @@ func (k Keeper) SetValidatorStatus(ctx context.Context, val sdk.ValAddress, stat
 // already active or was deactivated recently, as specified by InactivePenaltyDuration parameter.
 func (k Keeper) Activate(ctx context.Context, val sdk.ValAddress) error {
 	goCtx := sdk.UnwrapSDKContext(ctx)
-	status, err := k.GetValidatorStatus(ctx, val)
+
+	hasValidator, err := k.HasValidatorStatus(ctx, val)
 	if err != nil {
 		return err
 	}
 
-	if status.IsActive {
-		return types.ErrValidatorAlreadyActive
-	}
+	if hasValidator {
+		status, err := k.GetValidatorStatus(ctx, val)
+		if err != nil {
+			return err
+		}
 
-	params, err := k.GetParams(ctx)
-	if err != nil {
-		return err
-	}
+		if status.IsActive {
+			return types.ErrValidatorAlreadyActive
+		}
 
-	penaltyDuration := time.Duration(params.InactivePenaltyDuration)
-	if !status.Since.IsZero() && status.Since.Add(penaltyDuration).After(goCtx.BlockHeader().Time) {
-		return types.ErrTooSoonToActivate
+		params, err := k.GetParams(ctx)
+		if err != nil {
+			return err
+		}
+
+		penaltyDuration := time.Duration(params.InactivePenaltyDuration)
+		if !status.Since.IsZero() && status.Since.Add(penaltyDuration).After(goCtx.BlockHeader().Time) {
+			return types.ErrTooSoonToActivate
+		}
 	}
 
 	return k.SetValidatorStatus(ctx, val, types.NewValidatorStatus(true, goCtx.BlockHeader().Time))

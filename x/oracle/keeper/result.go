@@ -3,9 +3,11 @@ package keeper
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
+	"cosmossdk.io/collections"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	host "github.com/cosmos/ibc-go/v8/modules/core/24-host"
@@ -29,7 +31,15 @@ func (k Keeper) SetResult(ctx context.Context, reqID types.RequestID, result typ
 
 // GetResult returns the result for the given request ID or error if not exists.
 func (k Keeper) GetResult(ctx context.Context, id types.RequestID) (types.Result, error) {
-	return k.Results.Get(ctx, uint64(id))
+	result, err := k.Results.Get(ctx, uint64(id))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.Result{}, types.ErrResultNotFound
+		}
+		return result, err
+	}
+
+	return result, nil
 }
 
 // MustGetResult returns the result for the given request ID. Panics on error.

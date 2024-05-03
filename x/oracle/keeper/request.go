@@ -2,10 +2,12 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
-	"cosmossdk.io/errors"
+	"cosmossdk.io/collections"
+	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
@@ -21,7 +23,16 @@ func (k Keeper) HasRequest(ctx context.Context, id types.RequestID) (bool, error
 
 // GetRequest returns the request struct for the given ID or error if not exists.
 func (k Keeper) GetRequest(ctx context.Context, id types.RequestID) (types.Request, error) {
-	return k.Requests.Get(ctx, uint64(id))
+	request, err := k.Requests.Get(ctx, uint64(id))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.Request{}, types.ErrRequestNotFound
+		}
+
+		return request, err
+	}
+
+	return request, nil
 }
 
 // MustGetRequest returns the request struct for the given ID. Panics error if not exists.
@@ -215,7 +226,7 @@ func (k Keeper) GetPaginatedRequests(
 		return requestResult, nil
 	})
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to paginate requests")
+		return nil, nil, sdkerrors.Wrap(err, "failed to paginate requests")
 	}
 
 	return requests, pageRes, nil

@@ -3,8 +3,10 @@ package keeper
 import (
 	"bytes"
 	"context"
+	"errors"
 
-	"cosmossdk.io/errors"
+	"cosmossdk.io/collections"
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -17,7 +19,16 @@ func (k Keeper) HasOracleScript(ctx context.Context, id types.OracleScriptID) (b
 
 // GetOracleScript returns the oracle script struct for the given ID or error if not exists.
 func (k Keeper) GetOracleScript(ctx context.Context, id types.OracleScriptID) (types.OracleScript, error) {
-	return k.OracleScripts.Get(ctx, uint64(id))
+	oracleScript, err := k.OracleScripts.Get(ctx, uint64(id))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.OracleScript{}, sdkerrors.Wrapf(types.ErrOracleScriptNotFound, "id: %d", id)
+		}
+
+		return oracleScript, err
+	}
+
+	return oracleScript, nil
 }
 
 // MustGetOracleScript returns the oracle script struct for the given ID. Panic if not exists.
@@ -83,7 +94,7 @@ func (k Keeper) GetPaginatedOracleScripts(
 		return oracleScript, nil
 	})
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to paginate oracle scripts")
+		return nil, nil, sdkerrors.Wrap(err, "failed to paginate oracle scripts")
 	}
 
 	return oracleScripts, pageRes, nil
@@ -97,7 +108,7 @@ func (k Keeper) AddOracleScriptFile(file []byte) (string, error) {
 	}
 	compiledFile, err := k.owasmVM.Compile(file, types.MaxCompiledWasmCodeSize)
 	if err != nil {
-		return "", errors.Wrapf(types.ErrOwasmCompilation, "caused by %s", err.Error())
+		return "", sdkerrors.Wrapf(types.ErrOwasmCompilation, "caused by %s", err.Error())
 	}
 	return k.fileCache.AddFile(compiledFile), nil
 }

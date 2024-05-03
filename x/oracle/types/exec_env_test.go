@@ -76,12 +76,22 @@ func mockFreshPrepareEnv() *PrepareEnv {
 	return env
 }
 
-func mockAlreadyPreparedEnv() *PrepareEnv {
+func mockAlreadyPreparedEnv() (*PrepareEnv, error) {
 	env := mockFreshPrepareEnv()
-	env.AskExternalData(1, 1, []byte("CALLDATA1"))
-	env.AskExternalData(2, 2, []byte("CALLDATA2"))
-	env.AskExternalData(3, 3, []byte("CALLDATA3"))
-	return env
+	err := env.AskExternalData(1, 1, []byte("CALLDATA1"))
+	if err != nil {
+		return nil, err
+	}
+	err = env.AskExternalData(2, 2, []byte("CALLDATA2"))
+	if err != nil {
+		return nil, err
+	}
+	err = env.AskExternalData(3, 3, []byte("CALLDATA3"))
+	if err != nil {
+		return nil, err
+	}
+
+	return env, nil
 }
 
 func TestGetCalldata(t *testing.T) {
@@ -102,7 +112,8 @@ func TestSetReturnData(t *testing.T) {
 	require.Equal(t, api.ErrWrongPeriodAction, err)
 
 	eenv := mockExecEnv()
-	eenv.SetReturnData(result)
+	err = eenv.SetReturnData(result)
+	require.NoError(t, err)
 	require.Equal(t, result, eenv.Retdata)
 }
 func TestGetAskCount(t *testing.T) {
@@ -190,9 +201,10 @@ func TestGetExternalData(t *testing.T) {
 }
 
 func TestFailedGetExternalData(t *testing.T) {
-	penv := mockAlreadyPreparedEnv()
+	penv, err := mockAlreadyPreparedEnv()
+	require.NoError(t, err)
 
-	_, err := penv.GetExternalData(1, 1)
+	_, err = penv.GetExternalData(1, 1)
 	require.Equal(t, api.ErrWrongPeriodAction, err)
 	_, err = penv.GetExternalDataStatus(1, 1)
 	require.Equal(t, api.ErrWrongPeriodAction, err)
@@ -200,9 +212,12 @@ func TestFailedGetExternalData(t *testing.T) {
 
 func TestAskExternalData(t *testing.T) {
 	env := mockFreshPrepareEnv()
-	env.AskExternalData(1, 1, []byte("CALLDATA1"))
-	env.AskExternalData(42, 2, []byte("CALLDATA2"))
-	env.AskExternalData(3, 4, []byte("CALLDATA3"))
+	err := env.AskExternalData(1, 1, []byte("CALLDATA1"))
+	require.NoError(t, err)
+	err = env.AskExternalData(42, 2, []byte("CALLDATA2"))
+	require.NoError(t, err)
+	err = env.AskExternalData(3, 4, []byte("CALLDATA3"))
+	require.NoError(t, err)
 
 	rawReq := env.GetRawRequests()
 	expectRawReq := []RawRequest{
@@ -262,7 +277,9 @@ func TestAskExternalDataOnExecEnv(t *testing.T) {
 }
 
 func TestGetRawRequests(t *testing.T) {
-	env := mockAlreadyPreparedEnv()
+	env, err := mockAlreadyPreparedEnv()
+	require.NoError(t, err)
+
 	expect := []RawRequest{
 		NewRawRequest(1, 1, []byte("CALLDATA1")),
 		NewRawRequest(2, 2, []byte("CALLDATA2")),

@@ -80,7 +80,7 @@ func NewDefaultGenesisState() GenesisState {
 		HostEnabled:   true,
 		AllowMessages: v2_6.ICAAllowMessages,
 	}
-	oracleGenesis.ModuleCoinsAccount = "odin1lqf6hm3nfunmhppmjhgrme9jp9d8vle90hjy5m"
+	//oracleGenesis.ModuleCoinsAccount = "odin1lqf6hm3nfunmhppmjhgrme9jp9d8vle90hjy5m"
 
 	return GenesisState{
 		authtypes.ModuleName:         cdc.MustMarshalJSON(authGenesis),

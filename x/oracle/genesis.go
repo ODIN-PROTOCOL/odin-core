@@ -36,6 +36,16 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data *types.GenesisState) {
 		panic(err)
 	}
 
+	err = k.SetPendingResolveList(ctx, []types.RequestID{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetAccumulatedPaymentsForData(ctx, types.AccumulatedPaymentsForData{AccumulatedAmount: sdk.NewCoins()})
+	if err != nil {
+		panic(err)
+	}
+
 	err = k.SetRollingSeed(ctx, make([]byte, types.RollingSeedSizeInBytes))
 	if err != nil {
 		panic(err)
@@ -70,14 +80,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data *types.GenesisState) {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
-	balances := k.BankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
-	if balances.IsZero() {
-		if err := k.BankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.OraclePool.DataProvidersPool); err != nil {
-			panic(err)
-		}
-
-		k.AuthKeeper.SetModuleAccount(ctx, moduleAcc)
-	}
+	k.AuthKeeper.SetModuleAccount(ctx, moduleAcc)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.

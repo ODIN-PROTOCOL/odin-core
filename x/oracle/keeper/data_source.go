@@ -3,7 +3,10 @@ package keeper
 import (
 	"bytes"
 	"context"
+	"errors"
 
+	"cosmossdk.io/collections"
+	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
@@ -17,7 +20,16 @@ func (k Keeper) HasDataSource(ctx sdk.Context, id types.DataSourceID) (bool, err
 
 // GetDataSource returns the data source struct for the given ID or error if not exists.
 func (k Keeper) GetDataSource(ctx context.Context, id types.DataSourceID) (types.DataSource, error) {
-	return k.DataSources.Get(ctx, uint64(id))
+	dataSource, err := k.DataSources.Get(ctx, uint64(id))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.DataSource{}, sdkerrors.Wrapf(types.ErrDataSourceNotFound, "id: %d", id)
+		}
+
+		return dataSource, err
+	}
+
+	return dataSource, nil
 }
 
 // MustGetDataSource returns the data source struct for the given ID. Panic if not exists.

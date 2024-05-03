@@ -8,8 +8,8 @@ import (
 
 	storetypes "cosmossdk.io/store/types"
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
-	ics23 "github.com/confio/ics23/go"
 	"github.com/cosmos/cosmos-sdk/client"
+	ics23 "github.com/cosmos/ics23/go"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 )
 

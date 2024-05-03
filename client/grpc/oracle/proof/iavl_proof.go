@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	ics23 "github.com/confio/ics23/go"
+	ics23 "github.com/cosmos/ics23/go"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -42,7 +42,7 @@ func NewProofServer(clientCtx client.Context) ServiceServer {
 }
 
 // Proof returns a proof from provided request ID and block height
-func (s proofServer) Proof(ctx context.Context, req *QueryProofRequest) (*QueryProofResponse, error) {
+func (s proofServer) Proof(ctx context.Context, req *QueryProofRequest) (*ServiceProofResponse, error) {
 	cliCtx := s.clientCtx
 	// Set the height in the client context to the requested height
 	cliCtx.Height = req.Height
@@ -127,7 +127,7 @@ func (s proofServer) Proof(ctx context.Context, req *QueryProofRequest) (*QueryP
 	}
 
 	// Return a QueryProofResponse object with the relevant information
-	return &QueryProofResponse{
+	return &ServiceProofResponse{
 		Height: cliCtx.Height,
 		Result: SingleProofResponse{
 			Proof: SingleProof{
@@ -141,7 +141,7 @@ func (s proofServer) Proof(ctx context.Context, req *QueryProofRequest) (*QueryP
 }
 
 // MultiProof returns a proof for multiple request IDs
-func (s proofServer) MultiProof(ctx context.Context, req *QueryMultiProofRequest) (*QueryMultiProofResponse, error) {
+func (s proofServer) MultiProof(ctx context.Context, req *QueryMultiProofRequest) (*ServiceMultiProofResponse, error) {
 	// Get the client context from the server context
 	cliCtx := s.clientCtx
 	height := &cliCtx.Height
@@ -244,7 +244,7 @@ func (s proofServer) MultiProof(ctx context.Context, req *QueryMultiProofRequest
 	}
 
 	// Return a QueryMultiProofResponse object with the relevant information
-	return &QueryMultiProofResponse{
+	return &ServiceMultiProofResponse{
 		Height: cliCtx.Height,
 		Result: MultiProofResponse{
 			Proof: MultiProof{
@@ -261,7 +261,7 @@ func (s proofServer) MultiProof(ctx context.Context, req *QueryMultiProofRequest
 func (s proofServer) RequestCountProof(
 	ctx context.Context,
 	req *QueryRequestCountProofRequest,
-) (*QueryRequestCountProofResponse, error) {
+) (*ServiceRequestCountProofResponse, error) {
 	// Get the client context from the server context
 	cliCtx := s.clientCtx
 	height := &cliCtx.Height
@@ -340,7 +340,7 @@ func (s proofServer) RequestCountProof(
 	}
 
 	// Return the QueryRequestCountProofResponse object with the relevant information
-	return &QueryRequestCountProofResponse{
+	return &ServiceRequestCountProofResponse{
 		Height: cliCtx.Height,
 		Result: CountProofResponse{
 			Proof: CountProof{
