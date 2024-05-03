@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -25,7 +26,7 @@ func TestSuccessRequestOracleData(t *testing.T) {
 		3,
 		2,
 		"app_test",
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(9000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", math.NewInt(9000000))),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Validators[0].Address,
@@ -55,7 +56,8 @@ func TestSuccessRequestOracleData(t *testing.T) {
 		nil,
 		testapp.TestDefaultExecuteGas,
 	)
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 4})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	request, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NoError(t, err)
 	require.Equal(t, expectRequest, request)
@@ -72,15 +74,17 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	require.NotNil(t, res)
 	require.NoError(t, err)
 
-	ids := k.GetPendingResolveList(ctx)
+	ids, err := k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
 	require.Equal(t, []types.RequestID{}, ids)
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
-	result := app.EndBlocker(ctx, abci.RequestEndBlock{Height: 6})
-	expectEvents := []abci.Event{}
+	result, err := app.EndBlocker(ctx)
+	require.NoError(t, err)
+	expectEvents := make([]abci.Event, 0)
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 
 	ctx = ctx.WithBlockTime(time.Unix(1581589795, 0))
 	reportMsg2 := types.NewMsgReportData(
@@ -95,12 +99,14 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	require.NotNil(t, res)
 	require.NoError(t, err)
 
-	ids = k.GetPendingResolveList(ctx)
+	ids, err = k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
 	require.Equal(t, []types.RequestID{1}, ids)
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
-	result = app.EndBlocker(ctx, abci.RequestEndBlock{Height: 8})
+	result, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	resPacket := types.NewOracleResponsePacketData(
 		expectRequest.ClientID, types.RequestID(1), 2, int64(expectRequest.RequestTime), 1581589795,
 		types.RESOLVE_STATUS_SUCCESS, []byte("beeb"),
@@ -112,9 +118,10 @@ func TestSuccessRequestOracleData(t *testing.T) {
 		{Key: types.AttributeKeyGasUsed, Value: "2485000000"},
 	}}}
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 
-	ids = k.GetPendingResolveList(ctx)
+	ids, err = k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
 	require.Equal(t, []types.RequestID{}, ids)
 
 	req, err := k.GetRequest(ctx, types.RequestID(1))
@@ -122,7 +129,8 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	require.NoError(t, err)
 
 	ctx = ctx.WithBlockHeight(32).WithBlockTime(ctx.BlockTime().Add(time.Minute))
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 32})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 }
 
 func TestExpiredRequestOracleData(t *testing.T) {
@@ -136,7 +144,7 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		3,
 		2,
 		"app_test",
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(9000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", math.NewInt(9000000))),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Validators[0].Address,
@@ -165,13 +173,15 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		nil,
 		testapp.TestDefaultExecuteGas,
 	)
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 4})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	request, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NoError(t, err)
 	require.Equal(t, expectRequest, request)
 
 	ctx = ctx.WithBlockHeight(132).WithBlockTime(ctx.BlockTime().Add(time.Minute))
-	result := app.EndBlocker(ctx, abci.RequestEndBlock{Height: 132})
+	result, err := app.EndBlocker(ctx)
+	require.NoError(t, err)
 	resPacket := types.NewOracleResponsePacketData(
 		expectRequest.ClientID, types.RequestID(1), 0, int64(expectRequest.RequestTime), ctx.BlockTime().Unix(),
 		types.RESOLVE_STATUS_EXPIRED, []byte{},
@@ -211,5 +221,5 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		},
 	}}
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 }

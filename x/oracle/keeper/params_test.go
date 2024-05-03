@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
@@ -25,10 +25,14 @@ func TestGetSetParams(t *testing.T) {
 		OracleRewardPercentage:   50,
 		InactivePenaltyDuration:  1000,
 		IBCRequestEnabled:        true,
-		RewardDecreasingFraction: sdk.NewDec(10),
+		RewardDecreasingFraction: math.LegacyNewDec(10),
 	}
-	k.SetParams(ctx, expectedParams)
-	require.Equal(t, expectedParams, k.GetParams(ctx))
+	err := k.SetParams(ctx, expectedParams)
+	require.NoError(t, err)
+
+	params, err := k.GetParams(ctx)
+	require.NoError(t, err)
+	require.Equal(t, expectedParams, params)
 
 	expectedParams = types.Params{
 		MaxRawRequestCount:       2,
@@ -42,10 +46,14 @@ func TestGetSetParams(t *testing.T) {
 		OracleRewardPercentage:   80,
 		InactivePenaltyDuration:  10000,
 		IBCRequestEnabled:        false,
-		RewardDecreasingFraction: sdk.NewDec(10),
+		RewardDecreasingFraction: math.LegacyNewDec(10),
 	}
-	k.SetParams(ctx, expectedParams)
-	require.Equal(t, expectedParams, k.GetParams(ctx))
+	err = k.SetParams(ctx, expectedParams)
+	require.NoError(t, err)
+
+	params, err = k.GetParams(ctx)
+	require.NoError(t, err)
+	require.Equal(t, expectedParams, params)
 
 	expectedParams = types.Params{
 		MaxRawRequestCount:       2,
@@ -59,10 +67,14 @@ func TestGetSetParams(t *testing.T) {
 		OracleRewardPercentage:   0,
 		InactivePenaltyDuration:  0,
 		IBCRequestEnabled:        false,
-		RewardDecreasingFraction: sdk.NewDec(100),
+		RewardDecreasingFraction: math.LegacyNewDec(100),
 	}
-	k.SetParams(ctx, expectedParams)
-	require.Equal(t, expectedParams, k.GetParams(ctx))
+	err = k.SetParams(ctx, expectedParams)
+	require.NoError(t, err)
+
+	params, err = k.GetParams(ctx)
+	require.NoError(t, err)
+	require.Equal(t, expectedParams, params)
 
 	expectedParams = types.Params{
 		MaxRawRequestCount:       0,
@@ -76,8 +88,8 @@ func TestGetSetParams(t *testing.T) {
 		OracleRewardPercentage:   80,
 		InactivePenaltyDuration:  10000,
 		IBCRequestEnabled:        false,
-		RewardDecreasingFraction: sdk.NewDec(1),
+		RewardDecreasingFraction: math.LegacyNewDec(1),
 	}
-	err := k.SetParams(ctx, expectedParams)
+	err = k.SetParams(ctx, expectedParams)
 	require.EqualError(t, fmt.Errorf("max raw request count must be positive: 0"), err.Error())
 }

@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -24,7 +25,8 @@ import (
 
 func TestCreateDataSourceSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(false)
-	dsCount := k.GetDataSourceCount(ctx)
+	dsCount, err := k.GetDataSourceCount(ctx)
+	require.NoError(t, err)
 	treasury := testapp.Treasury.Address
 	owner := testapp.Owner.Address
 	name := "data_source_1"
@@ -56,7 +58,7 @@ func TestCreateDataSourceSuccess(t *testing.T) {
 			{Key: types.AttributeKeyID, Value: fmt.Sprintf("%d", dsCount+1)},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestCreateGzippedExecutableDataSourceFail(t *testing.T) {
@@ -122,7 +124,7 @@ func TestEditDataSourceSuccess(t *testing.T) {
 		Type:       types.EventTypeEditDataSource,
 		Attributes: []abci.EventAttribute{{Key: types.AttributeKeyID, Value: "1"}},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestEditDataSourceFail(t *testing.T) {
@@ -180,7 +182,8 @@ func TestEditDataSourceFail(t *testing.T) {
 
 func TestCreateOracleScriptSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(false)
-	osCount := k.GetOracleScriptCount(ctx)
+	osCount, err := k.GetOracleScriptCount(ctx)
+	require.NoError(t, err)
 	name := "os_1"
 	description := "beeb"
 	code := testapp.WasmExtra1
@@ -211,12 +214,13 @@ func TestCreateOracleScriptSuccess(t *testing.T) {
 			{Key: types.AttributeKeyID, Value: fmt.Sprintf("%d", osCount+1)},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestCreateGzippedOracleScriptSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(false)
-	osCount := k.GetOracleScriptCount(ctx)
+	osCount, err := k.GetOracleScriptCount(ctx)
+	require.NoError(t, err)
 	name := "os_1"
 	description := "beeb"
 	schema := "schema"
@@ -250,7 +254,7 @@ func TestCreateGzippedOracleScriptSuccess(t *testing.T) {
 			{Key: types.AttributeKeyID, Value: fmt.Sprintf("%d", osCount+1)},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestCreateOracleScriptFail(t *testing.T) {
@@ -329,7 +333,7 @@ func TestEditOracleScriptSuccess(t *testing.T) {
 		Type:       types.EventTypeEditOracleScript,
 		Attributes: []abci.EventAttribute{{Key: types.AttributeKeyID, Value: "1"}},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestEditOracleScriptFail(t *testing.T) {
@@ -431,7 +435,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			types.NewRawRequest(3, 3, []byte("beeb")),
 		},
 		nil,
-		uint64(testapp.TestDefaultExecuteGas),
+		testapp.TestDefaultExecuteGas,
 	), k.MustGetRequest(ctx, 1))
 	event := abci.Event{
 		Type: authtypes.EventTypeCoinSpent,
@@ -440,9 +444,9 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
-	require.Equal(t, abci.Event(event), res.Events[4])
-	require.Equal(t, abci.Event(event), res.Events[8])
+	require.Equal(t, event, res.Events[0])
+	require.Equal(t, event, res.Events[4])
+	require.Equal(t, event, res.Events[8])
 	event = abci.Event{
 		Type: authtypes.EventTypeCoinReceived,
 		Attributes: []abci.EventAttribute{
@@ -450,9 +454,9 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[1])
-	require.Equal(t, abci.Event(event), res.Events[5])
-	require.Equal(t, abci.Event(event), res.Events[9])
+	require.Equal(t, event, res.Events[1])
+	require.Equal(t, event, res.Events[5])
+	require.Equal(t, event, res.Events[9])
 	event = abci.Event{
 		Type: authtypes.EventTypeTransfer,
 		Attributes: []abci.EventAttribute{
@@ -461,18 +465,18 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: sdk.AttributeKeyAmount, Value: "2000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[2])
-	require.Equal(t, abci.Event(event), res.Events[6])
-	require.Equal(t, abci.Event(event), res.Events[10])
+	require.Equal(t, event, res.Events[2])
+	require.Equal(t, event, res.Events[6])
+	require.Equal(t, event, res.Events[10])
 	event = abci.Event{
 		Type: sdk.EventTypeMessage,
 		Attributes: []abci.EventAttribute{
 			{Key: authtypes.AttributeKeySender, Value: testapp.FeePayer.Address.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[3])
-	require.Equal(t, abci.Event(event), res.Events[7])
-	require.Equal(t, abci.Event(event), res.Events[11])
+	require.Equal(t, event, res.Events[3])
+	require.Equal(t, event, res.Events[7])
+	require.Equal(t, event, res.Events[11])
 
 	event = abci.Event{
 		Type: types.EventTypeRequest,
@@ -489,7 +493,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[0].ValAddress.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[12])
+	require.Equal(t, event, res.Events[12])
 	event = abci.Event{
 		Type: types.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -500,7 +504,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[13])
+	require.Equal(t, event, res.Events[13])
 	event = abci.Event{
 		Type: types.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -511,7 +515,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[14])
+	require.Equal(t, event, res.Events[14])
 	event = abci.Event{
 		Type: types.EventTypeRawRequest,
 		Attributes: []abci.EventAttribute{
@@ -522,7 +526,7 @@ func TestRequestDataSuccess(t *testing.T) {
 			{Key: types.AttributeKeyFee, Value: "1000000loki"},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[15])
+	require.Equal(t, event, res.Events[15])
 }
 
 func TestRequestDataFail(t *testing.T) {
@@ -546,8 +550,10 @@ func TestRequestDataFail(t *testing.T) {
 	)
 	testapp.CheckErrorf(t, err, types.ErrInsufficientValidators, "0 < 2")
 	require.Nil(t, res)
-	k.Activate(ctx, testapp.Validators[0].ValAddress)
-	k.Activate(ctx, testapp.Validators[1].ValAddress)
+	err = k.Activate(ctx, testapp.Validators[0].ValAddress)
+	require.NoError(t, err)
+	err = k.Activate(ctx, testapp.Validators[1].ValAddress)
+	require.NoError(t, err)
 	// Too large calldata
 	res, err = oracle.NewHandler(
 		k,
@@ -629,7 +635,7 @@ func TestRequestDataFail(t *testing.T) {
 func TestReportSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// Set up a mock request asking 3 validators with min count 2.
-	k.SetRequest(ctx, 42, types.NewRequest(
+	err := k.SetRequest(ctx, 42, types.NewRequest(
 		1,
 		[]byte("beeb"),
 		[]sdk.ValAddress{
@@ -648,12 +654,16 @@ func TestReportSuccess(t *testing.T) {
 		nil,
 		0,
 	))
+	require.NoError(t, err)
 	// Common raw reports for everyone.
 	reports := []types.RawReport{types.NewRawReport(1, 0, []byte("data1")), types.NewRawReport(2, 0, []byte("data2"))}
 	// Validators[0] reports data.
 	res, err := oracle.NewHandler(k)(ctx, types.NewMsgReportData(42, reports, testapp.Validators[0].ValAddress))
 	require.NoError(t, err)
-	require.Equal(t, []types.RequestID{}, k.GetPendingResolveList(ctx))
+
+	pendingResolveList, err := k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []types.RequestID(nil), pendingResolveList)
 	event := abci.Event{
 		Type: types.EventTypeReport,
 		Attributes: []abci.EventAttribute{
@@ -661,11 +671,14 @@ func TestReportSuccess(t *testing.T) {
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[0].ValAddress.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 	// Validators[1] reports data. Now the request should move to pending resolve.
 	res, err = oracle.NewHandler(k)(ctx, types.NewMsgReportData(42, reports, testapp.Validators[1].ValAddress))
 	require.NoError(t, err)
-	require.Equal(t, []types.RequestID{42}, k.GetPendingResolveList(ctx))
+
+	pendingResolveList, err = k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []types.RequestID{42}, pendingResolveList)
 	event = abci.Event{
 		Type: types.EventTypeReport,
 		Attributes: []abci.EventAttribute{
@@ -673,10 +686,13 @@ func TestReportSuccess(t *testing.T) {
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[1].ValAddress.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 	// Even if we resolve the request, Validators[2] should still be able to report.
-	k.SetPendingResolveList(ctx, []types.RequestID{})
-	k.ResolveSuccess(ctx, 42, []byte("RESOLVE_RESULT!"), 1234)
+	err = k.SetPendingResolveList(ctx, []types.RequestID{})
+	require.NoError(t, err)
+	err = k.ResolveSuccess(ctx, 42, []byte("RESOLVE_RESULT!"), 1234)
+	require.NoError(t, err)
+
 	res, err = oracle.NewHandler(k)(ctx, types.NewMsgReportData(42, reports, testapp.Validators[2].ValAddress))
 	require.NoError(t, err)
 	event = abci.Event{
@@ -686,9 +702,10 @@ func TestReportSuccess(t *testing.T) {
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[2].ValAddress.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 	// Check the reports of this request. We should see 3 reports, with report from Validators[2] comes after resolve.
-	finalReport := k.GetReports(ctx, 42)
+	finalReport, err := k.GetReports(ctx, 42)
+	require.NoError(t, err)
 	require.Contains(t, finalReport, types.NewReport(testapp.Validators[0].ValAddress, true, reports))
 	require.Contains(t, finalReport, types.NewReport(testapp.Validators[1].ValAddress, true, reports))
 	require.Contains(t, finalReport, types.NewReport(testapp.Validators[2].ValAddress, false, reports))
@@ -697,7 +714,7 @@ func TestReportSuccess(t *testing.T) {
 func TestReportFail(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// Set up a mock request asking 3 validators with min count 2.
-	k.SetRequest(ctx, 42, types.NewRequest(
+	err := k.SetRequest(ctx, 42, types.NewRequest(
 		1,
 		[]byte("beeb"),
 		[]sdk.ValAddress{
@@ -716,6 +733,8 @@ func TestReportFail(t *testing.T) {
 		nil,
 		0,
 	))
+	require.NoError(t, err)
+
 	// Common raw reports for everyone.
 	reports := []types.RawReport{types.NewRawReport(1, 0, []byte("data1")), types.NewRawReport(2, 0, []byte("data2"))}
 	// Bad ID
@@ -775,7 +794,8 @@ func TestReportFail(t *testing.T) {
 	testapp.CheckErrorf(t, err, types.ErrRawRequestNotFound, "reqID: 42, extID: 42")
 	require.Nil(t, res)
 	// Request already expired
-	k.SetRequestLastExpired(ctx, 42)
+	err = k.SetRequestLastExpired(ctx, 42)
+	require.NoError(t, err)
 	res, err = oracle.NewHandler(k)(ctx, types.NewMsgReportData(42, reports, testapp.Validators[0].ValAddress))
 	require.ErrorIs(t, err, types.ErrRequestAlreadyExpired)
 	require.Nil(t, res)
@@ -784,16 +804,21 @@ func TestReportFail(t *testing.T) {
 func TestActivateSuccess(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(false)
 	ctx = ctx.WithBlockTime(testapp.ParseTime(1000000))
+	validatorStatus, err := k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress)
+	require.NoError(t, err)
 	require.Equal(t,
 		types.NewValidatorStatus(false, time.Time{}),
-		k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress),
+		validatorStatus,
 	)
 	msg := types.NewMsgActivate(testapp.Validators[0].ValAddress)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	require.NoError(t, err)
+
+	validatorStatus, err = k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress)
+	require.NoError(t, err)
 	require.Equal(t,
 		types.NewValidatorStatus(true, testapp.ParseTime(1000000)),
-		k.GetValidatorStatus(ctx, testapp.Validators[0].ValAddress),
+		validatorStatus,
 	)
 	event := abci.Event{
 		Type: types.EventTypeActivate,
@@ -801,7 +826,7 @@ func TestActivateSuccess(t *testing.T) {
 			{Key: types.AttributeKeyValidator, Value: testapp.Validators[0].ValAddress.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestActivateFail(t *testing.T) {
@@ -813,7 +838,9 @@ func TestActivateFail(t *testing.T) {
 	require.Nil(t, res)
 	// Too soon to activate.
 	ctx = ctx.WithBlockTime(testapp.ParseTime(100000))
-	k.MissReport(ctx, testapp.Validators[0].ValAddress, testapp.ParseTime(99999))
+	err = k.MissReport(ctx, testapp.Validators[0].ValAddress, testapp.ParseTime(99999))
+	require.NoError(t, err)
+
 	ctx = ctx.WithBlockTime(testapp.ParseTime(100001))
 	res, err = oracle.NewHandler(k)(ctx, msg)
 	require.ErrorIs(t, err, types.ErrTooSoonToActivate)
@@ -838,19 +865,22 @@ func TestUpdateParamsSuccess(t *testing.T) {
 		OracleRewardPercentage:   50,
 		InactivePenaltyDuration:  1000,
 		IBCRequestEnabled:        true,
-		RewardDecreasingFraction: sdk.NewDec(10),
+		RewardDecreasingFraction: math.LegacyNewDec(10),
 	}
 	msg := types.NewMsgUpdateParams(k.GetAuthority(), expectedParams)
 	res, err := oracle.NewHandler(k)(ctx, msg)
 	require.NoError(t, err)
-	require.Equal(t, expectedParams, k.GetParams(ctx))
+
+	params, err := k.GetParams(ctx)
+	require.NoError(t, err)
+	require.Equal(t, expectedParams, params)
 	event := abci.Event{
 		Type: types.EventTypeUpdateParams,
 		Attributes: []abci.EventAttribute{
 			{Key: types.AttributeKeyParams, Value: expectedParams.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 
 	expectedParams = types.Params{
 		MaxRawRequestCount:       2,
@@ -864,19 +894,22 @@ func TestUpdateParamsSuccess(t *testing.T) {
 		OracleRewardPercentage:   0,
 		InactivePenaltyDuration:  0,
 		IBCRequestEnabled:        false,
-		RewardDecreasingFraction: sdk.NewDec(10),
+		RewardDecreasingFraction: math.LegacyNewDec(10),
 	}
 	msg = types.NewMsgUpdateParams(k.GetAuthority(), expectedParams)
 	res, err = oracle.NewHandler(k)(ctx, msg)
 	require.NoError(t, err)
-	require.Equal(t, expectedParams, k.GetParams(ctx))
+
+	params, err = k.GetParams(ctx)
+	require.NoError(t, err)
+	require.Equal(t, expectedParams, params)
 	event = abci.Event{
 		Type: types.EventTypeUpdateParams,
 		Attributes: []abci.EventAttribute{
 			{Key: types.AttributeKeyParams, Value: expectedParams.String()},
 		},
 	}
-	require.Equal(t, abci.Event(event), res.Events[0])
+	require.Equal(t, event, res.Events[0])
 }
 
 func TestUpdateParamsFail(t *testing.T) {

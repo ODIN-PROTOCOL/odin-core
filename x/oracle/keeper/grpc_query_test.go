@@ -60,11 +60,13 @@ func (suite *RequestVerificationTestSuite) SetupTest() {
 	suite.reporterAddr = sdk.AccAddress(suite.reporterPrivKey.PubKey().Address())
 	suite.granteeAddr = sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address())
 
-	k.SetRequest(ctx, types.RequestID(1), suite.request)
-	k.SetRequestCount(ctx, 1)
-	err := k.GrantReporter(ctx, testapp.Validators[0].ValAddress, suite.reporterAddr)
+	err := k.SetRequest(ctx, types.RequestID(1), suite.request)
+	require.NoError(suite.T(), err)
+	err = k.SetRequestCount(ctx, 1)
+	require.NoError(suite.T(), err)
+	err = k.GrantReporter(ctx, testapp.Validators[0].ValAddress, suite.reporterAddr)
 	expiration := ctx.BlockTime().Add(10 * time.Minute)
-	app.AuthzKeeper.SaveGrant(ctx, suite.granteeAddr, sdk.AccAddress(testapp.Validators[0].ValAddress),
+	err = app.AuthzKeeper.SaveGrant(ctx, suite.granteeAddr, sdk.AccAddress(testapp.Validators[0].ValAddress),
 		authz.NewGenericAuthorization("some url"), &expiration,
 	)
 	suite.assert.NoError(err)
@@ -366,7 +368,8 @@ func (suite *RequestVerificationTestSuite) TestFailedReporterUnauthorized() {
 
 func (suite *RequestVerificationTestSuite) TestFailedUnselectedValidator() {
 	suite.request.RequestedValidators = []string{testapp.Validators[1].ValAddress.String()}
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(1), suite.request)
+	err := suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(1), suite.request)
+	require.NoError(suite.T(), err)
 
 	req := &types.QueryRequestVerificationRequest{
 		ChainId:      suite.ctx.ChainID(),
@@ -396,7 +399,8 @@ func (suite *RequestVerificationTestSuite) TestFailedUnselectedValidator() {
 
 func (suite *RequestVerificationTestSuite) TestFailedNoDataSourceFound() {
 	suite.request.RawRequests = []types.RawRequest{}
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(1), suite.request)
+	err := suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(1), suite.request)
+	require.NoError(suite.T(), err)
 
 	req := &types.QueryRequestVerificationRequest{
 		ChainId:      suite.ctx.ChainID(),
@@ -547,7 +551,8 @@ func (suite *RequestVerificationTestSuite) TestIsNotReporter() {
 }
 
 func (suite *RequestVerificationTestSuite) TestRevokeReporters() {
-	suite.querier.Keeper.RevokeReporter(suite.ctx, testapp.Validators[0].ValAddress, suite.reporterAddr)
+	err := suite.querier.Keeper.RevokeReporter(suite.ctx, testapp.Validators[0].ValAddress, suite.reporterAddr)
+	require.NoError(suite.T(), err)
 	req := &types.QueryReportersRequest{
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 	}
@@ -651,13 +656,19 @@ func (suite *PendingRequestsTestSuite) TestSuccess() {
 		0,
 	)
 
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(3), assignedButPendingReq)
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(4), notBeAssignedReq)
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(5), alreadyReportAllReq)
-	suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(6), assignedButReportedReq)
-	suite.querier.Keeper.SetRequestCount(suite.ctx, 4)
-	suite.querier.Keeper.SetRequestLastExpired(suite.ctx, 2)
-	suite.querier.Keeper.SetReport(
+	err := suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(3), assignedButPendingReq)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(4), notBeAssignedReq)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(5), alreadyReportAllReq)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetRequest(suite.ctx, types.RequestID(6), assignedButReportedReq)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetRequestCount(suite.ctx, 4)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetRequestLastExpired(suite.ctx, 2)
+	require.NoError(suite.T(), err)
+	err = suite.querier.Keeper.SetReport(
 		suite.ctx,
 		5,
 		types.NewReport(testapp.Validators[0].ValAddress, true, []types.RawReport{
@@ -666,7 +677,9 @@ func (suite *PendingRequestsTestSuite) TestSuccess() {
 			types.NewRawReport(3, 0, []byte("testdata")),
 		}),
 	)
-	suite.querier.Keeper.SetReport(
+	require.NoError(suite.T(), err)
+
+	err = suite.querier.Keeper.SetReport(
 		suite.ctx,
 		5,
 		types.NewReport(testapp.Validators[1].ValAddress, true, []types.RawReport{
@@ -675,7 +688,9 @@ func (suite *PendingRequestsTestSuite) TestSuccess() {
 			types.NewRawReport(3, 0, []byte("testdata")),
 		}),
 	)
-	suite.querier.Keeper.SetReport(
+	require.NoError(suite.T(), err)
+
+	err = suite.querier.Keeper.SetReport(
 		suite.ctx,
 		6,
 		types.NewReport(testapp.Validators[0].ValAddress, true, []types.RawReport{
@@ -684,6 +699,7 @@ func (suite *PendingRequestsTestSuite) TestSuccess() {
 			types.NewRawReport(3, 0, []byte("testdata")),
 		}),
 	)
+	require.NoError(suite.T(), err)
 
 	r, err := suite.querier.PendingRequests(sdk.WrapSDKContext(suite.ctx), &types.QueryPendingRequestsRequest{
 		ValidatorAddress: sdk.ValAddress(testapp.Validators[0].Address).String(),
