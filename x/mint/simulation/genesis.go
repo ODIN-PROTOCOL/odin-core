@@ -81,7 +81,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { goalBonded = GenGoalBonded(r) },
 	)
 
-	mintDenom := simState.BondDenom
+	mintDenom := sdk.DefaultBondDenom
 	blocksPerYear := uint64(60 * 60 * 8766 / 5)
 	maxWithdrawalPerTime := sdk.Coins{sdk.NewCoin("loki", math.NewInt(10))}
 	mintAir := false

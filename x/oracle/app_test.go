@@ -8,6 +8,8 @@ import (
 	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
@@ -76,7 +78,7 @@ func TestSuccessRequestOracleData(t *testing.T) {
 
 	ids, err := k.GetPendingResolveList(ctx)
 	require.NoError(t, err)
-	require.Equal(t, []types.RequestID{}, ids)
+	require.Equal(t, []types.RequestID(nil), ids)
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
@@ -105,24 +107,59 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
+	distrAccount := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
+
 	result, err = app.EndBlocker(ctx)
 	require.NoError(t, err)
 	resPacket := types.NewOracleResponsePacketData(
 		expectRequest.ClientID, types.RequestID(1), 2, int64(expectRequest.RequestTime), 1581589795,
 		types.RESOLVE_STATUS_SUCCESS, []byte("beeb"),
 	)
-	expectEvents = []abci.Event{{Type: types.EventTypeResolve, Attributes: []abci.EventAttribute{
-		{Key: types.AttributeKeyID, Value: fmt.Sprint(resPacket.RequestID)},
-		{Key: types.AttributeKeyResolveStatus, Value: fmt.Sprint(uint32(resPacket.ResolveStatus))},
-		{Key: types.AttributeKeyResult, Value: "62656562"},
-		{Key: types.AttributeKeyGasUsed, Value: "2485000000"},
-	}}}
+	expectEvents = []abci.Event{
+		{
+			Type: types.EventTypeResolve,
+			Attributes: []abci.EventAttribute{
+				{Key: types.AttributeKeyID, Value: fmt.Sprint(resPacket.RequestID)},
+				{Key: types.AttributeKeyResolveStatus, Value: fmt.Sprint(uint32(resPacket.ResolveStatus))},
+				{Key: types.AttributeKeyResult, Value: "62656562"},
+				{Key: types.AttributeKeyGasUsed, Value: "2485000000"},
+			},
+		},
+		{
+			Type: banktypes.EventTypeCoinSpent,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeySpender, Value: distrAccount.GetAddress().String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: banktypes.EventTypeCoinReceived,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeyReceiver, Value: testapp.Owner.Address.String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: banktypes.EventTypeTransfer,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeyRecipient, Value: testapp.Owner.Address.String()},
+				{Key: banktypes.AttributeKeySender, Value: distrAccount.GetAddress().String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: sdk.EventTypeMessage,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeySender, Value: distrAccount.GetAddress().String()},
+			},
+		},
+	}
 
 	require.Equal(t, expectEvents, result.Events)
 
 	ids, err = k.GetPendingResolveList(ctx)
 	require.NoError(t, err)
-	require.Equal(t, []types.RequestID{}, ids)
+	require.Equal(t, []types.RequestID(nil), ids)
 
 	req, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NotEqual(t, types.Request{}, req)

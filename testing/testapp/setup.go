@@ -1,6 +1,7 @@
 package testapp
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -10,13 +11,15 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	"cosmossdk.io/store/snapshots"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
-	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
+	"github.com/cometbft/cometbft/crypto"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -27,9 +30,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
-	authsign "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -50,6 +50,13 @@ import (
 type Account struct {
 	PrivKey    cryptotypes.PrivKey
 	PubKey     cryptotypes.PubKey
+	Address    sdk.AccAddress
+	ValAddress sdk.ValAddress
+}
+
+type Validator struct {
+	PrivKey    crypto.PrivKey
+	PubKey     crypto.PubKey
 	Address    sdk.AccAddress
 	ValAddress sdk.ValAddress
 }
@@ -75,13 +82,14 @@ var (
 	Coins1loki               = sdk.NewCoins(sdk.NewInt64Coin("loki", 1))
 	Coins10loki              = sdk.NewCoins(sdk.NewInt64Coin("loki", 10))
 	Coins11loki              = sdk.NewCoins(sdk.NewInt64Coin("loki", 11))
+	Coins1000000minigeo      = sdk.NewCoins(sdk.NewInt64Coin("minigeo", 1000000))
 	Coin100000000minigeo     = sdk.NewInt64Coin("minigeo", 100000000)
 	Coins1000000loki         = sdk.NewCoins(sdk.NewInt64Coin("loki", 1000000))
 	Coin100000000loki        = sdk.NewInt64Coin("loki", 100000000)
 	Coins99999999loki        = sdk.NewCoins(sdk.NewInt64Coin("loki", 99999999))
 	Coins100000000loki       = sdk.NewCoins(sdk.NewInt64Coin("loki", 100000000))
 	Coins10000000000loki     = sdk.NewCoins(sdk.NewInt64Coin("loki", 10000000000))
-	BadCoins                 = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
+	BadCoins                 = []sdk.Coin{{Denom: "loki", Amount: math.NewInt(-1)}}
 	Port1                    = "port-1"
 	Port2                    = "port-2"
 	Channel1                 = "channel-1"
@@ -109,6 +117,7 @@ var DefaultConsensusParams = &tmproto.ConsensusParams{
 	Validator: &tmproto.ValidatorParams{
 		PubKeyTypes: []string{
 			tmtypes.ABCIPubKeyTypeSecp256k1,
+			tmtypes.ABCIPubKeyTypeEd25519,
 		},
 	},
 }
@@ -178,7 +187,7 @@ func createArbitraryAccount(r *rand.Rand) Account {
 	}
 }
 
-func getGenesisDataSources(homePath string) []types.DataSource {
+func getGenesisDataSources(homePath, denom string) []types.DataSource {
 	dir := filepath.Join(homePath, "files")
 	fc := filecache.New(dir)
 	DataSources = []types.DataSource{{}} // 0th index should be ignored
@@ -186,7 +195,7 @@ func getGenesisDataSources(homePath string) []types.DataSource {
 		idxStr := fmt.Sprintf("%d", idx+1)
 		hash := fc.AddFile([]byte("code" + idxStr))
 		DataSources = append(DataSources, types.NewDataSource(
-			Owner.Address, "name"+idxStr, "desc"+idxStr, hash, Coins1000000loki, Treasury.Address,
+			Owner.Address, "name"+idxStr, "desc"+idxStr, hash, sdk.NewCoins(sdk.NewCoin(denom, math.NewInt(1000000))), Treasury.Address,
 		))
 	}
 	return DataSources[1:]
@@ -224,8 +233,8 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	if err != nil {
 		panic(err)
 	}
-	// db := dbm.NewMemDB()
-	db, _ := dbm.NewGoLevelDB("db", dir)
+	db := dbm.NewMemDB()
+	// db, _ := dbm.NewGoLevelDB("db", dir)
 
 	appOptions := make(simtestutil.AppOptionsMap, 0)
 	appOptions[flags.FlagHome] = dir
@@ -276,14 +285,14 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	validators := make([]stakingtypes.Validator, 0, len(Validators))
 	signingInfos := make([]slashingtypes.SigningInfo, 0, len(Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(Validators))
-	bamt := []sdk.Int{Coins100000000loki[0].Amount, Coins1000000loki[0].Amount, Coins99999999loki[0].Amount}
+	bamt := []math.Int{Coins100000000loki[0].Amount, Coins1000000loki[0].Amount, Coins99999999loki[0].Amount}
 	// bondAmt := sdk.NewInt(1000000)
 	for idx, val := range Validators {
-		tmpk, err := cryptocodec.ToTmPubKeyInterface(val.PubKey)
+		tmpk, err := cryptocodec.ToCmtPubKeyInterface(val.PubKey)
 		if err != nil {
 			panic(err)
 		}
-		pk, err := cryptocodec.FromTmPubKeyInterface(tmpk)
+		pk, err := cryptocodec.FromCmtPubKeyInterface(tmpk)
 		if err != nil {
 			panic(err)
 		}
@@ -297,12 +306,12 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 			Jailed:            false,
 			Status:            stakingtypes.Bonded,
 			Tokens:            bamt[idx],
-			DelegatorShares:   sdk.OneDec(),
+			DelegatorShares:   math.LegacyOneDec(),
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
+			Commission:        stakingtypes.NewCommission(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec()),
+			MinSelfDelegation: math.ZeroInt(),
 		}
 		consAddr, err := validator.GetConsAddr()
 		validatorSigningInfo := slashingtypes.NewValidatorSigningInfo(consAddr, 0, 0, time.Unix(0, 0), false, 0)
@@ -312,11 +321,11 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 		validators = append(validators, validator)
 		signingInfos = append(
 			signingInfos,
-			slashingtypes.SigningInfo{Address: consAddr.String(), ValidatorSigningInfo: validatorSigningInfo},
+			slashingtypes.SigningInfo{Address: sdk.ConsAddress(consAddr).String(), ValidatorSigningInfo: validatorSigningInfo},
 		)
 		delegations = append(
 			delegations,
-			stakingtypes.NewDelegation(acc[4+idx].GetAddress(), val.Address.Bytes(), sdk.OneDec()),
+			stakingtypes.NewDelegation(acc[4+idx].GetAddress().String(), sdk.ValAddress(val.Address).String(), math.LegacyOneDec()),
 		)
 	}
 	// set validators and delegations
@@ -338,7 +347,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 		{Address: FeePayer.Address.String(), Coins: Coins100000000loki},
 		{Address: Alice.Address.String(), Coins: Coins1000000loki.Add(Coin100000000minigeo)},
 		{Address: Bob.Address.String(), Coins: Coins1000000loki},
-		{Address: Carol.Address.String(), Coins: Coins1000000loki},
+		{Address: Carol.Address.String(), Coins: Coins1000000loki.Add(Coin100000000minigeo)},
 		{Address: Validators[0].Address.String(), Coins: Coins100000000loki},
 		{Address: Validators[1].Address.String(), Coins: Coins100000000loki},
 		{Address: Validators[2].Address.String(), Coins: Coins100000000loki},
@@ -357,7 +366,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin("loki", sdk.NewInt(200999999))},
+		Coins:   sdk.Coins{sdk.NewCoin("loki", math.NewInt(200999999))},
 	})
 
 	bankGenesis := banktypes.NewGenesisState(
@@ -371,7 +380,7 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 
 	// Add genesis data sources and oracle scripts
 	oracleGenesis := types.DefaultGenesisState()
-	oracleGenesis.DataSources = getGenesisDataSources(dir)
+	oracleGenesis.DataSources = getGenesisDataSources(dir, "loki")
 	oracleGenesis.OracleScripts = getGenesisOracleScripts(dir)
 	genesis[types.ModuleName] = app.AppCodec().MustMarshalJSON(oracleGenesis)
 	stateBytes, err := json.MarshalIndent(genesis, "", " ")
@@ -380,19 +389,32 @@ func NewTestApp(chainID string, logger log.Logger) *TestingApp {
 	}
 
 	// Initialize the sim blockchain. We are ready for testing!
-	app.InitChain(abci.RequestInitChain{
+	_, err = app.InitChain(&abci.RequestInitChain{
 		ChainId:         chainID,
 		Validators:      []abci.ValidatorUpdate{},
 		ConsensusParams: DefaultConsensusParams,
 		AppStateBytes:   stateBytes,
 	})
+	if err != nil {
+		panic(err)
+	}
+
+	hash, _ := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000000")
+	_, err = app.FinalizeBlock(&abci.RequestFinalizeBlock{
+		Height: app.LastBlockHeight() + 1,
+		Hash:   hash,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	return app
 }
 
 // CreateTestInput creates a new test environment for unit tests.
 func CreateTestInput(params ...bool) (*TestingApp, sdk.Context, keeper.Keeper) {
 	app := NewTestApp("ODINCHAIN", log.NewNopLogger())
-	ctx := app.NewContext(false, tmproto.Header{Height: app.LastBlockHeight()})
+	ctx := app.NewContextLegacy(false, tmproto.Header{Height: app.LastBlockHeight()})
 	if len(params) > 0 && params[0] {
 		app.OracleKeeper.Activate(ctx, Validators[0].ValAddress)
 		app.OracleKeeper.Activate(ctx, Validators[1].ValAddress)
@@ -401,18 +423,31 @@ func CreateTestInput(params ...bool) (*TestingApp, sdk.Context, keeper.Keeper) {
 
 	if len(params) > 1 && params[1] {
 		app.DistrKeeper.FundCommunityPool(ctx, DefaultCommunityPool, FeePoolProvider.Address)
-		accumulatedPaymentsForData := app.OracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		accumulatedPaymentsForData, err := app.OracleKeeper.GetAccumulatedPaymentsForData(ctx)
+		if err != nil {
+			panic(err)
+		}
 		accumulatedPaymentsForData.AccumulatedAmount = accumulatedPaymentsForData.AccumulatedAmount.Add(DefaultDataProvidersPool...)
 
-		app.OracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+		err = app.OracleKeeper.SetAccumulatedPaymentsForData(ctx, accumulatedPaymentsForData)
+		if err != nil {
+			panic(err)
+		}
 
-		ctx = app.NewContext(false, tmproto.Header{})
+		ctx = app.NewContext(false)
 	}
 
 	if len(params) > 2 && params[2] {
-		mintParams := app.MintKeeper.GetParams(ctx)
+		mintParams, err := app.MintKeeper.GetParams(ctx)
+		if err != nil {
+			panic(err)
+		}
+
 		mintParams.MintAir = true
-		app.MintKeeper.SetParams(ctx, mintParams)
+		err = app.MintKeeper.SetParams(ctx, mintParams)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return app, ctx, app.OracleKeeper
@@ -478,9 +513,14 @@ func SetupWithGenesisValSet(
 	valSet *tmtypes.ValidatorSet,
 	genAccs []authtypes.GenesisAccount,
 	chainID string,
+	powerReduction math.Int,
 	balances ...banktypes.Balance,
 ) *TestingApp {
 	app, genesisState, dir := setup(true, 5, chainID)
+
+	// ensure baseapp has a chain-id set before running InitChain
+	baseapp.SetChainID(chainID)(app.GetBaseApp())
+
 	// set genesis accounts
 	authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
 	genesisState[authtypes.ModuleName] = app.AppCodec().MustMarshalJSON(authGenesis)
@@ -488,56 +528,56 @@ func SetupWithGenesisValSet(
 	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
 	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))
 
-	bondAmt := sdk.NewInt(1000000)
+	bondAmt := sdk.TokensFromConsensusPower(1, powerReduction)
 
-	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
+	for i, val := range valSet.Validators {
+		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		require.NoError(t, err)
 		pkAny, err := codectypes.NewAnyWithValue(pk)
 		require.NoError(t, err)
 		validator := stakingtypes.Validator{
-			OperatorAddress:   sdk.ValAddress(val.Address).String(),
+			OperatorAddress:   sdk.ValAddress(Validators[i].Address).String(),
 			ConsensusPubkey:   pkAny,
 			Jailed:            false,
 			Status:            stakingtypes.Bonded,
 			Tokens:            bondAmt,
-			DelegatorShares:   sdk.OneDec(),
+			DelegatorShares:   math.LegacyOneDec(),
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
+			Commission:        stakingtypes.NewCommission(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec()),
+			MinSelfDelegation: math.ZeroInt(),
 		}
+
 		validators = append(validators, validator)
 		delegations = append(
 			delegations,
-			stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec()),
+			stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), sdk.ValAddress(Validators[i].Address).String(), math.LegacyOneDec()),
 		)
 	}
 
 	// set validators and delegations
-	ps := stakingtypes.DefaultParams()
-	ps.BondDenom = "loki"
-	stakingGenesis := stakingtypes.NewGenesisState(ps, validators, delegations)
-	genesisState[stakingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(stakingGenesis)
+	var stakingGenesis stakingtypes.GenesisState
+	app.AppCodec().MustUnmarshalJSON(genesisState[stakingtypes.ModuleName], &stakingGenesis)
 
-	totalSupply := sdk.NewCoins()
-	for _, b := range balances {
-		// add genesis acc tokens and delegated tokens to total supply
-		totalSupply = totalSupply.Add(b.Coins.Add(sdk.NewCoin("loki", bondAmt))...)
-	}
+	stakingGenesis.Params.BondDenom = "loki"
+	bondDenom := stakingGenesis.Params.BondDenom
 
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin("loki", bondAmt.Mul(sdk.NewInt(2)))},
+		Coins:   sdk.Coins{sdk.NewCoin(bondDenom, bondAmt.Mul(math.NewInt(int64(len(valSet.Validators)))))},
 	})
+
+	// set validators and delegations
+	stakingGenesis = *stakingtypes.NewGenesisState(stakingGenesis.Params, validators, delegations)
+	genesisState[stakingtypes.ModuleName] = app.AppCodec().MustMarshalJSON(&stakingGenesis)
 
 	// update total supply
 	bankGenesis := banktypes.NewGenesisState(
 		banktypes.DefaultGenesisState().Params,
 		balances,
-		totalSupply,
+		sdk.NewCoins(), // TODO: check validity
 		[]banktypes.Metadata{},
 		[]banktypes.SendEnabled{},
 	)
@@ -545,7 +585,7 @@ func SetupWithGenesisValSet(
 
 	// Add genesis data sources and oracle scripts
 	oracleGenesis := types.DefaultGenesisState()
-	oracleGenesis.DataSources = getGenesisDataSources(dir)
+	oracleGenesis.DataSources = getGenesisDataSources(dir, "minigeo")
 	oracleGenesis.OracleScripts = getGenesisOracleScripts(dir)
 	genesisState[types.ModuleName] = app.AppCodec().MustMarshalJSON(oracleGenesis)
 
@@ -553,24 +593,15 @@ func SetupWithGenesisValSet(
 	require.NoError(t, err)
 
 	// init chain will set the validator set and initialize the genesis accounts
-	app.InitChain(
-		abci.RequestInitChain{
+	_, err = app.InitChain(
+		&abci.RequestInitChain{
 			ChainId:         chainID,
 			Validators:      []abci.ValidatorUpdate{},
-			ConsensusParams: DefaultConsensusParams,
+			ConsensusParams: simtestutil.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
-
-	// commit genesis changes
-	app.Commit()
-	app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{
-		ChainID:            chainID,
-		Height:             app.LastBlockHeight() + 1,
-		AppHash:            app.LastCommitID().Hash,
-		ValidatorsHash:     valSet.Hash(),
-		NextValidatorsHash: valSet.Hash(),
-	}, Hash: app.LastCommitID().Hash})
+	require.NoError(t, err)
 
 	return app
 }
@@ -579,6 +610,7 @@ const (
 	DefaultGenTxGas = 1000000
 )
 
+/*
 // GenTx generates a signed mock transaction.
 func GenTx(
 	gen client.TxConfig,
@@ -596,7 +628,10 @@ func GenTx(
 
 	memo := simulation.RandStringOfLength(r, simulation.RandIntBetween(r, 0, 100))
 
-	signMode := gen.SignModeHandler().DefaultMode()
+	signMode, err := authsign.APISignModeToInternal(gen.SignModeHandler().DefaultMode())
+	if err != nil {
+		return nil, err
+	}
 
 	// 1st round: set SignatureV2 with empty signatures, to set correct
 	// signer infos.
@@ -611,7 +646,7 @@ func GenTx(
 	}
 
 	tx := gen.NewTxBuilder()
-	err := tx.SetMsgs(msgs...)
+	err = tx.SetMsgs(msgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -675,3 +710,4 @@ func SignAndDeliver(
 
 	return gInfo, res, err
 }
+*/

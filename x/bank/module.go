@@ -63,7 +63,7 @@ func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), bankkeeper.NewMsgServerImpl(am.keeper))
+	types.RegisterMsgServer(cfg.MsgServer(), bankkeeper.NewMsgServerImpl(am.keeper.(keeper.WrappedBankKeeper).Keeper.(bankkeeper.BaseKeeper)))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
 
 	m := bankkeeper.NewMigrator(am.keeper.(keeper.WrappedBankKeeper).Keeper.(bankkeeper.BaseKeeper), am.legacySubspace)

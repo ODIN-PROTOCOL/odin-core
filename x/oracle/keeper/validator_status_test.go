@@ -40,7 +40,10 @@ func defaultVotes() []abci.VoteInfo {
 func SetupFeeCollector(app *testapp.TestingApp, ctx sdk.Context, k keeper.Keeper) sdk.ModuleAccountI {
 	// Set collected fee to 1000000loki and 70% oracle reward proportion.
 	feeCollector := app.AccountKeeper.GetModuleAccount(ctx, authtypes.FeeCollectorName)
-	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, Coins1000000loki)
+	balance := app.BankKeeper.GetAllBalances(ctx, feeCollector.GetAddress())
+	amt := Coins1000000loki.Sub(balance...)
+
+	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, amt)
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +51,7 @@ func SetupFeeCollector(app *testapp.TestingApp, ctx sdk.Context, k keeper.Keeper
 		ctx,
 		minttypes.ModuleName,
 		authtypes.FeeCollectorName,
-		Coins1000000loki,
+		amt,
 	)
 	if err != nil {
 		panic(err)

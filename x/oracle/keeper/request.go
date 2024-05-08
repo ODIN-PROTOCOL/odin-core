@@ -26,7 +26,7 @@ func (k Keeper) GetRequest(ctx context.Context, id types.RequestID) (types.Reque
 	request, err := k.Requests.Get(ctx, uint64(id))
 	if err != nil {
 		if errors.Is(err, collections.ErrNotFound) {
-			return types.Request{}, types.ErrRequestNotFound
+			return types.Request{}, types.ErrRequestNotFound.Wrapf("id: %d", id)
 		}
 
 		return request, err

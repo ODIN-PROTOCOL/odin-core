@@ -87,7 +87,12 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) e
 	}
 
 	// Allocate the remaining coins to the community pool.
-	remainingNormalized := sdk.NormalizeCoins(remaining)
+	// Recreate coins to sanitize them
+	remainingNormalized := sdk.NewCoins(sdk.NormalizeCoins(remaining)...)
+	if remainingNormalized.Empty() {
+		return nil
+	}
+
 	return k.distrKeeper.FundCommunityPool(ctx, remainingNormalized, distrModule.GetAddress())
 
 }
