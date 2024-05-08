@@ -123,6 +123,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_11"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_12"
 	nodeservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/node"
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -197,6 +198,7 @@ var (
 		v2_6.Upgrade,
 		// Added 7_10 upgrade
 		v7_11.Upgrade,
+		v7_12.Upgrade,
 	}
 )
 
