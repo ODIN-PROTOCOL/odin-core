@@ -1,17 +1,19 @@
 package benchmark
 
 import (
-	"io/ioutil"
 	"math"
+	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	types "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/client"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	owasm "github.com/odin-protocol/go-owasm/api"
@@ -36,7 +38,7 @@ type BenchmarkCalldata struct {
 }
 
 func GetBenchmarkWasm() ([]byte, error) {
-	oCode, err := ioutil.ReadFile("./testdata/benchmark-oracle-script.wasm")
+	oCode, err := os.ReadFile("./testdata/benchmark-oracle-script.wasm")
 	return oCode, err
 }
 
@@ -128,7 +130,8 @@ func GenSequenceOfTxs(
 	txs := make([]sdk.Tx, numTxs)
 
 	for i := 0; i < numTxs; i++ {
-		txs[i], _ = testapp.GenTx(
+		txs[i], _ = simtestutil.GenSignedMockTx(
+			rand.New(rand.NewSource(time.Now().UnixNano())),
 			txConfig,
 			msgs,
 			sdk.Coins{sdk.NewInt64Coin("loki", 1)},
@@ -215,17 +218,17 @@ func InitOwasmTestEnv(
 	return owasmVM, compiledCode, req
 }
 
-func GetConsensusParams(maxGas int64) *tmproto.ConsensusParams {
-	return &tmproto.ConsensusParams{
-		Block: &tmproto.BlockParams{
+func GetConsensusParams(maxGas int64) *cmtproto.ConsensusParams {
+	return &cmtproto.ConsensusParams{
+		Block: &cmtproto.BlockParams{
 			MaxBytes: 200000,
 			MaxGas:   maxGas,
 		},
-		Evidence: &tmproto.EvidenceParams{
+		Evidence: &cmtproto.EvidenceParams{
 			MaxAgeNumBlocks: 302400,
 			MaxAgeDuration:  504 * time.Hour,
 		},
-		Validator: &tmproto.ValidatorParams{
+		Validator: &cmtproto.ValidatorParams{
 			PubKeyTypes: []string{
 				tmtypes.ABCIPubKeyTypeSecp256k1,
 			},

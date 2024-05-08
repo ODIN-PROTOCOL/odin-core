@@ -3,8 +3,7 @@ package benchmark
 import (
 	"testing"
 
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,10 +49,13 @@ func InitializeBenchmarkApp(b testing.TB, maxGasPerBlock int64) *BenchmarkApp {
 	ba.TxConfig = ba.GetTxConfig()
 	ba.TxEncoder = ba.TxConfig.TxEncoder()
 
-	ba.Commit()
-	ba.CallBeginBlock()
+	_, err := ba.Commit()
+	require.NoError(ba.TB, err)
+	_, err = ba.CallBeginBlock()
+	require.NoError(ba.TB, err)
 
-	ba.StoreConsensusParams(ba.Ctx, GetConsensusParams(maxGasPerBlock))
+	err = ba.StoreConsensusParams(ba.Ctx, *GetConsensusParams(maxGasPerBlock))
+	require.NoError(ba.TB, err)
 
 	// create oracle script
 	oCode, err := GetBenchmarkWasm()
@@ -75,8 +77,10 @@ func InitializeBenchmarkApp(b testing.TB, maxGasPerBlock int64) *BenchmarkApp {
 	// activate oracle
 	_, _, _ = ba.DeliverMsg(ba.Validator, GenMsgActivate(ba.Validator))
 
-	ba.CallEndBlock()
-	ba.Commit()
+	_, err = ba.CallEndBlock()
+	require.NoError(ba.TB, err)
+	_, err = ba.Commit()
+	require.NoError(ba.TB, err)
 
 	return ba
 }
@@ -87,27 +91,27 @@ func (ba *BenchmarkApp) DeliverMsg(account *Account, msgs []sdk.Msg) (sdk.GasInf
 	return gas, res, err
 }
 
-func (ba *BenchmarkApp) CallBeginBlock() abci.ResponseBeginBlock {
-	return ba.BeginBlock(
-		abci.RequestBeginBlock{
-			Header: tmproto.Header{Height: ba.LastBlockHeight() + 1},
-			Hash:   ba.LastCommitID().Hash,
-		},
-	)
+func (ba *BenchmarkApp) CallBeginBlock() (sdk.BeginBlock, error) {
+	ctx := ba.Ctx.WithBlockHeight(ba.LastBlockHeight() + 1).WithHeaderHash(ba.LastCommitID().Hash)
+	return ba.BeginBlocker(ctx)
 }
 
-func (ba *BenchmarkApp) CallEndBlock() abci.ResponseEndBlock {
-	return ba.EndBlock(abci.RequestEndBlock{Height: ba.LastBlockHeight() + 1})
+func (ba *BenchmarkApp) CallEndBlock() (sdk.EndBlock, error) {
+	ctx := ba.Ctx.WithBlockHeight(ba.LastBlockHeight() + 1)
+	return ba.EndBlocker(ctx)
 }
 
 func (ba *BenchmarkApp) CallDeliver(tx sdk.Tx) (sdk.GasInfo, *sdk.Result, error) {
 	return ba.SimDeliver(ba.TxEncoder, tx)
 }
 
-func (ba *BenchmarkApp) AddMaxMsgRequests(msg []sdk.Msg) {
+func (ba *BenchmarkApp) AddMaxMsgRequests(msg []sdk.Msg) error {
 	// maximum of request blocks is only 20 because after that it will become report only block because of ante
 	for block := 0; block < 10; block++ {
-		ba.CallBeginBlock()
+		_, err := ba.CallBeginBlock()
+		if err != nil {
+			return err
+		}
 
 		var totalGas uint64 = 0
 		for {
@@ -126,14 +130,21 @@ func (ba *BenchmarkApp) AddMaxMsgRequests(msg []sdk.Msg) {
 			}
 		}
 
-		ba.CallEndBlock()
-		ba.Commit()
+		_, err = ba.CallEndBlock()
+		if err != nil {
+			return err
+		}
+		_, err = ba.Commit()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (ba *BenchmarkApp) GetAllPendingRequests(account *Account) *oracletypes.QueryPendingRequestsResponse {
 	res, err := ba.Querier.PendingRequests(
-		sdk.WrapSDKContext(ba.Ctx),
+		ba.Ctx,
 		&oracletypes.QueryPendingRequestsRequest{
 			ValidatorAddress: account.ValAddress.String(),
 		},
@@ -158,13 +169,13 @@ func (ba *BenchmarkApp) GenMsgReportData(account *Account, rids []uint64) []sdk.
 
 	for _, rid := range rids {
 		request, err := ba.OracleKeeper.GetRequest(ba.Ctx, oracletypes.RequestID(rid))
+		require.NoError(ba.TB, err)
 
 		// find  all external ids of the request
 		eids := []int64{}
 		for _, raw := range request.RawRequests {
 			eids = append(eids, int64(raw.ExternalID))
 		}
-		require.NoError(ba.TB, err)
 
 		rawReports := []oracletypes.RawReport{}
 
