@@ -48,15 +48,15 @@ type Keeper struct {
 	OracleScripts                   collections.Map[uint64, types.OracleScript]
 	Requests                        collections.Map[uint64, types.Request]
 	PendingResolveList              collections.Item[types.PendingResolveList]
-	Reports                         collections.Map[collections.Pair[uint64, sdk.ValAddress], types.Report]
+	Reports                         collections.Map[collections.Pair[uint64, []byte], types.Report]
 	Results                         collections.Map[uint64, types.Result]
-	ValidatorStatuses               collections.Map[sdk.ValAddress, types.ValidatorStatus]
+	ValidatorStatuses               collections.Map[[]byte, types.ValidatorStatus]
 	RequestID                       collections.Sequence
 	DataSourceID                    collections.Sequence
 	OracleScriptID                  collections.Sequence
 	RollingSeed                     collections.Item[[]byte]
 	RequestLastExpired              collections.Item[uint64]
-	DataProviderAccumulatedRewards  collections.Map[sdk.AccAddress, types.DataProviderAccumulatedReward]
+	DataProviderAccumulatedRewards  collections.Map[[]byte, types.DataProviderAccumulatedReward]
 	AccumulatedDataProvidersRewards collections.Item[types.DataProvidersAccumulatedRewards]
 	AccumulatedPaymentsForData      collections.Item[types.AccumulatedPaymentsForData]
 }
@@ -101,15 +101,15 @@ func NewKeeper(
 		OracleScripts:                   collections.NewMap(sb, types.OracleScriptStoreKeyPrefix, "oracle_scripts", collections.Uint64Key, codec.CollValue[types.OracleScript](cdc)),
 		Requests:                        collections.NewMap(sb, types.RequestStoreKeyPrefix, "requests", collections.Uint64Key, codec.CollValue[types.Request](cdc)),
 		PendingResolveList:              collections.NewItem(sb, types.PendingResolveListStoreKey, "pending_resolve_list", codec.CollValue[types.PendingResolveList](cdc)),
-		Reports:                         collections.NewMap(sb, types.ReportStoreKeyPrefix, "reports", collections.PairKeyCodec(collections.Uint64Key, sdk.LengthPrefixedAddressKey(sdk.ValAddressKey)), codec.CollValue[types.Report](cdc)), //collections.Map[collections.Pair[uint64, sdk.ValAddress], types.Report]{},
+		Reports:                         collections.NewMap(sb, types.ReportStoreKeyPrefix, "reports", collections.PairKeyCodec(collections.Uint64Key, collections.BytesKey), codec.CollValue[types.Report](cdc)), //collections.Map[collections.Pair[uint64, sdk.ValAddress], types.Report]{},
 		Results:                         collections.NewMap(sb, types.ResultStoreKeyPrefix, "results", collections.Uint64Key, codec.CollValue[types.Result](cdc)),
-		ValidatorStatuses:               collections.NewMap(sb, types.ValidatorStatusKeyPrefix, "validator_statuses", sdk.LengthPrefixedAddressKey(sdk.ValAddressKey), codec.CollValue[types.ValidatorStatus](cdc)),
+		ValidatorStatuses:               collections.NewMap(sb, types.ValidatorStatusKeyPrefix, "validator_statuses", collections.BytesKey, codec.CollValue[types.ValidatorStatus](cdc)),
 		RequestID:                       collections.NewSequence(sb, types.RequestCountStoreKey, "request_id"),
 		DataSourceID:                    collections.NewSequence(sb, types.DataSourceCountStoreKey, "data_source_id"),
 		OracleScriptID:                  collections.NewSequence(sb, types.OracleScriptCountStoreKey, "oracle_script_id"),
 		RollingSeed:                     collections.NewItem(sb, types.RollingSeedStoreKey, "rolling_seed", collections.BytesValue),
 		RequestLastExpired:              collections.NewItem(sb, types.RequestLastExpiredStoreKey, "request_last_expired", collections.Uint64Value),
-		DataProviderAccumulatedRewards:  collections.NewMap(sb, types.DataProviderRewardsKeyPrefix, "data_provider_accumulated_rewards", sdk.LengthPrefixedAddressKey(sdk.AccAddressKey), codec.CollValue[types.DataProviderAccumulatedReward](cdc)),
+		DataProviderAccumulatedRewards:  collections.NewMap(sb, types.DataProviderRewardsKeyPrefix, "data_provider_accumulated_rewards", collections.BytesKey, codec.CollValue[types.DataProviderAccumulatedReward](cdc)),
 		AccumulatedDataProvidersRewards: collections.NewItem(sb, types.AccumulatedDataProvidersRewardsStoreKey, "accumulated_data_providers_rewards", codec.CollValue[types.DataProvidersAccumulatedRewards](cdc)),
 		AccumulatedPaymentsForData:      collections.NewItem(sb, types.AccumulatedPaymentsForDataStoreKey, "accumulated_payments_for_data", codec.CollValue[types.AccumulatedPaymentsForData](cdc)),
 	}

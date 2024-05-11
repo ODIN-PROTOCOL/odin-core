@@ -13,13 +13,13 @@ import (
 
 // HasReport checks if the report of this ID triple exists in the storage.
 func (k Keeper) HasReport(ctx context.Context, rid types.RequestID, val sdk.ValAddress) (bool, error) {
-	return k.Reports.Has(ctx, collections.Join(uint64(rid), val))
+	return k.Reports.Has(ctx, collections.Join(uint64(rid), []byte(val)))
 }
 
 // SetReport saves the report to the storage without performing validation.
 func (k Keeper) SetReport(ctx context.Context, rid types.RequestID, rep types.Report) error {
 	val, _ := sdk.ValAddressFromBech32(rep.Validator)
-	return k.Reports.Set(ctx, collections.Join(uint64(rid), val), rep)
+	return k.Reports.Set(ctx, collections.Join(uint64(rid), []byte(val)), rep)
 }
 
 // AddReport performs sanity checks and adds a new batch from one validator to one request
@@ -89,15 +89,15 @@ func (k Keeper) CheckValidReport(
 func (k Keeper) IterateReports(
 	ctx context.Context,
 	rid types.RequestID,
-	cb func(key collections.Pair[uint64, sdk.ValAddress], value types.Report) (bool, error),
+	cb func(key collections.Pair[uint64, []byte], value types.Report) (bool, error),
 ) error {
-	rng := collections.NewPrefixedPairRange[uint64, sdk.ValAddress](uint64(rid))
+	rng := collections.NewPrefixedPairRange[uint64, []byte](uint64(rid))
 	return k.Reports.Walk(ctx, rng, cb)
 }
 
 // GetReportCount returns the number of reports for the given request ID.
 func (k Keeper) GetReportCount(ctx context.Context, rid types.RequestID) (count uint64, err error) {
-	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, sdk.ValAddress], report types.Report) (bool, error) {
+	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, []byte], report types.Report) (bool, error) {
 		count++
 		return false, nil
 	})
@@ -107,7 +107,7 @@ func (k Keeper) GetReportCount(ctx context.Context, rid types.RequestID) (count 
 
 // GetReports returns all reports for the given request ID, or nil if there is none.
 func (k Keeper) GetReports(ctx context.Context, rid types.RequestID) (reports []types.Report, err error) {
-	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, sdk.ValAddress], report types.Report) (bool, error) {
+	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, []byte], report types.Report) (bool, error) {
 		reports = append(reports, report)
 		return false, nil
 	})
@@ -126,9 +126,9 @@ func (k Keeper) GetPaginatedRequestReports(
 		Offset: offset,
 	}
 
-	reports, pageRes, err := query.CollectionPaginate(ctx, k.Reports, pagination, func(key collections.Pair[uint64, sdk.ValAddress], report types.Report) (types.Report, error) {
+	reports, pageRes, err := query.CollectionPaginate(ctx, k.Reports, pagination, func(key collections.Pair[uint64, []byte], report types.Report) (types.Report, error) {
 		return report, nil
-	}, query.WithCollectionPaginationPairPrefix[uint64, sdk.ValAddress](uint64(rid)))
+	}, query.WithCollectionPaginationPairPrefix[uint64, []byte](uint64(rid)))
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to paginate request reports")
@@ -139,8 +139,8 @@ func (k Keeper) GetPaginatedRequestReports(
 
 // DeleteReports removes all reports for the given request ID.
 func (k Keeper) DeleteReports(ctx context.Context, rid types.RequestID) error {
-	var keys []collections.Pair[uint64, sdk.ValAddress]
-	err := k.IterateReports(ctx, rid, func(key collections.Pair[uint64, sdk.ValAddress], _ types.Report) (bool, error) {
+	var keys []collections.Pair[uint64, []byte]
+	err := k.IterateReports(ctx, rid, func(key collections.Pair[uint64, []byte], _ types.Report) (bool, error) {
 		keys = append(keys, key)
 		return false, nil
 	})

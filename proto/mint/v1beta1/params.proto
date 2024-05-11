@@ -57,18 +57,20 @@ message Params {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable)     = false
   ];
+  // Deprecated: map with smart contracts addresses
+  map<string, string> integration_addresses = 8 [(gogoproto.moretags) = "yaml:\"integration_addresses\""];
   // flag if minting from air
-  bool mint_air = 8 [(gogoproto.moretags) = "yaml:\"mint_air\""];
+  bool mint_air = 9 [(gogoproto.moretags) = "yaml:\"mint_air\""];
   // eligible to withdraw accounts
-  repeated string eligible_accounts_pool = 9 [(gogoproto.moretags) = "yaml:\"eligible_accounts_pool\""];
+  repeated string eligible_accounts_pool = 10 [(gogoproto.moretags) = "yaml:\"eligible_accounts_pool\""];
   // max allowed mint volume
-  repeated cosmos.base.v1beta1.Coin max_allowed_mint_volume = 10 [
+  repeated cosmos.base.v1beta1.Coin max_allowed_mint_volume = 11 [
     (gogoproto.moretags)     = "yaml:\"max_allowed_mint_volume\"",
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.nullable)     = false
   ];
   // allowed mint denoms
-  repeated AllowedDenom allowed_mint_denoms = 11 [(gogoproto.moretags) = "yaml:\"allowed_mint_denoms\""];
+  repeated AllowedDenom allowed_mint_denoms = 12 [(gogoproto.moretags) = "yaml:\"allowed_mint_denoms\""];
   // allowed minter
-  repeated string allowed_minter = 12 [(gogoproto.moretags) = "yaml:\"allowed_minter\""];
+  repeated string allowed_minter = 13 [(gogoproto.moretags) = "yaml:\"allowed_minter\""];
 }

@@ -5,10 +5,14 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+	"cosmossdk.io/x/circuit"
+	circuittypes "cosmossdk.io/x/circuit/types"
 	"cosmossdk.io/x/evidence"
 	evidencetypes "cosmossdk.io/x/evidence/types"
 	"cosmossdk.io/x/feegrant"
 	feegrantmodule "cosmossdk.io/x/feegrant/module"
+	"cosmossdk.io/x/nft"
+	nftmodule "cosmossdk.io/x/nft/module"
 	"cosmossdk.io/x/upgrade"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -48,7 +52,6 @@ type GenesisState map[string]json.RawMessage
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState() GenesisState {
 	cdc := MakeEncodingConfig().Marshaler
-	ModuleBasics.DefaultGenesis(cdc)
 	denom := "loki"
 	// Get default genesis states of the modules we are to override.
 	authGenesis := authtypes.DefaultGenesisState()
@@ -102,6 +105,8 @@ func NewDefaultGenesisState() GenesisState {
 		ibctransafertypes.ModuleName: ibctransfer.AppModuleBasic{}.DefaultGenesis(cdc),
 		icatypes.ModuleName:          cdc.MustMarshalJSON(icaGenesis),
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
+		nft.ModuleName:               nftmodule.AppModuleBasic{}.DefaultGenesis(cdc),
+		circuittypes.ModuleName:      circuit.AppModuleBasic{}.DefaultGenesis(cdc),
 		//wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }

@@ -15,24 +15,24 @@ func (k Keeper) SetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAdd
 	}
 
 	if !hasReward {
-		return k.DataProviderAccumulatedRewards.Set(ctx, acc, oracletypes.NewDataProviderAccumulatedReward(acc, reward))
+		return k.DataProviderAccumulatedRewards.Set(ctx, acc.Bytes(), oracletypes.NewDataProviderAccumulatedReward(acc, reward))
 	}
 
-	oldReward, err := k.GetDataProviderAccumulatedReward(ctx, acc)
+	oldReward, err := k.GetDataProviderAccumulatedReward(ctx, acc.Bytes())
 	if err != nil {
 		return err
 	}
 
 	newReward := oldReward.Add(reward...)
-	return k.DataProviderAccumulatedRewards.Set(ctx, acc, oracletypes.NewDataProviderAccumulatedReward(acc, newReward))
+	return k.DataProviderAccumulatedRewards.Set(ctx, acc.Bytes(), oracletypes.NewDataProviderAccumulatedReward(acc, newReward))
 }
 
 func (k Keeper) ClearDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) error {
-	return k.DataProviderAccumulatedRewards.Remove(ctx, acc)
+	return k.DataProviderAccumulatedRewards.Remove(ctx, acc.Bytes())
 }
 
 func (k Keeper) GetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) (sdk.Coins, error) {
-	rewards, err := k.DataProviderAccumulatedRewards.Get(ctx, acc)
+	rewards, err := k.DataProviderAccumulatedRewards.Get(ctx, acc.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (k Keeper) GetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAdd
 }
 
 func (k Keeper) HasDataProviderReward(ctx sdk.Context, acc sdk.AccAddress) (bool, error) {
-	return k.DataProviderAccumulatedRewards.Has(ctx, acc)
+	return k.DataProviderAccumulatedRewards.Has(ctx, acc.Bytes())
 }
 
 // AllocateRewardsToDataProviders sends rewards from fee pool to data providers, that have given data for the passed request

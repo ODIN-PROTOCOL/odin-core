@@ -100,7 +100,7 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) e
 // GetValidatorStatus returns the validator status for the given validator. Note that validator
 // status is default to [inactive, 0], so new validators start with inactive state.
 func (k Keeper) GetValidatorStatus(ctx context.Context, val sdk.ValAddress) (types.ValidatorStatus, error) {
-	validatorStatus, err := k.ValidatorStatuses.Get(ctx, val)
+	validatorStatus, err := k.ValidatorStatuses.Get(ctx, val.Bytes())
 	if err != nil {
 		if errors.Is(err, collections.ErrNotFound) {
 			return types.ValidatorStatus{IsActive: false}, nil
@@ -112,12 +112,12 @@ func (k Keeper) GetValidatorStatus(ctx context.Context, val sdk.ValAddress) (typ
 }
 
 func (k Keeper) HasValidatorStatus(ctx context.Context, val sdk.ValAddress) (bool, error) {
-	return k.ValidatorStatuses.Has(ctx, val)
+	return k.ValidatorStatuses.Has(ctx, val.Bytes())
 }
 
 // SetValidatorStatus sets the validator status for the given validator.
 func (k Keeper) SetValidatorStatus(ctx context.Context, val sdk.ValAddress, status types.ValidatorStatus) error {
-	return k.ValidatorStatuses.Set(ctx, val, status)
+	return k.ValidatorStatuses.Set(ctx, val.Bytes(), status)
 }
 
 // Activate changes the given validator's status to active. Returns error if the validator is
