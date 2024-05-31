@@ -1,9 +1,0 @@
-Package: odinprotocol
-Priority: optional
-Architecture: amd64
-Homepage: https://github.com/ODIN-PROTOCOL/odin-core
-Maintainer: https://github.com/slandymani
-Provides: odinprotocol
-Conflicts: odinprotocol
-Replaces: odinprotocol
-Description: The Odin Protocol

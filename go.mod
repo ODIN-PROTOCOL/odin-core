@@ -40,7 +40,7 @@ require (
 	github.com/kyokomi/emoji v2.2.4+incompatible
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a
 	github.com/oasisprotocol/oasis-core/go v0.2202.7
-	github.com/odin-protocol/go-owasm v0.2.7
+	github.com/odin-protocol/go-owasm v0.3.1
 	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/prometheus/client_golang v1.19.0
 	github.com/rakyll/statik v0.1.7
