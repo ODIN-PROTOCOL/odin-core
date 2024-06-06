@@ -8,7 +8,7 @@ import (
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 
-	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
@@ -53,12 +53,12 @@ type AppKeepers struct {
 	CircuitKeeper         circuitkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
-	//WasmKeeper            wasmkeeper.Keeper
+	WasmKeeper            wasmkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 	ScopedOracleKeeper   capabilitykeeper.ScopedKeeper
-	//ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
+	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 }
