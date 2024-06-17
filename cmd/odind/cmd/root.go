@@ -87,6 +87,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	initClientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
 	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
 	autoCliOpts.ClientCtx = initClientCtx
+	autoCliOpts.ClientCtx.KeyringDir = "" 
 
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
