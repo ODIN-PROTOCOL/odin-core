@@ -18,6 +18,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
+
 	//"github.com/CosmWasm/wasmd/x/wasm"
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	//wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
@@ -991,7 +992,7 @@ func (app *OdinApp) AutoCliOpts() autocli.AppOptions {
 			}
 		}
 	}
-
+	
 	return autocli.AppOptions{
 		Modules:               modules,
 		ModuleOptions:         runtimeservices.ExtractAutoCLIOptions(app.ModuleManager.Modules),
