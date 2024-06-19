@@ -29,7 +29,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	"github.com/cosmos/ibc-go/v8/testing/simapp"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
@@ -47,7 +46,7 @@ const (
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
 func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
-	tempApp := app.NewOdinApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, simtestutil.NewAppOptionsWithFlagHome(tempDir()), 100)
+	tempApp := app.NewOdinApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, simtestutil.EmptyAppOptions{}, 100)
 	encodingConfig := app.MakeEncodingConfig()
 	
 	initClientCtx := client.Context{}.
@@ -155,7 +154,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig, b
 		snapshot.Cmd(newApp),
 	)
 
-	server.AddCommandsWithStartCmdOptions(rootCmd, simapp.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
+	server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
 		AddFlags: func(startCmd *cobra.Command) {
 			crisis.AddModuleInitFlags(startCmd)
 		},
@@ -294,14 +293,4 @@ func appExport(
 	}
 
 	return odinApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
-}
-
-var tempDir = func() string {
-	dir, err := os.MkdirTemp("", "simapp")
-	if err != nil {
-		dir = simapp.DefaultNodeHome
-	}
-	defer os.RemoveAll(dir)
-
-	return dir
 }
