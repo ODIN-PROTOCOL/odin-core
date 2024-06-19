@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -60,8 +59,6 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithHomeDir(app.DefaultNodeHome).
 		WithViper("ODIN")
-
-	fmt.Printf("signMode handler: %v\n", encodingConfig.TxConfig.SignModeHandler().SupportedModes())
 	
 	rootCmd := &cobra.Command{
 		Use:   "odind",
