@@ -616,10 +616,10 @@ $ %s tx oracle add-reporters odin1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun odin1m5
 					return err
 				}
 				msgs[i] = msg
-				err = msgs[i].ValidateBasic()
-				if err != nil {
-					return err
-				}
+				//err = msgs[i].ValidateBasic()
+				//if err != nil {
+				//	return err
+				//}
 			}
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msgs...)
 		},
@@ -663,10 +663,10 @@ $ %s tx oracle remove-reporters odin1p40yh3zkmhcv0ecqp3mcazy83sa57rgjp07dun odin
 					sdk.MsgTypeURL(&types.MsgReportData{}),
 				)
 				msgs[i] = &msg
-				err = msg.ValidateBasic()
-				if err != nil {
-					return err
-				}
+				//err = msg.ValidateBasic()
+				//if err != nil {
+				//	return err
+				//}
 			}
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msgs...)
 		},

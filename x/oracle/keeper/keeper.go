@@ -1,30 +1,26 @@
 package keeper
 
 import (
-	"encoding/binary"
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/collections"
+	corestoretypes "cosmossdk.io/core/store"
+	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
+	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	host "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	owasm "github.com/odin-protocol/go-owasm/api"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/filecache"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-const (
-	RollingSeedSizeInBytes = 32
-)
-
 type Keeper struct {
-	storeKey         storetypes.StoreKey
 	cdc              codec.BinaryCodec
 	fileCache        filecache.Cache
 	feeCollectorName string
@@ -42,12 +38,33 @@ type Keeper struct {
 	// the address capable of executing a MsgUpdateParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
+
+	// The (unexposed) keys used to access the stores from the Context.
+	storeService corestoretypes.KVStoreService
+
+	Schema                          collections.Schema
+	Params                          collections.Item[types.Params]
+	DataSources                     collections.Map[uint64, types.DataSource]
+	OracleScripts                   collections.Map[uint64, types.OracleScript]
+	Requests                        collections.Map[uint64, types.Request]
+	PendingResolveList              collections.Item[types.PendingResolveList]
+	Reports                         collections.Map[collections.Pair[uint64, []byte], types.Report]
+	Results                         collections.Map[uint64, types.Result]
+	ValidatorStatuses               collections.Map[[]byte, types.ValidatorStatus]
+	RequestID                       collections.Sequence
+	DataSourceID                    collections.Sequence
+	OracleScriptID                  collections.Sequence
+	RollingSeed                     collections.Item[[]byte]
+	RequestLastExpired              collections.Item[uint64]
+	DataProviderAccumulatedRewards  collections.Map[[]byte, types.DataProviderAccumulatedReward]
+	AccumulatedDataProvidersRewards collections.Item[types.DataProvidersAccumulatedRewards]
+	AccumulatedPaymentsForData      collections.Item[types.AccumulatedPaymentsForData]
 }
 
 // NewKeeper creates a new oracle Keeper instance.
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key storetypes.StoreKey,
+	storeService corestoretypes.KVStoreService,
 	fileDir string,
 	feeCollectorName string,
 	authKeeper types.AccountKeeper,
@@ -61,8 +78,9 @@ func NewKeeper(
 	owasmVM *owasm.Vm,
 	authority string,
 ) Keeper {
-	return Keeper{
-		storeKey:         key,
+	sb := collections.NewSchemaBuilder(storeService)
+
+	k := Keeper{
 		cdc:              cdc,
 		fileCache:        filecache.New(fileDir),
 		feeCollectorName: feeCollectorName,
@@ -76,7 +94,32 @@ func NewKeeper(
 		portKeeper:       portKeeper,
 		scopedKeeper:     scopeKeeper,
 		authority:        authority,
+		storeService:     storeService,
+
+		Params:                          collections.NewItem(sb, types.ParamsKeyPrefix, "params", codec.CollValue[types.Params](cdc)),
+		DataSources:                     collections.NewMap(sb, types.DataSourceStoreKeyPrefix, "data_sources", collections.Uint64Key, codec.CollValue[types.DataSource](cdc)),
+		OracleScripts:                   collections.NewMap(sb, types.OracleScriptStoreKeyPrefix, "oracle_scripts", collections.Uint64Key, codec.CollValue[types.OracleScript](cdc)),
+		Requests:                        collections.NewMap(sb, types.RequestStoreKeyPrefix, "requests", collections.Uint64Key, codec.CollValue[types.Request](cdc)),
+		PendingResolveList:              collections.NewItem(sb, types.PendingResolveListStoreKey, "pending_resolve_list", codec.CollValue[types.PendingResolveList](cdc)),
+		Reports:                         collections.NewMap(sb, types.ReportStoreKeyPrefix, "reports", collections.PairKeyCodec(collections.Uint64Key, collections.BytesKey), codec.CollValue[types.Report](cdc)), //collections.Map[collections.Pair[uint64, sdk.ValAddress], types.Report]{},
+		Results:                         collections.NewMap(sb, types.ResultStoreKeyPrefix, "results", collections.Uint64Key, codec.CollValue[types.Result](cdc)),
+		ValidatorStatuses:               collections.NewMap(sb, types.ValidatorStatusKeyPrefix, "validator_statuses", collections.BytesKey, codec.CollValue[types.ValidatorStatus](cdc)),
+		RequestID:                       collections.NewSequence(sb, types.RequestCountStoreKey, "request_id"),
+		DataSourceID:                    collections.NewSequence(sb, types.DataSourceCountStoreKey, "data_source_id"),
+		OracleScriptID:                  collections.NewSequence(sb, types.OracleScriptCountStoreKey, "oracle_script_id"),
+		RollingSeed:                     collections.NewItem(sb, types.RollingSeedStoreKey, "rolling_seed", collections.BytesValue),
+		RequestLastExpired:              collections.NewItem(sb, types.RequestLastExpiredStoreKey, "request_last_expired", collections.Uint64Value),
+		DataProviderAccumulatedRewards:  collections.NewMap(sb, types.DataProviderRewardsKeyPrefix, "data_provider_accumulated_rewards", collections.BytesKey, codec.CollValue[types.DataProviderAccumulatedReward](cdc)),
+		AccumulatedDataProvidersRewards: collections.NewItem(sb, types.AccumulatedDataProvidersRewardsStoreKey, "accumulated_data_providers_rewards", codec.CollValue[types.DataProvidersAccumulatedRewards](cdc)),
+		AccumulatedPaymentsForData:      collections.NewItem(sb, types.AccumulatedPaymentsForDataStoreKey, "accumulated_payments_for_data", codec.CollValue[types.AccumulatedPaymentsForData](cdc)),
 	}
+
+	schema, err := sb.Build()
+	if err != nil {
+		panic(err)
+	}
+	k.Schema = schema
+	return k
 }
 
 // GetAuthority returns the x/oracle module's authority.
@@ -90,86 +133,72 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // SetRollingSeed sets the rolling seed value to be provided value.
-func (k Keeper) SetRollingSeed(ctx sdk.Context, rollingSeed []byte) {
-	ctx.KVStore(k.storeKey).Set(types.RollingSeedStoreKey, rollingSeed)
+func (k Keeper) SetRollingSeed(ctx context.Context, rollingSeed []byte) error {
+	return k.RollingSeed.Set(ctx, rollingSeed)
 }
 
 // GetRollingSeed returns the current rolling seed value.
-func (k Keeper) GetRollingSeed(ctx sdk.Context) []byte {
-	return ctx.KVStore(k.storeKey).Get(types.RollingSeedStoreKey)
+func (k Keeper) GetRollingSeed(ctx context.Context) ([]byte, error) {
+	return k.RollingSeed.Get(ctx)
 }
 
 // SetRequestCount sets the number of request count to the given value. Useful for genesis state.
-func (k Keeper) SetRequestCount(ctx sdk.Context, count uint64) {
-	bz := make([]byte, 8)
-	binary.BigEndian.PutUint64(bz, count)
-	ctx.KVStore(k.storeKey).Set(types.RequestCountStoreKey, bz)
+func (k Keeper) SetRequestCount(ctx context.Context, count uint64) error {
+	return k.RequestID.Set(ctx, count)
 }
 
 // GetRequestCount returns the current number of all requests ever exist.
-func (k Keeper) GetRequestCount(ctx sdk.Context) uint64 {
-	bz := ctx.KVStore(k.storeKey).Get(types.RequestCountStoreKey)
-	return binary.BigEndian.Uint64(bz)
+func (k Keeper) GetRequestCount(ctx context.Context) (uint64, error) {
+	return k.RequestID.Peek(ctx)
 }
 
 // SetRequestLastExpired sets the ID of the last expired request.
-func (k Keeper) SetRequestLastExpired(ctx sdk.Context, id types.RequestID) {
-	bz := make([]byte, 8)
-	binary.BigEndian.PutUint64(bz, uint64(id))
-	ctx.KVStore(k.storeKey).Set(types.RequestLastExpiredStoreKey, bz)
+func (k Keeper) SetRequestLastExpired(ctx context.Context, id types.RequestID) error {
+	return k.RequestLastExpired.Set(ctx, uint64(id))
 }
 
 // GetRequestLastExpired returns the ID of the last expired request.
-func (k Keeper) GetRequestLastExpired(ctx sdk.Context) types.RequestID {
-	bz := ctx.KVStore(k.storeKey).Get(types.RequestLastExpiredStoreKey)
-	return types.RequestID(binary.BigEndian.Uint64(bz))
+func (k Keeper) GetRequestLastExpired(ctx context.Context) (types.RequestID, error) {
+	lastExpired, err := k.RequestLastExpired.Get(ctx)
+	return types.RequestID(lastExpired), err
 }
 
 // GetNextRequestID increments and returns the current number of requests.
-func (k Keeper) GetNextRequestID(ctx sdk.Context) types.RequestID {
-	requestNumber := k.GetRequestCount(ctx)
-	k.SetRequestCount(ctx, requestNumber+1)
-	return types.RequestID(requestNumber + 1)
+func (k Keeper) GetNextRequestID(ctx context.Context) (types.RequestID, error) {
+	count, err := k.RequestID.Next(ctx)
+	return types.RequestID(count + 1), err
 }
 
 // SetDataSourceCount sets the number of data source count to the given value.
-func (k Keeper) SetDataSourceCount(ctx sdk.Context, count uint64) {
-	bz := make([]byte, 8)
-	binary.BigEndian.PutUint64(bz, count)
-	ctx.KVStore(k.storeKey).Set(types.DataSourceCountStoreKey, bz)
+func (k Keeper) SetDataSourceCount(ctx context.Context, count uint64) error {
+	return k.DataSourceID.Set(ctx, count)
 }
 
 // GetDataSourceCount returns the current number of all data sources ever exist.
-func (k Keeper) GetDataSourceCount(ctx sdk.Context) uint64 {
-	bz := ctx.KVStore(k.storeKey).Get(types.DataSourceCountStoreKey)
-	return binary.BigEndian.Uint64(bz)
+func (k Keeper) GetDataSourceCount(ctx context.Context) (uint64, error) {
+	return k.DataSourceID.Peek(ctx)
 }
 
 // GetNextDataSourceID increments and returns the current number of data sources.
-func (k Keeper) GetNextDataSourceID(ctx sdk.Context) types.DataSourceID {
-	dataSourceCount := k.GetDataSourceCount(ctx)
-	k.SetDataSourceCount(ctx, dataSourceCount+1)
-	return types.DataSourceID(dataSourceCount + 1)
+func (k Keeper) GetNextDataSourceID(ctx context.Context) (types.DataSourceID, error) {
+	count, err := k.DataSourceID.Next(ctx)
+	return types.DataSourceID(count + 1), err
 }
 
 // SetOracleScriptCount sets the number of oracle script count to the given value.
-func (k Keeper) SetOracleScriptCount(ctx sdk.Context, count uint64) {
-	bz := make([]byte, 8)
-	binary.BigEndian.PutUint64(bz, count)
-	ctx.KVStore(k.storeKey).Set(types.OracleScriptCountStoreKey, bz)
+func (k Keeper) SetOracleScriptCount(ctx context.Context, count uint64) error {
+	return k.OracleScriptID.Set(ctx, count)
 }
 
 // GetOracleScriptCount returns the current number of all oracle scripts ever exist.
-func (k Keeper) GetOracleScriptCount(ctx sdk.Context) uint64 {
-	bz := ctx.KVStore(k.storeKey).Get(types.OracleScriptCountStoreKey)
-	return binary.BigEndian.Uint64(bz)
+func (k Keeper) GetOracleScriptCount(ctx context.Context) (uint64, error) {
+	return k.OracleScriptID.Peek(ctx)
 }
 
 // GetNextOracleScriptID increments and returns the current number of oracle scripts.
-func (k Keeper) GetNextOracleScriptID(ctx sdk.Context) types.OracleScriptID {
-	oracleScriptCount := k.GetOracleScriptCount(ctx)
-	k.SetOracleScriptCount(ctx, oracleScriptCount+1)
-	return types.OracleScriptID(oracleScriptCount + 1)
+func (k Keeper) GetNextOracleScriptID(ctx context.Context) (types.OracleScriptID, error) {
+	count, err := k.OracleScriptID.Next(ctx)
+	return types.OracleScriptID(count + 1), err
 }
 
 // GetFile loads the file from the file storage. Panics if the file does not exist.
@@ -186,20 +215,13 @@ func (k Keeper) IsBound(ctx sdk.Context, portID string) bool {
 // BindPort defines a wrapper function for the ort Keeper's function in
 // order to expose it to module's InitGenesis function
 func (k Keeper) BindPort(ctx sdk.Context, portID string) error {
-	cap := k.portKeeper.BindPort(ctx, portID)
-	return k.ClaimCapability(ctx, cap, host.PortPath(portID))
+	capability := k.portKeeper.BindPort(ctx, portID)
+	return k.ClaimCapability(ctx, capability, host.PortPath(portID))
 }
 
 // GetPort returns the portID for the oracle module. Used in ExportGenesis
-func (k Keeper) GetPort(ctx sdk.Context) string {
-	store := ctx.KVStore(k.storeKey)
-	return string(store.Get(types.PortKey))
-}
-
-// SetPort sets the portID for the oracle module. Used in InitGenesis
-func (k Keeper) SetPort(ctx sdk.Context, portID string) {
-	store := ctx.KVStore(k.storeKey)
-	store.Set(types.PortKey, []byte(portID))
+func (k Keeper) GetPort() string {
+	return types.PortID
 }
 
 // AuthenticateCapability wraps the scopedKeeper's AuthenticateCapability function
@@ -215,13 +237,13 @@ func (k Keeper) ClaimCapability(ctx sdk.Context, cap *capabilitytypes.Capability
 
 // IsReporter checks if the validator granted to the reporter
 func (k Keeper) IsReporter(ctx sdk.Context, validator sdk.ValAddress, reporter sdk.AccAddress) bool {
-	cap, _ := k.authzKeeper.GetAuthorization(
+	capability, _ := k.authzKeeper.GetAuthorization(
 		ctx,
 		reporter,
 		sdk.AccAddress(validator),
 		sdk.MsgTypeURL(&types.MsgReportData{}),
 	)
-	return cap != nil
+	return capability != nil
 }
 
 // GrantReporter grants the reporter to validator for testing
@@ -233,87 +255,22 @@ func (k Keeper) GrantReporter(ctx sdk.Context, validator sdk.ValAddress, reporte
 }
 
 // RevokeReporter revokes grant from the reporter for testing
-func (k Keeper) RevokeReporter(ctx sdk.Context, validator sdk.ValAddress, reporter sdk.AccAddress) error {
+func (k Keeper) RevokeReporter(ctx context.Context, validator sdk.ValAddress, reporter sdk.AccAddress) error {
 	return k.authzKeeper.DeleteGrant(ctx, reporter, sdk.AccAddress(validator), sdk.MsgTypeURL(&types.MsgReportData{}))
 }
 
-func (k Keeper) SetAccumulatedDataProvidersRewards(ctx sdk.Context, reward types.DataProvidersAccumulatedRewards) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&reward)
-	store.Set(types.AccumulatedDataProvidersRewardsStoreKey, b)
+func (k Keeper) SetAccumulatedDataProvidersRewards(ctx context.Context, reward types.DataProvidersAccumulatedRewards) error {
+	return k.AccumulatedDataProvidersRewards.Set(ctx, reward)
 }
 
-func (k Keeper) GetAccumulatedDataProvidersRewards(ctx sdk.Context) (reward types.DataProvidersAccumulatedRewards) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.AccumulatedDataProvidersRewardsStoreKey)
-	k.cdc.MustUnmarshal(bz, &reward)
-	return
+func (k Keeper) GetAccumulatedDataProvidersRewards(ctx context.Context) (reward types.DataProvidersAccumulatedRewards, err error) {
+	return k.AccumulatedDataProvidersRewards.Get(ctx)
 }
 
-func (k Keeper) SetAccumulatedPaymentsForData(ctx sdk.Context, payments types.AccumulatedPaymentsForData) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&payments)
-	store.Set(types.AccumulatedPaymentsForDataStoreKey, b)
+func (k Keeper) SetAccumulatedPaymentsForData(ctx context.Context, payments types.AccumulatedPaymentsForData) error {
+	return k.AccumulatedPaymentsForData.Set(ctx, payments)
 }
 
-func (k Keeper) GetAccumulatedPaymentsForData(ctx sdk.Context) (payments types.AccumulatedPaymentsForData) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.AccumulatedPaymentsForDataStoreKey)
-	k.cdc.MustUnmarshal(bz, &payments)
-	return
-}
-
-// get the module coins account
-func (k Keeper) GetOracleModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.OracleModuleCoinsAccountKey)
-	if b == nil {
-		return nil
-	}
-
-	return sdk.AccAddress(b)
-}
-
-// set the module coins account
-func (k Keeper) SetOracleModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
-	ctx.KVStore(k.storeKey).Set(types.OracleModuleCoinsAccountKey, account)
-}
-
-// IsAllowedFeeDenom checks if fee denom exists in data requester fee denoms list
-func (k Keeper) IsAllowedFeeDenom(ctx sdk.Context, feeDenom string) bool {
-	params := k.GetParams(ctx)
-
-	for _, paramsFeeDenom := range params.DataRequesterFeeDenoms {
-		if feeDenom == paramsFeeDenom {
-			return true
-		}
-	}
-
-	return false
-}
-
-// IsInDataProviderRewardPerByte checks if fee denom exists in data provider reward per byte list
-func (k Keeper) IsInDataProviderRewardPerByte(ctx sdk.Context, feeDenom string) bool {
-	params := k.GetParams(ctx)
-
-	for _, paramsRewardPerByte := range params.DataProviderRewardPerByte {
-		if feeDenom == paramsRewardPerByte.Denom {
-			return true
-		}
-	}
-
-	return false
-}
-
-// IsInDataProviderRewardThreshold checks if fee denom exists in data provider reward threshold list
-func (k Keeper) IsInDataProviderRewardThreshold(ctx sdk.Context, feeDenom string) bool {
-	params := k.GetParams(ctx)
-
-	for _, paramsRewardThreshold := range params.DataProviderRewardThreshold.Amount {
-		if feeDenom == paramsRewardThreshold.Denom {
-			return true
-		}
-	}
-
-	return false
+func (k Keeper) GetAccumulatedPaymentsForData(ctx context.Context) (payments types.AccumulatedPaymentsForData, err error) {
+	return k.AccumulatedPaymentsForData.Get(ctx)
 }

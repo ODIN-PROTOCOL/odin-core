@@ -4,7 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/exported"
-	v2 "github.com/ODIN-PROTOCOL/odin-core/x/oracle/migrations/v2"
 )
 
 // Migrator is a struct for handling in-place state migrations.
@@ -24,6 +23,6 @@ func NewMigrator(k Keeper, ss exported.Subspace) Migrator {
 // version 2. Specifically, it takes the parameters that are currently stored
 // and managed by the x/params modules and stores them directly into the x/oracle
 // module state.
-func (m Migrator) Migrate1to2(ctx sdk.Context) error {
-	return v2.Migrate(ctx, ctx.KVStore(m.keeper.storeKey), m.legacySubspace, m.keeper.cdc)
+func (m Migrator) Migrate1to2(_ sdk.Context) error {
+	return nil
 }

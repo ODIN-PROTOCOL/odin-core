@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 
 	errortypes "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,13 +48,14 @@ func (k *WrappedBankKeeper) SetMintKeeper(mintKeeper types.MintKeeper) {
 }
 
 // Logger returns a module-specific logger.
-func (k WrappedBankKeeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", "x/wrappedbank")
+func (k WrappedBankKeeper) Logger(ctx context.Context) log.Logger {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return sdkCtx.Logger().With("module", "x/wrappedbank")
 }
 
 // BurnCoins moves the specified amount of coins from the given module name to
 // the community pool. The total bank of the coins will not change.
-func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k WrappedBankKeeper) BurnCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	// If distrKeeper is not set OR we want to burn coins in distr itself, we will
 	// just use the original BurnCoins function.
 
@@ -79,10 +81,10 @@ func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk
 	}
 
 	// Instead of burning coins, we send them to the community pool.
-	k.SendCoinsFromModuleToModule(ctx, moduleName, distrtypes.ModuleName, amt)
-	feePool := k.distrKeeper.GetFeePool(ctx)
-	feePool.CommunityPool = feePool.CommunityPool.Add(sdk.NewDecCoinsFromCoins(amt...)...)
-	k.distrKeeper.SetFeePool(ctx, feePool)
+	err := k.distrKeeper.FundCommunityPool(ctx, amt, acc.GetAddress())
+	if err != nil {
+		return err
+	}
 
 	logger := k.Logger(ctx)
 	logger.Info(fmt.Sprintf(
@@ -92,13 +94,17 @@ func (k WrappedBankKeeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk
 }
 
 // MintCoins does not create any new coins, just gets them from the community pull
-func (k WrappedBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error {
+func (k WrappedBankKeeper) MintCoins(ctx context.Context, moduleName string, amt sdk.Coins) error {
 	if k.distrKeeper == nil || moduleName == distrtypes.ModuleName {
 		return k.Keeper.MintCoins(ctx, moduleName, amt)
 	}
 
-	vanillaMinting := k.mintKeeper.GetParams(ctx).MintAir
-	if vanillaMinting {
+	mintParams, err := k.mintKeeper.GetParams(ctx)
+	if err != nil {
+		return errortypes.Wrap(err, "failed to get mint module params")
+	}
+
+	if mintParams.MintAir {
 		return k.Keeper.MintCoins(ctx, moduleName, amt)
 	}
 	acc := k.accountKeeper.GetModuleAccount(ctx, moduleName)
@@ -111,7 +117,7 @@ func (k WrappedBankKeeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk
 	}
 
 	logger := k.Logger(ctx)
-	err := k.SendCoinsFromModuleToModule(ctx, distrtypes.ModuleName, moduleName, amt)
+	err = k.SendCoinsFromModuleToModule(ctx, distrtypes.ModuleName, moduleName, amt)
 	if err != nil {
 		err = errortypes.Wrap(err, fmt.Sprintf("failed to mint %s from %s module account", amt.String(), moduleName))
 		logger.Error(err.Error())

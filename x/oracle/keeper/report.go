@@ -1,31 +1,31 @@
 package keeper
 
 import (
+	"context"
+
+	"cosmossdk.io/collections"
 	"cosmossdk.io/errors"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasReport checks if the report of this ID triple exists in the storage.
-func (k Keeper) HasReport(ctx sdk.Context, rid types.RequestID, val sdk.ValAddress) bool {
-	return ctx.KVStore(k.storeKey).Has(types.ReportsOfValidatorPrefixKey(rid, val))
+func (k Keeper) HasReport(ctx context.Context, rid types.RequestID, val sdk.ValAddress) (bool, error) {
+	return k.Reports.Has(ctx, collections.Join(uint64(rid), []byte(val)))
 }
 
-// SetDataReport saves the report to the storage without performing validation.
-func (k Keeper) SetReport(ctx sdk.Context, rid types.RequestID, rep types.Report) {
+// SetReport saves the report to the storage without performing validation.
+func (k Keeper) SetReport(ctx context.Context, rid types.RequestID, rep types.Report) error {
 	val, _ := sdk.ValAddressFromBech32(rep.Validator)
-	key := types.ReportsOfValidatorPrefixKey(rid, val)
-	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(&rep))
+	return k.Reports.Set(ctx, collections.Join(uint64(rid), []byte(val)), rep)
 }
 
-// AddReports performs sanity checks and adds a new batch from one validator to one request
+// AddReport performs sanity checks and adds a new batch from one validator to one request
 // to the store. Note that we expect each validator to report to all raw data requests at once.
 func (k Keeper) AddReport(
-	ctx sdk.Context,
+	ctx context.Context,
 	rid types.RequestID,
 	val sdk.ValAddress,
 	reportInTime bool,
@@ -34,12 +34,11 @@ func (k Keeper) AddReport(
 	if err := k.CheckValidReport(ctx, rid, val, rawReports); err != nil {
 		return err
 	}
-	k.SetReport(ctx, rid, types.NewReport(val, reportInTime, rawReports))
-	return nil
+	return k.SetReport(ctx, rid, types.NewReport(val, reportInTime, rawReports))
 }
 
 func (k Keeper) CheckValidReport(
-	ctx sdk.Context,
+	ctx context.Context,
 	rid types.RequestID,
 	val sdk.ValAddress,
 	rawReports []types.RawReport,
@@ -60,11 +59,17 @@ func (k Keeper) CheckValidReport(
 		}
 	}
 	if !found {
-		return sdkerrors.Wrapf(
+		return errors.Wrapf(
 			types.ErrValidatorNotRequested, "reqID: %d, val: %s", rid, val.String())
 	}
-	if k.HasReport(ctx, rid, val) {
-		return sdkerrors.Wrapf(
+
+	hasReport, err := k.HasReport(ctx, rid, val)
+	if err != nil {
+		return err
+	}
+
+	if hasReport {
+		return errors.Wrapf(
 			types.ErrValidatorAlreadyReported, "reqID: %d, val: %s", rid, val.String())
 	}
 	if len(rawReports) != len(req.RawRequests) {
@@ -74,67 +79,57 @@ func (k Keeper) CheckValidReport(
 		// Here we can safely assume that external IDs are unique, as this has already been
 		// checked by ValidateBasic performed in baseapp's runTx function.
 		if !ContainsEID(req.RawRequests, rep.ExternalID) {
-			return sdkerrors.Wrapf(
+			return errors.Wrapf(
 				types.ErrRawRequestNotFound, "reqID: %d, extID: %d", rid, rep.ExternalID)
 		}
 	}
 	return nil
 }
 
-// GetReportIterator returns the iterator for all reports of the given request ID.
-func (k Keeper) GetReportIterator(ctx sdk.Context, rid types.RequestID) sdk.Iterator {
-	return sdk.KVStorePrefixIterator(ctx.KVStore(k.storeKey), types.ReportStoreKey(rid))
+func (k Keeper) IterateReports(
+	ctx context.Context,
+	rid types.RequestID,
+	cb func(key collections.Pair[uint64, []byte], value types.Report) (bool, error),
+) error {
+	rng := collections.NewPrefixedPairRange[uint64, []byte](uint64(rid))
+	return k.Reports.Walk(ctx, rng, cb)
 }
 
 // GetReportCount returns the number of reports for the given request ID.
-func (k Keeper) GetReportCount(ctx sdk.Context, rid types.RequestID) (count uint64) {
-	iterator := k.GetReportIterator(ctx, rid)
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
+func (k Keeper) GetReportCount(ctx context.Context, rid types.RequestID) (count uint64, err error) {
+	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, []byte], report types.Report) (bool, error) {
 		count++
-	}
-	return count
+		return false, nil
+	})
+
+	return count, err
 }
 
 // GetReports returns all reports for the given request ID, or nil if there is none.
-func (k Keeper) GetReports(ctx sdk.Context, rid types.RequestID) (reports []types.Report) {
-	iterator := k.GetReportIterator(ctx, rid)
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		var rep types.Report
-		k.cdc.MustUnmarshal(iterator.Value(), &rep)
-		reports = append(reports, rep)
-	}
-	return reports
+func (k Keeper) GetReports(ctx context.Context, rid types.RequestID) (reports []types.Report, err error) {
+	err = k.IterateReports(ctx, rid, func(_ collections.Pair[uint64, []byte], report types.Report) (bool, error) {
+		reports = append(reports, report)
+		return false, nil
+	})
+
+	return reports, err
 }
 
 // GetPaginatedRequestReports returns all reports for the given request ID with pagination.
 func (k Keeper) GetPaginatedRequestReports(
-	ctx sdk.Context,
+	ctx context.Context,
 	rid types.RequestID,
 	limit, offset uint64,
 ) ([]types.Report, *query.PageResponse, error) {
-	reports := make([]types.Report, 0)
-	reportsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ReportStoreKey(rid))
 	pagination := &query.PageRequest{
 		Limit:  limit,
 		Offset: offset,
 	}
 
-	pageRes, err := query.FilteredPaginate(
-		reportsStore,
-		pagination,
-		func(key []byte, value []byte, accumulate bool) (bool, error) {
-			var report types.Report
-			if err := k.cdc.Unmarshal(value, &report); err != nil {
-				return false, err
-			}
-			if accumulate {
-				reports = append(reports, report)
-			}
-			return true, nil
-		},
-	)
+	reports, pageRes, err := query.CollectionPaginate(ctx, k.Reports, pagination, func(key collections.Pair[uint64, []byte], report types.Report) (types.Report, error) {
+		return report, nil
+	}, query.WithCollectionPaginationPairPrefix[uint64, []byte](uint64(rid)))
+
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to paginate request reports")
 	}
@@ -143,14 +138,22 @@ func (k Keeper) GetPaginatedRequestReports(
 }
 
 // DeleteReports removes all reports for the given request ID.
-func (k Keeper) DeleteReports(ctx sdk.Context, rid types.RequestID) {
-	var keys [][]byte
-	iterator := k.GetReportIterator(ctx, rid)
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		keys = append(keys, iterator.Key())
+func (k Keeper) DeleteReports(ctx context.Context, rid types.RequestID) error {
+	var keys []collections.Pair[uint64, []byte]
+	err := k.IterateReports(ctx, rid, func(key collections.Pair[uint64, []byte], _ types.Report) (bool, error) {
+		keys = append(keys, key)
+		return false, nil
+	})
+	if err != nil {
+		return err
 	}
+
 	for _, key := range keys {
-		ctx.KVStore(k.storeKey).Delete(key)
+		err = k.Reports.Remove(ctx, key)
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

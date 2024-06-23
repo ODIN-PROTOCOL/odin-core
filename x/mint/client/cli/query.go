@@ -26,7 +26,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryInflation(),
 		GetCmdQueryAnnualProvisions(),
-		GetCmdQueryIntegrationAddress(),
+		//GetCmdQueryIntegrationAddress(),
 		GetCmdQueryTreasuryPool(),
 		GetCmdQueryCurrentMintVolume(),
 	)
@@ -125,34 +125,34 @@ func GetCmdQueryAnnualProvisions() *cobra.Command {
 }
 
 // GetCmdQueryIntegrationAddress returns the command for fetching integration address
-func GetCmdQueryIntegrationAddress() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "integration-address [network-name]",
-		Short: "Query current integration address by network name",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := minttypes.NewQueryClient(clientCtx)
-
-			res, err := queryClient.IntegrationAddress(context.Background(), &minttypes.QueryIntegrationAddressRequest{
-				NetworkName: args[0],
-			})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.IntegrationAddress))
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
+//func GetCmdQueryIntegrationAddress() *cobra.Command {
+//	cmd := &cobra.Command{
+//		Use:   "integration-address [network-name]",
+//		Short: "Query current integration address by network name",
+//		Args:  cobra.ExactArgs(1),
+//		RunE: func(cmd *cobra.Command, args []string) error {
+//			clientCtx, err := client.GetClientQueryContext(cmd)
+//			if err != nil {
+//				return err
+//			}
+//
+//			queryClient := minttypes.NewQueryClient(clientCtx)
+//
+//			res, err := queryClient.IntegrationAddress(context.Background(), &minttypes.QueryIntegrationAddressRequest{
+//				NetworkName: args[0],
+//			})
+//			if err != nil {
+//				return err
+//			}
+//
+//			return clientCtx.PrintString(fmt.Sprintf("%s\n", res.IntegrationAddress))
+//		},
+//	}
+//
+//	flags.AddQueryFlagsToCmd(cmd)
+//
+//	return cmd
+//}
 
 // GetCmdQueryTreasuryPool returns the command for fetching treasury pool info
 func GetCmdQueryTreasuryPool() *cobra.Command {

@@ -1,11 +1,13 @@
 package keeper
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
 
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/odinrng"
@@ -16,40 +18,69 @@ import (
 const gasConversionFactor = 20_000_000
 
 func ConvertToOwasmGas(cosmos uint64) uint64 {
-	return uint64(cosmos * gasConversionFactor)
+	return cosmos * gasConversionFactor
 }
 
 // GetSpanSize return maximum value between MaxReportDataSize and MaxCallDataSize
-func (k Keeper) GetSpanSize(ctx sdk.Context) uint64 {
-	params := k.GetParams(ctx)
-	if params.MaxReportDataSize > params.MaxCalldataSize {
-		return params.MaxReportDataSize
+func (k Keeper) GetSpanSize(ctx context.Context) (uint64, error) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return 0, err
 	}
-	return params.MaxCalldataSize
+	if params.MaxReportDataSize > params.MaxCalldataSize {
+		return params.MaxReportDataSize, nil
+	}
+	return params.MaxCalldataSize, nil
 }
 
 // GetRandomValidators returns a pseudorandom subset of active validators. Each validator has
 // chance of getting selected directly proportional to the amount of voting power it has.
 func (k Keeper) GetRandomValidators(ctx sdk.Context, size int, id uint64) ([]sdk.ValAddress, error) {
-	valOperators := []sdk.ValAddress{}
-	valPowers := []uint64{}
-	k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
+	valOperators := make([]sdk.ValAddress, 0)
+	valPowers := make([]uint64, 0)
+	err := k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
 		func(idx int64, val stakingtypes.ValidatorI) (stop bool) {
-			if k.GetValidatorStatus(ctx, val.GetOperator()).IsActive {
-				valOperators = append(valOperators, val.GetOperator())
+			valAddr, err := sdk.ValAddressFromBech32(val.GetOperator())
+			if err != nil {
+				return false
+			}
+
+			status, err := k.GetValidatorStatus(ctx, valAddr)
+			if err != nil {
+				return false
+			}
+
+			if status.IsActive {
+				valOperators = append(valOperators, valAddr)
 				valPowers = append(valPowers, val.GetTokens().Uint64())
 			}
 			return false
 		})
+	if err != nil {
+		return nil, err
+	}
+
 	if len(valOperators) < size {
-		return nil, sdkerrors.Wrapf(
+		return nil, errors.Wrapf(
 			types.ErrInsufficientValidators, "%d < %d", len(valOperators), size)
 	}
-	rng, err := odinrng.NewRng(k.GetRollingSeed(ctx), sdk.Uint64ToBigEndian(id), []byte(ctx.ChainID()))
+
+	rollingSeed, err := k.GetRollingSeed(ctx)
 	if err != nil {
-		return nil, sdkerrors.Wrapf(types.ErrBadDrbgInitialization, err.Error())
+		return nil, err
 	}
-	tryCount := int(k.GetParams(ctx).SamplingTryCount)
+
+	rng, err := odinrng.NewRng(rollingSeed, sdk.Uint64ToBigEndian(id), []byte(ctx.ChainID()))
+	if err != nil {
+		return nil, errors.Wrapf(types.ErrBadDrbgInitialization, err.Error())
+	}
+
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tryCount := int(params.SamplingTryCount)
 	chosenValIndexes := odinrng.ChooseSomeMaxWeight(rng, valPowers, size, tryCount)
 	validators := make([]sdk.ValAddress, size)
 	for i, idx := range chosenValIndexes {
@@ -67,12 +98,21 @@ func (k Keeper) PrepareRequest(
 	ibcChannel *types.IBCChannel,
 ) (types.RequestID, error) {
 	calldataSize := len(r.GetCalldata())
-	if calldataSize > int(k.GetSpanSize(ctx)) {
-		return 0, types.WrapMaxError(types.ErrTooLargeCalldata, calldataSize, int(k.GetSpanSize(ctx)))
+	spanSize, err := k.GetSpanSize(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	if calldataSize > int(spanSize) {
+		return 0, types.WrapMaxError(types.ErrTooLargeCalldata, calldataSize, int(spanSize))
 	}
 
 	askCount := r.GetAskCount()
-	params := k.GetParams(ctx)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return 0, err
+	}
+
 	if askCount > params.MaxAskCount {
 		return 0, types.WrapMaxError(types.ErrInvalidAskCount, int(askCount), int(params.MaxAskCount))
 	}
@@ -80,8 +120,13 @@ func (k Keeper) PrepareRequest(
 	// Consume gas for data requests.
 	ctx.GasMeter().ConsumeGas(askCount*params.PerValidatorRequestGas, "PER_VALIDATOR_REQUEST_FEE")
 
+	requestCount, err := k.GetRequestCount(ctx)
+	if err != nil {
+		return 0, err
+	}
+
 	// Get a random validator set to perform this request.
-	validators, err := k.GetRandomValidators(ctx, int(askCount), k.GetRequestCount(ctx)+1)
+	validators, err := k.GetRandomValidators(ctx, int(askCount), requestCount+1)
 	if err != nil {
 		return 0, err
 	}
@@ -97,7 +142,7 @@ func (k Keeper) PrepareRequest(
 		req,
 		int64(params.MaxCalldataSize),
 		int64(params.MaxRawRequestCount),
-		int64(k.GetSpanSize(ctx)),
+		int64(spanSize),
 	)
 	script, err := k.GetOracleScript(ctx, req.OracleScriptID)
 	if err != nil {
@@ -110,7 +155,7 @@ func (k Keeper) PrepareRequest(
 	code := k.GetFile(script.Filename)
 	output, err := k.owasmVM.Prepare(code, ConvertToOwasmGas(r.GetPrepareGas()), env)
 	if err != nil {
-		return 0, sdkerrors.Wrapf(types.ErrBadWasmExecution, err.Error())
+		return 0, errors.Wrapf(types.ErrBadWasmExecution, err.Error())
 	}
 
 	// Preparation complete! It's time to collect raw request ids.
@@ -124,7 +169,10 @@ func (k Keeper) PrepareRequest(
 		return 0, err
 	}
 	// We now have everything we need to the request, so let's add it to the store.
-	id := k.AddRequest(ctx, req)
+	id, err := k.AddRequest(ctx, req)
+	if err != nil {
+		return 0, err
+	}
 
 	// Emit an event describing a data request and asked validators.
 	event := sdk.NewEvent(types.EventTypeRequest)
@@ -167,20 +215,45 @@ func (k Keeper) PrepareRequest(
 
 // ResolveRequest resolves the given request and saves the result to the store. The function
 // assumes that the given request is in a resolvable state with sufficient reporters.
-func (k Keeper) ResolveRequest(ctx sdk.Context, reqID types.RequestID) {
-	req := k.MustGetRequest(ctx, reqID)
-	env := types.NewExecuteEnv(req, k.GetReports(ctx, reqID), ctx.BlockTime(), int64(k.GetSpanSize(ctx)))
+func (k Keeper) ResolveRequest(ctx sdk.Context, reqID types.RequestID) error {
+	req, err := k.GetRequest(ctx, reqID)
+	if err != nil {
+		return err
+	}
+
+	spanSize, err := k.GetSpanSize(ctx)
+	if err != nil {
+		return err
+	}
+
+	reports, err := k.GetReports(ctx, reqID)
+	if err != nil {
+		return err
+	}
+
+	env := types.NewExecuteEnv(req, reports, ctx.BlockTime(), int64(spanSize))
 	script := k.MustGetOracleScript(ctx, req.OracleScriptID)
 	code := k.GetFile(script.Filename)
 	output, err := k.owasmVM.Execute(code, ConvertToOwasmGas(req.GetExecuteGas()), env)
 
 	if err != nil {
-		k.ResolveFailure(ctx, reqID, err.Error())
+		err := k.ResolveFailure(ctx, reqID, err.Error())
+		if err != nil {
+			return err
+		}
 	} else if env.Retdata == nil {
-		k.ResolveFailure(ctx, reqID, "no return data")
+		err := k.ResolveFailure(ctx, reqID, "no return data")
+		if err != nil {
+			return err
+		}
 	} else {
-		k.ResolveSuccess(ctx, reqID, env.Retdata, output.GasUsed)
+		err := k.ResolveSuccess(ctx, reqID, env.Retdata, output.GasUsed)
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 // CollectFee subtract fee from fee payer and send them to treasury
@@ -201,7 +274,7 @@ func (k Keeper) CollectFee(
 
 		fee := sdk.NewCoins()
 		for _, c := range ds.Fee {
-			c.Amount = c.Amount.Mul(sdk.NewInt(int64(askCount)))
+			c.Amount = c.Amount.Mul(math.NewInt(int64(askCount)))
 			fee = fee.Add(c)
 		}
 

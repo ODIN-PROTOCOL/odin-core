@@ -8,69 +8,87 @@ import (
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
-func (k Keeper) SetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress, reward sdk.Coins) {
-	key := oracletypes.DataProviderRewardsPrefixKey(acc)
-	if !k.HasDataProviderReward(ctx, acc) {
-		ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(oracletypes.NewDataProviderAccumulatedReward(acc, reward)))
-		return
+func (k Keeper) SetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress, reward sdk.Coins) error {
+	hasReward, err := k.HasDataProviderReward(ctx, acc)
+	if err != nil {
+		return err
 	}
-	oldReward := k.GetDataProviderAccumulatedReward(ctx, acc)
+
+	if !hasReward {
+		return k.DataProviderAccumulatedRewards.Set(ctx, acc.Bytes(), oracletypes.NewDataProviderAccumulatedReward(acc, reward))
+	}
+
+	oldReward, err := k.GetDataProviderAccumulatedReward(ctx, acc.Bytes())
+	if err != nil {
+		return err
+	}
+
 	newReward := oldReward.Add(reward...)
-	ctx.KVStore(k.storeKey).Set(key, k.cdc.MustMarshal(oracletypes.NewDataProviderAccumulatedReward(acc, newReward)))
+	return k.DataProviderAccumulatedRewards.Set(ctx, acc.Bytes(), oracletypes.NewDataProviderAccumulatedReward(acc, newReward))
 }
 
-func (k Keeper) ClearDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) {
-	ctx.KVStore(k.storeKey).Delete(oracletypes.DataProviderRewardsPrefixKey(acc))
+func (k Keeper) ClearDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) error {
+	return k.DataProviderAccumulatedRewards.Remove(ctx, acc.Bytes())
 }
 
-func (k Keeper) GetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) sdk.Coins {
-	key := oracletypes.DataProviderRewardsPrefixKey(acc)
-	bz := ctx.KVStore(k.storeKey).Get(key)
-	dataProviderReward := oracletypes.DataProviderAccumulatedReward{}
-	k.cdc.MustUnmarshal(bz, &dataProviderReward)
-	return dataProviderReward.DataProviderReward
+func (k Keeper) GetDataProviderAccumulatedReward(ctx sdk.Context, acc sdk.AccAddress) (sdk.Coins, error) {
+	rewards, err := k.DataProviderAccumulatedRewards.Get(ctx, acc.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	return rewards.DataProviderReward, nil
 }
 
-func (k Keeper) HasDataProviderReward(ctx sdk.Context, acc sdk.AccAddress) bool {
-	return ctx.KVStore(k.storeKey).Has(oracletypes.DataProviderRewardsPrefixKey(acc))
+func (k Keeper) HasDataProviderReward(ctx sdk.Context, acc sdk.AccAddress) (bool, error) {
+	return k.DataProviderAccumulatedRewards.Has(ctx, acc.Bytes())
 }
 
 // AllocateRewardsToDataProviders sends rewards from fee pool to data providers, that have given data for the passed request
-func (k Keeper) AllocateRewardsToDataProviders(ctx sdk.Context, rid oracletypes.RequestID) {
-	logger := k.Logger(ctx)
-	request := k.MustGetRequest(ctx, rid)
-
-	// rewards are lying in the distribution fee pool
-	feePool := k.distrKeeper.GetFeePool(ctx)
+func (k Keeper) AllocateRewardsToDataProviders(ctx sdk.Context, rid oracletypes.RequestID) error {
+	request, err := k.GetRequest(ctx, rid)
+	if err != nil {
+		return err
+	}
 
 	for _, rawReq := range request.RawRequests {
 		ds := k.MustGetDataSource(ctx, rawReq.GetDataSourceID())
 
 		ownerAccAddr, err := sdk.AccAddressFromBech32(ds.Owner)
 		if err != nil {
-			panic(err)
+			return err
 		}
-		if !k.HasDataProviderReward(ctx, ownerAccAddr) {
-			continue
-		}
-		reward := k.GetDataProviderAccumulatedReward(ctx, ownerAccAddr)
 
-		diff, hasNeg := feePool.CommunityPool.SafeSub(sdk.NewDecCoinsFromCoins(reward...))
-		if hasNeg {
-			logger.With("lack", diff).Error("oracle pool does not have enough coins to reward data providers")
-			// not return because maybe still enough coins to pay someone
-			continue
-		}
-		feePool.CommunityPool = diff
-
-		err = k.BankKeeper.SendCoinsFromModuleToAccount(ctx, distrtypes.ModuleName, ownerAccAddr, reward)
+		hasReward, err := k.HasDataProviderReward(ctx, ownerAccAddr)
 		if err != nil {
-			panic(err)
+			return err
+		}
+
+		if !hasReward {
+			continue
+		}
+
+		reward, err := k.GetDataProviderAccumulatedReward(ctx, ownerAccAddr)
+		if err != nil {
+			return err
+		}
+
+		err = k.distrKeeper.DistributeFromFeePool(ctx, reward, ownerAccAddr)
+		if err != nil {
+			if err == distrtypes.ErrBadDistribution {
+				k.Logger(ctx).Error("oracle pool does not have enough coins to reward data providers")
+				continue
+			}
+
+			return err
 		}
 
 		// we are sure to have paid the reward to the provider, we can remove him now
-		k.ClearDataProviderAccumulatedReward(ctx, ownerAccAddr)
+		err = k.ClearDataProviderAccumulatedReward(ctx, ownerAccAddr)
+		if err != nil {
+			return err
+		}
 	}
 
-	k.distrKeeper.SetFeePool(ctx, feePool)
+	return nil
 }

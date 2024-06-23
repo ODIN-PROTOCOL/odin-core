@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
@@ -107,9 +108,6 @@ func (l *Limiter) transferCoinsToClaimer(key keyring.Record, to sdk.AccAddress, 
 	}
 
 	msg := banktypes.NewMsgSend(address, to, amt)
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, sdkerrors.Wrapf(err, "failed to validate a message: %s", msg.String())
-	}
 
 	clientCtx := client.Context{
 		Client:            l.client,
@@ -139,7 +137,7 @@ func (l *Limiter) transferCoinsToClaimer(key keyring.Record, to sdk.AccAddress, 
 		return nil, sdkerrors.Wrap(err, "failed to build unsigned tx")
 	}
 
-	err = tx.Sign(txf, key.Name, txb, true)
+	err = tx.Sign(context.Background(), txf, key.Name, txb, true)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "failed to sign tx")
 	}

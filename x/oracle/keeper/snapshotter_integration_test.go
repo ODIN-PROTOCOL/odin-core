@@ -17,8 +17,11 @@ func TestSnapshotter(t *testing.T) {
 	srcApp, srcCtx, srcKeeper := testapp.CreateTestInput(true)
 
 	// create snapshot
-	srcApp.Commit()
-	srcHashToCode := getMappingHashToCode(srcCtx, &srcKeeper)
+	_, err := srcApp.Commit()
+	require.NoError(t, err)
+
+	srcHashToCode, err := getMappingHashToCode(srcCtx, &srcKeeper)
+	require.NoError(t, err)
 	snapshotHeight := uint64(srcApp.LastBlockHeight())
 	snapshot, err := srcApp.SnapshotManager().Create(snapshotHeight)
 	require.NoError(t, err)
@@ -38,7 +41,8 @@ func TestSnapshotter(t *testing.T) {
 			break
 		}
 	}
-	destHashToCode := getMappingHashToCode(destCtx, &destKeeper)
+	destHashToCode, err := getMappingHashToCode(destCtx, &destKeeper)
+	require.NoError(t, err)
 
 	// compare src and dest
 	assert.Equal(
@@ -48,16 +52,22 @@ func TestSnapshotter(t *testing.T) {
 	)
 }
 
-func getMappingHashToCode(ctx sdk.Context, keeper *keeper.Keeper) map[string][]byte {
+func getMappingHashToCode(ctx sdk.Context, keeper *keeper.Keeper) (map[string][]byte, error) {
 	hashToCode := make(map[string][]byte)
-	oracleScripts := keeper.GetAllOracleScripts(ctx)
+	oracleScripts, err := keeper.GetAllOracleScripts(ctx)
+	if err != nil {
+		return nil, err
+	}
 	for _, oracleScript := range oracleScripts {
 		hashToCode[oracleScript.Filename] = keeper.GetFile(oracleScript.Filename)
 	}
-	dataSources := keeper.GetAllDataSources(ctx)
+	dataSources, err := keeper.GetAllDataSources(ctx)
+	if err != nil {
+		return hashToCode, err
+	}
 	for _, dataSource := range dataSources {
 		hashToCode[dataSource.Filename] = keeper.GetFile(dataSource.Filename)
 	}
 
-	return hashToCode
+	return hashToCode, nil
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/gzip"
@@ -45,7 +45,12 @@ func (k msgServer) RequestData(
 func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (*types.MsgReportDataResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	maxReportDataSize := int(k.GetParams(ctx).MaxReportDataSize)
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	maxReportDataSize := int(params.MaxReportDataSize)
 	for _, r := range msg.RawReports {
 		if len(r.Data) > maxReportDataSize {
 			return nil, types.WrapMaxError(types.ErrTooLargeRawReportData, len(r.Data), maxReportDataSize)
@@ -57,21 +62,35 @@ func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (
 		return nil, err
 	}
 
+	requestLastExpired, err := k.GetRequestLastExpired(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// check request must not expire.
-	if msg.RequestID <= k.GetRequestLastExpired(ctx) {
+	if msg.RequestID <= requestLastExpired {
 		return nil, types.ErrRequestAlreadyExpired
 	}
 
-	reportInTime := !k.HasResult(ctx, msg.RequestID)
-	err = k.AddReport(ctx, msg.RequestID, validator, reportInTime, msg.RawReports)
+	hasResult, err := k.HasResult(ctx, msg.RequestID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.AddReport(ctx, msg.RequestID, validator, !hasResult, msg.RawReports)
 	if err != nil {
 		return nil, err
 	}
 
 	// if request has not been resolved, check if it need to resolve at the endblock
-	if reportInTime {
+	if !hasResult {
 		req := k.MustGetRequest(ctx, msg.RequestID)
-		if k.GetReportCount(ctx, msg.RequestID) == req.MinCount {
+		reportCount, err := k.GetReportCount(ctx, msg.RequestID)
+		if err != nil {
+			return nil, err
+		}
+
+		if reportCount == req.MinCount {
 			// at this moment we are sure, that all the raw reports here are validated
 			// so we can distribute the reward for them in end-block
 			if _, err := k.CollectReward(ctx, msg.GetRawReports(), req.RawRequests); err != nil {
@@ -79,7 +98,10 @@ func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (
 			}
 			// At the exact moment when the number of reports is sufficient, we add the request to
 			// the pending resolve list. This can happen at most one time for any request.
-			k.AddPendingRequest(ctx, msg.RequestID)
+			err = k.AddPendingRequest(ctx, msg.RequestID)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -102,7 +124,7 @@ func (k msgServer) CreateDataSource(
 		var err error
 		msg.Executable, err = gzip.Uncompress(msg.Executable, types.MaxExecutableSize)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrUncompressionFailed, err.Error())
+			return nil, errors.Wrapf(types.ErrUncompressionFailed, err.Error())
 		}
 	}
 
@@ -116,9 +138,12 @@ func (k msgServer) CreateDataSource(
 		return nil, err
 	}
 
-	id := k.AddDataSource(ctx, types.NewDataSource(
+	id, err := k.AddDataSource(ctx, types.NewDataSource(
 		owner, msg.Name, msg.Description, k.AddExecutableFile(msg.Executable), msg.Fee, treasury,
 	))
+	if err != nil {
+		return nil, err
+	}
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
 		types.EventTypeCreateDataSource,
@@ -163,7 +188,7 @@ func (k msgServer) EditDataSource(
 	if gzip.IsGzipped(msg.Executable) {
 		msg.Executable, err = gzip.Uncompress(msg.Executable, types.MaxExecutableSize)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrUncompressionFailed, err.Error())
+			return nil, errors.Wrapf(types.ErrUncompressionFailed, err.Error())
 		}
 	}
 
@@ -196,7 +221,7 @@ func (k msgServer) CreateOracleScript(
 		var err error
 		msg.Code, err = gzip.Uncompress(msg.Code, types.MaxWasmCodeSize)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrUncompressionFailed, err.Error())
+			return nil, errors.Wrapf(types.ErrUncompressionFailed, err.Error())
 		}
 	}
 
@@ -210,9 +235,12 @@ func (k msgServer) CreateOracleScript(
 		return nil, err
 	}
 
-	id := k.AddOracleScript(ctx, types.NewOracleScript(
+	id, err := k.AddOracleScript(ctx, types.NewOracleScript(
 		owner, msg.Name, msg.Description, filename, msg.Schema, msg.SourceCodeURL,
 	))
+	if err != nil {
+		return nil, err
+	}
 
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
 		types.EventTypeCreateOracleScript,
@@ -252,7 +280,7 @@ func (k msgServer) EditOracleScript(
 	if gzip.IsGzipped(msg.Code) {
 		msg.Code, err = gzip.Uncompress(msg.Code, types.MaxWasmCodeSize)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(types.ErrUncompressionFailed, err.Error())
+			return nil, errors.Wrapf(types.ErrUncompressionFailed, err.Error())
 		}
 	}
 
@@ -301,7 +329,7 @@ func (k msgServer) UpdateParams(
 	msg *types.MsgUpdateParams,
 ) (*types.MsgUpdateParamsResponse, error) {
 	if k.authority != msg.Authority {
-		return nil, sdkerrors.Wrapf(
+		return nil, errors.Wrapf(
 			govtypes.ErrInvalidSigner,
 			"invalid authority; expected %s, got %s",
 			k.authority,

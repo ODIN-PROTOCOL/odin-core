@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"cosmossdk.io/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const (
@@ -75,27 +75,27 @@ func runCmd() *cobra.Command {
 
 	cmd.Flags().String(flags.FlagChainID, DefaultChainID, "chain ID of Odin network")
 	if err := viper.BindPFlag(flags.FlagChainID, cmd.Flags().Lookup(flags.FlagChainID)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flags.FlagChainID))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flags.FlagChainID))
 	}
 	cmd.Flags().String(flags.FlagNode, DefaultNodeURI, "RPC url to Odin node")
 	if err := viper.BindPFlag(flags.FlagNode, cmd.Flags().Lookup(flags.FlagNode)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flags.FlagNode))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flags.FlagNode))
 	}
 	cmd.Flags().String(flags.FlagGasPrices, DefaultGasPrices, "gas prices for report transaction")
 	if err := viper.BindPFlag(flags.FlagGasPrices, cmd.Flags().Lookup(flags.FlagGasPrices)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flags.FlagGasPrices))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flags.FlagGasPrices))
 	}
 	cmd.Flags().String(flagPort, DefaultFaucetPort, "port of faucet service")
 	if err := viper.BindPFlag(flagPort, cmd.Flags().Lookup(flagPort)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flagPort))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flagPort))
 	}
 	cmd.Flags().String(flagCoins, DefaultWithdrawalAmount, "coins to create")
 	if err := viper.BindPFlag(flagCoins, cmd.Flags().Lookup(flagCoins)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flagCoins))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flagCoins))
 	}
 	cmd.Flags().Duration(flagPeriod, DefaultFaucetPeriod, "period when can withdraw again")
 	if err := viper.BindPFlag(flagPeriod, cmd.Flags().Lookup(flagPeriod)); err != nil {
-		panic(sdkerrors.Wrapf(err, "failed to bind %s flag", flagPeriod))
+		panic(errors.Wrapf(err, "failed to bind %s flag", flagPeriod))
 	}
 
 	return cmd

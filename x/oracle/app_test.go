@@ -5,8 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
@@ -25,7 +28,7 @@ func TestSuccessRequestOracleData(t *testing.T) {
 		3,
 		2,
 		"app_test",
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(9000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", math.NewInt(9000000))),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Validators[0].Address,
@@ -55,7 +58,8 @@ func TestSuccessRequestOracleData(t *testing.T) {
 		nil,
 		testapp.TestDefaultExecuteGas,
 	)
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 4})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	request, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NoError(t, err)
 	require.Equal(t, expectRequest, request)
@@ -72,15 +76,17 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	require.NotNil(t, res)
 	require.NoError(t, err)
 
-	ids := k.GetPendingResolveList(ctx)
-	require.Equal(t, []types.RequestID{}, ids)
+	ids, err := k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []types.RequestID(nil), ids)
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
-	result := app.EndBlocker(ctx, abci.RequestEndBlock{Height: 6})
-	expectEvents := []abci.Event{}
+	result, err := app.EndBlocker(ctx)
+	require.NoError(t, err)
+	expectEvents := make([]abci.Event, 0)
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 
 	ctx = ctx.WithBlockTime(time.Unix(1581589795, 0))
 	reportMsg2 := types.NewMsgReportData(
@@ -95,34 +101,73 @@ func TestSuccessRequestOracleData(t *testing.T) {
 	require.NotNil(t, res)
 	require.NoError(t, err)
 
-	ids = k.GetPendingResolveList(ctx)
+	ids, err = k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
 	require.Equal(t, []types.RequestID{1}, ids)
 	_, err = k.GetResult(ctx, types.RequestID(1))
 	require.Error(t, err)
 
-	result = app.EndBlocker(ctx, abci.RequestEndBlock{Height: 8})
+	distrAccount := app.AccountKeeper.GetModuleAccount(ctx, distrtypes.ModuleName)
+
+	result, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	resPacket := types.NewOracleResponsePacketData(
 		expectRequest.ClientID, types.RequestID(1), 2, int64(expectRequest.RequestTime), 1581589795,
 		types.RESOLVE_STATUS_SUCCESS, []byte("beeb"),
 	)
-	expectEvents = []abci.Event{{Type: types.EventTypeResolve, Attributes: []abci.EventAttribute{
-		{Key: types.AttributeKeyID, Value: fmt.Sprint(resPacket.RequestID)},
-		{Key: types.AttributeKeyResolveStatus, Value: fmt.Sprint(uint32(resPacket.ResolveStatus))},
-		{Key: types.AttributeKeyResult, Value: "62656562"},
-		{Key: types.AttributeKeyGasUsed, Value: "2485000000"},
-	}}}
+	expectEvents = []abci.Event{
+		{
+			Type: types.EventTypeResolve,
+			Attributes: []abci.EventAttribute{
+				{Key: types.AttributeKeyID, Value: fmt.Sprint(resPacket.RequestID)},
+				{Key: types.AttributeKeyResolveStatus, Value: fmt.Sprint(uint32(resPacket.ResolveStatus))},
+				{Key: types.AttributeKeyResult, Value: "62656562"},
+				{Key: types.AttributeKeyGasUsed, Value: "2485000000"},
+			},
+		},
+		{
+			Type: banktypes.EventTypeCoinSpent,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeySpender, Value: distrAccount.GetAddress().String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: banktypes.EventTypeCoinReceived,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeyReceiver, Value: testapp.Owner.Address.String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: banktypes.EventTypeTransfer,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeyRecipient, Value: testapp.Owner.Address.String()},
+				{Key: banktypes.AttributeKeySender, Value: distrAccount.GetAddress().String()},
+				{Key: sdk.AttributeKeyAmount},
+			},
+		},
+		{
+			Type: sdk.EventTypeMessage,
+			Attributes: []abci.EventAttribute{
+				{Key: banktypes.AttributeKeySender, Value: distrAccount.GetAddress().String()},
+			},
+		},
+	}
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 
-	ids = k.GetPendingResolveList(ctx)
-	require.Equal(t, []types.RequestID{}, ids)
+	ids, err = k.GetPendingResolveList(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []types.RequestID(nil), ids)
 
 	req, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NotEqual(t, types.Request{}, req)
 	require.NoError(t, err)
 
 	ctx = ctx.WithBlockHeight(32).WithBlockTime(ctx.BlockTime().Add(time.Minute))
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 32})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 }
 
 func TestExpiredRequestOracleData(t *testing.T) {
@@ -136,7 +181,7 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		3,
 		2,
 		"app_test",
-		sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(9000000))),
+		sdk.NewCoins(sdk.NewCoin("loki", math.NewInt(9000000))),
 		testapp.TestDefaultPrepareGas,
 		testapp.TestDefaultExecuteGas,
 		testapp.Validators[0].Address,
@@ -165,13 +210,15 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		nil,
 		testapp.TestDefaultExecuteGas,
 	)
-	app.EndBlocker(ctx, abci.RequestEndBlock{Height: 4})
+	_, err = app.EndBlocker(ctx)
+	require.NoError(t, err)
 	request, err := k.GetRequest(ctx, types.RequestID(1))
 	require.NoError(t, err)
 	require.Equal(t, expectRequest, request)
 
 	ctx = ctx.WithBlockHeight(132).WithBlockTime(ctx.BlockTime().Add(time.Minute))
-	result := app.EndBlocker(ctx, abci.RequestEndBlock{Height: 132})
+	result, err := app.EndBlocker(ctx)
+	require.NoError(t, err)
 	resPacket := types.NewOracleResponsePacketData(
 		expectRequest.ClientID, types.RequestID(1), 0, int64(expectRequest.RequestTime), ctx.BlockTime().Unix(),
 		types.RESOLVE_STATUS_EXPIRED, []byte{},
@@ -211,5 +258,5 @@ func TestExpiredRequestOracleData(t *testing.T) {
 		},
 	}}
 
-	require.Equal(t, expectEvents, result.GetEvents())
+	require.Equal(t, expectEvents, result.Events)
 }

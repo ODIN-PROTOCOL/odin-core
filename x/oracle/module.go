@@ -5,30 +5,37 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/core/appmodule"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/exported"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
-
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/client/cli"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/exported"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
-	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // ConsensusVersion defines the current x/oracle module consensus version.
 const ConsensusVersion = 2
 
 var (
-	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
-	_ porttypes.IBCModule   = IBCModule{}
+	_ module.HasServices    = AppModule{}
+	_ module.HasInvariants  = AppModule{}
+	_ module.HasABCIGenesis = AppModule{}
+
+	_ appmodule.AppModule       = AppModule{}
+	_ appmodule.HasBeginBlocker = AppModule{}
+	_ appmodule.HasEndBlocker   = AppModule{}
+
+	_ porttypes.IBCModule = IBCModule{}
 )
 
 // AppModuleBasic is Odin Oracle's module basic object.
@@ -123,20 +130,30 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 
 // ExportGenesis returns the current state as genesis raw bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	gs := ExportGenesis(ctx, am.keeper)
+	gs, err := ExportGenesis(ctx, am.keeper)
+	if err != nil {
+		panic(err)
+	}
 	return cdc.MustMarshalJSON(gs)
 }
 
 // ConsensusVersion implements AppModule/ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 { return ConsensusVersion }
 
+// IsOnePerModuleType implements the depinject.OnePerModuleType interface.
+func (am AppModule) IsOnePerModuleType() {}
+
+// IsAppModule implements the appmodule.AppModule interface.
+func (am AppModule) IsAppModule() {}
+
 // BeginBlock processes ABCI begin block message for this oracle module (SDK AppModule interface).
-func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
-	handleBeginBlock(ctx, req, am.keeper)
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	c := sdk.UnwrapSDKContext(ctx)
+	return handleBeginBlock(c, am.keeper)
 }
 
 // EndBlock processes ABCI end block message for this oracle module (SDK AppModule interface).
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	handleEndBlock(ctx, am.keeper)
-	return []abci.ValidatorUpdate{}
+func (am AppModule) EndBlock(ctx context.Context) error {
+	c := sdk.UnwrapSDKContext(ctx)
+	return handleEndBlock(c, am.keeper)
 }

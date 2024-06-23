@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -10,23 +11,16 @@ const (
 	TypeMsgMintCoins                      = "mint_coins"
 )
 
-var _ sdk.Msg = &MsgUpdateParams{}
-
-// GetSignBytes implements the LegacyMsg interface.
-func (m MsgUpdateParams) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&m))
-}
-
-// GetSigners returns the expected signers for a MsgUpdateParams message.
-func (m *MsgUpdateParams) GetSigners() []sdk.AccAddress {
-	addr, _ := sdk.AccAddressFromBech32(m.Authority)
-	return []sdk.AccAddress{addr}
-}
+var (
+	_ sdk.Msg = &MsgUpdateParams{}
+	_ sdk.Msg = &MsgWithdrawCoinsToAccFromTreasury{}
+	_ sdk.Msg = &MsgMintCoins{}
+)
 
 // ValidateBasic does a sanity check on the provided data.
 func (m *MsgUpdateParams) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(m.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
+		return errors.Wrap(err, "invalid authority address")
 	}
 
 	if err := m.Params.Validate(); err != nil {
@@ -49,16 +43,6 @@ func NewMsgWithdrawCoinsToAccFromTreasury(
 	}
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgWithdrawCoinsToAccFromTreasury) Route() string {
-	return RouterKey
-}
-
-// Type implements the sdk.Msg interface.
-func (msg MsgWithdrawCoinsToAccFromTreasury) Type() string {
-	return TypeMsgWithdrawCoinsToAccFromTreasury
-}
-
 // ValidateBasic implements the sdk.Msg interface.
 func (msg MsgWithdrawCoinsToAccFromTreasury) ValidateBasic() error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
@@ -70,24 +54,19 @@ func (msg MsgWithdrawCoinsToAccFromTreasury) ValidateBasic() error {
 		return err
 	}
 	if err := sdk.VerifyAddressFormat(sender); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "sender: %s", msg.Sender)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "sender: %s", msg.Sender)
 	}
 	if err := sdk.VerifyAddressFormat(receiver); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "receiver: %s", msg.Receiver)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "receiver: %s", msg.Receiver)
 	}
 	if !msg.Amount.IsValid() {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidCoins, "amount: %s", msg.Amount.String())
+		return errors.Wrapf(sdkerrors.ErrInvalidCoins, "amount: %s", msg.Amount.String())
 	}
 	if msg.Amount.IsAnyNegative() {
-		return sdkerrors.Wrapf(ErrInvalidWithdrawalAmount, "amount: %s", msg.Amount.String())
+		return errors.Wrapf(ErrInvalidWithdrawalAmount, "amount: %s", msg.Amount.String())
 	}
 
 	return nil
-}
-
-// GetSignBytes implements the sdk.Msg interface.
-func (msg MsgWithdrawCoinsToAccFromTreasury) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 // GetSigners implements the sdk.Msg interface.
@@ -110,16 +89,6 @@ func NewMsgMintCoins(
 	}
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgMintCoins) Route() string {
-	return RouterKey
-}
-
-// Type implements the sdk.Msg interface.
-func (msg MsgMintCoins) Type() string {
-	return TypeMsgMintCoins
-}
-
 // ValidateBasic implements the sdk.Msg interface.
 func (msg MsgMintCoins) ValidateBasic() error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
@@ -127,28 +96,14 @@ func (msg MsgMintCoins) ValidateBasic() error {
 		return err
 	}
 	if err := sdk.VerifyAddressFormat(sender); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "sender: %s", msg.Sender)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "sender: %s", msg.Sender)
 	}
 	if !msg.Amount.IsValid() {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidCoins, "amount: %s", msg.Amount.String())
+		return errors.Wrapf(sdkerrors.ErrInvalidCoins, "amount: %s", msg.Amount.String())
 	}
 	if msg.Amount.IsAnyNegative() {
-		return sdkerrors.Wrapf(ErrInvalidWithdrawalAmount, "amount: %s", msg.Amount.String())
+		return errors.Wrapf(ErrInvalidWithdrawalAmount, "amount: %s", msg.Amount.String())
 	}
 
 	return nil
-}
-
-// GetSignBytes implements the sdk.Msg interface.
-func (msg MsgMintCoins) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
-
-// GetSigners implements the sdk.Msg interface.
-func (msg MsgMintCoins) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{addr}
 }

@@ -1,30 +1,31 @@
 package keepers
 
 import (
+	circuitkeeper "cosmossdk.io/x/circuit/keeper"
+	evidencekeeper "cosmossdk.io/x/evidence/keeper"
+	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
+	nftkeeper "cosmossdk.io/x/nft/keeper"
+	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
+	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
+
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	auctionkeeper "github.com/ODIN-PROTOCOL/odin-core/x/auction/keeper"
-	coinswapkeeper "github.com/ODIN-PROTOCOL/odin-core/x/coinswap/keeper"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
-	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	consensusparamkeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
-	evidencekeeper "github.com/cosmos/cosmos-sdk/x/evidence/keeper"
-	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
-	icahostkeeper "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/keeper"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
-	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	icahostkeeper "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
 	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
-	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 )
 
 type AppKeepers struct {
@@ -48,9 +49,9 @@ type AppKeepers struct {
 	FeegrantKeeper        feegrantkeeper.Keeper
 	AuthzKeeper           authzkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
+	NFTKeeper             nftkeeper.Keeper
+	CircuitKeeper         circuitkeeper.Keeper
 	OracleKeeper          oraclekeeper.Keeper
-	CoinswapKeeper        coinswapkeeper.Keeper
-	AuctionKeeper         auctionkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	//WasmKeeper            wasmkeeper.Keeper
 

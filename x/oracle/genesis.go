@@ -11,20 +11,59 @@ import (
 
 // InitGenesis performs genesis initialization for the oracle module.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, data *types.GenesisState) {
-	k.SetParams(ctx, data.Params)
-	k.SetDataSourceCount(ctx, 0)
-	k.SetOracleScriptCount(ctx, 0)
-	k.SetRequestCount(ctx, 0)
-	k.SetRequestLastExpired(ctx, 0)
-	k.SetRollingSeed(ctx, make([]byte, types.RollingSeedSizeInBytes))
-	for _, dataSource := range data.DataSources {
-		_ = k.AddDataSource(ctx, dataSource)
-	}
-	for _, oracleScript := range data.OracleScripts {
-		_ = k.AddOracleScript(ctx, oracleScript)
+	err := k.SetParams(ctx, data.Params)
+	if err != nil {
+		panic(err)
 	}
 
-	k.SetPort(ctx, types.PortID)
+	err = k.SetDataSourceCount(ctx, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetOracleScriptCount(ctx, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetRequestCount(ctx, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetRequestLastExpired(ctx, 0)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetPendingResolveList(ctx, []types.RequestID{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetAccumulatedPaymentsForData(ctx, types.AccumulatedPaymentsForData{AccumulatedAmount: sdk.NewCoins()})
+	if err != nil {
+		panic(err)
+	}
+
+	err = k.SetRollingSeed(ctx, make([]byte, types.RollingSeedSizeInBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	for _, dataSource := range data.DataSources {
+		_, err = k.AddDataSource(ctx, dataSource)
+		if err != nil {
+			panic(err)
+		}
+	}
+	for _, oracleScript := range data.OracleScripts {
+		_, err = k.AddOracleScript(ctx, oracleScript)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	// Only try to bind to port if it is not already bound, since we may already own
 	// port capability from capability InitGenesis
 	if !k.IsBound(ctx, types.PortID) {
@@ -41,25 +80,29 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, data *types.GenesisState) {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
 
-	balances := k.BankKeeper.GetAllBalances(ctx, moduleAcc.GetAddress())
-	if balances.IsZero() {
-		if err := k.BankKeeper.SendCoins(ctx, sdk.AccAddress(data.ModuleCoinsAccount), moduleAcc.GetAddress(), data.OraclePool.DataProvidersPool); err != nil {
-			panic(err)
-		}
-
-		k.AuthKeeper.SetModuleAccount(ctx, moduleAcc)
-	}
-
-	k.SetOraclePool(ctx, data.OraclePool)
+	k.AuthKeeper.SetModuleAccount(ctx, moduleAcc)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
-	return &types.GenesisState{
-		Params:             k.GetParams(ctx),
-		DataSources:        k.GetAllDataSources(ctx),
-		OracleScripts:      k.GetAllOracleScripts(ctx),
-		OraclePool:         k.GetOraclePool(ctx),
-		ModuleCoinsAccount: k.GetOracleModuleCoinsAccount(ctx).String(),
+func ExportGenesis(ctx sdk.Context, k keeper.Keeper) (*types.GenesisState, error) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
 	}
+
+	dataSources, err := k.GetAllDataSources(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	oracleScipts, err := k.GetAllOracleScripts(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.GenesisState{
+		Params:        params,
+		DataSources:   dataSources,
+		OracleScripts: oracleScipts,
+	}, nil
 }

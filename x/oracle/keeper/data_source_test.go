@@ -13,12 +13,18 @@ import (
 func TestHasDataSource(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// We should not have a data source ID 42 without setting it.
-	require.False(t, k.HasDataSource(ctx, 42))
+	hasDataSource, err := k.HasDataSource(ctx, 42)
+	require.NoError(t, err)
+	require.False(t, hasDataSource)
 	// After we set it, we should be able to find it.
-	k.SetDataSource(ctx, 42, types.NewDataSource(
+	err = k.SetDataSource(ctx, 42, types.NewDataSource(
 		testapp.Owner.Address, BasicName, BasicDesc, BasicFilename, testapp.EmptyCoins, testapp.Treasury.Address,
 	))
-	require.True(t, k.HasDataSource(ctx, 42))
+	require.NoError(t, err)
+
+	hasDataSource, err = k.HasDataSource(ctx, 42)
+	require.NoError(t, err)
+	require.True(t, hasDataSource)
 }
 
 func TestSetterGetterDataSource(t *testing.T) {
@@ -45,8 +51,10 @@ func TestSetterGetterDataSource(t *testing.T) {
 		testapp.Treasury.Address,
 	)
 	// Sets id 42 with data soure 1 and id 42 with data source 2.
-	k.SetDataSource(ctx, 42, dataSource1)
-	k.SetDataSource(ctx, 43, dataSource2)
+	err = k.SetDataSource(ctx, 42, dataSource1)
+	require.NoError(t, err)
+	err = k.SetDataSource(ctx, 43, dataSource2)
+	require.NoError(t, err)
 	// Checks that Get and MustGet perform correctly.
 	dataSource1Res, err := k.GetDataSource(ctx, 42)
 	require.Nil(t, err)
@@ -57,7 +65,8 @@ func TestSetterGetterDataSource(t *testing.T) {
 	require.Equal(t, dataSource2, dataSource2Res)
 	require.Equal(t, dataSource2, k.MustGetDataSource(ctx, 43))
 	// Replaces id 42 with another data source.
-	k.SetDataSource(ctx, 42, dataSource2)
+	err = k.SetDataSource(ctx, 42, dataSource2)
+	require.NoError(t, err)
 	require.NotEqual(t, dataSource1, k.MustGetDataSource(ctx, 42))
 	require.Equal(t, dataSource2, k.MustGetDataSource(ctx, 42))
 }
@@ -82,7 +91,8 @@ func TestAddDataSourceEditDataSourceBasic(t *testing.T) {
 		testapp.Treasury.Address,
 	)
 	// Adds a new data source to the store. We should be able to retrieve it back.
-	id := k.AddDataSource(ctx, dataSource1)
+	id, err := k.AddDataSource(ctx, dataSource1)
+	require.NoError(t, err)
 	require.Equal(t, dataSource1, k.MustGetDataSource(ctx, id))
 	require.NotEqual(t, dataSource2, k.MustGetDataSource(ctx, id))
 	owner, err := sdk.AccAddressFromBech32(dataSource2.Owner)
@@ -117,7 +127,8 @@ func TestEditDataSourceDoNotModify(t *testing.T) {
 		testapp.Treasury.Address,
 	)
 	// Adds a new data source to the store. We should be able to retrieve it back.
-	id := k.AddDataSource(ctx, dataSource1)
+	id, err := k.AddDataSource(ctx, dataSource1)
+	require.NoError(t, err)
 	require.Equal(t, dataSource1, k.MustGetDataSource(ctx, id))
 	require.NotEqual(t, dataSource2, k.MustGetDataSource(ctx, id))
 	// Edits the data source. We should get the updated data source.
@@ -137,9 +148,11 @@ func TestAddDataSourceDataSourceMustReturnCorrectID(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// Initially we expect the data source count to be what we have on genesis state.
 	genesisCount := uint64(len(testapp.DataSources)) - 1
-	require.Equal(t, genesisCount, k.GetDataSourceCount(ctx))
+	dataSourceCount, err := k.GetDataSourceCount(ctx)
+	require.NoError(t, err)
+	require.Equal(t, genesisCount, dataSourceCount)
 	// Every new data source we add should return a new ID.
-	id1 := k.AddDataSource(
+	id1, err := k.AddDataSource(
 		ctx,
 		types.NewDataSource(
 			testapp.Owner.Address,
@@ -150,9 +163,10 @@ func TestAddDataSourceDataSourceMustReturnCorrectID(t *testing.T) {
 			testapp.Treasury.Address,
 		),
 	)
+	require.NoError(t, err)
 	require.Equal(t, types.DataSourceID(genesisCount+1), id1)
 	// Adds another data source so now ID should increase by 2.
-	id2 := k.AddDataSource(
+	id2, err := k.AddDataSource(
 		ctx,
 		types.NewDataSource(
 			testapp.Owner.Address,
@@ -163,9 +177,12 @@ func TestAddDataSourceDataSourceMustReturnCorrectID(t *testing.T) {
 			testapp.Treasury.Address,
 		),
 	)
+	require.NoError(t, err)
 	require.Equal(t, types.DataSourceID(genesisCount+2), id2)
 	// Finally we expect the data source to increase as well.
-	require.Equal(t, genesisCount+2, k.GetDataSourceCount(ctx))
+	dataSourceCount, err = k.GetDataSourceCount(ctx)
+	require.NoError(t, err)
+	require.Equal(t, genesisCount+2, dataSourceCount)
 }
 
 func TestEditDataSourceNonExistentDataSource(t *testing.T) {
@@ -176,7 +193,9 @@ func TestEditDataSourceNonExistentDataSource(t *testing.T) {
 func TestGetAllDataSources(t *testing.T) {
 	_, ctx, k := testapp.CreateTestInput(true)
 	// We should be able to get all genesis data sources.
-	require.Equal(t, testapp.DataSources[1:], k.GetAllDataSources(ctx))
+	dataSources, err := k.GetAllDataSources(ctx)
+	require.NoError(t, err)
+	require.Equal(t, testapp.DataSources[1:], dataSources)
 }
 
 func TestAddExecutableFile(t *testing.T) {

@@ -7,17 +7,20 @@ package ibctesting
 import (
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	connectiontypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	commitmenttypes "github.com/cosmos/ibc-go/v7/modules/core/23-commitment/types"
-	ibctmtypes "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
-	"github.com/cosmos/ibc-go/v7/testing/mock"
-
+	"cosmossdk.io/math"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	connectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
+	commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
+	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+	"github.com/cosmos/ibc-go/v8/testing/mock"
+	"github.com/cosmos/ibc-go/v8/testing/simapp"
 )
 
 const (
 	FirstClientID     = "07-tendermint-0"
+	SecondClientID    = "07-tendermint-1"
 	FirstChannelID    = "channel-0"
 	FirstConnectionID = "connection-0"
 
@@ -32,28 +35,38 @@ const (
 
 	// Application Ports
 	OraclePort = oracletypes.ModuleName
-	MockPort   = mock.ModuleName
+	// TransferPort = ibctransfertypes.ModuleName
+	MockPort    = mock.ModuleName
+	MockFeePort = simapp.MockFeePort
 
 	// used for testing proposals
 	Title       = "title"
 	Description = "description"
+
+	// character set used for generating a random string in GenerateString
+	charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
 
 var (
 	DefaultOpenInitVersion *connectiontypes.Version
 
-	// Default params variables used to create a TM client
-	DefaultTrustLevel ibctmtypes.Fraction = ibctmtypes.DefaultTrustLevel
-	TestCoin                              = sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(100))
+	// DefaultTrustLevel sets params variables used to create a TM client
+	DefaultTrustLevel = ibctm.DefaultTrustLevel
+
+	TestAccAddress = "cosmos17dtl0mjt3t77kpuhg2edqzjpszulwhgzuj9ljs"
+	TestCoin       = sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(100))
+	TestCoins      = sdk.NewCoins(TestCoin)
 
 	UpgradePath = []string{"upgrade", "upgradedIBCState"}
 
-	ConnectionVersion = connectiontypes.ExportedVersionsToProto(connectiontypes.GetCompatibleVersions())[0]
+	ConnectionVersion = connectiontypes.GetCompatibleVersions()[0]
 
-	// MockAcknowledgement      = mock.MockAcknowledgement.Acknowledgement()
-	// MockPacketData           = []byte("mock packet data")
-	// MockFailPacketData       = []byte("mock failed packet data")
-	// MockCanaryCapabilityName = []byte("mock async packet data")
+	MockAcknowledgement          = mock.MockAcknowledgement.Acknowledgement()
+	MockPacketData               = mock.MockPacketData
+	MockFailPacketData           = mock.MockFailPacketData
+	MockRecvCanaryCapabilityName = mock.MockRecvCanaryCapabilityName
 
 	prefix = commitmenttypes.NewMerklePrefix([]byte("ibc"))
+	// unusedHash is a placeholder hash used for testing.
+	unusedHash = tmhash.Sum([]byte{0x00})
 )

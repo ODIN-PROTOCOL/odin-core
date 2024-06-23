@@ -1,10 +1,10 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	"cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type FeeCollector interface {
@@ -23,14 +23,21 @@ func (k Keeper) CollectReward(
 	ctx sdk.Context, rawReports []oracletypes.RawReport, rawRequests []oracletypes.RawRequest,
 ) (sdk.Coins, error) {
 	collector := newRewardCollector(k, k.BankKeeper)
-	oracleParams := k.GetParams(ctx)
+	oracleParams, err := k.GetParams(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	rawReportsMap := make(map[oracletypes.ExternalID]oracletypes.RawReport)
 	for _, rawRep := range rawReports {
 		rawReportsMap[rawRep.ExternalID] = rawRep
 	}
 
-	accumulatedDataProvidersRewards := k.GetAccumulatedDataProvidersRewards(ctx)
+	accumulatedDataProvidersRewards, err := k.GetAccumulatedDataProvidersRewards(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	accumulatedAmount := accumulatedDataProvidersRewards.AccumulatedAmount
 	currentRewardPerByte := accumulatedDataProvidersRewards.CurrentRewardPerByte
 	var rewPerByteInFeeDenom sdk.Coins
@@ -45,7 +52,7 @@ func (k Keeper) CollectReward(
 		ds := k.MustGetDataSource(ctx, rawReq.GetDataSourceID())
 		dsOwnerAddr, err := sdk.AccAddressFromBech32(ds.Owner)
 		if err != nil {
-			return nil, sdkerrors.Wrapf(err, "parsing data source owner address: %s", dsOwnerAddr)
+			return nil, errors.Wrapf(err, "parsing data source owner address: %s", dsOwnerAddr)
 		}
 
 		for _, fee := range ds.Fee {
@@ -60,7 +67,7 @@ func (k Keeper) CollectReward(
 			}
 
 			rewPerByteInFeeDenom, _ = sdk.NewDecCoinsFromCoins(rewPerByteInFeeDenom...).MulDec(
-				sdk.NewDec(1).Sub(oracleParams.RewardDecreasingFraction),
+				math.LegacyOneDec().Sub(oracleParams.RewardDecreasingFraction),
 			).TruncateDecimal()
 		}
 
@@ -71,10 +78,13 @@ func (k Keeper) CollectReward(
 		}
 	}
 
-	k.SetAccumulatedDataProvidersRewards(
+	err = k.SetAccumulatedDataProvidersRewards(
 		ctx,
 		oracletypes.NewDataProvidersAccumulatedRewards(rewPerByteInFeeDenom, accumulatedAmount),
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return collector.Collected(), nil
 }

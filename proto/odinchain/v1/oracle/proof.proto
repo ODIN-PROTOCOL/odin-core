@@ -10,17 +10,17 @@ import "oracle/v1/oracle.proto";
 // Service defines the gRPC querier service.
 service Service {
   // Proof queries the proof for given request ID
-  rpc Proof(QueryProofRequest) returns (QueryProofResponse) {
+  rpc Proof(QueryProofRequest) returns (ServiceProofResponse) {
     option (google.api.http).get = "/odinchain/v1/oracle/proof/{request_id}";
   }
 
   // MultiProof queries multiple proofs for given list of request IDs
-  rpc MultiProof(QueryMultiProofRequest) returns (QueryMultiProofResponse) {
+  rpc MultiProof(QueryMultiProofRequest) returns (ServiceMultiProofResponse) {
     option (google.api.http).get = "/odinchain/v1/oracle/multi_proof";
   }
 
   // RequestCountProof queries the count proof
-  rpc RequestCountProof(QueryRequestCountProofRequest) returns (QueryRequestCountProofResponse) {
+  rpc RequestCountProof(QueryRequestCountProofRequest) returns (ServiceRequestCountProofResponse) {
     option (google.api.http).get = "/odinchain/v1/oracle/requests_count_proof";
   }
 }
@@ -34,7 +34,7 @@ message QueryProofRequest {
 }
 
 // QueryChainIDResponse is response type for the Service/Proof RPC method.
-message QueryProofResponse {
+message ServiceProofResponse {
   // height is block height
   int64 height = 1;
   // result is the proof
@@ -48,7 +48,7 @@ message QueryMultiProofRequest {
 }
 
 // QueryMultiProofResponse is response type for the Service/MultiProof RPC method.
-message QueryMultiProofResponse {
+message ServiceMultiProofResponse {
   int64              height = 1;
   MultiProofResponse result = 2 [(gogoproto.nullable) = false];
 }
@@ -57,7 +57,7 @@ message QueryMultiProofResponse {
 message QueryRequestCountProofRequest {}
 
 // QueryRequestCountProofResponse is response type for the Service/RequestCountProof RPC method.
-message QueryRequestCountProofResponse {
+message ServiceRequestCountProofResponse {
   int64              height = 1;
   CountProofResponse result = 2 [(gogoproto.nullable) = false];
 }

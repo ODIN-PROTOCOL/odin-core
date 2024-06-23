@@ -1,20 +1,24 @@
 package keeper
 
 import (
+	"context"
+	"fmt"
+
+	"cosmossdk.io/collections"
+	storetypes "cosmossdk.io/core/store"
 	"cosmossdk.io/errors"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // Keeper of the mint store
 type Keeper struct {
 	cdc              codec.BinaryCodec
-	storeKey         storetypes.StoreKey
+	storeService     storetypes.KVStoreService
 	stakingKeeper    minttypes.StakingKeeper
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
@@ -23,12 +27,17 @@ type Keeper struct {
 	// the address capable of executing a MsgUpdateParams message. Typically, this
 	// should be the x/gov module account.
 	authority string
+
+	Schema   collections.Schema
+	Params   collections.Item[minttypes.Params]
+	Minter   collections.Item[minttypes.Minter]
+	MintPool collections.Item[minttypes.MintPool]
 }
 
 // NewKeeper creates a new mint Keeper instance
 func NewKeeper(
 	cdc codec.BinaryCodec,
-	key storetypes.StoreKey,
+	storeService storetypes.KVStoreService,
 	sk minttypes.StakingKeeper,
 	ak minttypes.AccountKeeper,
 	bk minttypes.BankKeeper,
@@ -37,18 +46,29 @@ func NewKeeper(
 ) Keeper {
 	// ensure mint module account is set
 	if addr := ak.GetModuleAddress(minttypes.ModuleName); addr == nil {
-		panic("the mint module account has not been set")
+		panic(fmt.Sprintf("the x/%s module account has not been set", minttypes.ModuleName))
 	}
 
-	return Keeper{
+	sb := collections.NewSchemaBuilder(storeService)
+	k := Keeper{
 		cdc:              cdc,
-		storeKey:         key,
+		storeService:     storeService,
 		stakingKeeper:    sk,
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
 		authority:        authority,
+		Params:           collections.NewItem(sb, minttypes.ParamsKey, "params", codec.CollValue[minttypes.Params](cdc)),
+		Minter:           collections.NewItem(sb, minttypes.MinterKey, "minter", codec.CollValue[minttypes.Minter](cdc)),
+		MintPool:         collections.NewItem(sb, minttypes.MintPoolStoreKey, "mint_pool", codec.CollValue[minttypes.MintPool](cdc)),
 	}
+
+	schema, err := sb.Build()
+	if err != nil {
+		panic(err)
+	}
+	k.Schema = schema
+	return k
 }
 
 // GetAuthority returns the x/mint module's authority.
@@ -57,114 +77,56 @@ func (k Keeper) GetAuthority() string {
 }
 
 // Logger returns a module-specific logger.
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", "x/"+minttypes.ModuleName)
+func (k Keeper) Logger(ctx context.Context) log.Logger {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return sdkCtx.Logger().With("module", "x/"+minttypes.ModuleName)
 }
 
 // get the minter
-func (k Keeper) GetMinter(ctx sdk.Context) (minter minttypes.Minter) {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(minttypes.MinterKey)
-	if b == nil {
-		panic("stored minter should not have been nil")
-	}
-
-	k.cdc.MustUnmarshal(b, &minter)
-	return
+func (k Keeper) GetMinter(ctx context.Context) (minttypes.Minter, error) {
+	return k.Minter.Get(ctx)
 }
 
 // set the minter
-func (k Keeper) SetMinter(ctx sdk.Context, minter minttypes.Minter) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&minter)
-	store.Set(minttypes.MinterKey, b)
-}
-
-// get the module coins account
-func (k Keeper) GetMintModuleCoinsAccount(ctx sdk.Context) (account sdk.AccAddress) {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(minttypes.MintModuleCoinsAccountKey)
-	if b == nil {
-		return nil
-	}
-
-	return sdk.AccAddress(b)
-}
-
-// set the module coins account
-func (k Keeper) SetMintModuleCoinsAccount(ctx sdk.Context, account sdk.AccAddress) {
-	ctx.KVStore(k.storeKey).Set(minttypes.MintModuleCoinsAccountKey, account)
+func (k Keeper) SetMinter(ctx context.Context, minter minttypes.Minter) error {
+	return k.Minter.Set(ctx, minter)
 }
 
 // GetMintPool returns the mint pool info
-func (k Keeper) GetMintPool(ctx sdk.Context) (mintPool minttypes.MintPool) {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(minttypes.MintPoolStoreKey)
-	if b == nil {
-		panic("Stored fee pool should not have been nil")
-	}
-
-	k.cdc.MustUnmarshal(b, &mintPool)
-	return
+func (k Keeper) GetMintPool(ctx context.Context) (minttypes.MintPool, error) {
+	return k.MintPool.Get(ctx)
 }
 
 // SetMintPool sets mint pool to the store
-func (k Keeper) SetMintPool(ctx sdk.Context, mintPool minttypes.MintPool) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&mintPool)
-	store.Set(minttypes.MintPoolStoreKey, b)
+func (k Keeper) SetMintPool(ctx context.Context, mintPool minttypes.MintPool) error {
+	return k.MintPool.Set(ctx, mintPool)
 }
 
 // GetParams returns the total set of minting parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params minttypes.Params) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(minttypes.ParamsKey)
-	if bz == nil {
-		return params
-	}
-
-	k.cdc.MustUnmarshal(bz, &params)
-	return params
+func (k Keeper) GetParams(ctx context.Context) (minttypes.Params, error) {
+	return k.Params.Get(ctx)
 }
 
 // SetParams sets the total set of minting parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params minttypes.Params) error {
-	if err := params.Validate(); err != nil {
-		return err
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&params)
-	store.Set(minttypes.ParamsKey, bz)
-
-	return nil
-}
-
-// GetMintAccount returns the mint ModuleAccount
-func (k Keeper) GetMintAccount(ctx sdk.Context) authtypes.ModuleAccountI {
-	return k.authKeeper.GetModuleAccount(ctx, minttypes.ModuleName)
-}
-
-// SetMintAccount sets the module account
-func (k Keeper) SetMintAccount(ctx sdk.Context, moduleAcc authtypes.ModuleAccountI) {
-	k.authKeeper.SetModuleAccount(ctx, moduleAcc)
+func (k Keeper) SetParams(ctx context.Context, params minttypes.Params) error {
+	return k.Params.Set(ctx, params)
 }
 
 // StakingTokenSupply implements an alias call to the underlying staking keeper's
 // StakingTokenSupply to be used in BeginBlocker.
-func (k Keeper) StakingTokenSupply(ctx sdk.Context) sdk.Int {
+func (k Keeper) StakingTokenSupply(ctx context.Context) (math.Int, error) {
 	return k.stakingKeeper.StakingTokenSupply(ctx)
 }
 
 // BondedRatio implements an alias call to the underlying staking keeper's
 // BondedRatio to be used in BeginBlocker.
-func (k Keeper) BondedRatio(ctx sdk.Context) sdk.Dec {
+func (k Keeper) BondedRatio(ctx context.Context) (math.LegacyDec, error) {
 	return k.stakingKeeper.BondedRatio(ctx)
 }
 
 // MintCoins implements an alias call to the underlying supply keeper's
 // MintCoins to be used in BeginBlocker.
-func (k Keeper) MintCoins(ctx sdk.Context, newCoins sdk.Coins) error {
+func (k Keeper) MintCoins(ctx context.Context, newCoins sdk.Coins) error {
 	if newCoins.Empty() {
 		// skip as no coins need to be minted
 		return nil
@@ -175,32 +137,42 @@ func (k Keeper) MintCoins(ctx sdk.Context, newCoins sdk.Coins) error {
 
 // AddCollectedFees implements an alias call to the underlying supply keeper's
 // AddCollectedFees to be used in BeginBlocker.
-func (k Keeper) AddCollectedFees(ctx sdk.Context, fees sdk.Coins) error {
+func (k Keeper) AddCollectedFees(ctx context.Context, fees sdk.Coins) error {
 	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, k.feeCollectorName, fees)
 }
 
 // LimitExceeded checks if withdrawal amount exceeds the limit
-func (k Keeper) LimitExceeded(ctx sdk.Context, amt sdk.Coins) bool {
-	moduleParams := k.GetParams(ctx)
-	return amt.IsAnyGT(moduleParams.MaxWithdrawalPerTime)
+func (k Keeper) LimitExceeded(ctx context.Context, amt sdk.Coins) (bool, error) {
+	moduleParams, err := k.GetParams(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return amt.IsAnyGT(moduleParams.MaxWithdrawalPerTime), nil
 }
 
 // IsEligibleAccount checks if addr exists in the eligible to withdraw account pool
-func (k Keeper) IsEligibleAccount(ctx sdk.Context, addr string) bool {
-	params := k.GetParams(ctx)
+func (k Keeper) IsEligibleAccount(ctx context.Context, addr string) (bool, error) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return false, err
+	}
 
 	for _, item := range params.EligibleAccountsPool {
 		if item == addr {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 // WithdrawCoinsFromTreasury transfers coins from treasury pool to receiver account
-func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddress, amount sdk.Coins) error {
-	mintPool := k.GetMintPool(ctx)
+func (k Keeper) WithdrawCoinsFromTreasury(ctx context.Context, receiver sdk.AccAddress, amount sdk.Coins) error {
+	mintPool, err := k.GetMintPool(ctx)
+	if err != nil {
+		return err
+	}
 
 	if amount.IsAllGT(mintPool.TreasuryPool) {
 		return errors.Wrapf(
@@ -223,50 +195,75 @@ func (k Keeper) WithdrawCoinsFromTreasury(ctx sdk.Context, receiver sdk.AccAddre
 	for _, coinAmount := range amount {
 		mintPool.TreasuryPool = mintPool.TreasuryPool.Sub(coinAmount)
 	}
-	k.SetMintPool(ctx, mintPool)
+	err = k.SetMintPool(ctx, mintPool)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // IsAllowedMintDenom checks if denom exists in the allowed mint denoms list
-func (k Keeper) IsAllowedMintDenom(ctx sdk.Context, coin sdk.Coin) bool {
-	params := k.GetParams(ctx)
+func (k Keeper) IsAllowedMintDenom(ctx context.Context, coin sdk.Coin) (bool, error) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return false, err
+	}
+
 	denom := coin.Denom
 
 	for i := range params.AllowedMintDenoms {
 		if denom == params.AllowedMintDenoms[i].TokenUnitDenom {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 // IsAllowedMinter checks if address exists in the allowed minters list
-func (k Keeper) IsAllowedMinter(ctx sdk.Context, addr string) bool {
-	params := k.GetParams(ctx)
+func (k Keeper) IsAllowedMinter(ctx context.Context, addr string) (bool, error) {
+	params, err := k.GetParams(ctx)
+	if err != nil {
+		return false, err
+	}
 
 	for i := range params.AllowedMinter {
 		if addr == params.AllowedMinter[i] {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 // MintVolumeExceeded checks if minting volume exceeds the limit
-func (k Keeper) MintVolumeExceeded(ctx sdk.Context, amt sdk.Coins) bool {
-	moduleParams := k.GetParams(ctx)
-	minter := k.GetMinter(ctx)
+func (k Keeper) MintVolumeExceeded(ctx context.Context, amt sdk.Coins) (bool, error) {
+	moduleParams, err := k.GetParams(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	minter, err := k.GetMinter(ctx)
+	if err != nil {
+		return false, err
+	}
+
 	amt = amt.Add(minter.CurrentMintVolume...)
-	return amt.IsAnyGT(moduleParams.MaxAllowedMintVolume)
+	return amt.IsAnyGT(moduleParams.MaxAllowedMintVolume), nil
 }
 
 // MintNewCoins issue new coins
-func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
-	mintPool := k.GetMintPool(ctx)
-	minter := k.GetMinter(ctx)
+func (k Keeper) MintNewCoins(ctx context.Context, amount sdk.Coins) error {
+	mintPool, err := k.GetMintPool(ctx)
+	if err != nil {
+		return err
+	}
+
+	minter, err := k.GetMinter(ctx)
+	if err != nil {
+		return err
+	}
 
 	if err := k.bankKeeper.MintCoins(ctx, minttypes.ModuleName, amount); err != nil {
 		return errors.Wrapf(
@@ -277,10 +274,16 @@ func (k Keeper) MintNewCoins(ctx sdk.Context, amount sdk.Coins) error {
 	}
 
 	mintPool.TreasuryPool = mintPool.TreasuryPool.Add(amount...)
-	k.SetMintPool(ctx, mintPool)
+	err = k.SetMintPool(ctx, mintPool)
+	if err != nil {
+		return err
+	}
 
 	minter.CurrentMintVolume = minter.CurrentMintVolume.Add(amount...)
-	k.SetMinter(ctx, minter)
+	err = k.SetMinter(ctx, minter)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

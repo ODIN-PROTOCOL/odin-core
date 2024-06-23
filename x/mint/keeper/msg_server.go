@@ -5,7 +5,6 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
@@ -27,30 +26,38 @@ func NewMsgServerImpl(keeper Keeper) minttypes.MsgServer {
 
 var _ minttypes.MsgServer = msgServer{}
 
-func (k msgServer) WithdrawCoinsToAccFromTreasury(
-	goCtx context.Context,
+func (ms msgServer) WithdrawCoinsToAccFromTreasury(
+	ctx context.Context,
 	msg *minttypes.MsgWithdrawCoinsToAccFromTreasury,
 ) (*minttypes.MsgWithdrawCoinsToAccFromTreasuryResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
+	goCtx := sdk.UnwrapSDKContext(ctx)
 
-	if !k.IsEligibleAccount(ctx, msg.Sender) {
-		return nil, sdkerrors.Wrapf(minttypes.ErrAccountIsNotEligible, "account: %s", msg.Sender)
+	allowed, err := ms.IsEligibleAccount(ctx, msg.Sender)
+	if err != nil {
+		return nil, err
+	}
+	if !allowed {
+		return nil, errors.Wrapf(minttypes.ErrAccountIsNotEligible, "account: %s", msg.Sender)
 	}
 
-	if k.LimitExceeded(ctx, msg.Amount) {
-		return nil, sdkerrors.Wrapf(minttypes.ErrExceedsWithdrawalLimitPerTime, "amount: %s", msg.Amount.String())
+	exceeded, err := ms.LimitExceeded(ctx, msg.Amount)
+	if err != nil {
+		return nil, err
+	}
+	if exceeded {
+		return nil, errors.Wrapf(minttypes.ErrExceedsWithdrawalLimitPerTime, "amount: %s", msg.Amount.String())
 	}
 
 	receiver, err := sdk.AccAddressFromBech32(msg.Receiver)
 	if err != nil {
-		return nil, sdkerrors.Wrapf(err, "failed to parse receiver address %s", msg.Receiver)
+		return nil, errors.Wrapf(err, "failed to parse receiver address %s", msg.Receiver)
 	}
 
-	if err := k.WithdrawCoinsFromTreasury(ctx, receiver, msg.Amount); err != nil {
-		return nil, sdkerrors.Wrapf(err, "failed to mint %s coins to account %s", msg.Amount, msg.Receiver)
+	if err := ms.WithdrawCoinsFromTreasury(ctx, receiver, msg.Amount); err != nil {
+		return nil, errors.Wrapf(err, "failed to mint %s coins to account %s", msg.Amount, msg.Receiver)
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
+	goCtx.EventManager().EmitEvent(sdk.NewEvent(
 		minttypes.EventTypeWithdrawal,
 		sdk.NewAttribute(minttypes.AttributeKeyWithdrawalAmount, msg.Amount.String()),
 		sdk.NewAttribute(minttypes.AttributeKeyReceiver, msg.Receiver),
@@ -60,29 +67,41 @@ func (k msgServer) WithdrawCoinsToAccFromTreasury(
 	return &minttypes.MsgWithdrawCoinsToAccFromTreasuryResponse{}, nil
 }
 
-func (k msgServer) MintCoins(
-	goCtx context.Context,
+func (ms msgServer) MintCoins(
+	ctx context.Context,
 	msg *minttypes.MsgMintCoins,
 ) (*minttypes.MsgMintCoinsResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
+	goCtx := sdk.UnwrapSDKContext(ctx)
 
-	if !k.IsAllowedMintDenom(ctx, msg.Amount[0]) {
-		return nil, sdkerrors.Wrapf(minttypes.ErrInvalidMintDenom, "denom: %s", msg.Amount.GetDenomByIndex(0))
+	allowed, err := ms.IsAllowedMintDenom(ctx, msg.Amount[0])
+	if err != nil {
+		return nil, err
+	}
+	if !allowed {
+		return nil, errors.Wrapf(minttypes.ErrInvalidMintDenom, "denom: %s", msg.Amount.GetDenomByIndex(0))
 	}
 
-	if !k.IsAllowedMinter(ctx, msg.Sender) {
-		return nil, sdkerrors.Wrapf(minttypes.ErrAccountIsNotEligible, "account: %s", msg.Sender)
+	allowed, err = ms.IsAllowedMinter(ctx, msg.Sender)
+	if err != nil {
+		return nil, err
+	}
+	if !allowed {
+		return nil, errors.Wrapf(minttypes.ErrAccountIsNotEligible, "account: %s", msg.Sender)
 	}
 
-	if k.MintVolumeExceeded(ctx, msg.Amount) {
-		return nil, sdkerrors.Wrapf(minttypes.ErrMintVolumeExceedsLimit, "volume: %s", msg.Amount.String())
+	exceeded, err := ms.MintVolumeExceeded(ctx, msg.Amount)
+	if err != nil {
+		return nil, err
+	}
+	if exceeded {
+		return nil, errors.Wrapf(minttypes.ErrMintVolumeExceedsLimit, "volume: %s", msg.Amount.String())
 	}
 
-	if err := k.MintNewCoins(ctx, msg.Amount); err != nil {
-		return nil, sdkerrors.Wrapf(err, "failed to mint %s new coins", msg.Amount)
+	if err := ms.MintNewCoins(ctx, msg.Amount); err != nil {
+		return nil, errors.Wrapf(err, "failed to mint %s new coins", msg.Amount)
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
+	goCtx.EventManager().EmitEvent(sdk.NewEvent(
 		minttypes.EventTypeMinting,
 		sdk.NewAttribute(minttypes.AttributeKeyMintingVolume, msg.Amount.String()),
 		sdk.NewAttribute(minttypes.AttributeKeySender, msg.Sender),
@@ -92,13 +111,16 @@ func (k msgServer) MintCoins(
 }
 
 // UpdateParams updates the params.
-func (k msgServer) UpdateParams(goCtx context.Context, req *minttypes.MsgUpdateParams) (*minttypes.MsgUpdateParamsResponse, error) {
-	if k.authority != req.Authority {
-		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, req.Authority)
+func (ms msgServer) UpdateParams(ctx context.Context, msg *minttypes.MsgUpdateParams) (*minttypes.MsgUpdateParamsResponse, error) {
+	if ms.authority != msg.Authority {
+		return nil, errors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", ms.authority, msg.Authority)
 	}
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := k.SetParams(ctx, req.Params); err != nil {
+	if err := msg.Params.Validate(); err != nil {
+		return nil, err
+	}
+
+	if err := ms.SetParams(ctx, msg.Params); err != nil {
 		return nil, err
 	}
 

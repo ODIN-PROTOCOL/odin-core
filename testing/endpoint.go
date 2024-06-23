@@ -2,15 +2,19 @@ package ibctesting
 
 import (
 	"fmt"
+	"strings"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	connectiontypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	commitmenttypes "github.com/cosmos/ibc-go/v7/modules/core/23-commitment/types"
-	host "github.com/cosmos/ibc-go/v7/modules/core/24-host"
-	"github.com/cosmos/ibc-go/v7/modules/core/exported"
-	ibctmtypes "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
+	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	connectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
+	host "github.com/cosmos/ibc-go/v8/modules/core/24-host"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
+	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	"github.com/stretchr/testify/require"
 )
 
@@ -66,7 +70,7 @@ func (endpoint *Endpoint) QueryProof(key []byte) ([]byte, clienttypes.Height) {
 }
 
 // QueryProofAtHeight queries proof associated with this endpoint using the proof height
-// providied
+// provided
 func (endpoint *Endpoint) QueryProofAtHeight(key []byte, height uint64) ([]byte, clienttypes.Height) {
 	// query proof on the counterparty using the latest height of the IBC client
 	return endpoint.Chain.QueryProofAtHeight(key, int64(height))
@@ -77,7 +81,7 @@ func (endpoint *Endpoint) QueryProofAtHeight(key []byte, height uint64) ([]byte,
 // NOTE: a solo machine client will be created with an empty diversifier.
 func (endpoint *Endpoint) CreateClient() (err error) {
 	// ensure counterparty has committed state
-	endpoint.Chain.Coordinator.CommitBlock(endpoint.Counterparty.Chain)
+	endpoint.Counterparty.Chain.NextBlock()
 
 	var (
 		clientState    exported.ClientState
@@ -87,10 +91,10 @@ func (endpoint *Endpoint) CreateClient() (err error) {
 	switch endpoint.ClientConfig.GetClientType() {
 	case exported.Tendermint:
 		tmConfig, ok := endpoint.ClientConfig.(*TendermintConfig)
-		require.True(endpoint.Chain.t, ok)
+		require.True(endpoint.Chain.T, ok)
 
 		height := endpoint.Counterparty.Chain.LastHeader.GetHeight().(clienttypes.Height)
-		clientState = ibctmtypes.NewClientState(
+		clientState = ibctm.NewClientState(
 			endpoint.Counterparty.Chain.ChainID,
 			tmConfig.TrustLevel,
 			tmConfig.TrustingPeriod,
@@ -103,7 +107,7 @@ func (endpoint *Endpoint) CreateClient() (err error) {
 		consensusState = endpoint.Counterparty.Chain.LastHeader.ConsensusState()
 	case exported.Solomachine:
 		// TODO
-		//		solo := NewSolomachine(chain.t, endpoint.Chain.Codec, clientID, "", 1)
+		//		solo := NewSolomachine(endpoint.Chain.T, endpoint.Chain.Codec, clientID, "", 1)
 		//		clientState = solo.ClientState()
 		//		consensusState = solo.ConsensusState()
 
@@ -118,15 +122,15 @@ func (endpoint *Endpoint) CreateClient() (err error) {
 	msg, err := clienttypes.NewMsgCreateClient(
 		clientState, consensusState, endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	require.NoError(endpoint.Chain.t, err)
+	require.NoError(endpoint.Chain.T, err)
 
-	res, err := endpoint.Chain.SendMsgs(msg)
+	res, err := endpoint.Chain.SendMsgs(nil, msg)
 	if err != nil {
 		return err
 	}
 
 	endpoint.ClientID, err = ParseClientIDFromEvents(res.GetEvents())
-	require.NoError(endpoint.Chain.t, err)
+	require.NoError(endpoint.Chain.T, err)
 
 	return nil
 }
@@ -136,9 +140,7 @@ func (endpoint *Endpoint) UpdateClient() (err error) {
 	// ensure counterparty has committed state
 	endpoint.Chain.Coordinator.CommitBlock(endpoint.Counterparty.Chain)
 
-	var (
-		header *ibctmtypes.Header
-	)
+	var header exported.ClientMessage
 
 	switch endpoint.ClientConfig.GetClientType() {
 	case exported.Tendermint:
@@ -156,9 +158,59 @@ func (endpoint *Endpoint) UpdateClient() (err error) {
 		endpoint.ClientID, header,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	require.NoError(endpoint.Chain.t, err)
+	require.NoError(endpoint.Chain.T, err)
 
-	return endpoint.Chain.sendMsgs(msg)
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// UpgradeChain will upgrade a chain's chainID to the next revision number.
+// It will also update the counterparty client.
+// TODO: implement actual upgrade chain functionality via scheduling an upgrade
+// and upgrading the client via MsgUpgradeClient
+// see reference https://github.com/cosmos/ibc-go/pull/1169
+func (endpoint *Endpoint) UpgradeChain() error {
+	if strings.TrimSpace(endpoint.Counterparty.ClientID) == "" {
+		return fmt.Errorf("cannot upgrade chain if there is no counterparty client")
+	}
+
+	clientState := endpoint.Counterparty.GetClientState().(*ibctm.ClientState)
+
+	// increment revision number in chainID
+
+	oldChainID := clientState.ChainId
+	if !clienttypes.IsRevisionFormat(oldChainID) {
+		return fmt.Errorf("cannot upgrade chain which is not of revision format: %s", oldChainID)
+	}
+
+	revisionNumber := clienttypes.ParseChainID(oldChainID)
+	newChainID, err := clienttypes.SetRevisionNumber(oldChainID, revisionNumber+1)
+	if err != nil {
+		return err
+	}
+
+	// update chain
+	baseapp.SetChainID(newChainID)(endpoint.Chain.App.GetBaseApp())
+	endpoint.Chain.ChainID = newChainID
+	endpoint.Chain.CurrentHeader.ChainID = newChainID
+	endpoint.Chain.NextBlock() // commit changes
+
+	// update counterparty client manually
+	clientState.ChainId = newChainID
+	clientState.LatestHeight = clienttypes.NewHeight(revisionNumber+1, clientState.LatestHeight.GetRevisionHeight()+1)
+	endpoint.Counterparty.SetClientState(clientState)
+
+	consensusState := &ibctm.ConsensusState{
+		Timestamp:          endpoint.Chain.LastHeader.GetTime(),
+		Root:               commitmenttypes.NewMerkleRoot(endpoint.Chain.LastHeader.Header.GetAppHash()),
+		NextValidatorsHash: endpoint.Chain.LastHeader.Header.NextValidatorsHash,
+	}
+	endpoint.Counterparty.SetConsensusState(consensusState, clientState.GetLatestHeight())
+
+	// ensure the next update isn't identical to the one set in state
+	endpoint.Chain.Coordinator.IncrementTime()
+	endpoint.Chain.NextBlock()
+
+	return endpoint.Counterparty.UpdateClient()
 }
 
 // ConnOpenInit will construct and execute a MsgConnectionOpenInit on the associated endpoint.
@@ -169,46 +221,47 @@ func (endpoint *Endpoint) ConnOpenInit() error {
 		endpoint.Counterparty.Chain.GetPrefix(), DefaultOpenInitVersion, endpoint.ConnectionConfig.DelayPeriod,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	res, err := endpoint.Chain.SendMsgs(msg)
+	res, err := endpoint.Chain.SendMsgs(nil, msg)
 	if err != nil {
 		return err
 	}
 
 	endpoint.ConnectionID, err = ParseConnectionIDFromEvents(res.GetEvents())
-	require.NoError(endpoint.Chain.t, err)
+	require.NoError(endpoint.Chain.T, err)
 
 	return nil
 }
 
 // ConnOpenTry will construct and execute a MsgConnectionOpenTry on the associated endpoint.
 func (endpoint *Endpoint) ConnOpenTry() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
-	counterpartyClient, proofClient, proofConsensus, consensusHeight, proofInit, proofHeight := endpoint.QueryConnectionHandshakeProof()
+	counterpartyClient, clientProof, consensusProof, consensusHeight, initProof, proofHeight := endpoint.QueryConnectionHandshakeProof()
 
 	msg := connectiontypes.NewMsgConnectionOpenTry(
-		endpoint.ClientID, // does not support handshake continuation
+		endpoint.ClientID,
 		endpoint.Counterparty.ConnectionID,
 		endpoint.Counterparty.ClientID,
 		counterpartyClient,
 		endpoint.Counterparty.Chain.GetPrefix(),
 		[]*connectiontypes.Version{ConnectionVersion},
 		endpoint.ConnectionConfig.DelayPeriod,
-		proofInit,
-		proofClient,
-		proofConsensus,
+		initProof,
+		clientProof,
+		consensusProof,
 		proofHeight,
 		consensusHeight,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	res, err := endpoint.Chain.SendMsgs(msg)
+	res, err := endpoint.Chain.SendMsgs(nil, msg)
 	if err != nil {
 		return err
 	}
 
 	if endpoint.ConnectionID == "" {
 		endpoint.ConnectionID, err = ParseConnectionIDFromEvents(res.GetEvents())
-		require.NoError(endpoint.Chain.t, err)
+		require.NoError(endpoint.Chain.T, err)
 	}
 
 	return nil
@@ -216,28 +269,30 @@ func (endpoint *Endpoint) ConnOpenTry() error {
 
 // ConnOpenAck will construct and execute a MsgConnectionOpenAck on the associated endpoint.
 func (endpoint *Endpoint) ConnOpenAck() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
-	counterpartyClient, proofClient, proofConsensus, consensusHeight, proofTry, proofHeight := endpoint.QueryConnectionHandshakeProof()
+	counterpartyClient, clientProof, consensusProof, consensusHeight, tryProof, proofHeight := endpoint.QueryConnectionHandshakeProof()
 
 	msg := connectiontypes.NewMsgConnectionOpenAck(
 		endpoint.ConnectionID,
 		endpoint.Counterparty.ConnectionID,
 		counterpartyClient, // testing doesn't use flexible selection
-		proofTry,
-		proofClient,
-		proofConsensus,
+		tryProof,
+		clientProof,
+		consensusProof,
 		proofHeight,
 		consensusHeight,
 		ConnectionVersion,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	return endpoint.Chain.sendMsgs(msg)
+	return endpoint.Chain.sendMsgs(nil, msg)
 }
 
 // ConnOpenConfirm will construct and execute a MsgConnectionOpenConfirm on the associated endpoint.
 func (endpoint *Endpoint) ConnOpenConfirm() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
 	connectionKey := host.ConnectionKey(endpoint.Counterparty.ConnectionID)
 	proof, height := endpoint.Counterparty.Chain.QueryProof(connectionKey)
@@ -247,7 +302,7 @@ func (endpoint *Endpoint) ConnOpenConfirm() error {
 		proof, height,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	return endpoint.Chain.sendMsgs(msg)
+	return endpoint.Chain.sendMsgs(nil, msg)
 }
 
 // QueryConnectionHandshakeProof returns all the proofs necessary to execute OpenTry or Open Ack of
@@ -255,28 +310,28 @@ func (endpoint *Endpoint) ConnOpenConfirm() error {
 // client state, proof of the counterparty consensus state, the consensus state height, proof of
 // the counterparty connection, and the proof height for all the proofs returned.
 func (endpoint *Endpoint) QueryConnectionHandshakeProof() (
-	clientState exported.ClientState, proofClient,
-	proofConsensus []byte, consensusHeight clienttypes.Height,
-	proofConnection []byte, proofHeight clienttypes.Height,
+	clientState exported.ClientState, clientProof,
+	consensusProof []byte, consensusHeight clienttypes.Height,
+	connectioProof []byte, proofHeight clienttypes.Height,
 ) {
 	// obtain the client state on the counterparty chain
 	clientState = endpoint.Counterparty.Chain.GetClientState(endpoint.Counterparty.ClientID)
 
 	// query proof for the client state on the counterparty
 	clientKey := host.FullClientStateKey(endpoint.Counterparty.ClientID)
-	proofClient, proofHeight = endpoint.Counterparty.QueryProof(clientKey)
+	clientProof, proofHeight = endpoint.Counterparty.QueryProof(clientKey)
 
 	consensusHeight = clientState.GetLatestHeight().(clienttypes.Height)
 
 	// query proof for the consensus state on the counterparty
 	consensusKey := host.FullConsensusStateKey(endpoint.Counterparty.ClientID, consensusHeight)
-	proofConsensus, _ = endpoint.Counterparty.QueryProofAtHeight(consensusKey, proofHeight.GetRevisionHeight())
+	consensusProof, _ = endpoint.Counterparty.QueryProofAtHeight(consensusKey, proofHeight.GetRevisionHeight())
 
 	// query proof for the connection on the counterparty
 	connectionKey := host.ConnectionKey(endpoint.Counterparty.ConnectionID)
-	proofConnection, _ = endpoint.Counterparty.QueryProofAtHeight(connectionKey, proofHeight.GetRevisionHeight())
+	connectioProof, _ = endpoint.Counterparty.QueryProofAtHeight(connectionKey, proofHeight.GetRevisionHeight())
 
-	return
+	return clientState, clientProof, consensusProof, consensusHeight, connectioProof, proofHeight
 }
 
 // ChanOpenInit will construct and execute a MsgChannelOpenInit on the associated endpoint.
@@ -287,20 +342,25 @@ func (endpoint *Endpoint) ChanOpenInit() error {
 		endpoint.Counterparty.ChannelConfig.PortID,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	res, err := endpoint.Chain.SendMsgs(msg)
+	res, err := endpoint.Chain.SendMsgs(nil, msg)
 	if err != nil {
 		return err
 	}
 
 	endpoint.ChannelID, err = ParseChannelIDFromEvents(res.GetEvents())
-	require.NoError(endpoint.Chain.t, err)
+	require.NoError(endpoint.Chain.T, err)
+
+	// update version to selected app version
+	// NOTE: this update must be performed after SendMsgs()
+	endpoint.ChannelConfig.Version = endpoint.GetChannel().Version
 
 	return nil
 }
 
 // ChanOpenTry will construct and execute a MsgChannelOpenTry on the associated endpoint.
 func (endpoint *Endpoint) ChanOpenTry() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
 	channelKey := host.ChannelKey(endpoint.Counterparty.ChannelConfig.PortID, endpoint.Counterparty.ChannelID)
 	proof, height := endpoint.Counterparty.Chain.QueryProof(channelKey)
@@ -317,22 +377,27 @@ func (endpoint *Endpoint) ChanOpenTry() error {
 		height,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	res, err := endpoint.Chain.SendMsgs(msg)
+	res, err := endpoint.Chain.SendMsgs(nil, msg)
 	if err != nil {
 		return err
 	}
 
 	if endpoint.ChannelID == "" {
 		endpoint.ChannelID, err = ParseChannelIDFromEvents(res.GetEvents())
-		require.NoError(endpoint.Chain.t, err)
+		require.NoError(endpoint.Chain.T, err)
 	}
+
+	// update version to selected app version
+	// NOTE: this update must be performed after the endpoint channelID is set
+	endpoint.ChannelConfig.Version = endpoint.GetChannel().Version
 
 	return nil
 }
 
 // ChanOpenAck will construct and execute a MsgChannelOpenAck on the associated endpoint.
 func (endpoint *Endpoint) ChanOpenAck() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
 	channelKey := host.ChannelKey(endpoint.Counterparty.ChannelConfig.PortID, endpoint.Counterparty.ChannelID)
 	proof, height := endpoint.Counterparty.Chain.QueryProof(channelKey)
@@ -346,12 +411,20 @@ func (endpoint *Endpoint) ChanOpenAck() error {
 		height,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	return endpoint.Chain.sendMsgs(msg)
+
+	if err = endpoint.Chain.sendMsgs(nil, msg); err != nil {
+		return err
+	}
+
+	endpoint.ChannelConfig.Version = endpoint.GetChannel().Version
+
+	return nil
 }
 
 // ChanOpenConfirm will construct and execute a MsgChannelOpenConfirm on the associated endpoint.
 func (endpoint *Endpoint) ChanOpenConfirm() error {
-	endpoint.UpdateClient()
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
 
 	channelKey := host.ChannelKey(endpoint.Counterparty.ChannelConfig.PortID, endpoint.Counterparty.ChannelID)
 	proof, height := endpoint.Counterparty.Chain.QueryProof(channelKey)
@@ -361,7 +434,7 @@ func (endpoint *Endpoint) ChanOpenConfirm() error {
 		proof, height,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	return endpoint.Chain.sendMsgs(msg)
+	return endpoint.Chain.sendMsgs(nil, msg)
 }
 
 // ChanCloseInit will construct and execute a MsgChannelCloseInit on the associated endpoint.
@@ -372,7 +445,7 @@ func (endpoint *Endpoint) ChanCloseInit() error {
 		endpoint.ChannelConfig.PortID, endpoint.ChannelID,
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
-	return endpoint.Chain.sendMsgs(msg)
+	return endpoint.Chain.sendMsgs(nil, msg)
 }
 
 // SendPacket sends a packet through the channel keeper using the associated endpoint
@@ -424,7 +497,7 @@ func (endpoint *Endpoint) RecvPacket(packet channeltypes.Packet) error {
 
 // RecvPacketWithResult receives a packet on the associated endpoint and the result
 // of the transaction is returned. The counterparty client is updated.
-func (endpoint *Endpoint) RecvPacketWithResult(packet channeltypes.Packet) (*sdk.Result, error) {
+func (endpoint *Endpoint) RecvPacketWithResult(packet channeltypes.Packet) (*abci.ExecTxResult, error) {
 	// get proof of packet commitment on source
 	packetKey := host.PacketCommitmentKey(packet.GetSourcePort(), packet.GetSourceChannel(), packet.GetSequence())
 	proof, proofHeight := endpoint.Counterparty.Chain.QueryProof(packetKey)
@@ -437,7 +510,7 @@ func (endpoint *Endpoint) RecvPacketWithResult(packet channeltypes.Packet) (*sdk
 	)
 
 	// receive on counterparty and update source client
-	res, err := endpoint.Chain.SendMsgs(recvMsg)
+	res, err := endpoint.Chain.SendMsgs(nil, recvMsg)
 	if err != nil {
 		return nil, err
 	}
@@ -485,7 +558,7 @@ func (endpoint *Endpoint) AcknowledgePacket(packet channeltypes.Packet, ack []by
 		endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
 
-	return endpoint.Chain.sendMsgs(ackMsg)
+	return endpoint.Chain.sendMsgs(nil, ackMsg)
 }
 
 // TimeoutPacket sends a MsgTimeout to the channel associated with the endpoint.
@@ -502,27 +575,273 @@ func (endpoint *Endpoint) TimeoutPacket(packet channeltypes.Packet) error {
 		return fmt.Errorf("unsupported order type %s", endpoint.ChannelConfig.Order)
 	}
 
-	proof, proofHeight := endpoint.Counterparty.QueryProof(packetKey)
-	nextSeqRecv, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetNextSequenceRecv(
-		endpoint.Counterparty.Chain.GetContext(),
-		endpoint.ChannelConfig.PortID,
-		endpoint.ChannelID,
+	counterparty := endpoint.Counterparty
+	proof, proofHeight := counterparty.QueryProof(packetKey)
+	nextSeqRecv, found := counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetNextSequenceRecv(
+		counterparty.Chain.GetContext(),
+		counterparty.ChannelConfig.PortID,
+		counterparty.ChannelID,
 	)
-	require.True(endpoint.Chain.t, found)
+	require.True(endpoint.Chain.T, found)
 
 	timeoutMsg := channeltypes.NewMsgTimeout(
 		packet, nextSeqRecv,
 		proof, proofHeight, endpoint.Chain.SenderAccount.GetAddress().String(),
 	)
 
-	return endpoint.Chain.sendMsgs(timeoutMsg)
+	return endpoint.Chain.sendMsgs(nil, timeoutMsg)
 }
 
-// SetChannelClosed sets a channel state to CLOSED.
-func (endpoint *Endpoint) SetChannelClosed() error {
+// TimeoutOnClose sends a MsgTimeoutOnClose to the channel associated with the endpoint.
+func (endpoint *Endpoint) TimeoutOnClose(packet channeltypes.Packet) error {
+	// get proof for timeout based on channel order
+	var packetKey []byte
+
+	switch endpoint.ChannelConfig.Order {
+	case channeltypes.ORDERED:
+		packetKey = host.NextSequenceRecvKey(packet.GetDestPort(), packet.GetDestChannel())
+	case channeltypes.UNORDERED:
+		packetKey = host.PacketReceiptKey(packet.GetDestPort(), packet.GetDestChannel(), packet.GetSequence())
+	default:
+		return fmt.Errorf("unsupported order type %s", endpoint.ChannelConfig.Order)
+	}
+
+	proof, proofHeight := endpoint.Counterparty.QueryProof(packetKey)
+
+	channelKey := host.ChannelKey(packet.GetDestPort(), packet.GetDestChannel())
+	closedProof, _ := endpoint.Counterparty.QueryProof(channelKey)
+
+	nextSeqRecv, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetNextSequenceRecv(
+		endpoint.Counterparty.Chain.GetContext(),
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	timeoutOnCloseMsg := channeltypes.NewMsgTimeoutOnCloseWithCounterpartyUpgradeSequence(
+		packet, nextSeqRecv,
+		proof, closedProof, proofHeight, endpoint.Chain.SenderAccount.GetAddress().String(),
+		endpoint.Counterparty.GetChannel().UpgradeSequence,
+	)
+
+	return endpoint.Chain.sendMsgs(nil, timeoutOnCloseMsg)
+}
+
+// QueryChannelUpgradeProof returns all the proofs necessary to execute UpgradeTry/UpgradeAck/UpgradeOpen.
+// It returns the proof for the channel on the endpoint's chain, the proof for the upgrade attempt on the
+// endpoint's chain, and the height at which the proof was queried.
+func (endpoint *Endpoint) QueryChannelUpgradeProof() ([]byte, []byte, clienttypes.Height) {
+	channelKey := host.ChannelKey(endpoint.ChannelConfig.PortID, endpoint.ChannelID)
+	channelProof, height := endpoint.QueryProof(channelKey)
+
+	upgradeKey := host.ChannelUpgradeKey(endpoint.ChannelConfig.PortID, endpoint.ChannelID)
+	upgradeProof, _ := endpoint.QueryProof(upgradeKey)
+
+	return channelProof, upgradeProof, height
+}
+
+// ChanUpgradeInit sends a MsgChannelUpgradeInit on the associated endpoint.
+// A default upgrade proposal is used with overrides from the ProposedUpgrade
+// in the channel config, and submitted via governance proposal
+func (endpoint *Endpoint) ChanUpgradeInit() error {
+	upgrade := endpoint.GetProposedUpgrade()
+
+	// create upgrade init message via gov proposal and submit the proposal
+	msg := channeltypes.NewMsgChannelUpgradeInit(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		upgrade.Fields,
+		endpoint.Chain.App.IBCKeeper.GetAuthority(),
+	)
+
+	proposal, err := govtypesv1.NewMsgSubmitProposal(
+		[]sdk.Msg{msg},
+		sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, govtypesv1.DefaultMinDepositTokens)),
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+		endpoint.ChannelID,
+		"upgrade-init",
+		fmt.Sprintf("gov proposal for initialising channel upgrade: %s", endpoint.ChannelID),
+		false,
+	)
+	require.NoError(endpoint.Chain.T, err)
+
+	var proposalID uint64
+	res, err := endpoint.Chain.SendMsgs(nil, proposal)
+	if err != nil {
+		return err
+	}
+
+	proposalID, err = ParseProposalIDFromEvents(res.Events)
+	require.NoError(endpoint.Chain.T, err)
+
+	return VoteAndCheckProposalStatus(endpoint, proposalID)
+}
+
+// ChanUpgradeTry sends a MsgChannelUpgradeTry on the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeTry() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	upgrade := endpoint.GetProposedUpgrade()
+	channelProof, upgradeProof, height := endpoint.Counterparty.QueryChannelUpgradeProof()
+
+	counterpartyUpgrade, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetUpgrade(
+		endpoint.Counterparty.Chain.GetContext(),
+		endpoint.Counterparty.ChannelConfig.PortID,
+		endpoint.Counterparty.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	if !found {
+		return fmt.Errorf("could not find upgrade for channel %s", endpoint.ChannelID)
+	}
+
+	msg := channeltypes.NewMsgChannelUpgradeTry(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		upgrade.Fields.ConnectionHops,
+		counterpartyUpgrade.Fields,
+		endpoint.Counterparty.GetChannel().UpgradeSequence,
+		channelProof,
+		upgradeProof,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// ChanUpgradeAck sends a MsgChannelUpgradeAck to the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeAck() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	channelProof, upgradeProof, height := endpoint.Counterparty.QueryChannelUpgradeProof()
+
+	counterpartyUpgrade, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetUpgrade(
+		endpoint.Counterparty.Chain.GetContext(),
+		endpoint.Counterparty.ChannelConfig.PortID,
+		endpoint.Counterparty.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	msg := channeltypes.NewMsgChannelUpgradeAck(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		counterpartyUpgrade,
+		channelProof,
+		upgradeProof,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// ChanUpgradeConfirm sends a MsgChannelUpgradeConfirm to the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeConfirm() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	channelProof, upgradeProof, height := endpoint.Counterparty.QueryChannelUpgradeProof()
+
+	counterpartyUpgrade, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetUpgrade(
+		endpoint.Counterparty.Chain.GetContext(),
+		endpoint.Counterparty.ChannelConfig.PortID,
+		endpoint.Counterparty.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	msg := channeltypes.NewMsgChannelUpgradeConfirm(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		endpoint.Counterparty.GetChannel().State,
+		counterpartyUpgrade,
+		channelProof,
+		upgradeProof,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// ChanUpgradeOpen sends a MsgChannelUpgradeOpen to the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeOpen() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	channelKey := host.ChannelKey(endpoint.Counterparty.ChannelConfig.PortID, endpoint.Counterparty.ChannelID)
+	channelProof, height := endpoint.Counterparty.QueryProof(channelKey)
+
+	msg := channeltypes.NewMsgChannelUpgradeOpen(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		endpoint.Counterparty.GetChannel().State,
+		endpoint.Counterparty.GetChannel().UpgradeSequence,
+		channelProof,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// ChanUpgradeTimeout sends a MsgChannelUpgradeTimeout to the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeTimeout() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	channelKey := host.ChannelKey(endpoint.Counterparty.ChannelConfig.PortID, endpoint.Counterparty.ChannelID)
+	channelProof, height := endpoint.Counterparty.Chain.QueryProof(channelKey)
+
+	msg := channeltypes.NewMsgChannelUpgradeTimeout(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		endpoint.Counterparty.GetChannel(),
+		channelProof,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// ChanUpgradeCancel sends a MsgChannelUpgradeCancel to the associated endpoint.
+func (endpoint *Endpoint) ChanUpgradeCancel() error {
+	err := endpoint.UpdateClient()
+	require.NoError(endpoint.Chain.T, err)
+
+	errorReceiptKey := host.ChannelUpgradeErrorKey(
+		endpoint.Counterparty.ChannelConfig.PortID,
+		endpoint.Counterparty.ChannelID,
+	)
+	proofErrorReceipt, height := endpoint.Counterparty.Chain.QueryProof(errorReceiptKey)
+
+	errorReceipt, found := endpoint.Counterparty.Chain.App.GetIBCKeeper().ChannelKeeper.GetUpgradeErrorReceipt(
+		endpoint.Counterparty.Chain.GetContext(),
+		endpoint.Counterparty.ChannelConfig.PortID,
+		endpoint.Counterparty.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	msg := channeltypes.NewMsgChannelUpgradeCancel(
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		errorReceipt,
+		proofErrorReceipt,
+		height,
+		endpoint.Chain.SenderAccount.GetAddress().String(),
+	)
+
+	return endpoint.Chain.sendMsgs(nil, msg)
+}
+
+// SetChannelState sets a channel state
+func (endpoint *Endpoint) SetChannelState(state channeltypes.State) error {
 	channel := endpoint.GetChannel()
 
-	channel.State = channeltypes.CLOSED
+	channel.State = state
 	endpoint.Chain.App.GetIBCKeeper().ChannelKeeper.SetChannel(
 		endpoint.Chain.GetContext(),
 		endpoint.ChannelConfig.PortID,
@@ -554,7 +873,7 @@ func (endpoint *Endpoint) SetClientState(clientState exported.ClientState) {
 // The consensus state is expected to exist otherwise testing will fail.
 func (endpoint *Endpoint) GetConsensusState(height exported.Height) exported.ConsensusState {
 	consensusState, found := endpoint.Chain.GetConsensusState(endpoint.ClientID, height)
-	require.True(endpoint.Chain.t, found)
+	require.True(endpoint.Chain.T, found)
 
 	return consensusState
 }
@@ -576,7 +895,7 @@ func (endpoint *Endpoint) GetConnection() connectiontypes.ConnectionEnd {
 		endpoint.Chain.GetContext(),
 		endpoint.ConnectionID,
 	)
-	require.True(endpoint.Chain.t, found)
+	require.True(endpoint.Chain.T, found)
 
 	return connection
 }
@@ -598,7 +917,7 @@ func (endpoint *Endpoint) GetChannel() channeltypes.Channel {
 		endpoint.ChannelConfig.PortID,
 		endpoint.ChannelID,
 	)
-	require.True(endpoint.Chain.t, found)
+	require.True(endpoint.Chain.T, found)
 
 	return channel
 }
@@ -613,6 +932,39 @@ func (endpoint *Endpoint) SetChannel(channel channeltypes.Channel) {
 	)
 }
 
+// GetChannelUpgrade retrieves an IBC Channel Upgrade for the endpoint. The upgrade
+// is expected to exist otherwise testing will fail.
+func (endpoint *Endpoint) GetChannelUpgrade() channeltypes.Upgrade {
+	upgrade, found := endpoint.Chain.App.GetIBCKeeper().ChannelKeeper.GetUpgrade(
+		endpoint.Chain.GetContext(),
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+	)
+	require.True(endpoint.Chain.T, found)
+
+	return upgrade
+}
+
+// SetChannelUpgrade sets the channel upgrade for this endpoint.
+func (endpoint *Endpoint) SetChannelUpgrade(upgrade channeltypes.Upgrade) {
+	endpoint.Chain.App.GetIBCKeeper().ChannelKeeper.SetUpgrade(
+		endpoint.Chain.GetContext(),
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		upgrade,
+	)
+}
+
+// SetChannelCounterpartyUpgrade sets the channel counterparty upgrade for this endpoint.
+func (endpoint *Endpoint) SetChannelCounterpartyUpgrade(upgrade channeltypes.Upgrade) {
+	endpoint.Chain.App.GetIBCKeeper().ChannelKeeper.SetCounterpartyUpgrade(
+		endpoint.Chain.GetContext(),
+		endpoint.ChannelConfig.PortID,
+		endpoint.ChannelID,
+		upgrade,
+	)
+}
+
 // QueryClientStateProof performs and abci query for a client stat associated
 // with this endpoint and returns the ClientState along with the proof.
 func (endpoint *Endpoint) QueryClientStateProof() (exported.ClientState, []byte) {
@@ -620,7 +972,44 @@ func (endpoint *Endpoint) QueryClientStateProof() (exported.ClientState, []byte)
 	clientState := endpoint.GetClientState()
 
 	clientKey := host.FullClientStateKey(endpoint.ClientID)
-	proofClient, _ := endpoint.QueryProof(clientKey)
+	clientProof, _ := endpoint.QueryProof(clientKey)
 
-	return clientState, proofClient
+	return clientState, clientProof
+}
+
+// GetProposedUpgrade returns a valid upgrade which can be used for UpgradeInit and UpgradeTry.
+// By default, the endpoint's existing channel fields will be used for the upgrade fields and
+// a sane default timeout will be used by querying the counterparty's latest height.
+// If any non-empty values are specified in the ChannelConfig's ProposedUpgrade,
+// those values will be used in the returned upgrade.
+func (endpoint *Endpoint) GetProposedUpgrade() channeltypes.Upgrade {
+	// create a default upgrade
+	upgrade := channeltypes.Upgrade{
+		Fields: channeltypes.UpgradeFields{
+			Ordering:       endpoint.ChannelConfig.Order,
+			ConnectionHops: []string{endpoint.ConnectionID},
+			Version:        endpoint.ChannelConfig.Version,
+		},
+		Timeout:          channeltypes.NewTimeout(endpoint.Counterparty.Chain.GetTimeoutHeight(), 0),
+		NextSequenceSend: 0,
+	}
+
+	override := endpoint.ChannelConfig.ProposedUpgrade
+	if override.Timeout.IsValid() {
+		upgrade.Timeout = override.Timeout
+	}
+
+	if override.Fields.Ordering != channeltypes.NONE {
+		upgrade.Fields.Ordering = override.Fields.Ordering
+	}
+
+	if override.Fields.Version != "" {
+		upgrade.Fields.Version = override.Fields.Version
+	}
+
+	if len(override.Fields.ConnectionHops) != 0 {
+		upgrade.Fields.ConnectionHops = override.Fields.ConnectionHops
+	}
+
+	return upgrade
 }

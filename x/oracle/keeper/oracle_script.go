@@ -2,34 +2,37 @@ package keeper
 
 import (
 	"bytes"
+	"context"
+	"errors"
 
-	"cosmossdk.io/errors"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"cosmossdk.io/collections"
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
 )
 
 // HasOracleScript checks if the oracle script of this ID exists in the storage.
-func (k Keeper) HasOracleScript(ctx sdk.Context, id types.OracleScriptID) bool {
-	return ctx.KVStore(k.storeKey).Has(types.OracleScriptStoreKey(id))
+func (k Keeper) HasOracleScript(ctx context.Context, id types.OracleScriptID) (bool, error) {
+	return k.OracleScripts.Has(ctx, uint64(id))
 }
 
 // GetOracleScript returns the oracle script struct for the given ID or error if not exists.
-func (k Keeper) GetOracleScript(ctx sdk.Context, id types.OracleScriptID) (types.OracleScript, error) {
-	bz := ctx.KVStore(k.storeKey).Get(types.OracleScriptStoreKey(id))
-	if bz == nil {
-		return types.OracleScript{}, errors.Wrapf(types.ErrOracleScriptNotFound, "id: %d", id)
+func (k Keeper) GetOracleScript(ctx context.Context, id types.OracleScriptID) (types.OracleScript, error) {
+	oracleScript, err := k.OracleScripts.Get(ctx, uint64(id))
+	if err != nil {
+		if errors.Is(err, collections.ErrNotFound) {
+			return types.OracleScript{}, sdkerrors.Wrapf(types.ErrOracleScriptNotFound, "id: %d", id)
+		}
+
+		return oracleScript, err
 	}
-	var oracleScript types.OracleScript
-	k.cdc.MustUnmarshal(bz, &oracleScript)
+
 	return oracleScript, nil
 }
 
 // MustGetOracleScript returns the oracle script struct for the given ID. Panic if not exists.
-func (k Keeper) MustGetOracleScript(ctx sdk.Context, id types.OracleScriptID) types.OracleScript {
+func (k Keeper) MustGetOracleScript(ctx context.Context, id types.OracleScriptID) types.OracleScript {
 	oracleScript, err := k.GetOracleScript(ctx, id)
 	if err != nil {
 		panic(err)
@@ -38,20 +41,22 @@ func (k Keeper) MustGetOracleScript(ctx sdk.Context, id types.OracleScriptID) ty
 }
 
 // SetOracleScript saves the given oracle script to the storage without performing validation.
-func (k Keeper) SetOracleScript(ctx sdk.Context, id types.OracleScriptID, oracleScript types.OracleScript) {
-	store := ctx.KVStore(k.storeKey)
-	store.Set(types.OracleScriptStoreKey(id), k.cdc.MustMarshal(&oracleScript))
+func (k Keeper) SetOracleScript(ctx context.Context, id types.OracleScriptID, oracleScript types.OracleScript) error {
+	return k.OracleScripts.Set(ctx, uint64(id), oracleScript)
 }
 
 // AddOracleScript adds the given oracle script to the storage.
-func (k Keeper) AddOracleScript(ctx sdk.Context, oracleScript types.OracleScript) types.OracleScriptID {
-	id := k.GetNextOracleScriptID(ctx)
-	k.SetOracleScript(ctx, id, oracleScript)
-	return id
+func (k Keeper) AddOracleScript(ctx context.Context, oracleScript types.OracleScript) (types.OracleScriptID, error) {
+	id, err := k.GetNextOracleScriptID(ctx)
+	if err != nil {
+		return 0, err
+	}
+	err = k.SetOracleScript(ctx, id, oracleScript)
+	return id, err
 }
 
 // MustEditOracleScript edits the given oracle script by id and flushes it to the storage. Panic if not exists.
-func (k Keeper) MustEditOracleScript(ctx sdk.Context, id types.OracleScriptID, new types.OracleScript) {
+func (k Keeper) MustEditOracleScript(ctx context.Context, id types.OracleScriptID, new types.OracleScript) {
 	oracleScript := k.MustGetOracleScript(ctx, id)
 	oracleScript.Owner = new.Owner
 	oracleScript.Name = modify(oracleScript.Name, new.Name)
@@ -59,50 +64,37 @@ func (k Keeper) MustEditOracleScript(ctx sdk.Context, id types.OracleScriptID, n
 	oracleScript.Filename = modify(oracleScript.Filename, new.Filename)
 	oracleScript.Schema = modify(oracleScript.Schema, new.Schema)
 	oracleScript.SourceCodeURL = modify(oracleScript.SourceCodeURL, new.SourceCodeURL)
-	k.SetOracleScript(ctx, id, oracleScript)
+
+	err := k.SetOracleScript(ctx, id, oracleScript)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // GetAllOracleScripts returns the list of all oracle scripts in the store, or nil if there is none.
-func (k Keeper) GetAllOracleScripts(ctx sdk.Context) (oracleScripts []types.OracleScript) {
-	store := ctx.KVStore(k.storeKey)
-	iterator := sdk.KVStorePrefixIterator(store, types.OracleScriptStoreKeyPrefix)
-	defer iterator.Close()
-	for ; iterator.Valid(); iterator.Next() {
-		var oracleScript types.OracleScript
-		k.cdc.MustUnmarshal(iterator.Value(), &oracleScript)
+func (k Keeper) GetAllOracleScripts(ctx context.Context) (oracleScripts []types.OracleScript, err error) {
+	err = k.OracleScripts.Walk(ctx, nil, func(_ uint64, oracleScript types.OracleScript) (stop bool, err error) {
 		oracleScripts = append(oracleScripts, oracleScript)
-	}
-	return oracleScripts
+		return false, err
+	})
+	return oracleScripts, err
 }
 
 // GetPaginatedOracleScripts returns oracle scripts with pagination.
 func (k Keeper) GetPaginatedOracleScripts(
-	ctx sdk.Context,
+	ctx context.Context,
 	limit, offset uint64,
 ) ([]types.OracleScript, *query.PageResponse, error) {
-	oracleScripts := make([]types.OracleScript, 0)
-	oracleScriptsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.OracleScriptStoreKeyPrefix)
 	pagination := &query.PageRequest{
 		Limit:  limit,
 		Offset: offset,
 	}
 
-	pageRes, err := query.FilteredPaginate(
-		oracleScriptsStore,
-		pagination,
-		func(key []byte, value []byte, accumulate bool) (bool, error) {
-			var oracleScript types.OracleScript
-			if err := k.cdc.Unmarshal(value, &oracleScript); err != nil {
-				return false, err
-			}
-			if accumulate {
-				oracleScripts = append(oracleScripts, oracleScript)
-			}
-			return true, nil
-		},
-	)
+	oracleScripts, pageRes, err := query.CollectionPaginate(ctx, k.OracleScripts, pagination, func(key uint64, oracleScript types.OracleScript) (types.OracleScript, error) {
+		return oracleScript, nil
+	})
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to paginate oracle scripts")
+		return nil, nil, sdkerrors.Wrap(err, "failed to paginate oracle scripts")
 	}
 
 	return oracleScripts, pageRes, nil

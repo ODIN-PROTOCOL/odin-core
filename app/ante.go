@@ -2,13 +2,14 @@ package odin
 
 import (
 	errorsmod "cosmossdk.io/errors"
+	circuitante "cosmossdk.io/x/circuit/ante"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
-	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 )
 
 // HandlerOptions extend the SDK's AnteHandler options by requiring the IBC
@@ -18,6 +19,7 @@ type HandlerOptions struct {
 	OracleKeeper  *oraclekeeper.Keeper
 	IBCKeeper     *ibckeeper.Keeper
 	StakingKeeper *stakingkeeper.Keeper
+	CircuitKeeper circuitante.CircuitBreaker
 	//WasmKeeper        *wasmkeeper.Keeper
 	//WasmConfig        *wasmtypes.WasmConfig
 	//TXCounterStoreKey storetypes.StoreKey
@@ -56,6 +58,7 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 
 	anteDecorators := []sdk.AnteDecorator{
 		ante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first(),
+		circuitante.NewCircuitBreakerDecorator(options.CircuitKeeper),
 		//wasmkeeper.NewLimitSimulationGasDecorator(options.WasmConfig.SimulationGasLimit), // after setup context to enforce limits early
 		//wasmkeeper.NewCountTXDecorator(options.TXCounterStoreKey),
 		//wasmkeeper.NewGasRegisterDecorator(options.WasmKeeper.GetGasRegister()),

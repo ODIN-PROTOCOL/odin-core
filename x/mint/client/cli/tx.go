@@ -1,13 +1,12 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
-
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/spf13/cobra"
 
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 )
@@ -48,24 +47,24 @@ func NewCmdWithdrawCoinsToAccFromTreasury() *cobra.Command {
 			}
 			receiverStr, err := cmd.Flags().GetString(flagReceiver)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "flag: %s", flagReceiver)
+				return errors.Wrapf(err, "flag: %s", flagReceiver)
 			}
 			receiver, err := sdk.AccAddressFromBech32(receiverStr)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "receiver: %s", receiverStr)
+				return errors.Wrapf(err, "receiver: %s", receiverStr)
 			}
 			amountStr, err := cmd.Flags().GetString(flagAmount)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "flag: %s", flagAmount)
+				return errors.Wrapf(err, "flag: %s", flagAmount)
 			}
 			amount, err := sdk.ParseCoinsNormalized(amountStr)
 			if err != nil {
-				return sdkerrors.Wrapf(err, "amount: %s", amountStr)
+				return errors.Wrapf(err, "amount: %s", amountStr)
 			}
 
 			msg := minttypes.NewMsgWithdrawCoinsToAccFromTreasury(amount, receiver, clientCtx.GetFromAddress())
 			if err := msg.ValidateBasic(); err != nil {
-				return sdkerrors.Wrapf(err, "amount: %s receiver: %s", amount, receiverStr)
+				return errors.Wrapf(err, "amount: %s receiver: %s", amount, receiverStr)
 			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
@@ -93,12 +92,12 @@ func NewCmdMintCoins() *cobra.Command {
 
 			amount, err := sdk.ParseCoinsNormalized(args[0])
 			if err != nil {
-				return sdkerrors.Wrapf(err, "amount: %s", amount)
+				return errors.Wrapf(err, "amount: %s", amount)
 			}
 
 			msg := minttypes.NewMsgMintCoins(amount, clientCtx.GetFromAddress())
 			if err := msg.ValidateBasic(); err != nil {
-				return sdkerrors.Wrapf(err, "amount: %s", amount)
+				return errors.Wrapf(err, "amount: %s", amount)
 			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)

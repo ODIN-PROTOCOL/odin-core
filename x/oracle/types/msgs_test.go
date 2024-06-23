@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -11,22 +12,22 @@ import (
 
 var (
 	GoodTestAddr    = sdk.AccAddress(make([]byte, 20))
-	EmptyAddr       = sdk.AccAddress([]byte(""))
+	EmptyAddr       = sdk.AccAddress("")
 	GoodTestValAddr = sdk.ValAddress(make([]byte, 20))
-	EmptyValAddr    = sdk.ValAddress([]byte(""))
+	EmptyValAddr    = sdk.ValAddress("")
 
 	MsgPk            = secp256k1.GenPrivKey().PubKey()
 	GoodTestAddr2    = sdk.AccAddress(MsgPk.Address())
 	GoodTestValAddr2 = sdk.ValAddress(MsgPk.Address())
 
 	GoodCoins = sdk.NewCoins()
-	BadCoins  = []sdk.Coin{{Denom: "loki", Amount: sdk.NewInt(-1)}}
-	FeeCoins  = sdk.NewCoins(sdk.NewCoin("loki", sdk.NewInt(1000)))
+	BadCoins  = []sdk.Coin{{Denom: "loki", Amount: math.NewInt(-1)}}
+	FeeCoins  = sdk.NewCoins(sdk.NewCoin("loki", math.NewInt(1000)))
 )
 
 type validateTestCase struct {
 	valid bool
-	msg   sdk.Msg
+	msg   sdk.HasValidateBasic
 }
 
 func performValidateTests(t *testing.T, cases []validateTestCase) {
@@ -61,11 +62,11 @@ func TestMsgType(t *testing.T) {
 }
 
 func TestMsgGetSigners(t *testing.T) {
-	signerAcc := sdk.AccAddress([]byte("01234567890123456789"))
-	signerVal := sdk.ValAddress([]byte("01234567890123456789"))
-	anotherAcc := sdk.AccAddress([]byte("98765432109876543210"))
-	anotherVal := sdk.ValAddress([]byte("98765432109876543210"))
-	treasuryAcc := sdk.AccAddress([]byte("treasury"))
+	signerAcc := sdk.AccAddress("01234567890123456789")
+	signerVal := sdk.ValAddress("01234567890123456789")
+	anotherAcc := sdk.AccAddress("98765432109876543210")
+	anotherVal := sdk.ValAddress("98765432109876543210")
+	treasuryAcc := sdk.AccAddress("treasury")
 	signers := []sdk.AccAddress{signerAcc}
 	emptyCoins := sdk.NewCoins()
 	require.Equal(

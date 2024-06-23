@@ -64,7 +64,7 @@ func signAndBroadcast(
 		return "", err
 	}
 
-	err = tx.Sign(txf, key.Name, txb, true)
+	err = tx.Sign(context.Background(), txf, key.Name, txb, true)
 	if err != nil {
 		return "", err
 	}
