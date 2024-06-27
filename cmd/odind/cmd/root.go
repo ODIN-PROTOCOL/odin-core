@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -85,8 +86,14 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 
 	autoCliOpts := tempApp.AutoCliOpts()
 	initClientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	keyringB, err := client.NewKeyringFromBackend(initClientCtx, "file")
+	if err != nil {
+		panic(fmt.Errorf("couldn't get keyring: %w", err))
+	}
+	initClientCtx.Keyring = keyringB
 	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
 	autoCliOpts.ClientCtx = initClientCtx
+	autoCliOpts.ClientCtx.KeyringDir = ""
 
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
 		panic(err)
