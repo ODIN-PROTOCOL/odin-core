@@ -17,8 +17,9 @@ import (
 	circuittypes "cosmossdk.io/x/circuit/types"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmvm "github.com/CosmWasm/wasmvm/v2"
-	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v9_0"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	icq "github.com/cosmos/ibc-apps/modules/async-icq/v8"
 	icqkeeper "github.com/cosmos/ibc-apps/modules/async-icq/v8/keeper"
 	icqtypes "github.com/cosmos/ibc-apps/modules/async-icq/v8/types"
@@ -29,6 +30,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
+
 	//"github.com/CosmWasm/wasmd/x/wasm"
 	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	//wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
@@ -76,6 +78,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
@@ -148,7 +151,8 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v2_6"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_11"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_12"
-	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v8_1"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v8_3"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v9_0"
 	nodeservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/node"
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -230,7 +234,7 @@ var (
 		// Added 7_10 upgrade
 		v7_11.Upgrade,
 		v7_12.Upgrade,
-		v8_1.Upgrade,
+		v8_3.Upgrade,
 		v9_0.Upgrade,
 	}
 )
@@ -406,6 +410,24 @@ func NewOdinApp(
 		),
 		app.AccountKeeper,
 	)
+
+	enabledSignModes := append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL)
+	txConfigOpts := tx.ConfigOptions{
+		EnabledSignModes:           enabledSignModes,
+		TextualCoinMetadataQueryFn: authtxconfig.NewBankKeeperCoinMetadataQueryFn(app.BankKeeper),
+	}
+	txConfig, err := tx.NewTxConfigWithOptions(
+		appCodec,
+		txConfigOpts,
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create new TxConfig with options: %s", err))
+	}
+	encodingConfig.TxConfig = txConfig
+
+	bApp.SetTxEncoder(txConfig.TxEncoder())
+	bApp.SetTxDecoder(txConfig.TxDecoder())
+
 	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),

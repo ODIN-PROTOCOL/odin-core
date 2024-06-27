@@ -1,4 +1,4 @@
-package v8_1
+package v8_3
 
 import (
 	"context"
@@ -34,7 +34,7 @@ func CreateUpgradeHandler(
 }
 
 var Upgrade = upgrades.Upgrade{
-	UpgradeName:          "v0.8.1",
+	UpgradeName:          "v0.8.3",
 	CreateUpgradeHandler: CreateUpgradeHandler,
 	StoreUpgrades: storetypes.StoreUpgrades{
 		Added: []string{nft.StoreKey, circuittypes.StoreKey},
