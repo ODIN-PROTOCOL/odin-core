@@ -67,15 +67,6 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
 
-			// If default keyring flag is not set, set it to file
-			if !cmd.Flags().Changed(flags.FlagKeyringBackend) {
-				cmd.Flags().Set(flags.FlagKeyringBackend, keyring.BackendFile)
-			}
-			// If default FlagKeyringDir is not set, set it to homedir
-			if !cmd.Flags().Changed(flags.FlagKeyringDir) {
-				cmd.Flags().Set(flags.FlagKeyringDir, app.DefaultNodeHome)
-			}
-
 			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err

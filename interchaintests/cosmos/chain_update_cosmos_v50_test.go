@@ -165,7 +165,7 @@ func CosmosChainFlushIBCTest(t *testing.T, chainName, initialVersion, upgradeCon
 	propId, err := strconv.ParseUint(upgradeTx.ProposalID, 10, 64)
 	require.NoError(t, err, "failed to convert proposal ID to uint64")
 
-	err = chain.VoteOnProposalAllValidators(ctx, upgradeTx.ProposalID, cosmos.ProposalVoteYes)
+	err = chain.VoteOnProposalAllValidators(ctx, propId, cosmos.ProposalVoteYes)
 	require.NoError(t, err, "failed to submit vote")
 
 	_, err = cosmos.PollForProposalStatus(ctx, chain, height, height+int64(haltHeightDelta)+1, propId, govv1beta1.StatusPassed)

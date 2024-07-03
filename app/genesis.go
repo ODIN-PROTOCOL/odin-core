@@ -15,6 +15,8 @@ import (
 	nftmodule "cosmossdk.io/x/nft/module"
 	"cosmossdk.io/x/upgrade"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	"github.com/CosmWasm/wasmd/x/wasm"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	minttypes "github.com/ODIN-PROTOCOL/odin-core/x/mint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -107,6 +109,6 @@ func NewDefaultGenesisState() GenesisState {
 		oracletypes.ModuleName:       cdc.MustMarshalJSON(oracleGenesis),
 		nft.ModuleName:               nftmodule.AppModuleBasic{}.DefaultGenesis(cdc),
 		circuittypes.ModuleName:      circuit.AppModuleBasic{}.DefaultGenesis(cdc),
-		//wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
+		wasmtypes.ModuleName:         wasm.AppModuleBasic{}.DefaultGenesis(cdc),
 	}
 }
