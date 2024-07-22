@@ -15,8 +15,8 @@ import (
 	"cosmossdk.io/core/appmodule"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	wasmvm "github.com/CosmWasm/wasmvm/v2"
+	wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
+	wasmvm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
@@ -31,9 +31,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 
-	//"github.com/CosmWasm/wasmd/x/wasm"
-	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	//wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	//"github.com/ODIN-PROTOCOL/wasmd/x/wasm"
+	//wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
+	//wasmtypes "github.com/ODIN-PROTOCOL/wasmd/x/wasm/types"
 	"cosmossdk.io/log"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
@@ -57,8 +57,9 @@ import (
 	"cosmossdk.io/x/upgrade"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	"github.com/ODIN-PROTOCOL/wasmd/x/wasm"
+	wasmtypes "github.com/ODIN-PROTOCOL/wasmd/x/wasm/types"
+	owasm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -140,7 +141,6 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	"github.com/gorilla/mux"
-	owasm "github.com/odin-protocol/go-owasm/api"
 
 	//"github.com/prometheus/client_golang/prometheus"
 	"github.com/rakyll/statik/fs"
@@ -353,7 +353,7 @@ func NewOdinApp(
 		tkeys:             tkeys,
 		memKeys:           memKeys,
 	}
-	owasmVM, err := owasm.NewVm(owasmCacheSize)
+	owasmVM, err := owasm.NewOracleVm(owasmCacheSize)
 	if err != nil {
 		panic(err)
 	}
@@ -606,6 +606,9 @@ func NewOdinApp(
 	if err != nil {
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
+
+	wasmConfig.MemoryCacheSize = 1000000
+	wasmConfig.ContractDebugMode = true
 
 	acceptedStargateQueries := wasmkeeper.AcceptedQueries{
 		// ibc

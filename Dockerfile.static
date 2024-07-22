@@ -7,15 +7,15 @@ WORKDIR /chain
 COPY . /chain
 
 RUN go mod download
-RUN GO_OWASM_VERSION=$(go list -m github.com/odin-protocol/go-owasm | cut -d ' ' -f 2) && \
-    wget https://github.com/odin-protocol/go-owasm/releases/download/$GO_OWASM_VERSION/libgo_owasm_muslc.x86_64.a -O /lib/libgo_owasm_muslc.x86_64.a
-RUN sha256sum /lib/libgo_owasm_muslc.x86_64.a | grep 52b43f1d1ee7f93eba2316b0dd0ba5bd8eefbf93b11bc7b44447b91a694dc74e
+#RUN GO_OWASM_VERSION=$(go list -m github.com/odin-protocol/go-owasm | cut -d ' ' -f 2) && \
+#    wget https://github.com/odin-protocol/go-owasm/releases/download/$GO_OWASM_VERSION/libgo_owasm_muslc.x86_64.a -O /lib/libgo_owasm_muslc.x86_64.a
+#RUN sha256sum /lib/libgo_owasm_muslc.x86_64.a | grep b4ebce01c2c742c32ba0312793ea3936e4738c50362a631a47b1e42bff878e5d
 
 # Copy the library you want to the final location that will be found by the linker flag `-lgo_owasm_muslc`
-RUN cp /lib/libgo_owasm_muslc.x86_64.a /lib/libgo_owasm_muslc.a
+#RUN cp /lib/libgo_owasm_muslc.x86_64.a /lib/libgo_owasm_muslc.a
 
-ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.0.0/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
-ADD https://github.com/CosmWasm/wasmvm/releases/download/v2.0.0/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
+ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.16/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
+ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.16/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
 #RUN sha256sum /lib/libwasmvm_muslc.aarch64.a | grep 860ba8d7ee4c89c1b0dc3abd4b3658d07ddf5531d2de970cada0699689cc1e33
 #RUN sha256sum /lib/libwasmvm_muslc.x86_64.a | grep 85de2ab3c40236935dbd023c9211130d49c5464494c4b9b09ea33e27a2d6bf87
 

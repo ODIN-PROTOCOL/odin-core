@@ -4,11 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ODIN-PROTOCOL/wasmvm/v2/types"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-
-	"github.com/odin-protocol/go-owasm/api"
 )
 
 var (
@@ -109,7 +108,7 @@ func TestSetReturnData(t *testing.T) {
 
 	penv := mockFreshPrepareEnv()
 	err := penv.SetReturnData(result)
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 
 	eenv := mockExecEnv()
 	err = eenv.SetReturnData(result)
@@ -147,7 +146,7 @@ func TestGetExecuteTime(t *testing.T) {
 	// Should return error if call on prepare environment.
 	penv := mockFreshPrepareEnv()
 	_, err := penv.GetExecuteTime()
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 
 	eenv := mockExecEnv()
 	v, err := eenv.GetExecuteTime()
@@ -159,7 +158,7 @@ func TestGetAnsCount(t *testing.T) {
 	// Should return error if call on prepare environment.
 	penv := mockFreshPrepareEnv()
 	_, err := penv.GetAnsCount()
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 
 	eenv := mockExecEnv()
 	v, err := eenv.GetAnsCount()
@@ -185,19 +184,19 @@ func TestGetExternalData(t *testing.T) {
 	require.Equal(t, int64(-1), status)
 
 	_, err = env.GetExternalData(1, 100)
-	require.Equal(t, api.ErrBadValidatorIndex, err)
+	require.Equal(t, types.ErrBadValidatorIndex, err)
 	_, err = env.GetExternalDataStatus(1, 100)
-	require.Equal(t, api.ErrBadValidatorIndex, err)
+	require.Equal(t, types.ErrBadValidatorIndex, err)
 
 	_, err = env.GetExternalData(1, -1)
-	require.ErrorIs(t, err, api.ErrBadValidatorIndex)
+	require.ErrorIs(t, err, types.ErrBadValidatorIndex)
 	_, err = env.GetExternalDataStatus(1, -1)
-	require.ErrorIs(t, err, api.ErrBadValidatorIndex)
+	require.ErrorIs(t, err, types.ErrBadValidatorIndex)
 
 	_, err = env.GetExternalData(100, 0)
-	require.ErrorIs(t, err, api.ErrBadExternalID)
+	require.ErrorIs(t, err, types.ErrBadExternalID)
 	_, err = env.GetExternalDataStatus(100, 0)
-	require.ErrorIs(t, err, api.ErrBadExternalID)
+	require.ErrorIs(t, err, types.ErrBadExternalID)
 }
 
 func TestFailedGetExternalData(t *testing.T) {
@@ -205,9 +204,9 @@ func TestFailedGetExternalData(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = penv.GetExternalData(1, 1)
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 	_, err = penv.GetExternalDataStatus(1, 1)
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 }
 
 func TestAskExternalData(t *testing.T) {
@@ -232,7 +231,7 @@ func TestAskExternalDataOnTooSmallSpan(t *testing.T) {
 	penv := mockFreshPrepareEnv()
 
 	err := penv.AskExternalData(1, 3, make([]byte, DefaultMaxCalldataSize+1))
-	require.Equal(t, api.ErrSpanTooSmall, err)
+	require.Equal(t, types.ErrSpanTooSmall, err)
 	require.Equal(t, []RawRequest(nil), penv.GetRawRequests())
 }
 func TestAskTooManyExternalData(t *testing.T) {
@@ -253,7 +252,7 @@ func TestAskTooManyExternalData(t *testing.T) {
 	require.Equal(t, expectRawReq, penv.GetRawRequests())
 
 	err = penv.AskExternalData(4, 4, []byte("CALLDATA4"))
-	require.Equal(t, api.ErrTooManyExternalData, err)
+	require.Equal(t, types.ErrTooManyExternalData, err)
 	require.Equal(t, expectRawReq, penv.GetRawRequests())
 }
 
@@ -266,14 +265,14 @@ func TestAskDuplicateExternalID(t *testing.T) {
 	require.NoError(t, err)
 
 	err = penv.AskExternalData(1, 3, []byte("CALLDATA3"))
-	require.Equal(t, api.ErrDuplicateExternalID, err)
+	require.Equal(t, types.ErrDuplicateExternalID, err)
 }
 
 func TestAskExternalDataOnExecEnv(t *testing.T) {
 	env := mockExecEnv()
 	calldata := []byte("CALLDATA")
 	err := env.AskExternalData(2, 2, calldata)
-	require.Equal(t, api.ErrWrongPeriodAction, err)
+	require.Equal(t, types.ErrWrongPeriodAction, err)
 }
 
 func TestGetRawRequests(t *testing.T) {

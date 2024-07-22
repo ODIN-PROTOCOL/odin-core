@@ -3,12 +3,12 @@ package types
 import (
 	"time"
 
-	"github.com/odin-protocol/go-owasm/api"
+	"github.com/ODIN-PROTOCOL/wasmvm/v2/types"
 )
 
 var (
-	_ api.EnvInterface = (*PrepareEnv)(nil)
-	_ api.EnvInterface = (*ExecuteEnv)(nil)
+	_ types.EnvInterface = (*PrepareEnv)(nil)
+	_ types.EnvInterface = (*ExecuteEnv)(nil)
 )
 
 // BaseEnv combines shared functions used in prepare and execution Owasm program,
@@ -29,7 +29,7 @@ func (env *BaseEnv) GetCalldata() []byte {
 
 // SetReturnData implements Owasm ExecEnv interface.
 func (env *BaseEnv) SetReturnData(data []byte) error {
-	return api.ErrWrongPeriodAction
+	return types.ErrWrongPeriodAction
 }
 
 // GetAskCount implements Owasm ExecEnv interface.
@@ -49,27 +49,27 @@ func (env *BaseEnv) GetPrepareTime() int64 {
 
 // GetExecuteTime implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetExecuteTime() (int64, error) {
-	return 0, api.ErrWrongPeriodAction
+	return 0, types.ErrWrongPeriodAction
 }
 
 // GetAnsCount implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetAnsCount() (int64, error) {
-	return 0, api.ErrWrongPeriodAction
+	return 0, types.ErrWrongPeriodAction
 }
 
 // AskExternalData implements Owasm ExecEnv interface.
 func (env *BaseEnv) AskExternalData(eid int64, did int64, data []byte) error {
-	return api.ErrWrongPeriodAction
+	return types.ErrWrongPeriodAction
 }
 
 // GetExternalDataStatus implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetExternalDataStatus(eid int64, vid int64) (int64, error) {
-	return 0, api.ErrWrongPeriodAction
+	return 0, types.ErrWrongPeriodAction
 }
 
 // GetExternalData implements Owasm ExecEnv interface.
 func (env *BaseEnv) GetExternalData(eid int64, vid int64) ([]byte, error) {
-	return nil, api.ErrWrongPeriodAction
+	return nil, types.ErrWrongPeriodAction
 }
 
 // PrepareEnv implements ExecEnv interface only expected function and panic on non-prepare functions.
@@ -95,14 +95,14 @@ func NewPrepareEnv(req Request, maxCalldataSize int64, maxRawRequests int64, spa
 // AskExternalData implements Owasm ExecEnv interface.
 func (env *PrepareEnv) AskExternalData(eid int64, did int64, data []byte) error {
 	if int64(len(data)) > env.maxCalldataSize {
-		return api.ErrSpanTooSmall
+		return types.ErrSpanTooSmall
 	}
 	if int64(len(env.rawRequests)) >= env.maxRawRequests {
-		return api.ErrTooManyExternalData
+		return types.ErrTooManyExternalData
 	}
 	for _, raw := range env.rawRequests {
 		if raw.ExternalID == ExternalID(eid) {
-			return api.ErrDuplicateExternalID
+			return types.ErrDuplicateExternalID
 		}
 	}
 	env.rawRequests = append(env.rawRequests, NewRawRequest(
@@ -157,7 +157,7 @@ func (env *ExecuteEnv) GetAnsCount() (int64, error) {
 // SetReturnData implements Owasm ExecEnv interface.
 func (env *ExecuteEnv) SetReturnData(data []byte) error {
 	if env.Retdata != nil {
-		return api.ErrRepeatSetReturnData
+		return types.ErrRepeatSetReturnData
 	}
 	env.Retdata = data
 	return nil
@@ -165,7 +165,7 @@ func (env *ExecuteEnv) SetReturnData(data []byte) error {
 
 func (env *ExecuteEnv) getExternalDataFull(eid int64, valIdx int64) ([]byte, int64, error) {
 	if valIdx < 0 || valIdx >= int64(len(env.request.RequestedValidators)) {
-		return nil, 0, api.ErrBadValidatorIndex
+		return nil, 0, types.ErrBadValidatorIndex
 	}
 	valAddr := env.request.RequestedValidators[valIdx]
 	valReports, ok := env.reports[valAddr]
@@ -174,7 +174,7 @@ func (env *ExecuteEnv) getExternalDataFull(eid int64, valIdx int64) ([]byte, int
 	}
 	valReport, ok := valReports[ExternalID(eid)]
 	if !ok {
-		return nil, 0, api.ErrBadExternalID
+		return nil, 0, types.ErrBadExternalID
 	}
 	return valReport.Data, int64(valReport.ExitCode), nil
 }

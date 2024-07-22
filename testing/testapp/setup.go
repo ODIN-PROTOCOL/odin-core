@@ -15,6 +15,7 @@ import (
 	"cosmossdk.io/math"
 	"cosmossdk.io/store/snapshots"
 	snapshottypes "cosmossdk.io/store/snapshots/types"
+	owasm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/crypto"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -37,7 +38,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
-	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
 	odinapp "github.com/ODIN-PROTOCOL/odin-core/app"
@@ -168,7 +168,7 @@ func init() {
 		return Validators[i].PubKey.Address().String() < Validators[j].PubKey.Address().String()
 	})
 
-	owasmVM, err := owasm.NewVm(10)
+	owasmVM, err := owasm.NewOracleVm(10)
 	if err != nil {
 		panic(err)
 	}

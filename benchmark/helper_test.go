@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	owasm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	types "github.com/cometbft/cometbft/abci/types"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtypes "github.com/cometbft/cometbft/types"
@@ -16,7 +17,6 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	owasm "github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/pkg/obi"
@@ -157,7 +157,7 @@ func DecodeEvents(events []types.Event) []Event {
 	for _, event := range events {
 		attrs := make(map[string]string, 0)
 		for _, attributes := range event.Attributes {
-			attrs[string(attributes.Key)] = string(attributes.Value)
+			attrs[attributes.Key] = attributes.Value
 		}
 		evs = append(evs, Event{
 			Type:       event.Type,
@@ -182,7 +182,7 @@ func LogEvents(b testing.TB, events []types.Event) {
 func GetFirstAttributeOfLastEventValue(events []types.Event) (int, error) {
 	evt := events[len(events)-1]
 	attr := evt.Attributes[0]
-	value, err := strconv.Atoi(string(attr.Value))
+	value, err := strconv.Atoi(attr.Value)
 
 	return value, err
 }
@@ -195,7 +195,7 @@ func InitOwasmTestEnv(
 	stringLength int,
 ) (*owasm.Vm, []byte, oracletypes.Request) {
 	// prepare owasm vm
-	owasmVM, err := owasm.NewVm(cacheSize)
+	owasmVM, err := owasm.NewOracleVm(cacheSize)
 	require.NoError(b, err)
 
 	// prepare owasm code
