@@ -48,7 +48,7 @@ const (
 func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 	tempApp := app.NewOdinApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, simtestutil.EmptyAppOptions{}, 100)
 	encodingConfig := app.MakeEncodingConfig()
-	
+
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Marshaler).
 		WithInterfaceRegistry(encodingConfig.InterfaceRegistry).
@@ -58,7 +58,7 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithHomeDir(app.DefaultNodeHome).
 		WithViper("ODIN")
-	
+
 	rootCmd := &cobra.Command{
 		Use:   "odind",
 		Short: "OdinChain App",
@@ -66,15 +66,6 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())
 			cmd.SetErr(cmd.ErrOrStderr())
-			
-			// If default keyring flag is not set, set it to file
-			if !cmd.Flags().Changed(flags.FlagKeyringBackend) {
-				cmd.Flags().Set(flags.FlagKeyringBackend, keyring.BackendFile)
-			}
-			// If default FlagKeyringDir is not set, set it to homedir
-			if !cmd.Flags().Changed(flags.FlagKeyringDir) {
-				cmd.Flags().Set(flags.FlagKeyringDir, app.DefaultNodeHome)
-			}
 
 			initClientCtx, err := client.ReadPersistentCommandFlags(initClientCtx, cmd.Flags())
 			if err != nil {
@@ -101,7 +92,7 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 
 				initClientCtx = initClientCtx.WithTxConfig(txConfig)
 			}
-			
+
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
@@ -113,17 +104,17 @@ func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
 	}
 
 	initRootCmd(rootCmd, encodingConfig, tempApp.BasicModuleManager)
-	
+
 	autoCliOpts := tempApp.AutoCliOpts()
 	initClientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
 
 	autoCliOpts.ClientCtx = initClientCtx
 	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
-	autoCliOpts.ClientCtx.KeyringDir = "" 
-	
+	autoCliOpts.ClientCtx.KeyringDir = ""
+
 	// TODO!: Add Textual signing mode to app.go
 	enabledSignModes := append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL)
-	autoCliOpts.TxConfigOpts =  tx.ConfigOptions{
+	autoCliOpts.TxConfigOpts = tx.ConfigOptions{
 		EnabledSignModes:           enabledSignModes,
 		TextualCoinMetadataQueryFn: authtxconfig.NewGRPCCoinMetadataQueryFn(initClientCtx),
 	}
