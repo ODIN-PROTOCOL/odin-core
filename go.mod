@@ -22,7 +22,7 @@ require (
 	cosmossdk.io/x/tx v0.13.3
 	cosmossdk.io/x/upgrade v0.1.1
 	github.com/ODIN-PROTOCOL/wasmd v0.51.1
-	github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.16
+	github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.17
 	github.com/bytecodealliance/wasmtime-go/v20 v20.0.0
 	github.com/cometbft/cometbft v0.38.7
 	github.com/cosmos/cosmos-db v1.0.2
