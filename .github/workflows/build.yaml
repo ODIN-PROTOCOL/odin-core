@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile.ci
+          file: ./Dockerfile.static
           push: true
           tags: odinprotocol/core:latest
 

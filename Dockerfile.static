@@ -24,6 +24,8 @@ RUN LEDGER_ENABLED=true BUILD_TAGS=muslc LINK_STATICALLY=true make install \
     && echo "Ensuring binary is statically linked ..." \
     && (file /go/bin/odind | grep "statically linked")
 
+#RUN go test ./...
+
 # --------------------------------------------------------
 FROM alpine:3.16
 
