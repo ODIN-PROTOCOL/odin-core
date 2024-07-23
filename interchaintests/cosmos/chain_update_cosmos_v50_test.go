@@ -32,7 +32,7 @@ const (
 )
 
 func TestOdinFlushIBC(t *testing.T) {
-	CosmosChainFlushIBCTest(t, "odin", "v0.7.12", "odinprotocol/core", "v0.8.1", "v0.8.1")
+	CosmosChainFlushIBCTest(t, "odin", "v0.7.12", "ODIN-PROTOCOL/core", "v0.8.1", "v0.8.1")
 }
 
 func CosmosChainFlushIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion, upgradeName string) {
