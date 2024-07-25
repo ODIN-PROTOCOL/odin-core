@@ -14,8 +14,8 @@ RUN go mod download
 # Copy the library you want to the final location that will be found by the linker flag `-lgo_owasm_muslc`
 #RUN cp /lib/libgo_owasm_muslc.x86_64.a /lib/libgo_owasm_muslc.a
 
-ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.16/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
-ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.16/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
+ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.18/libwasmvm_muslc.aarch64.a /lib/libwasmvm_muslc.aarch64.a
+ADD https://github.com/ODIN-PROTOCOL/wasmvm/releases/download/v2.0.18/libwasmvm_muslc.x86_64.a /lib/libwasmvm_muslc.x86_64.a
 #RUN sha256sum /lib/libwasmvm_muslc.aarch64.a | grep 860ba8d7ee4c89c1b0dc3abd4b3658d07ddf5531d2de970cada0699689cc1e33
 #RUN sha256sum /lib/libwasmvm_muslc.x86_64.a | grep 85de2ab3c40236935dbd023c9211130d49c5464494c4b9b09ea33e27a2d6bf87
 

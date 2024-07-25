@@ -29,7 +29,7 @@ import (
 //)
 
 func TestOdinWasmIBC(t *testing.T) {
-	CosmosChainWasmIBCTest(t, "odin", "v0.8.4", "odinprotocol/core", "v0.9.2", "v0.9.0")
+	CosmosChainWasmIBCTest(t, "odin", "v0.8.4", "odinprotocol/core", "v0.9.3", "v0.9.0")
 }
 
 func CosmosChainWasmIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion, upgradeName string) {
