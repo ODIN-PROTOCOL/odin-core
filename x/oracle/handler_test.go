@@ -15,12 +15,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/odin-protocol/go-owasm/api"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ODIN-PROTOCOL/odin-core/testing/testapp"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
+	wasmtypes "github.com/ODIN-PROTOCOL/wasmvm/v2/types"
 )
 
 func TestCreateDataSourceSuccess(t *testing.T) {
@@ -274,7 +274,7 @@ func TestCreateOracleScriptFail(t *testing.T) {
 		testapp.Alice.Address,
 	)
 	res, err := oracle.NewHandler(k)(ctx, msg)
-	testapp.CheckErrorf(t, err, types.ErrOwasmCompilation, "caused by %s", api.ErrValidation)
+	testapp.CheckErrorf(t, err, types.ErrOwasmCompilation, "caused by %s", wasmtypes.ErrValidation)
 	require.Nil(t, res)
 	// Bad Gzip
 	var buf bytes.Buffer
@@ -383,7 +383,7 @@ func TestEditOracleScriptFail(t *testing.T) {
 		testapp.Owner.Address,
 	)
 	res, err = oracle.NewHandler(k)(ctx, msg)
-	testapp.CheckErrorf(t, err, types.ErrOwasmCompilation, "caused by %s", api.ErrValidation)
+	testapp.CheckErrorf(t, err, types.ErrOwasmCompilation, "caused by %s", wasmtypes.ErrValidation)
 	require.Nil(t, res)
 	// Bad Gzip
 	var buf bytes.Buffer

@@ -15,15 +15,25 @@ import (
 	"cosmossdk.io/core/appmodule"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
+	wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
+	wasmvm "github.com/ODIN-PROTOCOL/wasmvm/v2"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
+	icq "github.com/cosmos/ibc-apps/modules/async-icq/v8"
+	icqkeeper "github.com/cosmos/ibc-apps/modules/async-icq/v8/keeper"
+	icqtypes "github.com/cosmos/ibc-apps/modules/async-icq/v8/types"
+	wasmlc "github.com/cosmos/ibc-go/modules/light-clients/08-wasm"
+	wasmlckeeper "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/keeper"
+	wasmlctypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/types"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 
-	//"github.com/CosmWasm/wasmd/x/wasm"
-	//wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	//wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	//"github.com/ODIN-PROTOCOL/wasmd/x/wasm"
+	//wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
+	//wasmtypes "github.com/ODIN-PROTOCOL/wasmd/x/wasm/types"
 	"cosmossdk.io/log"
 	"github.com/ODIN-PROTOCOL/odin-core/x/mint"
 	mintkeeper "github.com/ODIN-PROTOCOL/odin-core/x/mint/keeper"
@@ -47,6 +57,9 @@ import (
 	"cosmossdk.io/x/upgrade"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	"github.com/ODIN-PROTOCOL/wasmd/x/wasm"
+	wasmtypes "github.com/ODIN-PROTOCOL/wasmd/x/wasm/types"
+	owasm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -128,7 +141,6 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	"github.com/gorilla/mux"
-	owasm "github.com/odin-protocol/go-owasm/api"
 
 	//"github.com/prometheus/client_golang/prometheus"
 	"github.com/rakyll/statik/fs"
@@ -140,6 +152,7 @@ import (
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_11"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v7_12"
 	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v8_3"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v9_3"
 	nodeservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/node"
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
@@ -196,7 +209,9 @@ var (
 		oracle.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		circuit.AppModuleBasic{},
-		//wasm.AppModuleBasic{},
+		wasm.AppModuleBasic{},
+		wasmlc.AppModuleBasic{},
+		icq.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -210,7 +225,8 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:         nil,
 		nft.ModuleName:                 nil,
-		//wasmtypes.ModuleName:           {authtypes.Burner},
+		wasmtypes.ModuleName:           {authtypes.Burner},
+		icqtypes.ModuleName:            nil,
 	}
 
 	Upgrades = []upgrades.Upgrade{
@@ -219,6 +235,7 @@ var (
 		v7_11.Upgrade,
 		v7_12.Upgrade,
 		v8_3.Upgrade,
+		v9_3.Upgrade,
 	}
 )
 
@@ -320,7 +337,9 @@ func NewOdinApp(
 		nft.StoreKey,
 		circuittypes.StoreKey,
 		oracletypes.StoreKey,
-		//wasmtypes.StoreKey,
+		wasmtypes.StoreKey,
+		wasmlctypes.StoreKey,
+		icqtypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -334,7 +353,7 @@ func NewOdinApp(
 		tkeys:             tkeys,
 		memKeys:           memKeys,
 	}
-	owasmVM, err := owasm.NewVm(owasmCacheSize)
+	owasmVM, err := owasm.NewOracleVm(owasmCacheSize)
 	if err != nil {
 		panic(err)
 	}
@@ -365,7 +384,8 @@ func NewOdinApp(
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedOracleKeeper := app.CapabilityKeeper.ScopeToModule(oracletypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
-	//scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+	scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+	scopedICQKeeper := app.CapabilityKeeper.ScopeToModule(icqtypes.ModuleName)
 	app.CapabilityKeeper.Seal()
 
 	// Add keepers.
@@ -552,6 +572,19 @@ func NewOdinApp(
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 	transferIBCModule := transfer.NewIBCModule(app.TransferKeeper)
 
+	// ICQ Keeper
+	app.ICQKeeper = icqkeeper.NewKeeper(
+		appCodec,
+		app.keys[icqtypes.StoreKey],
+		app.IBCKeeper.ChannelKeeper, // may be replaced with middleware
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.PortKeeper,
+		scopedICQKeeper,
+		bApp.GRPCQueryRouter(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+	icqStack := icq.NewIBCModule(app.ICQKeeper)
+
 	app.ICAHostKeeper = icahostkeeper.NewKeeper(
 		appCodec, keys[icahosttypes.StoreKey],
 		app.GetSubspace(icahosttypes.SubModuleName),
@@ -563,39 +596,100 @@ func NewOdinApp(
 		app.MsgServiceRouter(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
+	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
 	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
 
-	//wasmDir := filepath.Join(homePath, "wasm")
-	//wasmConfig, err := wasm.ReadWasmConfig(appOpts)
-	//if err != nil {
-	//	panic(fmt.Sprintf("error while reading wasm config: %s", err))
-	//}
-	//
+	wasmDir := filepath.Join(homePath, "wasm")
+	wasmConfig, err := wasm.ReadWasmConfig(appOpts)
+	if err != nil {
+		panic(fmt.Sprintf("error while reading wasm config: %s", err))
+	}
+
+	wasmConfig.MemoryCacheSize = 1000000
+	wasmConfig.ContractDebugMode = true
+
+	acceptedStargateQueries := wasmkeeper.AcceptedQueries{
+		// ibc
+		"/ibc.core.client.v1.Query/ClientState":    &ibcclienttypes.QueryClientStateResponse{},
+		"/ibc.core.client.v1.Query/ConsensusState": &ibcclienttypes.QueryConsensusStateResponse{},
+		"/ibc.core.connection.v1.Query/Connection": &ibcconnectiontypes.QueryConnectionResponse{},
+
+		// governance
+		"/cosmos.gov.v1beta1.Query/Vote": &govv1.QueryVoteResponse{},
+
+		// distribution
+		"/cosmos.distribution.v1beta1.Query/DelegationRewards": &distrtypes.QueryDelegationRewardsResponse{},
+
+		// staking
+		"/cosmos.staking.v1beta1.Query/Delegation":          &stakingtypes.QueryDelegationResponse{},
+		"/cosmos.staking.v1beta1.Query/Redelegations":       &stakingtypes.QueryRedelegationsResponse{},
+		"/cosmos.staking.v1beta1.Query/UnbondingDelegation": &stakingtypes.QueryUnbondingDelegationResponse{},
+		"/cosmos.staking.v1beta1.Query/Validator":           &stakingtypes.QueryValidatorResponse{},
+		"/cosmos.staking.v1beta1.Query/Params":              &stakingtypes.QueryParamsResponse{},
+		"/cosmos.staking.v1beta1.Query/Pool":                &stakingtypes.QueryPoolResponse{},
+	}
+
+	querierOpts := wasmkeeper.WithQueryPlugins(
+		&wasmkeeper.QueryPlugins{
+			Stargate: wasmkeeper.AcceptListStargateQuerier(acceptedStargateQueries, bApp.GRPCQueryRouter(), appCodec),
+		})
+
+	wasmOpts := append(GetWasmOpts(appOpts), querierOpts)
+
 	//// The last arguments can contain custom message handlers, and custom query handlers,
 	//// if we want to allow any custom callbacks
-	//availableCapabilities := strings.Join(AllCapabilities(), ",")
-	//app.WasmKeeper = wasmkeeper.NewKeeper(
-	//	appCodec,
-	//	keys[wasmtypes.StoreKey],
-	//	app.AccountKeeper,
-	//	app.BankKeeper,
-	//	app.StakingKeeper,
-	//	distrkeeper.NewQuerier(app.DistrKeeper),
-	//	app.IBCKeeper.ChannelKeeper, // ISC4 Wrapper: fee IBC middleware
-	//	app.IBCKeeper.ChannelKeeper,
-	//	&app.IBCKeeper.PortKeeper,
-	//	scopedWasmKeeper,
-	//	app.TransferKeeper,
-	//	app.MsgServiceRouter(),
-	//	app.GRPCQueryRouter(),
-	//	wasmDir,
-	//	wasmConfig,
-	//	availableCapabilities,
-	//	authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	//	GetWasmOpts(appOpts)...,
-	//)
+	app.WasmKeeper = wasmkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.StakingKeeper,
+		distrkeeper.NewQuerier(app.DistrKeeper),
+		app.IBCKeeper.ChannelKeeper, // ISC4 Wrapper: fee IBC middleware
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.PortKeeper,
+		scopedWasmKeeper,
+		app.TransferKeeper,
+		app.MsgServiceRouter(),
+		app.GRPCQueryRouter(),
+		wasmDir,
+		wasmConfig,
+		wasmkeeper.BuiltInCapabilities(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		wasmOpts...,
+	)
+
+	lcWasmer, err := wasmvm.NewVM(filepath.Join(homePath, "light-client-wasm"), wasmkeeper.BuiltInCapabilities(), 32, wasmConfig.ContractDebugMode, wasmConfig.MemoryCacheSize)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create odin wasm vm for 08-wasm: %s", err))
+	}
+
+	// 08-wasm light client
+	accepted := make([]string, 0)
+	for k := range acceptedStargateQueries {
+		accepted = append(accepted, k)
+	}
+
+	wasmLightClientQuerier := wasmlctypes.QueryPlugins{
+		// Custom: MyCustomQueryPlugin(),
+		// `myAcceptList` is a `[]string` containing the list of gRPC query paths that the chain wants to allow for the `08-wasm` module to query.
+		// These queries must be registered in the chain's gRPC query router, be deterministic, and track their gas usage.
+		// The `AcceptListStargateQuerier` function will return a query plugin that will only allow queries for the paths in the `myAcceptList`.
+		// The query responses are encoded in protobuf unlike the implementation in `x/wasm`.
+		Stargate: wasmlctypes.AcceptListStargateQuerier(accepted),
+	}
+
+	app.WasmClientKeeper = wasmlckeeper.NewKeeperWithVM(
+		appCodec,
+		runtime.NewKVStoreService(keys[wasmlctypes.StoreKey]),
+		app.IBCKeeper.ClientKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		lcWasmer,
+		bApp.GRPCQueryRouter(),
+		wasmlckeeper.WithQueryPlugins(&wasmLightClientQuerier),
+	)
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
@@ -617,16 +711,17 @@ func NewOdinApp(
 	oracleModule := oracle.NewAppModule(app.OracleKeeper, app.GetSubspace(oracletypes.ModuleName))
 	oracleIBCModule := oracle.NewIBCModule(app.OracleKeeper)
 
-	//var wasmStack porttypes.IBCModule
-	//wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper)
+	var wasmStack porttypes.IBCModule
+	wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.
 		AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
-		AddRoute(oracletypes.ModuleName, oracleIBCModule)
-	//AddRoute(wasmtypes.ModuleName, wasmStack)
+		AddRoute(oracletypes.ModuleName, oracleIBCModule).
+		AddRoute(wasmtypes.ModuleName, wasmStack).
+		AddRoute(icqtypes.ModuleName, icqStack)
 
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -715,7 +810,9 @@ func NewOdinApp(
 		transferModule,
 		icaModule,
 		oracleModule,
-		//wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
+		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
+		wasmlc.NewAppModule(app.AppKeepers.WasmClientKeeper),
+		icq.NewAppModule(app.AppKeepers.ICQKeeper, app.GetSubspace(icqtypes.ModuleName)),
 	)
 
 	// BasicModuleManager defines the module BasicManager is in charge of setting up basic,
@@ -764,7 +861,9 @@ func NewOdinApp(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		//wasmtypes.ModuleName,
+		wasmtypes.ModuleName,
+		icqtypes.ModuleName,
+		wasmlctypes.ModuleName,
 	)
 	app.ModuleManager.SetOrderEndBlockers(
 		crisistypes.ModuleName,
@@ -789,7 +888,9 @@ func NewOdinApp(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		//wasmtypes.ModuleName,
+		wasmtypes.ModuleName,
+		icqtypes.ModuleName,
+		wasmlctypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -822,7 +923,9 @@ func NewOdinApp(
 		consensusparamtypes.ModuleName,
 		oracletypes.ModuleName,
 		circuittypes.ModuleName,
-		//wasmtypes.ModuleName,
+		wasmtypes.ModuleName,
+		icqtypes.ModuleName,
+		wasmlctypes.ModuleName,
 	)
 
 	// NOTE: upgrade module is required to be prioritized
@@ -873,13 +976,13 @@ func NewOdinApp(
 				FeegrantKeeper:  app.FeegrantKeeper,
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
-			OracleKeeper:  &app.OracleKeeper,
-			IBCKeeper:     app.IBCKeeper,
-			StakingKeeper: app.StakingKeeper,
-			CircuitKeeper: &app.CircuitKeeper,
-			//WasmKeeper:        &app.WasmKeeper,
-			//WasmConfig:        &wasmConfig,
-			//TXCounterStoreKey: keys[wasmtypes.StoreKey],
+			OracleKeeper:      &app.OracleKeeper,
+			IBCKeeper:         app.IBCKeeper,
+			StakingKeeper:     app.StakingKeeper,
+			CircuitKeeper:     &app.CircuitKeeper,
+			WasmKeeper:        &app.WasmKeeper,
+			WasmConfig:        &wasmConfig,
+			TXCounterStoreKey: runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
 		},
 	)
 	if err != nil {
@@ -896,7 +999,8 @@ func NewOdinApp(
 	if snapshotManager := app.SnapshotManager(); snapshotManager != nil {
 		err := snapshotManager.RegisterExtensions(
 			oraclekeeper.NewOracleSnapshotter(app.CommitMultiStore(), &app.OracleKeeper),
-			//wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+			wasmlckeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.AppKeepers.WasmClientKeeper),
 		)
 		if err != nil {
 			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
@@ -909,19 +1013,24 @@ func NewOdinApp(
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
 		}
 
-		//ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
+		ctx := app.BaseApp.NewUncachedContext(true, cmtproto.Header{})
+
+		if err := wasmlckeeper.InitializePinnedCodes(ctx); err != nil {
+			tmos.Exit(fmt.Sprintf("wasmlckeeper failed initialize pinned codes %s", err))
+		}
 
 		// Initialize pinned codes in wasmvm as they are not persisted there
-		//if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
-		//	tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
-		//}
+		if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
+			panic(fmt.Sprintf("failed initialize pinned codes %s", err))
+		}
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	app.ScopedOracleKeeper = scopedOracleKeeper
-	//app.ScopedWasmKeeper = scopedWasmKeeper
+	app.ScopedWasmKeeper = scopedWasmKeeper
 	app.ScopedICAHostKeeper = scopedICAHostKeeper
+	app.ScopedICQKeeper = scopedICQKeeper
 
 	return app
 }
@@ -1166,7 +1275,8 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName).WithKeyTable(ibctransfertypes.ParamKeyTable())
 	paramsKeeper.Subspace(icahosttypes.SubModuleName).WithKeyTable(icahosttypes.ParamKeyTable())
 	paramsKeeper.Subspace(oracletypes.ModuleName)
-	//paramsKeeper.Subspace(wasmtypes.ModuleName)
+	paramsKeeper.Subspace(wasmtypes.ModuleName)
+	paramsKeeper.Subspace(icqtypes.ModuleName)
 
 	return paramsKeeper
 }
@@ -1204,25 +1314,11 @@ func (app *OdinApp) setupUpgradeStoreLoaders() {
 	}
 }
 
-func AllCapabilities() []string {
-	return []string{
-		"iterator",
-		"staking",
-		"stargate",
-		"cosmwasm_1_1",
-		"cosmwasm_1_2",
-		"cosmwasm_1_3",
-		"cosmwasm_1_4",
+func GetWasmOpts(appOpts servertypes.AppOptions) []wasmkeeper.Option {
+	var wasmOpts []wasmkeeper.Option
+	if cast.ToBool(appOpts.Get("telemetry.enabled")) {
+		wasmOpts = append(wasmOpts, wasmkeeper.WithVMCacheMetrics(prometheus.DefaultRegisterer))
 	}
-}
 
-//func GetWasmOpts(appOpts servertypes.AppOptions) []wasmkeeper.Option {
-//	var wasmOpts []wasmkeeper.Option
-//	if cast.ToBool(appOpts.Get("telemetry.enabled")) {
-//		wasmOpts = append(wasmOpts, wasmkeeper.WithVMCacheMetrics(prometheus.DefaultRegisterer))
-//	}
-//
-//	//wasmOpts = append(wasmOpts, wasmkeeper.WithGasRegister(NewWasmGasRegister()))
-//
-//	return wasmOpts
-//}
+	return wasmOpts
+}
