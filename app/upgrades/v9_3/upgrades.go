@@ -1,4 +1,4 @@
-package v9_0
+package v9_3
 
 import (
 	"context"
@@ -35,7 +35,7 @@ func CreateUpgradeHandler(
 }
 
 var Upgrade = upgrades.Upgrade{
-	UpgradeName:          "v0.9.0",
+	UpgradeName:          "v0.9.3",
 	CreateUpgradeHandler: CreateUpgradeHandler,
 	StoreUpgrades: storetypes.StoreUpgrades{
 		Added: []string{wasmtypes.StoreKey, wasmlctypes.StoreKey, icqtypes.StoreKey},
