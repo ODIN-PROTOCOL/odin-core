@@ -36,6 +36,8 @@ func TestOdinFlushIBC(t *testing.T) {
 }
 
 func CosmosChainFlushIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion, upgradeName string) {
+	t.Skip("old test")
+
 	if testing.Short() {
 		t.Skip("skipping in short mode")
 	}

@@ -24,7 +24,7 @@ require (
 	github.com/ODIN-PROTOCOL/wasmd v0.51.1
 	github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.16
 	github.com/bytecodealliance/wasmtime-go/v20 v20.0.0
-	github.com/cometbft/cometbft v0.38.7
+	github.com/cometbft/cometbft v0.38.10
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.7
@@ -301,7 +301,6 @@ require (
 replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
-	github.com/cometbft/cometbft => github.com/ODIN-PROTOCOL/cometbft v0.38.8
 	github.com/cosmos/ibc-go/modules/light-clients/08-wasm => github.com/ODIN-PROTOCOL/ibc-go/modules/light-clients/08-wasm v0.1.1-0.20240722162036-ab84c6f0f48b
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
