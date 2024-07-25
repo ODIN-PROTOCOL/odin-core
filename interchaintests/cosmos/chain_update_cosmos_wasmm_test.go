@@ -29,7 +29,7 @@ import (
 //)
 
 func TestOdinWasmIBC(t *testing.T) {
-	CosmosChainWasmIBCTest(t, "odin", "v0.8.4", "odinprotocol/core", "v0.9.3", "v0.9.0")
+	CosmosChainWasmIBCTest(t, "odin", "v0.8.4", "odinprotocol/core", "v0.9.3", "v0.9.3")
 }
 
 func CosmosChainWasmIBCTest(t *testing.T, chainName, initialVersion, upgradeContainerRepo, upgradeVersion, upgradeName string) {
@@ -140,7 +140,7 @@ func CosmosChainWasmIBCTest(t *testing.T, chainName, initialVersion, upgradeCont
 	prop, err := chain.BuildProposal([]cosmos.ProtoMessage{&upgradetypes.MsgSoftwareUpgrade{
 		Authority: govAddr,
 		Plan: upgradetypes.Plan{
-			Name:   "v0.9.0",
+			Name:   "v0.9.3",
 			Height: haltHeight,
 			Info:   "",
 		},
