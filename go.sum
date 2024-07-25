@@ -258,8 +258,8 @@ github.com/ODIN-PROTOCOL/ibc-go/modules/light-clients/08-wasm v0.1.1-0.202407221
 github.com/ODIN-PROTOCOL/ibc-go/modules/light-clients/08-wasm v0.1.1-0.20240722162036-ab84c6f0f48b/go.mod h1:pz9iDcct3yc0VQN/10fhTezHMK+o6egGsmKSVXFkPIE=
 github.com/ODIN-PROTOCOL/wasmd v0.51.1 h1:YrCKatR2QuHIJDjueLABfnU4XZ+tMmmTqiyXUqD43M0=
 github.com/ODIN-PROTOCOL/wasmd v0.51.1/go.mod h1:/FFZ3fX20ATe5MPp4EkNTu9aMGQDkp7yXpmjtSmyyUw=
-github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.17 h1:YwqhfvwpTgy8neX8rHVJWt+Fx4O1JqXNzm/+2yP/GU4=
-github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.17/go.mod h1:byVmvc+Sk1gIpmn1exL8EdAiXebWZCsLe5HtvI0PVpk=
+github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.18 h1:vdSThbSNpkXSSWyrPHO4mGpgn3KBj/E9QYVsCGAqcCw=
+github.com/ODIN-PROTOCOL/wasmvm/v2 v2.0.18/go.mod h1:byVmvc+Sk1gIpmn1exL8EdAiXebWZCsLe5HtvI0PVpk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
