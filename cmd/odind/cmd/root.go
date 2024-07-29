@@ -37,6 +37,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
+	"github.com/cosmos/ibc-go/v8/testing/simapp"
 )
 
 const (
@@ -46,7 +47,7 @@ const (
 // NewRootCmd creates a new root command for simd. It is called once in the
 // main function.
 func NewRootCmd() (rootCMD *cobra.Command, params params.EncodingConfig) {
-	tempApp := app.NewOdinApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, simtestutil.EmptyAppOptions{}, 100)
+	tempApp := app.NewOdinApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, map[int64]bool{}, simtestutil.NewAppOptionsWithFlagHome(tempDir()), 100)
 	encodingConfig := app.MakeEncodingConfig()
 
 	initClientCtx := client.Context{}.
@@ -284,4 +285,14 @@ func appExport(
 	}
 
 	return odinApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
+}
+
+var tempDir = func() string {
+	dir, err := os.MkdirTemp("", "simapp")
+	if err != nil {
+		dir = simapp.DefaultNodeHome
+	}
+	defer os.RemoveAll(dir)
+
+	return dir
 }
