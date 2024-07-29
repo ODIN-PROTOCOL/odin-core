@@ -638,8 +638,19 @@ func NewOdinApp(
 
 	wasmOpts := append(GetWasmOpts(appOpts), querierOpts)
 
+	mainWasmer, err := wasmvm.NewVM(filepath.Join(homePath, "wasm"), wasmkeeper.BuiltInCapabilities(), 32, wasmConfig.ContractDebugMode, wasmConfig.MemoryCacheSize)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create odin wasm vm: %s", err))
+	}
+
+	lcWasmer, err := wasmvm.NewVM(filepath.Join(homePath, "light-client-wasm"), wasmkeeper.BuiltInCapabilities(), 32, wasmConfig.ContractDebugMode, wasmConfig.MemoryCacheSize)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create odin wasm vm for 08-wasm: %s", err))
+	}
+
 	//// The last arguments can contain custom message handlers, and custom query handlers,
 	//// if we want to allow any custom callbacks
+
 	app.WasmKeeper = wasmkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
@@ -658,13 +669,9 @@ func NewOdinApp(
 		wasmConfig,
 		wasmkeeper.BuiltInCapabilities(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		wasmOpts...,
+		append(wasmOpts, wasmkeeper.WithWasmEngine(mainWasmer))...,
 	)
 
-	lcWasmer, err := wasmvm.NewVM(filepath.Join(homePath, "light-client-wasm"), wasmkeeper.BuiltInCapabilities(), 32, wasmConfig.ContractDebugMode, wasmConfig.MemoryCacheSize)
-	if err != nil {
-		panic(fmt.Sprintf("failed to create odin wasm vm for 08-wasm: %s", err))
-	}
 
 	// 08-wasm light client
 	accepted := make([]string, 0)
