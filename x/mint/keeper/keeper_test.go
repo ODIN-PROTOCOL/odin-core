@@ -13,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -48,6 +49,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	stakingKeeper := minttestutil.NewMockStakingKeeper(ctrl)
 
 	accountKeeper.EXPECT().GetModuleAddress(types.ModuleName).Return(sdk.AccAddress{})
+	accountKeeper.EXPECT().AddressCodec().Return(authcodec.NewBech32Codec("odin"))
 
 	s.mintKeeper = mintkeeper.NewKeeper(
 		encCfg.Codec,
