@@ -32,7 +32,7 @@ func (k Keeper) AllocateTokens(ctx sdk.Context, previousVotes []abci.VoteInfo) e
 			return err
 		}
 
-		valAddress, err := sdk.ValAddressFromBech32(val.GetOperator())
+		valAddress, err := k.validatorAddressCodec.StringToBytes(val.GetOperator())
 		status, err := k.GetValidatorStatus(ctx, valAddress)
 		if err != nil {
 			return err

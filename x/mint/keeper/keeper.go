@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/collections"
+	addresscodec "cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/core/store"
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
@@ -22,6 +23,7 @@ type Keeper struct {
 	stakingKeeper    minttypes.StakingKeeper
 	authKeeper       minttypes.AccountKeeper
 	bankKeeper       minttypes.BankKeeper
+	addressCodec     addresscodec.Codec
 	feeCollectorName string
 
 	// the address capable of executing a MsgUpdateParams message. Typically, this
@@ -57,6 +59,7 @@ func NewKeeper(
 		bankKeeper:       bk,
 		authKeeper:       ak,
 		feeCollectorName: feeCollectorName,
+		addressCodec:     ak.AddressCodec(),
 		authority:        authority,
 		Params:           collections.NewItem(sb, minttypes.ParamsKey, "params", codec.CollValue[minttypes.Params](cdc)),
 		Minter:           collections.NewItem(sb, minttypes.MinterKey, "minter", codec.CollValue[minttypes.Minter](cdc)),
@@ -82,12 +85,12 @@ func (k Keeper) Logger(ctx context.Context) log.Logger {
 	return sdkCtx.Logger().With("module", "x/"+minttypes.ModuleName)
 }
 
-// get the minter
+// GetMinter returns the minter
 func (k Keeper) GetMinter(ctx context.Context) (minttypes.Minter, error) {
 	return k.Minter.Get(ctx)
 }
 
-// set the minter
+// SetMinter sets minter to the store
 func (k Keeper) SetMinter(ctx context.Context, minter minttypes.Minter) error {
 	return k.Minter.Set(ctx, minter)
 }

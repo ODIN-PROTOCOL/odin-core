@@ -93,7 +93,7 @@ func (suite *RequestVerificationTestSuite) TestSuccess() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
 	expectedResult := &types.QueryRequestVerificationResponse{
 		ChainId:      suite.ctx.ChainID(),
@@ -128,8 +128,9 @@ func (suite *RequestVerificationTestSuite) TestFailedRequestIDNotExist() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "unable to get request from chain", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -156,7 +157,7 @@ func (suite *RequestVerificationTestSuite) TestRequestInDelayRange() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
 	expectedResult := &types.QueryRequestVerificationResponse{
 		ChainId:      suite.ctx.ChainID(),
@@ -192,8 +193,9 @@ func (suite *RequestVerificationTestSuite) TestFailedExceedDelayRange() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "unable to get request from chain", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -219,8 +221,9 @@ func (suite *RequestVerificationTestSuite) TestFailedDataSourceIDNotMatch() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(
 		err.Error(),
 		"is not match with data source id provided in request",
@@ -230,8 +233,9 @@ func (suite *RequestVerificationTestSuite) TestFailedDataSourceIDNotMatch() {
 }
 
 func (suite *RequestVerificationTestSuite) TestFailedEmptyRequest() {
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), nil)
+	res, err := suite.querier.RequestVerification(suite.ctx, nil)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "empty request", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -257,8 +261,9 @@ func (suite *RequestVerificationTestSuite) TestFailedChainIDNotMatch() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(
 		err.Error(),
 		"provided chain ID does not match the validator's chain ID",
@@ -288,8 +293,9 @@ func (suite *RequestVerificationTestSuite) TestFailedInvalidValidatorAddr() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "unable to parse validator address", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -315,8 +321,9 @@ func (suite *RequestVerificationTestSuite) TestFailedInvalidReporterPubKey() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "unable to get reporter's public key", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -330,8 +337,9 @@ func (suite *RequestVerificationTestSuite) TestFailedEmptySignature() {
 		Reporter:   hex.EncodeToString(suite.reporterPrivKey.PubKey().Bytes()),
 	}
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "invalid reporter's signature", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -360,8 +368,9 @@ func (suite *RequestVerificationTestSuite) TestFailedReporterUnauthorized() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "is not an authorized reporter of", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -391,8 +400,9 @@ func (suite *RequestVerificationTestSuite) TestFailedUnselectedValidator() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "is not assigned for request ID", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -422,8 +432,9 @@ func (suite *RequestVerificationTestSuite) TestFailedNoDataSourceFound() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "no data source required by the request", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -460,8 +471,9 @@ func (suite *RequestVerificationTestSuite) TestFailedValidatorAlreadyReported() 
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "already submitted data report", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -489,8 +501,9 @@ func (suite *RequestVerificationTestSuite) TestFailedRequestAlreadyExpired() {
 	suite.assert.NoError(err)
 	req.Signature = signature
 
-	res, err := suite.querier.RequestVerification(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.RequestVerification(suite.ctx, req)
 
+	suite.assert.Error(err)
 	suite.assert.Contains(err.Error(), "Request with ID 1 is already expired", "RequestVerification should failed")
 	suite.assert.Nil(res, "response should be nil")
 }
@@ -499,7 +512,7 @@ func (suite *RequestVerificationTestSuite) TestGetReporters() {
 	req := &types.QueryReportersRequest{
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 	}
-	res, err := suite.querier.Reporters(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.Reporters(suite.ctx, req)
 
 	expectedResult := &types.QueryReportersResponse{
 		Reporter: []string{suite.reporterAddr.String()},
@@ -513,7 +526,7 @@ func (suite *RequestVerificationTestSuite) TestGetExpiredReporters() {
 	req := &types.QueryReportersRequest{
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 	}
-	res, err := suite.querier.Reporters(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.Reporters(suite.ctx, req)
 
 	expectedResult := &types.QueryReportersResponse{
 		Reporter: []string{},
@@ -527,7 +540,7 @@ func (suite *RequestVerificationTestSuite) TestIsReporter() {
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 		ReporterAddress:  suite.reporterAddr.String(),
 	}
-	res, err := suite.querier.IsReporter(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.IsReporter(suite.ctx, req)
 
 	expectedResult := &types.QueryIsReporterResponse{
 		IsReporter: true,
@@ -541,7 +554,7 @@ func (suite *RequestVerificationTestSuite) TestIsNotReporter() {
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 		ReporterAddress:  suite.granteeAddr.String(),
 	}
-	res, err := suite.querier.IsReporter(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.IsReporter(suite.ctx, req)
 
 	expectedResult := &types.QueryIsReporterResponse{
 		IsReporter: false,
@@ -556,7 +569,7 @@ func (suite *RequestVerificationTestSuite) TestRevokeReporters() {
 	req := &types.QueryReportersRequest{
 		ValidatorAddress: testapp.Validators[0].ValAddress.String(),
 	}
-	res, err := suite.querier.Reporters(sdk.WrapSDKContext(suite.ctx), req)
+	res, err := suite.querier.Reporters(suite.ctx, req)
 
 	expectedResult := &types.QueryReportersResponse{
 		Reporter: []string{},
@@ -701,7 +714,7 @@ func (suite *PendingRequestsTestSuite) TestSuccess() {
 	)
 	require.NoError(suite.T(), err)
 
-	r, err := suite.querier.PendingRequests(sdk.WrapSDKContext(suite.ctx), &types.QueryPendingRequestsRequest{
+	r, err := suite.querier.PendingRequests(suite.ctx, &types.QueryPendingRequestsRequest{
 		ValidatorAddress: sdk.ValAddress(testapp.Validators[0].Address).String(),
 	})
 

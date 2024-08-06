@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 
@@ -30,7 +31,7 @@ func (k msgServer) RequestData(
 ) (*types.MsgRequestDataResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	payer, err := sdk.AccAddressFromBech32(msg.Sender)
+	payer, err := k.addressCodec.StringToBytes(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (
 		}
 	}
 
-	validator, err := sdk.ValAddressFromBech32(msg.Validator)
+	validator, err := k.validatorAddressCodec.StringToBytes(msg.Validator)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (k msgServer) ReportData(goCtx context.Context, msg *types.MsgReportData) (
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
 		types.EventTypeReport,
 		sdk.NewAttribute(types.AttributeKeyID, fmt.Sprintf("%d", msg.RequestID)),
-		sdk.NewAttribute(types.AttributeKeyValidator, validator.String()),
+		sdk.NewAttribute(types.AttributeKeyValidator, sdk.ValAddress(validator).String()),
 	))
 	return &types.MsgReportDataResponse{}, nil
 }
@@ -128,12 +129,12 @@ func (k msgServer) CreateDataSource(
 		}
 	}
 
-	owner, err := sdk.AccAddressFromBech32(msg.Owner)
+	owner, err := k.addressCodec.StringToBytes(msg.Owner)
 	if err != nil {
 		return nil, err
 	}
 
-	treasury, err := sdk.AccAddressFromBech32(msg.Treasury)
+	treasury, err := k.addressCodec.StringToBytes(msg.Treasury)
 	if err != nil {
 		return nil, err
 	}
@@ -164,22 +165,22 @@ func (k msgServer) EditDataSource(
 		return nil, err
 	}
 
-	owner, err := sdk.AccAddressFromBech32(dataSource.Owner)
+	owner, err := k.addressCodec.StringToBytes(dataSource.Owner)
 	if err != nil {
 		return nil, err
 	}
 
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	sender, err := k.addressCodec.StringToBytes(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
 
 	// sender must be the owner of data source
-	if !owner.Equals(sender) {
+	if !bytes.Equal(owner, sender) {
 		return nil, types.ErrEditorNotAuthorized
 	}
 
-	treasury, err := sdk.AccAddressFromBech32(msg.Treasury)
+	treasury, err := k.addressCodec.StringToBytes(msg.Treasury)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +193,7 @@ func (k msgServer) EditDataSource(
 		}
 	}
 
-	newOwner, err := sdk.AccAddressFromBech32(msg.Owner)
+	newOwner, err := k.addressCodec.StringToBytes(msg.Owner)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +226,7 @@ func (k msgServer) CreateOracleScript(
 		}
 	}
 
-	owner, err := sdk.AccAddressFromBech32(msg.Owner)
+	owner, err := k.addressCodec.StringToBytes(msg.Owner)
 	if err != nil {
 		return nil, err
 	}
@@ -261,18 +262,18 @@ func (k msgServer) EditOracleScript(
 		return nil, err
 	}
 
-	owner, err := sdk.AccAddressFromBech32(oracleScript.Owner)
+	owner, err := k.addressCodec.StringToBytes(oracleScript.Owner)
 	if err != nil {
 		return nil, err
 	}
 
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	sender, err := k.addressCodec.StringToBytes(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
 
 	// sender must be the owner of oracle script
-	if !owner.Equals(sender) {
+	if !bytes.Equal(owner, sender) {
 		return nil, types.ErrEditorNotAuthorized
 	}
 
@@ -289,7 +290,7 @@ func (k msgServer) EditOracleScript(
 		return nil, err
 	}
 
-	newOwner, err := sdk.AccAddressFromBech32(msg.Owner)
+	newOwner, err := k.addressCodec.StringToBytes(msg.Owner)
 	if err != nil {
 		return nil, err
 	}
@@ -309,14 +310,16 @@ func (k msgServer) EditOracleScript(
 func (k msgServer) Activate(goCtx context.Context, msg *types.MsgActivate) (*types.MsgActivateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	valAddr, err := sdk.ValAddressFromBech32(msg.Validator)
+	valAddr, err := k.validatorAddressCodec.StringToBytes(msg.Validator)
 	if err != nil {
 		return nil, err
 	}
+
 	err = k.Keeper.Activate(ctx, valAddr)
 	if err != nil {
 		return nil, err
 	}
+
 	ctx.EventManager().EmitEvent(sdk.NewEvent(
 		types.EventTypeActivate,
 		sdk.NewAttribute(types.AttributeKeyValidator, msg.Validator),

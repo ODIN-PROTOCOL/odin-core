@@ -40,7 +40,7 @@ func (k Keeper) GetRandomValidators(ctx sdk.Context, size int, id uint64) ([]sdk
 	valPowers := make([]uint64, 0)
 	err := k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
 		func(idx int64, val stakingtypes.ValidatorI) (stop bool) {
-			valAddr, err := sdk.ValAddressFromBech32(val.GetOperator())
+			valAddr, err := k.validatorAddressCodec.StringToBytes(val.GetOperator())
 			if err != nil {
 				return false
 			}

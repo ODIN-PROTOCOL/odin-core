@@ -18,28 +18,28 @@ func NewHandler(k keeper.Keeper) Handler {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case *types.MsgRequestData:
-			res, err := msgServer.RequestData(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.RequestData(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgReportData:
-			res, err := msgServer.ReportData(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.ReportData(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgCreateDataSource:
-			res, err := msgServer.CreateDataSource(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.CreateDataSource(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgEditDataSource:
-			res, err := msgServer.EditDataSource(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.EditDataSource(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgCreateOracleScript:
-			res, err := msgServer.CreateOracleScript(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.CreateOracleScript(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgEditOracleScript:
-			res, err := msgServer.EditOracleScript(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.EditOracleScript(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgActivate:
-			res, err := msgServer.Activate(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.Activate(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		case *types.MsgUpdateParams:
-			res, err := msgServer.UpdateParams(sdk.WrapSDKContext(ctx), msg)
+			res, err := msgServer.UpdateParams(ctx, msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", types.ModuleName, msg)

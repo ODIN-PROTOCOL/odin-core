@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"cosmossdk.io/core/address"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/authz"
@@ -14,6 +15,7 @@ import (
 
 // AccountKeeper defines the expected account keeper.
 type AccountKeeper interface {
+	AddressCodec() address.Codec
 	GetAccount(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 	GetModuleAccount(ctx context.Context, name string) sdk.ModuleAccountI
 
@@ -32,6 +34,7 @@ type BankKeeper interface {
 
 // StakingKeeper defines the expected staking keeper.
 type StakingKeeper interface {
+	ValidatorAddressCodec() address.Codec
 	ValidatorByConsAddr(context.Context, sdk.ConsAddress) (stakingtypes.ValidatorI, error)
 	IterateBondedValidatorsByPower(
 		ctx context.Context,
