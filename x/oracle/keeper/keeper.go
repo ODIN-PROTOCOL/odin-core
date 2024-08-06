@@ -97,6 +97,7 @@ func NewKeeper(
 		portKeeper:            portKeeper,
 		scopedKeeper:          scopeKeeper,
 		validatorAddressCodec: stakingKeeper.ValidatorAddressCodec(),
+		addressCodec:          authKeeper.AddressCodec(),
 		authority:             authority,
 		storeService:          storeService,
 

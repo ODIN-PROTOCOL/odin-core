@@ -133,7 +133,7 @@ func TestPrepareRequestSuccessBasic(t *testing.T) {
 	ctx = ctx.WithGasMeter(wrappedGasMeter)
 
 	balancesRes, err := app.BankKeeper.AllBalances(
-		sdk.WrapSDKContext(ctx),
+		ctx,
 		authtypes.NewQueryAllBalancesRequest(testapp.FeePayer.Address, &query.PageRequest{}, false),
 	)
 	require.NoError(t, err)
@@ -1040,7 +1040,7 @@ func TestCollectFeeBasicSuccess(t *testing.T) {
 	require.NoError(t, err)
 
 	balancesRes, err := app.BankKeeper.AllBalances(
-		sdk.WrapSDKContext(ctx),
+		ctx,
 		authtypes.NewQueryAllBalancesRequest(testapp.FeePayer.Address, &query.PageRequest{}, false),
 	)
 	require.NoError(t, err)
@@ -1074,7 +1074,7 @@ func TestCollectFeeBasicSuccessWithOtherAskCount(t *testing.T) {
 	require.NoError(t, err)
 
 	balancesRes, err := app.BankKeeper.AllBalances(
-		sdk.WrapSDKContext(ctx),
+		ctx,
 		authtypes.NewQueryAllBalancesRequest(testapp.FeePayer.Address, &query.PageRequest{}, false),
 	)
 	require.NoError(t, err)

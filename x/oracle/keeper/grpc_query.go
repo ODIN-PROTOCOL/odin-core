@@ -312,7 +312,7 @@ func (k Querier) IsReporter(
 	if err != nil {
 		return nil, err
 	}
-	rep, err := k.validatorAddressCodec.StringToBytes(req.ReporterAddress)
+	rep, err := k.addressCodec.StringToBytes(req.ReporterAddress)
 	if err != nil {
 		return nil, err
 	}
