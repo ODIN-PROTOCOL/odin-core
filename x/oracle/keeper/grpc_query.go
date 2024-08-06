@@ -204,13 +204,14 @@ func (k Querier) PendingRequests(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	valAddress, err := sdk.ValAddressFromBech32(req.ValidatorAddress)
+	val, err := k.validatorAddressCodec.StringToBytes(req.ValidatorAddress)
 	if err != nil {
 		return nil, status.Error(
 			codes.InvalidArgument,
 			fmt.Sprintf("unable to parse given validator address: %v", err),
 		)
 	}
+	valAddress := sdk.ValAddress(val)
 
 	lastExpired, err := k.GetRequestLastExpired(ctx)
 	if err != nil {
@@ -239,14 +240,14 @@ func (k Querier) PendingRequests(
 		// If the validator isn't in requested validators set, then skip it.
 		isInValidatorSet := false
 		for _, v := range oracleReq.RequestedValidators {
-			val, err := sdk.ValAddressFromBech32(v)
+			val, err := k.validatorAddressCodec.StringToBytes(v)
 			if err != nil {
 				return nil, status.Error(
 					codes.Internal,
 					fmt.Sprintf("unable to parse validator address in requested validators %v: %v", v, err),
 				)
 			}
-			if valAddress.Equals(val) {
+			if valAddress.Equals(sdk.ValAddress(val)) {
 				isInValidatorSet = true
 				break
 			}
@@ -258,14 +259,14 @@ func (k Querier) PendingRequests(
 		// If the validator has reported, then skip it.
 		reported := false
 		for _, r := range reports {
-			val, err := sdk.ValAddressFromBech32(r.Validator)
+			val, err := k.validatorAddressCodec.StringToBytes(r.Validator)
 			if err != nil {
 				return nil, status.Error(
 					codes.Internal,
 					fmt.Sprintf("unable to parse validator address in requested validators %v: %v", r.Validator, err),
 				)
 			}
-			if valAddress.Equals(val) {
+			if valAddress.Equals(sdk.ValAddress(val)) {
 				reported = true
 				break
 			}
@@ -290,7 +291,7 @@ func (k Querier) Validator(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	val, err := sdk.ValAddressFromBech32(req.ValidatorAddress)
+	val, err := k.validatorAddressCodec.StringToBytes(req.ValidatorAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -307,11 +308,11 @@ func (k Querier) IsReporter(
 	req *types.QueryIsReporterRequest,
 ) (*types.QueryIsReporterResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	val, err := sdk.ValAddressFromBech32(req.ValidatorAddress)
+	val, err := k.validatorAddressCodec.StringToBytes(req.ValidatorAddress)
 	if err != nil {
 		return nil, err
 	}
-	rep, err := sdk.AccAddressFromBech32(req.ReporterAddress)
+	rep, err := k.validatorAddressCodec.StringToBytes(req.ReporterAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +328,7 @@ func (k Querier) Reporters(
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	val, err := sdk.ValAddressFromBech32(req.ValidatorAddress)
+	val, err := k.validatorAddressCodec.StringToBytes(req.ValidatorAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -363,7 +364,7 @@ func (k Querier) ActiveValidators(
 	result := types.QueryActiveValidatorsResponse{}
 	err := k.stakingKeeper.IterateBondedValidatorsByPower(ctx,
 		func(idx int64, val stakingtypes.ValidatorI) (stop bool) {
-			valAddr, err := sdk.ValAddressFromBech32(val.GetOperator())
+			valAddr, err := k.validatorAddressCodec.StringToBytes(val.GetOperator())
 			if err != nil {
 				return false
 			}
@@ -443,13 +444,14 @@ func (k Querier) RequestVerification(
 	}
 
 	// Provided validator's address should be valid
-	validator, err := sdk.ValAddressFromBech32(req.Validator)
+	val, err := k.validatorAddressCodec.StringToBytes(req.Validator)
 	if err != nil {
 		return nil, status.Error(
 			codes.InvalidArgument,
 			fmt.Sprintf("unable to parse validator address: %s", err.Error()),
 		)
 	}
+	validator := sdk.ValAddress(val)
 
 	// Provided signature should be valid, which means this query request should be signed by the provided reporter
 	pk, err := hex.DecodeString(req.Reporter)
@@ -503,8 +505,8 @@ func (k Querier) RequestVerification(
 	// Provided validator should be assigned to response to the request
 	isValidatorAssigned := false
 	for _, requestedValidator := range request.RequestedValidators {
-		v, _ := sdk.ValAddressFromBech32(requestedValidator)
-		if validator.Equals(v) {
+		v, _ := k.validatorAddressCodec.StringToBytes(requestedValidator)
+		if validator.Equals(sdk.ValAddress(v)) {
 			isValidatorAssigned = true
 			break
 		}
@@ -553,8 +555,8 @@ func (k Querier) RequestVerification(
 
 	isValidatorReported := false
 	for _, report := range reports {
-		reportVal, _ := sdk.ValAddressFromBech32(report.Validator)
-		if reportVal.Equals(validator) {
+		reportVal, _ := k.validatorAddressCodec.StringToBytes(report.Validator)
+		if sdk.ValAddress(reportVal).Equals(validator) {
 			isValidatorReported = true
 			break
 		}
@@ -608,7 +610,7 @@ func (k Querier) DataProviderAccumulatedReward(c context.Context, req *types.Que
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 	ctx := sdk.UnwrapSDKContext(c)
-	addr, err := sdk.AccAddressFromBech32(req.DataProviderAddress)
+	addr, err := k.addressCodec.StringToBytes(req.DataProviderAddress)
 	if err != nil {
 		return nil, err
 	}

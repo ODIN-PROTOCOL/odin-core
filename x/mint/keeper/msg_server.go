@@ -48,7 +48,7 @@ func (ms msgServer) WithdrawCoinsToAccFromTreasury(
 		return nil, errors.Wrapf(minttypes.ErrExceedsWithdrawalLimitPerTime, "amount: %s", msg.Amount.String())
 	}
 
-	receiver, err := sdk.AccAddressFromBech32(msg.Receiver)
+	receiver, err := ms.addressCodec.StringToBytes(msg.Receiver)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse receiver address %s", msg.Receiver)
 	}
