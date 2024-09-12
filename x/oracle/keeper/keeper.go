@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cosmossdk.io/collections"
+	addresscodec "cosmossdk.io/core/address"
 	corestoretypes "cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	owasm "github.com/ODIN-PROTOCOL/wasmvm/v2"
@@ -26,14 +27,16 @@ type Keeper struct {
 	feeCollectorName string
 	owasmVM          *owasm.Vm
 
-	AuthKeeper    types.AccountKeeper
-	BankKeeper    types.BankKeeper
-	stakingKeeper types.StakingKeeper
-	distrKeeper   types.DistrKeeper
-	authzKeeper   types.AuthzKeeper
-	channelKeeper types.ChannelKeeper
-	portKeeper    types.PortKeeper
-	scopedKeeper  capabilitykeeper.ScopedKeeper
+	AuthKeeper            types.AccountKeeper
+	BankKeeper            types.BankKeeper
+	stakingKeeper         types.StakingKeeper
+	distrKeeper           types.DistrKeeper
+	authzKeeper           types.AuthzKeeper
+	channelKeeper         types.ChannelKeeper
+	portKeeper            types.PortKeeper
+	scopedKeeper          capabilitykeeper.ScopedKeeper
+	validatorAddressCodec addresscodec.Codec
+	addressCodec          addresscodec.Codec
 
 	// the address capable of executing a MsgUpdateParams message. Typically, this
 	// should be the x/gov module account.
@@ -81,20 +84,22 @@ func NewKeeper(
 	sb := collections.NewSchemaBuilder(storeService)
 
 	k := Keeper{
-		cdc:              cdc,
-		fileCache:        filecache.New(fileDir),
-		feeCollectorName: feeCollectorName,
-		owasmVM:          owasmVM,
-		AuthKeeper:       authKeeper,
-		BankKeeper:       bankKeeper,
-		stakingKeeper:    stakingKeeper,
-		distrKeeper:      distrKeeper,
-		authzKeeper:      authzKeeper,
-		channelKeeper:    channelKeeper,
-		portKeeper:       portKeeper,
-		scopedKeeper:     scopeKeeper,
-		authority:        authority,
-		storeService:     storeService,
+		cdc:                   cdc,
+		fileCache:             filecache.New(fileDir),
+		feeCollectorName:      feeCollectorName,
+		owasmVM:               owasmVM,
+		AuthKeeper:            authKeeper,
+		BankKeeper:            bankKeeper,
+		stakingKeeper:         stakingKeeper,
+		distrKeeper:           distrKeeper,
+		authzKeeper:           authzKeeper,
+		channelKeeper:         channelKeeper,
+		portKeeper:            portKeeper,
+		scopedKeeper:          scopeKeeper,
+		validatorAddressCodec: stakingKeeper.ValidatorAddressCodec(),
+		addressCodec:          authKeeper.AddressCodec(),
+		authority:             authority,
+		storeService:          storeService,
 
 		Params:                          collections.NewItem(sb, types.ParamsKeyPrefix, "params", codec.CollValue[types.Params](cdc)),
 		DataSources:                     collections.NewMap(sb, types.DataSourceStoreKeyPrefix, "data_sources", collections.Uint64Key, codec.CollValue[types.DataSource](cdc)),

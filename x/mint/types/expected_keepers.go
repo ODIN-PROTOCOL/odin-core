@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 
+	"cosmossdk.io/core/address"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -15,6 +16,7 @@ type StakingKeeper interface {
 
 // AccountKeeper defines the contract required for account APIs.
 type AccountKeeper interface {
+	AddressCodec() address.Codec
 	GetModuleAddress(name string) sdk.AccAddress
 
 	// TODO remove with genesis 2-phases refactor https://github.com/cosmos/cosmos-sdk/issues/2862

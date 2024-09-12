@@ -18,7 +18,7 @@ func (k Keeper) HasReport(ctx context.Context, rid types.RequestID, val sdk.ValA
 
 // SetReport saves the report to the storage without performing validation.
 func (k Keeper) SetReport(ctx context.Context, rid types.RequestID, rep types.Report) error {
-	val, _ := sdk.ValAddressFromBech32(rep.Validator)
+	val, _ := k.validatorAddressCodec.StringToBytes(rep.Validator)
 	return k.Reports.Set(ctx, collections.Join(uint64(rid), []byte(val)), rep)
 }
 
@@ -49,11 +49,11 @@ func (k Keeper) CheckValidReport(
 	}
 	found := false
 	for _, reqVal := range req.RequestedValidators {
-		v, err := sdk.ValAddressFromBech32(reqVal)
+		v, err := k.validatorAddressCodec.StringToBytes(reqVal)
 		if err != nil {
 			return err
 		}
-		if v.Equals(val) {
+		if sdk.ValAddress(v).Equals(val) {
 			found = true
 			break
 		}

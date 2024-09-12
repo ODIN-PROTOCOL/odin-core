@@ -54,7 +54,7 @@ func (k Keeper) AllocateRewardsToDataProviders(ctx sdk.Context, rid oracletypes.
 	for _, rawReq := range request.RawRequests {
 		ds := k.MustGetDataSource(ctx, rawReq.GetDataSourceID())
 
-		ownerAccAddr, err := sdk.AccAddressFromBech32(ds.Owner)
+		ownerAccAddr, err := k.addressCodec.StringToBytes(ds.Owner)
 		if err != nil {
 			return err
 		}

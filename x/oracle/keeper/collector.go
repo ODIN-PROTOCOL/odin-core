@@ -40,7 +40,7 @@ func (k Keeper) CollectReward(
 
 	accumulatedAmount := accumulatedDataProvidersRewards.AccumulatedAmount
 	currentRewardPerByte := accumulatedDataProvidersRewards.CurrentRewardPerByte
-	var rewPerByteInFeeDenom sdk.Coins
+	rewPerByteInFeeDenom := sdk.Coins{}
 
 	for _, rawReq := range rawRequests {
 		rawRep, ok := rawReportsMap[rawReq.GetExternalID()]
@@ -50,7 +50,7 @@ func (k Keeper) CollectReward(
 		}
 
 		ds := k.MustGetDataSource(ctx, rawReq.GetDataSourceID())
-		dsOwnerAddr, err := sdk.AccAddressFromBech32(ds.Owner)
+		dsOwnerAddr, err := k.addressCodec.StringToBytes(ds.Owner)
 		if err != nil {
 			return nil, errors.Wrapf(err, "parsing data source owner address: %s", dsOwnerAddr)
 		}

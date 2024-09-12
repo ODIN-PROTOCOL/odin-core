@@ -115,7 +115,7 @@ func (k Keeper) ProcessExpiredRequests(ctx context.Context) error {
 
 		// Deactivate all validators that do not report to this request.
 		for _, val := range req.RequestedValidators {
-			v, _ := sdk.ValAddressFromBech32(val)
+			v, _ := k.validatorAddressCodec.StringToBytes(val)
 
 			hasReport, err := k.HasReport(ctx, currentReqID, v)
 			if err != nil {
