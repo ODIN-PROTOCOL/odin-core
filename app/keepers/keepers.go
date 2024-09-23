@@ -28,6 +28,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
 	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	onftkeeper "github.com/ODIN-PROTOCOL/odin-core/x/onft/keeper"
 )
 
 type AppKeepers struct {
@@ -58,6 +59,7 @@ type AppKeepers struct {
 	WasmKeeper            wasmkeeper.Keeper
 	WasmClientKeeper      wasmlckeeper.Keeper
 	ICQKeeper             icqkeeper.Keeper
+	ONFTKeeper            onftkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper

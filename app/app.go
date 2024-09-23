@@ -15,6 +15,8 @@ import (
 	"cosmossdk.io/core/appmodule"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
+	"github.com/ODIN-PROTOCOL/odin-core/x/onft"
+	onftkeeper "github.com/ODIN-PROTOCOL/odin-core/x/onft/keeper"
 	wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
 	wasmvm "github.com/ODIN-PROTOCOL/wasmvm/v2"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -157,6 +159,7 @@ import (
 	proofservice "github.com/ODIN-PROTOCOL/odin-core/client/grpc/oracle/proof"
 	odinbank "github.com/ODIN-PROTOCOL/odin-core/x/bank"
 	odinbankkeeper "github.com/ODIN-PROTOCOL/odin-core/x/bank/keeper"
+	onfttypes "github.com/ODIN-PROTOCOL/odin-core/x/onft/types"
 	"github.com/ODIN-PROTOCOL/odin-core/x/oracle"
 	oraclekeeper "github.com/ODIN-PROTOCOL/odin-core/x/oracle/keeper"
 	oracletypes "github.com/ODIN-PROTOCOL/odin-core/x/oracle/types"
@@ -212,6 +215,7 @@ var (
 		wasm.AppModuleBasic{},
 		wasmlc.AppModuleBasic{},
 		icq.AppModuleBasic{},
+		onft.AppModuleBasic{},
 	)
 	// module account permissions
 	maccPerms = map[string][]string{
@@ -227,6 +231,7 @@ var (
 		nft.ModuleName:                 nil,
 		wasmtypes.ModuleName:           {authtypes.Burner},
 		icqtypes.ModuleName:            nil,
+		onfttypes.ModuleName:           nil,
 	}
 
 	Upgrades = []upgrades.Upgrade{
@@ -340,6 +345,7 @@ func NewOdinApp(
 		wasmtypes.StoreKey,
 		wasmlctypes.StoreKey,
 		icqtypes.StoreKey,
+		onfttypes.StoreKey,
 	)
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -563,6 +569,14 @@ func NewOdinApp(
 
 	app.NFTKeeper = nftkeeper.NewKeeper(runtime.NewKVStoreService(keys[nftkeeper.StoreKey]), appCodec, app.AccountKeeper, app.BankKeeper)
 
+	app.ONFTKeeper = onftkeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[onfttypes.StoreKey]),
+		app.AccountKeeper,
+		app.NFTKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
 		app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper, app.IBCKeeper.PortKeeper,
@@ -651,6 +665,19 @@ func NewOdinApp(
 	//// The last arguments can contain custom message handlers, and custom query handlers,
 	//// if we want to allow any custom callbacks
 
+	messenger := wasmkeeper.NewMessageHandlerChain(
+		onftkeeper.NewMintNFTMessageHandler(app.ONFTKeeper), //should be first
+		wasmkeeper.NewDefaultMessageHandler(
+			app.MsgServiceRouter(),
+			app.IBCKeeper.ChannelKeeper,
+			app.IBCKeeper.ChannelKeeper,
+			scopedWasmKeeper,
+			app.BankKeeper,
+			appCodec,
+			app.TransferKeeper,
+		),
+	)
+
 	app.WasmKeeper = wasmkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
@@ -669,9 +696,8 @@ func NewOdinApp(
 		wasmConfig,
 		wasmkeeper.BuiltInCapabilities(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-		append(wasmOpts, wasmkeeper.WithWasmEngine(mainWasmer))...,
+		append(wasmOpts, wasmkeeper.WithWasmEngine(mainWasmer), wasmkeeper.WithMessageHandler(messenger))...,
 	)
-
 
 	// 08-wasm light client
 	accepted := make([]string, 0)
@@ -820,6 +846,7 @@ func NewOdinApp(
 		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
 		wasmlc.NewAppModule(app.AppKeepers.WasmClientKeeper),
 		icq.NewAppModule(app.AppKeepers.ICQKeeper, app.GetSubspace(icqtypes.ModuleName)),
+		onft.NewAppModule(app.ONFTKeeper),
 	)
 
 	// BasicModuleManager defines the module BasicManager is in charge of setting up basic,
@@ -842,9 +869,8 @@ func NewOdinApp(
 
 	// NOTE: Oracle module must occur before distr as it takes some fee to distribute to active oracle validators.
 	// NOTE: During begin block slashing happens after distr.BeginBlocker so that there is nothing left
-	// over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
+	// over in the validator fee pool, to keep the CanWithdrawInvariant invariant.
 
-	// TODO: Recheck all Begin/End block logic order
 	app.ModuleManager.SetOrderBeginBlockers(
 		upgradetypes.ModuleName,
 		capabilitytypes.ModuleName,
@@ -871,6 +897,7 @@ func NewOdinApp(
 		wasmtypes.ModuleName,
 		icqtypes.ModuleName,
 		wasmlctypes.ModuleName,
+		onfttypes.ModuleName,
 	)
 	app.ModuleManager.SetOrderEndBlockers(
 		crisistypes.ModuleName,
@@ -898,6 +925,7 @@ func NewOdinApp(
 		wasmtypes.ModuleName,
 		icqtypes.ModuleName,
 		wasmlctypes.ModuleName,
+		onfttypes.ModuleName,
 	)
 	// NOTE: The genutils module must occur after staking so that pools are
 	// properly initialized with tokens from genesis accounts.
@@ -933,6 +961,7 @@ func NewOdinApp(
 		wasmtypes.ModuleName,
 		icqtypes.ModuleName,
 		wasmlctypes.ModuleName,
+		onfttypes.ModuleName,
 	)
 
 	// NOTE: upgrade module is required to be prioritized
