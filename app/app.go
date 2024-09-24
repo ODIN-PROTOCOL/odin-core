@@ -15,6 +15,7 @@ import (
 	"cosmossdk.io/core/appmodule"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	circuittypes "cosmossdk.io/x/circuit/types"
+	"github.com/ODIN-PROTOCOL/odin-core/app/upgrades/v10_0"
 	"github.com/ODIN-PROTOCOL/odin-core/x/onft"
 	onftkeeper "github.com/ODIN-PROTOCOL/odin-core/x/onft/keeper"
 	wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
@@ -241,6 +242,7 @@ var (
 		v7_12.Upgrade,
 		v8_3.Upgrade,
 		v9_3.Upgrade,
+		v10_0.Upgrade,
 	}
 )
 
