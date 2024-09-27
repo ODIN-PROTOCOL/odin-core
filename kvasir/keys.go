@@ -37,6 +37,7 @@ func keysCmd(c *Context) *cobra.Command {
 		keysDeleteCmd(c),
 		keysListCmd(c),
 		keysShowCmd(c),
+		ImportKeyHexCommand(),
 	)
 	return cmd
 }
@@ -137,6 +138,21 @@ func keysDeleteCmd(c *Context) *cobra.Command {
 			return nil
 		},
 	}
+	return cmd
+}
+
+func ImportKeyHexCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "import-hex <name> <hex>",
+		Short: "Import private keys into the local keybase",
+		Long:  "Import hex encoded private key into the local keybase.\nSupported key-types can be obtained with:\n list-key-types",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			keyType, _ := cmd.Flags().GetString(flags.FlagKeyType)
+			return kb.ImportPrivKeyHex(args[0], args[1], keyType)
+		},
+	}
+	cmd.Flags().String(flags.FlagKeyType, string(hd.Secp256k1Type), "private key signing algorithm kind")
 	return cmd
 }
 

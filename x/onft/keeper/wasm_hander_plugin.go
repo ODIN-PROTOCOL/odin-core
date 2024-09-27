@@ -10,6 +10,7 @@ import (
 	wasmkeeper "github.com/ODIN-PROTOCOL/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/ODIN-PROTOCOL/wasmd/x/wasm/types"
 	wasmvmtypes "github.com/ODIN-PROTOCOL/wasmvm/v2/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -68,7 +69,19 @@ func NewMintNFTMessageHandler(onftKeeper Keeper) MessageHandlerFunc {
 				With("module", fmt.Sprintf("x/%s", wasmtypes.ModuleName)).
 				Info("Minted NFT", "id", nftID)
 
-			return nil, nil, nil, nil
+			events = []sdk.Event{
+				{
+					Type: "nft",
+					Attributes: []abci.EventAttribute{
+						{
+							Key:   "nft_id",
+							Value: nftID,
+						},
+					},
+				},
+			}
+
+			return events, nil, nil, nil
 		}
 
 		return nil, nil, nil, wasmtypes.ErrUnknownMsg
