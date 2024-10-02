@@ -35,7 +35,7 @@ type ReportMsgWithKey struct {
 	msg             *wasmtypes.RawContractMessage
 	execVersion     string
 	keyIndex        int64
-	requestID       uint64
+	request         Request
 }
 
 type Context struct {

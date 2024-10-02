@@ -93,11 +93,11 @@ func handleRequest(c *Context, l *Logger, contract string, request Request) {
 
 	c.pendingMsgs <- ReportMsgWithKey{
 		contractAddress: contract,
-		requestID:       request.RequestID,
 		//msg:             types.NewMsgReportData(types.RequestID(id), reports, c.validator),
 		execVersion: result.version,
 		keyIndex:    keyIndex,
 		result:      result.result,
+		request:     request,
 	}
 }
 

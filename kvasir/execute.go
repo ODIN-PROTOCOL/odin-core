@@ -1,8 +1,12 @@
 package kvasir
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"image/jpeg"
+	"image/png"
 	"os"
 	"strings"
 	"time"
@@ -115,7 +119,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 	ids := make([]uint64, len(reports))
 
 	for i, report := range reports {
-		hash, err := uploadToIPFS(c, l, report.result)
+		hash, err := uploadToIPFS(c, l, report.result, report)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -125,7 +129,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 		contractMsg := fmt.Sprintf(
 			"{\"report_data\":{\"val_address\": \"%s\", \"request_id\": %d, \"response\": \"%s\"}}",
 			c.validator.String(),
-			report.requestID,
+			report.request.RequestID,
 			hash,
 		)
 
@@ -141,7 +145,7 @@ func SubmitReport(c *Context, l *Logger, keyIndex int64, reports []ReportMsgWith
 			return
 		}
 		msgs[i] = sdk.Msg(&msg)
-		ids[i] = report.requestID
+		ids[i] = report.request.RequestID
 		versionMap[report.execVersion] = true
 	}
 	l = l.With("rids", ids)
@@ -236,22 +240,71 @@ func abciQuery(c *Context, l *Logger, path string, data []byte) (*ctypes.ResultA
 	return nil, lastErr
 }
 
-func uploadToIPFS(c *Context, l *Logger, file []byte) (string, error) {
-	bz, err := os.Open(string(file))
+func uploadToIPFS(c *Context, l *Logger, file []byte, report ReportMsgWithKey) (string, error) {
+	pngFile, err := os.Open(string(file))
 	if err != nil {
 		return "", err
 	}
 	defer func() {
-		bz.Close()
+		pngFile.Close()
 		os.Remove(string(file))
 	}()
 
 	// Connect to local IPFS node
 	sh := shell.NewShell(c.ipfs)
 	// Upload the image to IPFS
-	cid, err := sh.Add(bz, shell.Pin(true))
+	pngCID, err := sh.Add(pngFile, shell.Pin(true))
 	if err != nil {
 		return "", err
 	}
+
+	img, err := png.Decode(pngFile)
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new JPG file
+	jpgFile, err := os.Create(string(file) + ".jpg")
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		jpgFile.Close()
+		os.Remove(string(file) + ".jpg")
+	}()
+
+	options := jpeg.Options{
+		Quality: 80,
+	}
+
+	// Encode the image to JPEG and save it
+	err = jpeg.Encode(jpgFile, img, &options)
+	if err != nil {
+		return "", err
+	}
+
+	jpgCID, err := sh.Add(jpgFile, shell.Pin(true))
+	if err != nil {
+		return "", err
+	}
+
+	data := map[string]interface{}{
+		"image":          fmt.Sprintf("https://ipfs.io/ipfs/%s", pngCID),
+		"preview":        fmt.Sprintf("https://ipfs.io/ipfs/%s", jpgCID),
+		"request_id":     report.request.RequestID,
+		"request_height": report.request.RequestHeight,
+		"prompt":         report.request.Metadata,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	cid, err := sh.Add(bytes.NewReader(jsonData), shell.Pin(true))
+	if err != nil {
+		return "", err
+	}
+
 	return cid, nil
 }
