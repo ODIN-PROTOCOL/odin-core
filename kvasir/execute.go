@@ -250,14 +250,6 @@ func uploadToIPFS(c *Context, l *Logger, file []byte, report ReportMsgWithKey) (
 		os.Remove(string(file))
 	}()
 
-	// Connect to local IPFS node
-	sh := shell.NewShell(c.ipfs)
-	// Upload the image to IPFS
-	pngCID, err := sh.Add(pngFile, shell.Pin(true))
-	if err != nil {
-		return "", err
-	}
-
 	img, err := png.Decode(pngFile)
 	if err != nil {
 		return "", err
@@ -279,6 +271,14 @@ func uploadToIPFS(c *Context, l *Logger, file []byte, report ReportMsgWithKey) (
 
 	// Encode the image to JPEG and save it
 	err = jpeg.Encode(jpgFile, img, &options)
+	if err != nil {
+		return "", err
+	}
+
+	// Connect to local IPFS node
+	sh := shell.NewShell(c.ipfs)
+	// Upload the image to IPFS
+	pngCID, err := sh.Add(pngFile, shell.Pin(true))
 	if err != nil {
 		return "", err
 	}
