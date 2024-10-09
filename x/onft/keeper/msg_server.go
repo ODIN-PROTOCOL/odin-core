@@ -7,6 +7,7 @@ import (
 
 	"cosmossdk.io/x/nft"
 	"github.com/ODIN-PROTOCOL/odin-core/x/onft/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type msgServer struct {
@@ -52,6 +53,16 @@ func (m msgServer) CreateNFTClass(ctx context.Context, msg *types.MsgCreateNFTCl
 
 	err = m.ClassOwners.Set(ctx, id, sender)
 
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeCreateNFTClass,
+			sdk.NewAttribute(types.AttributeKeyClassID, id),
+			sdk.NewAttribute(types.AttributeKeyUri, msg.Uri),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
+		),
+	)
+
 	return &types.MsgCreateNFTClassResponse{Id: id}, nil
 }
 
@@ -83,6 +94,16 @@ func (m msgServer) TransferClassOwnership(ctx context.Context, msg *types.MsgTra
 	if err != nil {
 		return nil, err
 	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeTransferClassOwnership,
+			sdk.NewAttribute(types.AttributeKeyClassID, msg.ClassId),
+			sdk.NewAttribute(types.AttributeKeyReceiver, msg.NewOwner),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
+		),
+	)
 
 	return &types.MsgTransferClassOwnershipResponse{}, nil
 }
@@ -123,6 +144,17 @@ func (m msgServer) MintNFT(ctx context.Context, msg *types.MsgMintNFT) (*types.M
 	if err != nil {
 		return nil, err
 	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeMintNFT,
+			sdk.NewAttribute(types.AttributeKeyNFTID, nftID),
+			sdk.NewAttribute(types.AttributeKeyClassID, msg.ClassId),
+			sdk.NewAttribute(types.AttributeKeyUri, msg.Uri),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
+		),
+	)
 
 	return &types.MsgMintNFTResponse{Id: nftID}, nil
 }
