@@ -49,10 +49,10 @@ func (AppModuleBasic) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 }
 
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	//err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
-	//if err != nil {
-	//	panic(err)
-	//}
+	err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
+	if err != nil {
+		panic(err)
+	}
 }
 
 // GetTxCmd returns cobra CLI command to send txs for this module (SDK AppModuleBasic interface).
@@ -96,8 +96,8 @@ func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	// For future use
-	//types.RegisterQueryServer(cfg.QueryServer(), keeper.Querier{Keeper: am.keeper})
+
+	types.RegisterQueryServer(cfg.QueryServer(), types.QueryServer(am.keeper))
 }
 
 // InitGenesis performs genesis initialization for the oracle module.
