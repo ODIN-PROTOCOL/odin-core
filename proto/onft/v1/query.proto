@@ -1,0 +1,112 @@
+syntax = "proto3";
+package onft.v1;
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/onft/types";
+
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "onft/v1/onft.proto";
+
+// Query defines the gRPC querier service.
+service Query {
+  // ClassOwner queries the owner of the NFT class
+  rpc ClassOwner(QueryClassOwnerRequest) returns (QueryClassOwnerResponse) {
+    option (google.api.http).get = "/onft/v1/class/{class_id}/owner";
+  }
+
+  // NFTs queries all NFTs with owners of a given class or owner,choose at least one of the two,
+  // similar to tokenByIndex in ERC721Enumerable
+  rpc NFTs(QueryNFTsRequest) returns (QueryNFTsResponse) {
+    option (google.api.http).get = "/onft/v1/nfts";
+  }
+
+  // NFT queries an NFT with owner based on its class and id
+  rpc NFT(QueryNFTRequest) returns (QueryNFTResponse) {
+    option (google.api.http).get = "/onft/v1/nfts/{class_id}/{id}";
+  }
+
+  // Class queries an NFT class based on its id with class owner
+  rpc Class(QueryClassRequest) returns (QueryClassResponse) {
+    option (google.api.http).get = "/onft/v1/classes/{class_id}";
+  }
+
+  // Classes queries all NFT classes with owners
+  rpc Classes(QueryClassesRequest) returns (QueryClassesResponse) {
+    option (google.api.http).get = "/onft/v1/classes";
+  }
+}
+
+// QueryClassOwnerRequest is the request type for the Query/Owner RPC method
+message QueryClassOwnerRequest {
+  // class_id associated with nft collection
+  string class_id = 1;
+}
+
+// QueryClassOwnerResponse is the response type for the Query/Owner RPC method
+message QueryClassOwnerResponse {
+  // owner is the owner address of the nft class
+  string owner = 1;
+}
+
+// QueryNFTstRequest is the request type for the Query/NFTs RPC method
+message QueryNFTsRequest {
+  // class_id associated with the nft
+  string class_id = 1;
+
+  // owner is the owner address of the nft
+  string owner = 2;
+
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryNFTsResponse is the response type for the Query/NFTs RPC methods
+message QueryNFTsResponse {
+  // NFT defines the NFT
+  repeated NFT nfts = 1;
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryNFTRequest is the request type for the Query/NFT RPC method
+message QueryNFTRequest {
+  // class_id associated with the nft
+  string class_id = 1;
+
+  // id is a unique identifier of the NFT
+  string id = 2;
+}
+
+// QueryNFTResponse is the response type for the Query/NFT RPC method
+message QueryNFTResponse {
+  // owner is the owner address of the nft
+  NFT nft = 1;
+}
+
+// QueryClassRequest is the request type for the Query/Class RPC method
+message QueryClassRequest {
+  // class_id associated with the nft
+  string class_id = 1;
+}
+
+// QueryClassResponse is the response type for the Query/Class RPC method
+message QueryClassResponse {
+  // class defines the class of the nft type.
+  Class class = 1;
+}
+
+// QueryClassesRequest is the request type for the Query/Classes RPC method
+message QueryClassesRequest {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryClassesResponse is the response type for the Query/Classes RPC method
+message QueryClassesResponse {
+  // class defines the class of the nft type.
+  repeated Class classes = 1;
+
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

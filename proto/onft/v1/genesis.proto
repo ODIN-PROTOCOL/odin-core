@@ -1,0 +1,15 @@
+syntax = "proto3";
+package onft.v1;
+
+option go_package = "github.com/ODIN-PROTOCOL/odin-core/x/onft/types";
+
+import "gogoproto/gogo.proto";
+
+// GenesisState defines the onft module's genesis state.
+message GenesisState {
+  // NFTClassID defines number of NFTs minted by module
+  uint64 nft_class_id = 1 [(gogoproto.moretags) = "yaml:\"nft_class_id\""];
+
+  // ClassOwners are owners of NFT classes
+  map<string, string> class_owners = 2 [(gogoproto.moretags) = "yaml:\"class_owners\""];
+}
