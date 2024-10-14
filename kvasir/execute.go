@@ -275,8 +275,14 @@ func uploadToIPFS(c *Context, l *Logger, file []byte, report ReportMsgWithKey) (
 		return "", err
 	}
 
-	// Connect to local IPFS node
-	sh := shell.NewShell(c.ipfs)
+	var sh *shell.Shell
+
+	if c.ipfsProjectID != "" && c.ipfsProjectSecret != "" {
+		sh = shell.NewShellWithClient(c.ipfs, NewClient(c.ipfsProjectID, c.ipfsProjectSecret))
+	} else {
+		sh = shell.NewShell(c.ipfs)
+	}
+
 	// Upload the image to IPFS
 	pngFile.Seek(0, 0)
 	pngCID, err := sh.Add(pngFile, shell.Pin(true))

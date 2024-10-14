@@ -49,8 +49,11 @@ type Context struct {
 	maxTry           uint64
 	rpcPollInterval  time.Duration
 	maxReport        uint64
-	ipfs             string
 	grpc             *grpc.ClientConn
+
+	ipfs              string
+	ipfsProjectID     string
+	ipfsProjectSecret string
 
 	pendingMsgs        chan ReportMsgWithKey
 	freeKeys           chan int64

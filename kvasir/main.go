@@ -40,6 +40,8 @@ type Config struct {
 	MetricsListenAddr string   `mapstructure:"metrics-listen-addr"` // Address to listen on for prometheus metrics
 	Contracts         []string `mapstructure:"contracts"`
 	IPFS              string   `mapstructure:"ipfs"`
+	IPFSProjectID     string   `mapstructure:"ipfs_project_id"` // For Infura IPFS usage, leave empty otherwise
+	IPFSProjectSecret string   `mapstructure:"ipfs_project_secret"`
 	GRPC              string   `mapstructure:"grpc"`
 }
 

@@ -177,6 +177,8 @@ func runCmd(c *Context) *cobra.Command {
 			c.metricsEnabled = cfg.MetricsListenAddr != ""
 			c.contracts = cfg.Contracts
 			c.ipfs = cfg.IPFS
+			c.ipfsProjectID = cfg.IPFSProjectID
+			c.ipfsProjectSecret = cfg.IPFSProjectSecret
 
 			c.grpc, err = grpc.NewClient(cfg.GRPC, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
