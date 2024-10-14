@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
-// NewGenesisState creates a new GenesisState instanc e
+// NewGenesisState creates a new GenesisState instance
 func NewGenesisState(params Params, dataSources []DataSource, oracleScripts []OracleScript) *GenesisState {
 	return &GenesisState{
 		Params:        params,

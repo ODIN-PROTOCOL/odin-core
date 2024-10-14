@@ -44,16 +44,24 @@ all: install
 install: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/odind
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/kvasir
 
 install-yoda: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/yoda
 
+install-kvasir: go.sum
+	go install -mod=readonly $(BUILD_FLAGS) ./cmd/kvasir
+
 build: go.sum
 	go build -mod=readonly -o ./build/odind $(BUILD_FLAGS) ./cmd/odind
 	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
+	go build -mod=readonly -o ./build/kvasir $(BUILD_FLAGS) ./cmd/kvasir
 
 build-yoda: go.sum
 	go build -mod=readonly -o ./build/yoda $(BUILD_FLAGS) ./cmd/yoda
+
+build-kvasir: go.sum
+	go build -mod=readonly -o ./build/kvasir $(BUILD_FLAGS) ./cmd/kvasir
 
 faucet: go.sum
 	go install -mod=readonly $(BUILD_FLAGS) ./cmd/faucet
